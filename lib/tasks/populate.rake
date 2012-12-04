@@ -1,5 +1,5 @@
 require File.dirname(__FILE__) + '/sample_data_populator.rb'
-begin  
+begin
   namespace :db do  
     desc "Populate the database with some sample data for testing"
     task :populate => :environment do  

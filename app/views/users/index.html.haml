@@ -5,7 +5,6 @@
     %th Last name
     %th Email
     %th Role
-    %th Status
     %th Last signed in
     %th Actions
   - @users.each do |user|
@@ -14,11 +13,6 @@
       %td= user.last_name
       %td= user.email
       %td= user.role.name if user.role
-      %td
-        - if user.status == 'A'
-          Active
-        - else
-          Deactivated
       %td
         - if user.last_sign_in_at.nil?
           Never logged in

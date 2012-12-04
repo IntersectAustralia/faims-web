@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
   # Include devise modules
-  devise :database_authenticatable, :registerable, :lockable, :recoverable, :trackable, :validatable, :timeoutable
+  devise :database_authenticatable, :lockable, :recoverable, :trackable, :validatable, :timeoutable
 
   belongs_to :role
 
@@ -79,7 +79,6 @@ class User < ActiveRecord::Base
     save
   end
 
-
   def approved?
     self.status == 'A'
   end
@@ -136,6 +135,10 @@ class User < ActiveRecord::Base
 
   def full_name
     "#{first_name} #{last_name}".strip
+  end
+
+  def admin?
+    role.name == 'superuser' if role
   end
 
   private

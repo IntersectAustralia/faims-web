@@ -2,9 +2,8 @@
 %html
   %head
     %title 
-      PLEASE CHANGE TITLE
+      FAIMS
       = " - #{yield :title}"
-
     = stylesheet_link_tag    "application", :media => "all"
     = javascript_include_tag "application"
     = csrf_meta_tags
@@ -17,18 +16,16 @@
             %span.icon-bar
             %span.icon-bar
             %span.icon-bar
-          %a.brand{:href => root_path } PLEASE CHANGE THIS
+          %a.brand{:href => root_path } FAIMS
           .nav-collapse
             %ul.nav
-              %li= link_to "LINK1"
-              %li= link_to "LINK2"
-              %li= link_to "LINK3"
+              %li= link_to "PROJECTS"
           = render 'layouts/user_menu'
 
     .container.main_content
       %h1= yield :title
-
       - flash.each do |name, msg|
+        - next if name == :timedout
         %div{:class => "alert alert-#{name == :notice ? "success" : "error"}"}
           %a.close{"data-dismiss" => "alert"} ×
           = msg

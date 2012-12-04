@@ -1,9 +1,5 @@
 .container
-  - title 'Home'
+  - title 'FAIMS Server'
   - if !user_signed_in?
     = simple_form_for("user", :url => user_session_path) do |f|
       = render(:partial => 'devise/sessions/form', :locals => { :f => f })
-    = link_to "Sign Up", new_user_registration_path, :class => "button"
-    = link_to "Forgot your password?", new_user_password_path, :class => "button"
-  - else
-    %p TODO: you are logged in: put your own home page content here

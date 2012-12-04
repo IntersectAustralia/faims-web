@@ -5,9 +5,8 @@
       %ul.dropdown-menu
         %li= link_to "Logout", destroy_user_session_path
         %li= link_to "Change My Password", users_edit_password_path
-        %li= link_to "Edit My Details", edit_user_registration_path
+        %li= link_to "Edit My Details", users_edit_path
 - else
   .pull-right
     %ul.nav
       %li= link_to 'Sign in', new_user_session_path
-      %li= link_to 'Sign up', new_user_registration_path

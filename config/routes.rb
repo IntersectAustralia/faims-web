@@ -1,7 +1,9 @@
 FaimsWeb::Application.routes.draw do
-  devise_for :users, controllers: {registrations: "user_registers", passwords: "user_passwords"}
+  devise_for :users, controllers: {passwords: "user_passwords"}
 devise_scope :user do
-  get "/users/profile", :to => "user_registers#profile" #page which gives options to edit details or change password
+  get "/users/profile", :to => "user_registers#profile"
+  get "/users/edit", :to => "user_registers#edit"
+  put "/users/update", :to => "user_registers#update"
   get "/users/edit_password", :to => "user_registers#edit_password" #allow users to edit their own password
   put "/users/update_password", :to => "user_registers#update_password" #allow users to edit their own password
 end
@@ -9,21 +11,12 @@ end
   resources :users, :only => [:show] do
 
     collection do
-      get :access_requests
       get :index
-      get :admin
     end
 
     member do
-      put :reject
-      put :reject_as_spam
-      put :deactivate
-      put :activate
       get :edit_role
       put :update_role
-      get :edit_approval
-      put :approve
-
     end
   end
 

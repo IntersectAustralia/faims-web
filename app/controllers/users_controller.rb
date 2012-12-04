@@ -4,7 +4,7 @@ class UsersController < ApplicationController
   load_and_authorize_resource
 
   def index
-    @users = User.deactivated_or_approved
+    @users = User.all
   end
 
   def show
@@ -80,4 +80,5 @@ class UsersController < ApplicationController
       redirect_to(edit_approval_user_path(@user), :alert => "Please select a role for the user.")
     end
   end
+
 end

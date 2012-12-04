@@ -1,7 +1,0 @@
-%h2 User Sign Up
-= simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name)) do |f|
-  = render :partial => 'personal_details', :locals  => {:f => f}
-  = render :partial => 'account_details', :locals  => {:f => f}
-  .form-actions
-    = f.submit "Submit Request", :class => "btn btn-primary"
-    = link_to 'Cancel', root_path, :class => "btn"
