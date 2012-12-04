@@ -61,7 +61,7 @@ Feature: Locking out users after multiple failed password attempts
     When I follow "Change my password" in the email
     Then I should see "Change Your Password"
     When I fill in "Password" with "Pass.456"
-    And I fill in "Password confirmation" with "Pass.456"
+    And I fill in "Confirm Password" with "Pass.456"
     And I press "Change Your Password"
     Then I should see "Your password was changed successfully. You are now signed in."
     # to verify we are actually logged in

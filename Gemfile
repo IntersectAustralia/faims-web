@@ -7,7 +7,6 @@ gem 'rails', '3.2.9'
 
 gem 'sqlite3'
 
-
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
@@ -37,31 +36,31 @@ gem 'jquery-rails'
 # To use debugger
 # gem 'debugger'
     
-gem "therubyracer" # TODO should this be in group :assets ?
+gem 'therubyracer' # TODO should this be in group :assets ?
 group :development, :test do
-  gem "rspec-rails"
-  gem "factory_girl_rails"
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
 
   # cucumber gems
-  gem "cucumber"
-  gem "capybara"
-  gem "database_cleaner"
-  #gem "spork"
-  gem "launchy"    # So you can do Then show me the page
+  gem 'cucumber'
+  gem 'capybara'
+  gem 'database_cleaner'
+  #gem 'spork'
+  gem 'launchy'    # So you can do Then show me the page
 end
 
 group :test do
-  gem "cucumber-rails", require: false
-  gem "shoulda"
+  gem 'cucumber-rails', require: false
+  gem 'shoulda'
 end
 
-gem "haml"
-gem "haml-rails"
-gem "bootstrap-sass"
-gem "simple_form"
-gem "devise"
-gem "email_spec", :group => :test
-gem "cancan"
-gem "capistrano-ext"
-gem "capistrano"
-gem "capistrano_colors"
+gem 'haml'
+gem 'haml-rails'
+gem 'bootstrap-sass'
+gem 'simple_form'
+gem 'devise'
+gem 'email_spec', :group => :test
+gem 'cancan'
+gem 'capistrano-ext'
+gem 'capistrano'
+gem 'capistrano_colors'

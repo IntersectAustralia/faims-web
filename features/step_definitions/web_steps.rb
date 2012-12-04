@@ -56,15 +56,20 @@ When /^(?:|I )press "([^"]*)"$/ do |button|
 end
 
 When /^(?:|I )follow "([^"]*)"$/ do |link|
-  click_link(link)
+  first(:css, "a:contains('#{link}')").click
 end
 
 When /^(?:|I )fill in "([^"]*)" with "([^"]*)"$/ do |field, value|
-  fill_in(field, :with => value)
+  get_field(field).set(value)
 end
 
 When /^(?:|I )fill in "([^"]*)" for "([^"]*)"$/ do |value, field|
-  fill_in(field, :with => value)
+  get_field(field).set(value).set(value)
+end
+
+def get_field(field)
+  label = first(:css, "label:contains('#{field}')")
+  first(:css, "##{label[:for]}")
 end
 
 # Use this to fill in an entire form with data from a table. Example:
@@ -142,7 +147,7 @@ end
 
 Then /^the "([^"]*)" field(?: within (.*))? should contain "([^"]*)"$/ do |field, parent, expected_value|
   with_scope(parent) do
-    field = find_field(field)
+    field = get_field(field)
     field_value = (field.tag_name == 'textarea') ? field.text : field.value
     if expected_value.blank?
       field_value.should be_blank
@@ -154,7 +159,7 @@ end
 
 Then /^the "([^"]*)" field(?: within (.*))? should not contain "([^"]*)"$/ do |field, parent, value|
   with_scope(parent) do
-    field = find_field(field)
+    field = get_field(field)
     field_value = (field.tag_name == 'textarea') ? field.text : field.value
     if field_value.respond_to? :should_not
       field_value.should_not =~ /#{value}/
@@ -165,7 +170,7 @@ Then /^the "([^"]*)" field(?: within (.*))? should not contain "([^"]*)"$/ do |f
 end
 
 Then /^the "([^"]*)" field should have the error "([^"]*)"$/ do |field, error_message|
-  element = find_field(field)
+  element = get_field(field)
 
   form_for_input = element.find(:xpath, 'ancestor::form[1]')
   using_simple_form = form_for_input[:class].include?('simple_form')
@@ -202,7 +207,7 @@ Then /^the "([^"]*)" field should have the error "([^"]*)"$/ do |field, error_me
 end
 
 Then /^the "([^"]*)" field should have no errors$/ do |field|
-  element = find_field(field)
+  element = get_field(field)
 
   form_for_input = element.find(:xpath, 'ancestor::form[1]')
   using_simple_form = form_for_input[:class].include?('simple_form')
@@ -224,7 +229,7 @@ end
 
 Then /^the "([^"]*)" checkbox(?: within (.*))? should be checked$/ do |label, parent|
   with_scope(parent) do
-    field_checked = find_field(label)['checked']
+    field_checked = get_field(label)['checked']
     if field_checked.respond_to? :should
       field_checked.should be_true
     else
@@ -235,7 +240,7 @@ end
 
 Then /^the "([^"]*)" checkbox(?: within (.*))? should not be checked$/ do |label, parent|
   with_scope(parent) do
-    field_checked = find_field(label)['checked']
+    field_checked = get_field(label)['checked']
     if field_checked.respond_to? :should
       field_checked.should be_false
     else

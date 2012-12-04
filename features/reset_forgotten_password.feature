@@ -20,7 +20,7 @@ Feature: Reset forgotten password
     When I follow "Change my password" in the email
     Then I should see "Change Your Password"
     When I fill in "Password" with "Pass.456"
-    And I fill in "Password confirmation" with "Pass.456"
+    And I fill in "Confirm Password" with "Pass.456"
     And I press "Change Your Password"
     Then I should see "Your password was changed successfully. You are now signed in."
     And I should be able to log in with "georgina@intersect.org.au" and "Pass.456"
@@ -77,7 +77,7 @@ Feature: Reset forgotten password
      And I open the email
      And I follow "Change my password" in the email
      And I fill in "Password" with "Pass.456"
-     And I fill in "Password confirmation" with "Pass.123"
+     And I fill in "Confirm Password" with "Pass.123"
      And I press "Change Your Password"
      Then I should see "Password doesn't match confirmation"
 
@@ -88,7 +88,7 @@ Feature: Reset forgotten password
      And I open the email
      And I follow "Change my password" in the email
      And I fill in "Password" with "Pass"
-     And I fill in "Password confirmation" with "Pass"
+     And I fill in "Confirm Password" with "Pass"
      And I press "Change Your Password"
      Then I should see "Password must be between 6 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one symbol"
 
@@ -99,14 +99,14 @@ Feature: Reset forgotten password
     And I open the email
     And I follow "Change my password" in the email
     And I fill in "Password" with "Pass.456"
-    And I fill in "Password confirmation" with "Pass.456"
+    And I fill in "Confirm Password" with "Pass.456"
     And I press "Change Your Password"
     Then I should see "Your password was changed successfully. You are now signed in."
     When I follow "Logout"
     And I open the email
     And I follow "Change my password" in the email
     And I fill in "Password" with "Pass.000"
-    And I fill in "Password confirmation" with "Pass.000"
+    And I fill in "Confirm Password" with "Pass.000"
     And I press "Change Your Password"
     Then I should see "Reset password token is invalid"
     And I should be able to log in with "georgina@intersect.org.au" and "Pass.456"
