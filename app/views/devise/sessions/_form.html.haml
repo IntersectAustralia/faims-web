@@ -1,0 +1,5 @@
+%h2 Please enter your email and password to log in
+= f.input :email, :required => false
+= f.input :password, :required => false
+.form-actions
+  = f.submit "Log in", :class => "btn btn-primary"

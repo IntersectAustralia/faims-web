@@ -1,0 +1,6 @@
+- if target.errors.any?
+  %h3.error_header The record could not be saved
+  %p.notification{:id => "*.errors"}
+    - target.errors.full_messages.each do |msg|
+      = msg
+      %br/

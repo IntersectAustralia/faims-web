@@ -1,0 +1,8 @@
+- title "Select Role For #{@user.email}"
+= simple_form_for(@user, :url => approve_user_path(@user)) do |f|
+  = render "shared/error_messages", :target => @user
+  .field
+    = f.input :role, :collection => @roles
+  .form-actions
+    = f.submit "Approve", :class => "btn btn-primary"
+    = link_to 'Back', access_requests_users_path, :class => "btn"

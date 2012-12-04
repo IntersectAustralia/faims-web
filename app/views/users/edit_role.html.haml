@@ -1,0 +1,8 @@
+- title "Edit Role For #{@user.email}"
+
+= simple_form_for(@user, :url => update_role_user_path(@user)) do |f|
+  = render "shared/error_messages", :target => @user
+  = f.input :role, :collection => @roles
+  .form-actions
+    = f.submit "Save", :class => "btn btn-primary"
+    = link_to 'Back', @user, :class => "btn"

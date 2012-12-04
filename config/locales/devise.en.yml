@@ -1,0 +1,66 @@
+# Additional translations at http://github.com/plataformatec/devise/wiki/I18n
+
+en:
+  errors:
+    messages:
+      expired: "has expired, please request a new one"
+      not_found: "not found"
+      already_confirmed: "was already confirmed, please try signing in"
+      not_locked: "was not locked"
+      not_saved:
+        one: "1 error prohibited this %{resource} from being saved:"
+        other: "%{count} errors prohibited this %{resource} from being saved:"
+  devise:
+    failure:
+      already_authenticated: 'You are already logged in.'
+      unauthenticated: 'You need to log in before continuing.'
+      unconfirmed: 'You have to confirm your account before continuing.'
+      locked: 'You entered an incorrect password 3 times in a row. For security reasons your account has been locked for one hour.'
+      invalid: 'Invalid email or password.'
+      invalid_token: 'Invalid authentication token.'
+      timeout: 'Your session expired, please sign in again to continue.'
+      inactive: 'Your account is not active.'
+      not_approved: 'Your account is not active.'
+    sessions:
+      signed_in: 'Logged in successfully.'
+      signed_out: 'Logged out successfully.'
+    passwords:
+      send_instructions: 'You will receive an email with instructions about how to reset your password in a few minutes.'
+      updated: 'Your password was changed successfully. You are now signed in.'
+      send_paranoid_instructions: 'If the email address you entered was valid, you will receive an email with instructions about how to reset your password in a few minutes.'
+      no_token: "You can't access this page without coming from a password reset email. If you do come from a password reset email, please make sure you used the full URL provided."
+    confirmations:
+      send_instructions: 'You will receive an email with instructions about how to confirm your account in a few minutes.'
+      send_paranoid_instructions: 'If your e-mail exists on our database, you will receive an email with instructions about how to confirm your account in a few minutes.'
+      confirmed: 'Your account was successfully confirmed. You are now signed in.'
+    registrations:
+      signed_up: 'You have signed up successfully. If enabled, a confirmation was sent to your e-mail.'
+      signed_up_but_unconfirmed: 'A message with a confirmation link has been sent to your email address. Please open the link to activate your account.'
+      signed_up_but_inactive: 'You have signed up successfully. However, we could not sign you in because your account is not yet activated.'
+      signed_up_but_locked: 'You have signed up successfully. However, we could not sign you in because your account is locked.'
+      updated: 'You updated your account successfully.'
+      destroyed: 'Bye! Your account was successfully cancelled. We hope to see you again soon.'
+    unlocks:
+      send_instructions: 'You will receive an email with instructions about how to unlock your account in a few minutes.'
+      unlocked: 'Your account was successfully unlocked. You are now signed in.'
+      send_paranoid_instructions: 'If your account exists, you will receive an email with instructions about how to unlock it in a few minutes.'
+    omniauth_callbacks:
+      success: 'Successfully authorized from %{kind} account.'
+      failure: 'Could not authorize you from %{kind} because "%{reason}".'
+    mailer:
+      confirmation_instructions:
+        subject: 'Confirmation instructions'
+      reset_password_instructions:
+        subject: 'Reset password instructions'
+      unlock_instructions:
+        subject: 'Unlock Instructions'
+    user_registers:
+      user:
+        updated: 'Your account details have been successfully updated.'
+        password_updated: 'Your password has been updated.'
+        signed_up_but_inactive: 'Thanks for requesting an account. You will receive an email when your request has been approved.'
+    user_passwords:
+      user:
+        no_token: "You canoot access this page without coming from a password reset email. If you do come from a password reset email, please make sure you used the full URL provided."
+        updated: 'Your password was changed successfully. You are now signed in.'
+        send_paranoid_instructions: 'If the email address you entered was valid, you will receive an email with instructions about how to reset your password in a few minutes.'
