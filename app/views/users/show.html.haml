@@ -16,4 +16,6 @@
     %tr
       %th Last signed in
       %td= @user.last_sign_in_at.localtime.strftime("%d/%m/%Y %I:%M%p")
+- if can?(:update_role, User)
+  = link_to 'Edit Role', edit_role_user_path(current_user), :class => "btn"
 = link_to 'Back', users_path, :class => "btn"

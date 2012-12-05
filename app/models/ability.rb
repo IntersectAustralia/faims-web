@@ -6,10 +6,10 @@ class Ability
     alias_action :edit_role, :to => :update_role
     alias_action :index, :show, :to => :read
 
-    return unless user.role
-
     if user.admin?
       can [:read, :update_role], User
+    else
+      can [:read], User
     end
 
     # Define abilities for the passed in user here. For example:

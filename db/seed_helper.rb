@@ -1,4 +1,4 @@
-def create_roles_and_permissions
+def create_roles_and_users
   Role.delete_all
   User.delete_all
 

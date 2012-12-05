@@ -14,6 +14,10 @@ Then /^I should see field "([^"]*)" with value "([^"]*)"$/ do |field, value|
   end
 end
 
+Then /^I should see row "([^"]*)" with value "([^"]*)"$/ do |field, value|
+  first(:css, "tr:contains('#{field}')").should == first(:css, "tr:contains('#{value}')")
+end
+
 Then /^I should see fields displayed$/ do |table|
   # as above, this assumes you're using the helper to render the field which sets the div id based on the field name
   table.hashes.each do |row|
@@ -100,4 +104,14 @@ end
 Then /^pause$/ do
   puts "Press Enter to continue"
   STDIN.getc
+end
+
+Given /^I am the admin$/ do |table|
+  table.hashes.each do |hash|
+    r = Role.create(name:'superuser')
+    u = User.new(hash.merge({password:"Pas$w0rd", password_confirmation:"Pas$w0rd"}))
+    u.activate
+    u.role = r
+    u.save!
+  end
 end

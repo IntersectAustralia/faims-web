@@ -31,4 +31,4 @@ Feature: Edit my details
     Given I am on the home page
     When I follow "Edit My Details"
     And I follow "Cancel"
-    Then I should be on the user profile page
+    Then I should be on the user details page for georgina@intersect.org.au
