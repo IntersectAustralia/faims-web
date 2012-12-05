@@ -8,6 +8,7 @@ class Ability
 
     if user.admin?
       can [:read, :update_role], User
+      can [:manage], Project
     else
       can [:read], User
     end

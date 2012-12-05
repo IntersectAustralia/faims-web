@@ -1,0 +1,14 @@
+.container
+  .pull-left
+    %h1 Projects
+  .pull-right
+    = link_to "Create Project", new_project_path, :class => "btn"
+.clear
+- if @projects
+  %div{:id => "links"}
+    %ul
+    - for project in @projects
+      %li
+        = link_to project.name, project
+
+

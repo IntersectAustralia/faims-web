@@ -2,4 +2,9 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  hello: "Hello world"
+  projects:
+    index:
+      empty: "Click 'Create Project' to add a new project."
+    new:
+      success: "New project created."
+      failure: "Please correct the errors in this form."

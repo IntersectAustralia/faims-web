@@ -43,6 +43,13 @@ module NavigationHelpers
     when /the list users page/
       users_path
 
+    # Projects paths
+    when /the projects page/
+      projects_path
+
+    when /the new projects page/
+      new_project_path
+
 # Add more mappings here.
     # Here is an example that pulls values out of the Regexp:
     #

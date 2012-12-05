@@ -12,14 +12,9 @@
     .navbar.navbar-fixed-top
       .navbar-inner
         .container
-          %a.btn.btn-navbar{"data-target" => ".nav-collapse", "data-toggle" => "collapse"}
-            %span.icon-bar
-            %span.icon-bar
-            %span.icon-bar
           %a.brand{:href => root_path } FAIMS
-          .nav-collapse
-            %ul.nav
-              %li= link_to "PROJECTS"
+          %ul.nav
+            %li= link_to "PROJECTS", projects_path
           = render 'layouts/user_menu'
 
     .container.main_content

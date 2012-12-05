@@ -1,0 +1,23 @@
+.container
+  .row-fluid
+    = simple_form_for @project, :url => projects_path, :method => "post", :multipart => true, :html => {:id => 'project-form'} do |f|
+      %p Step 1: Choose project name
+      = f.label :name, "Name:"
+      = f.text_field :name
+      = f.error :name
+    .clear
+    %p Step 2: Upload Data Definition Schema
+    = simple_form_for @project, :url => projects_path, :method => "post", :multipart => true, :html => {:id => 'data-schema-form'} do |f|
+      = f.label :data_schema, "Data Schema:"
+      = f.file_field :data_schema
+      = f.error :data_schema
+      = button_to "Upload", '#', :class => "btn data-schema-upload-btn"
+    .clear
+    %p Step 3: Upload User Interface Schema
+    = simple_form_for @project, :url => projects_path, :method => "post", :multipart => true, :html => {:id => 'ui-schema-form'} do |f|
+      = f.label :ui_schema, "UI Schema:"
+      = f.file_field :ui_schema
+      = f.error :ui_schema
+      = button_to "Upload", '#', :class => "btn ui-schema-upload-btn"
+    .clear
+    = button_to "Submit", '#', :class => "btn btn-primary project-submit-btn"

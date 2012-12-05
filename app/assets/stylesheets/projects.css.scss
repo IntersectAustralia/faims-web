@@ -1,0 +1,42 @@
+// ref: http://www.smileycat.com/miaow/archives/000230.php
+#links ul {
+  list-style-type: none;
+  width: 400px;
+}
+
+#links li {
+  border: 1px dashed #999;
+  border-width: 0 0 1px 0;
+  margin: 5px 0;
+}
+
+#links li a {
+  display: block;
+  font: bold 120% Arial, Helvetica, sans-serif;
+  padding: 5px;
+  text-decoration: none;
+}
+
+* html #links li a {  /* make hover effect work in IE */
+  width: 400px;
+}
+
+#links li a:hover {
+}
+
+#links a em {
+  color: #333;
+  display: block;
+  font: normal 85% Verdana, Helvetica, sans-serif;
+  line-height: 125%;
+}
+
+#links a span {
+  color: #125F15;
+  font: normal 70% Verdana, Helvetica, sans-serif;
+  line-height: 150%;
+}
+
+.help-inline {
+  color: #cc0000;
+}

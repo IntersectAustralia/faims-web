@@ -20,6 +20,7 @@ end
     end
   end
 
+  resources :projects
 
   root :to => "pages#home"
 

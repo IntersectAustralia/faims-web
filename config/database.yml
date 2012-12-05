@@ -5,8 +5,6 @@
 #   gem 'sqlite3'
 common: &common
   adapter: sqlite3
-  username: faims
-  password: faims
   pool: 5
   timeout: 5000
 
