@@ -274,7 +274,3 @@ end
 Then /^show me the page$/ do
   save_and_open_page
 end
-
-And /^I upload file "([^"]*)" for "([^"]*)"$/ do |file, field|
-  attach_file(field, File.expand_path("../../resources/" + file, __FILE__))
-end

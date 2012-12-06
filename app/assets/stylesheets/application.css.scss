@@ -54,9 +54,9 @@
 }
 
 .help-inline {
-  border: 1px dashed #FF4D4D;
   color:#FF4D4D;
-  @include border-radius(5px);
+  //border: 1px dashed #FF4D4D;
+  //@include border-radius(5px);
   padding: 5px 10px 5px 10px;
 }
 
