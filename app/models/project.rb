@@ -1,4 +1,5 @@
 class Project < ActiveRecord::Base
+  include XSDValidator
 
   attr_accessible :name, :data_schema, :ui_schema
 
@@ -28,14 +29,20 @@ class Project < ActiveRecord::Base
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
-    # TODO: validate data schema against xsd
+    file = create_temp_schema(schema)
+    result = XSDValidator.validate_data_schema(file.path)
+    file.unlink
+    return "invalid xml" unless result.empty?
     return nil
   end
 
   def self.validate_ui_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
-    # TODO: validate ui schema against xsd
+    file = create_temp_schema(schema)
+    result = XSDValidator.validate_ui_schema(file.path)
+    file.unlink
+    return "invalid xml" unless result.empty?
     return nil
   end
 
@@ -48,6 +55,13 @@ class Project < ActiveRecord::Base
 
     def projects_dir
       Rails.env == 'test' ? 'tmp/projects' : 'projects'
+    end
+
+    def self.create_temp_schema(schema)
+      file = Tempfile.new('schema')
+      file.write(schema.read)
+      file.close
+      file
     end
 
 end

@@ -112,7 +112,6 @@ GEM
     libwebsocket (0.1.7.1)
       addressable
       websocket
-    libxml-ruby (2.3.3)
     mail (2.4.4)
       i18n (>= 0.4.0)
       mime-types (~> 1.16)
@@ -233,7 +232,7 @@ DEPENDENCIES
   haml-rails
   jquery-rails
   launchy
-  libxml-ruby
+  nokogiri
   rails (= 3.2.9)
   rspec-rails
   sass-rails (~> 3.2.3)

@@ -19,8 +19,13 @@ class ProjectsController < ApplicationController
 
   def create
     # create project project valid and schemas uploaded
-    @project = Project.new(:name => params[:project][:name])
-    valid = @project.valid?
+
+    if params[:project]
+      @project = Project.new(:name => params[:project][:name]) if params[:project]
+      valid = @project.valid?
+    else
+      valid = false
+    end
 
     unless session[:data_schema]
       @project.errors.add(:data_schema, "can't be blank")
