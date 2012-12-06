@@ -15,9 +15,58 @@
 @import "bootstrap";
 @import "bootstrap-responsive";
 
+.step-box {
+  width: 300px;
+  padding: 20px;
+  margin: 20px;
+  margin-bottom: 40px;
+  border: 1px solid #eee;
+  border-width: 2px;
+  @include border-radius(5px);
+}
+
+.number-circle {
+  float:left;
+  position: relative;
+  top: -25px;
+
+  -webkit-border-radius: 999px;
+  -moz-border-radius: 999px;
+  border-radius: 999px;
+  behavior: url(PIE.htc);
+
+  width: 36px;
+  height: 36px;
+  padding: 8px;
+
+  background: #fff;
+  border: 2px solid #666;
+  color: #666;
+  text-align: center;
+
+  font: 32px Arial, sans-serif;
+}
+
+.step-container {
+  top: 100px;
+
+  display: block !important;
+}
+
+.help-inline {
+  border: 1px dashed #FF4D4D;
+  color:#FF4D4D;
+  @include border-radius(5px);
+  padding: 5px 10px 5px 10px;
+}
+
+@media (max-width: 1200px) {
+
+}
+
 @media (min-width: 979px) {
   body {
     padding-top: 60px;
   }
-}
 
+}

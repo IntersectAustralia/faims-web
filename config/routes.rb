@@ -20,7 +20,14 @@ end
     end
   end
 
-  resources :projects
+  resources :projects do
+
+    collection do
+      post :upload_data_schema
+      post :upload_ui_schema
+      get :valid_name
+    end
+  end
 
   root :to => "pages#home"
 

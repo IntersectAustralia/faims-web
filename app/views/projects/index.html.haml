@@ -5,10 +5,13 @@
     = link_to "Create Project", new_project_path, :class => "btn"
 .clear
 - if @projects
-  %div{:id => "links"}
-    %ul
-    - for project in @projects
-      %li
-        = link_to project.name, project
-
-
+  %ul.project-list
+  - index = 0
+  - for project in @projects
+    - index = index + 1
+    %a.project{href:project_path(project)}
+      %li.media
+        %h1.pull-left.project-number.hidden-phone= index.to_s + "."
+        .project-body
+          %h4.project-name= project.name
+          = project.created_at

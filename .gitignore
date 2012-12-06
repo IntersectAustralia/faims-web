@@ -16,3 +16,6 @@
 
 # Ignore all rubymine files
 /.idea
+
+# Ignore all project directories
+/projects

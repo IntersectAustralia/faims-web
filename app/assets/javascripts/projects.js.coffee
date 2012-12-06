@@ -16,6 +16,18 @@ $(document).ready(
       =>
         $('.data-schema-upload-btn').click(
           =>
+            options = {
+              dataType: 'json',
+              success: (data) =>
+                $('#data-schema-form').parent().find('.help-inline').remove()
+                if data.status == 'success'
+                  $('#data-schema-form').replaceWith("<span class='file-uploaded'>File Uploaded!</span>")
+                else
+                  $('#data-schema-form').parent().append("<span class='help-inline'>"+ data.message + "</span>")
+              ,
+              #error: => alert('error')
+            }
+            $('#data-schema-form').ajaxSubmit(options)
             return false
         )
     )
@@ -23,7 +35,18 @@ $(document).ready(
       =>
         $('.ui-schema-upload-btn').click(
           =>
-            $('#ui-schema-form').submit()
+            options = {
+              dataType: 'json',
+              success: (data) =>
+                $('#ui-schema-form').parent().find('.help-inline').remove()
+                if data.status == 'success'
+                  $('#ui-schema-form').replaceWith("<span class='file-uploaded'>File Uploaded!</span>")
+                else
+                  $('#ui-schema-form').parent().append("<span class='help-inline'>"+ data.message + "</span>")
+              ,
+              #error: => alert('error')
+            }
+            $('#ui-schema-form').ajaxSubmit(options)
             return false
         )
     )

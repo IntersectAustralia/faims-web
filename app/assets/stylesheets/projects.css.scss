@@ -1,42 +1,46 @@
 // ref: http://www.smileycat.com/miaow/archives/000230.php
-#links ul {
-  list-style-type: none;
-  width: 400px;
+
+.project-list {
 }
 
-#links li {
+.project li {
   border: 1px dashed #999;
   border-width: 0 0 1px 0;
   margin: 5px 0;
+  color: #CCC;
+  list-style-type: none;
 }
 
-#links li a {
-  display: block;
-  font: bold 120% Arial, Helvetica, sans-serif;
-  padding: 5px;
+.project li:hover {
+  background-color: #EEE;
+}
+
+.project:hover {
   text-decoration: none;
 }
 
-* html #links li a {  /* make hover effect work in IE */
-  width: 400px;
+.project-number {
+  min-width: 60px;
+  height: 50px;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  background-color: #DDD;
+  text-align: center;
+  color: #3C3C3C;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 
-#links li a:hover {
+.project-body {
+  padding-top: 5px;
+  padding-bottom: 5px;
 }
 
-#links a em {
-  color: #333;
-  display: block;
-  font: normal 85% Verdana, Helvetica, sans-serif;
-  line-height: 125%;
+.project-name {
+  color:#3C3C3C;
 }
 
-#links a span {
-  color: #125F15;
-  font: normal 70% Verdana, Helvetica, sans-serif;
-  line-height: 150%;
-}
-
-.help-inline {
-  color: #cc0000;
+.file-uploaded {
+  color:#0C0;
 }
