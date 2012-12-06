@@ -11,6 +11,20 @@ Feature: Manage projects
     And I should see "Logged in successfully."
     And I have a projects dir
 
+  Scenario: List projects
+    Given I am on the home page
+    And I have projects
+      | name |
+      | Project 1|
+      | Project 2|
+      | Project 3|
+    And I follow "Show Projects"
+    Then I should see projects
+      | name |
+      | Project 1|
+      | Project 2|
+      | Project 3|
+
   @javascript
   Scenario: Create a new project
     Given I am on the home page
