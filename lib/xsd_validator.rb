@@ -1,16 +1,23 @@
-def validate_data_schema(file)
-  validate_schema(File.expand_path("../assets/data_schema.xsd", __FILE__), file)
-end
+module XSDValidator
 
-def validate_ui_schema(file)
-  validate_schema(File.expand_path("../assets/data_schema.xsd", __FILE__), file)
-end
+  require 'nokogiri'
+  def self.validate_data_schema(file)
+    validate_schema(File.expand_path("../assets/data_schema.xsd", __FILE__), file)
+  end
 
-def validate_schema(xsd, file)
-  #schema = LibXML::XML::Schema.new(xsd)
-  #document = LibXML::XML::Document.file(file)
-  #result = document.validate_schema(schema) do |message, flag|
-  #  p message
-  #end
-  return true
+  def self.validate_ui_schema(file)
+    validate_schema(File.expand_path("../assets/data_schema.xsd", __FILE__), file)
+  end
+
+  def self.validate_schema(xsd, file)
+    xsd = Nokogiri::XML::Schema(File.read(xsd))
+    doc = Nokogiri::XML(File.read(file))
+
+    result = xsd.validate(doc).each do |error|
+      error.message
+    end
+
+    result
+  end
+
 end
