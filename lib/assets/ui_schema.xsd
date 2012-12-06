@@ -1,125 +1,125 @@
 <xs:schema targetNamespace="http://www.w3.org/2002/xforms"
-        xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-        xmlns:xsi="http://www.w3.org/2001/instance" 
-        xmlns:xforms="http://www.w3.org/2002/xforms"
-        xmlns:xhtml="http://www.w3.org/1999/xhtml"
-        xmlns:xml="http://www.w3.org/XML/1998/namespace"
-        elementFormDefault="qualified">
-        
-<xs:import namespace="http://www.w3.org/1999/xhtml"
-    schemaLocation="ui_schema_checker.xsd" />
-<xs:import namespace="http://www.w3.org/XML/1998/namespace" />
-<xs:redefine
-    schemaLocation="core_ui_schema.xsd">
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:xsi="http://www.w3.org/2001/instance"
+           xmlns:xforms="http://www.w3.org/2002/xforms"
+           xmlns:xhtml="http://www.w3.org/1999/xhtml"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+           elementFormDefault="qualified">
+
+  <xs:import namespace="http://www.w3.org/1999/xhtml"
+             schemaLocation="ui_schema_checker.xsd" />
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+  <xs:redefine
+          schemaLocation="core_ui_schema.xsd">
 
     <xs:attributeGroup name="UI.Common.Attrs">
-        <xs:attributeGroup ref="xforms:UI.Common.Attrs"/>
-        
-        <!--  
-        The XForms 1.1 specification says: "A host language is expected to add
-        attributes such as xml:lang as well as an attribute, named class, that
-        holds a list of strings that can be matched by CSS class selectors."
-        
-        Accordingly, this schema redefines the XForms schema by incorporating UI attributes such as
-        'class' into the XForms namespace that correspond to those found in the XHTML namespace.
-        -->
-        <xs:attributeGroup ref="xforms:coreattrs"/>
-        <xs:attributeGroup ref="xforms:i18n"/>
-        <xs:attributeGroup ref="xforms:events"/>
-        <xs:attributeGroup ref="xforms:focus"/>
+      <xs:attributeGroup ref="xforms:UI.Common.Attrs"/>
+
+      <!--
+         The XForms 1.1 specification says: "A host language is expected to add
+         attributes such as xml:lang as well as an attribute, named class, that
+         holds a list of strings that can be matched by CSS class selectors."
+
+         Accordingly, this schema redefines the XForms schema by incorporating UI attributes such as
+         'class' into the XForms namespace that correspond to those found in the XHTML namespace.
+         -->
+      <xs:attributeGroup ref="xforms:coreattrs"/>
+      <xs:attributeGroup ref="xforms:i18n"/>
+      <xs:attributeGroup ref="xforms:events"/>
+      <xs:attributeGroup ref="xforms:focus"/>
     </xs:attributeGroup>
-</xs:redefine>
-<xs:annotation>
+  </xs:redefine>
+  <xs:annotation>
     <xs:documentation>
-         The attributes defined below are as for XHTML 1.0 but incorporated 
-         in the XForms namespace. The license for XHTML follows.
+      The attributes defined below are as for XHTML 1.0 but incorporated
+      in the XForms namespace. The license for XHTML follows.
     </xs:documentation>
     <xs:documentation>
-        This is XHTML, a reformulation of HTML as a modular XML application The
-        Extensible HyperText Markup Language (XHTML) Copyright ©1998-2002
-        World Wide Web Consortium (Massachusetts Institute of Technology,
-        Institut National de Recherche en Informatique et en Automatique,
-        Keio University). All Rights Reserved. Permission to use, copy,
-        modify and distribute the XHTML Schema modules and their accompanying
-        xs:documentation for any purpose and without fee is hereby granted in
-        perpetuity, provided that the above copyright notice and this
-        paragraph appear in all copies. The copyright holders make no
-        representation about the suitability of these XML Schema modules for
-        any purpose. They are provided "as is" without expressed or implied
-        warranty. 
+      This is XHTML, a reformulation of HTML as a modular XML application The
+      Extensible HyperText Markup Language (XHTML) Copyright ©1998-2002
+      World Wide Web Consortium (Massachusetts Institute of Technology,
+      Institut National de Recherche en Informatique et en Automatique,
+      Keio University). All Rights Reserved. Permission to use, copy,
+      modify and distribute the XHTML Schema modules and their accompanying
+      xs:documentation for any purpose and without fee is hereby granted in
+      perpetuity, provided that the above copyright notice and this
+      paragraph appear in all copies. The copyright holders make no
+      representation about the suitability of these XML Schema modules for
+      any purpose. They are provided "as is" without expressed or implied
+      warranty.
     </xs:documentation>
-</xs:annotation>
-    <xs:attributeGroup name="coreattrs">
-        <xs:annotation>
-            <xs:documentation>
-                core attributes common to most elements id document-wide unique id class
-                space separated list of classes style associated style info title
-                advisory title/amplification 
-            </xs:documentation>
-        </xs:annotation>
-        <!--  <xs:attribute name="id" type="xs:ID" /> -->
-        <xs:attribute name="class" type="xs:NMTOKENS" />
-        <xs:attribute name="style" type="xhtml:StyleSheet" />
-        <xs:attribute name="title" type="xhtml:Text" />
-    </xs:attributeGroup>
-    <xs:attributeGroup name="i18n">
-        <xs:annotation>
-            <xs:documentation>
-                internationalization attributes lang language code (backwards compatible) xml:lang
-                language code (as per XML 1.0 spec) dir direction for weak/neutral
-                text 
-            </xs:documentation>
-        </xs:annotation>
-        <xs:attribute name="lang" type="xhtml:LanguageCode" />
-        <xs:attribute ref="xml:lang" />
-        <xs:attribute name="dir">
-            <xs:simpleType>
-                <xs:restriction base="xs:token">
-                    <xs:enumeration value="ltr" />
-                    <xs:enumeration value="rtl" />
-                </xs:restriction>
-            </xs:simpleType>
-        </xs:attribute>
-    </xs:attributeGroup>  
-    <xs:attributeGroup name="events">
-        <xs:annotation>
-            <xs:documentation>
-                attributes for common UI events onclick a pointer button was clicked
-                ondblclick a pointer button was double clicked onmousedown a pointer
-                button was pressed down onmouseup a pointer button was released
-                onmousemove a pointer was moved onto the element onmouseout a
-                pointer was moved away from the element onkeypress a key was pressed
-                and released onkeydown a key was pressed down onkeyup a key was
-                released 
-</xs:documentation>
-        </xs:annotation>
-        <xs:attribute name="onclick" type="xhtml:Script" />
-        <xs:attribute name="ondblclick" type="xhtml:Script" />
-        <xs:attribute name="onmousedown" type="xhtml:Script" />
-        <xs:attribute name="onmouseup" type="xhtml:Script" />
-        <xs:attribute name="onmouseover" type="xhtml:Script" />
-        <xs:attribute name="onmousemove" type="xhtml:Script" />
-        <xs:attribute name="onmouseout" type="xhtml:Script" />
-        <xs:attribute name="onkeypress" type="xhtml:Script" />
-        <xs:attribute name="onkeydown" type="xhtml:Script" />
-        <xs:attribute name="onkeyup" type="xhtml:Script" />
-    </xs:attributeGroup>
-    <xs:attributeGroup name="focus">
-        <xs:annotation>
-            <xs:documentation>
-                attributes for elements that can get the focus accesskey accessibility key
-                character tabindex position in tabbing order onfocus the element got
-                the focus onblur the element lost the focus 
-            </xs:documentation>
-        </xs:annotation>
-        <xs:attribute name="accesskey" type="xhtml:Character" />
-        <xs:attribute name="tabindex" type="xhtml:tabindexNumber" />
-        <xs:attribute name="onfocus" type="xhtml:Script" />
-        <xs:attribute name="onblur" type="xhtml:Script" />
-    </xs:attributeGroup>
-    <xs:attributeGroup name="attrs">
-        <xs:attributeGroup ref="xhtml:coreattrs" />
-        <xs:attributeGroup ref="xhtml:i18n" />
-        <xs:attributeGroup ref="xhtml:events" />
-    </xs:attributeGroup>
+  </xs:annotation>
+  <xs:attributeGroup name="coreattrs">
+    <xs:annotation>
+      <xs:documentation>
+        core attributes common to most elements id document-wide unique id class
+        space separated list of classes style associated style info title
+        advisory title/amplification
+      </xs:documentation>
+    </xs:annotation>
+    <!--  <xs:attribute name="id" type="xs:ID" /> -->
+    <xs:attribute name="class" type="xs:NMTOKENS" />
+    <xs:attribute name="style" type="xhtml:StyleSheet" />
+    <xs:attribute name="title" type="xhtml:Text" />
+  </xs:attributeGroup>
+  <xs:attributeGroup name="i18n">
+    <xs:annotation>
+      <xs:documentation>
+        internationalization attributes lang language code (backwards compatible) xml:lang
+        language code (as per XML 1.0 spec) dir direction for weak/neutral
+        text
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="lang" type="xhtml:LanguageCode" />
+    <xs:attribute ref="xml:lang" />
+    <xs:attribute name="dir">
+      <xs:simpleType>
+        <xs:restriction base="xs:token">
+          <xs:enumeration value="ltr" />
+          <xs:enumeration value="rtl" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:attributeGroup>
+  <xs:attributeGroup name="events">
+    <xs:annotation>
+      <xs:documentation>
+        attributes for common UI events onclick a pointer button was clicked
+        ondblclick a pointer button was double clicked onmousedown a pointer
+        button was pressed down onmouseup a pointer button was released
+        onmousemove a pointer was moved onto the element onmouseout a
+        pointer was moved away from the element onkeypress a key was pressed
+        and released onkeydown a key was pressed down onkeyup a key was
+        released
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="onclick" type="xhtml:Script" />
+    <xs:attribute name="ondblclick" type="xhtml:Script" />
+    <xs:attribute name="onmousedown" type="xhtml:Script" />
+    <xs:attribute name="onmouseup" type="xhtml:Script" />
+    <xs:attribute name="onmouseover" type="xhtml:Script" />
+    <xs:attribute name="onmousemove" type="xhtml:Script" />
+    <xs:attribute name="onmouseout" type="xhtml:Script" />
+    <xs:attribute name="onkeypress" type="xhtml:Script" />
+    <xs:attribute name="onkeydown" type="xhtml:Script" />
+    <xs:attribute name="onkeyup" type="xhtml:Script" />
+  </xs:attributeGroup>
+  <xs:attributeGroup name="focus">
+    <xs:annotation>
+      <xs:documentation>
+        attributes for elements that can get the focus accesskey accessibility key
+        character tabindex position in tabbing order onfocus the element got
+        the focus onblur the element lost the focus
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="accesskey" type="xhtml:Character" />
+    <xs:attribute name="tabindex" type="xhtml:tabindexNumber" />
+    <xs:attribute name="onfocus" type="xhtml:Script" />
+    <xs:attribute name="onblur" type="xhtml:Script" />
+  </xs:attributeGroup>
+  <xs:attributeGroup name="attrs">
+    <xs:attributeGroup ref="xhtml:coreattrs" />
+    <xs:attributeGroup ref="xhtml:i18n" />
+    <xs:attributeGroup ref="xhtml:events" />
+  </xs:attributeGroup>
 </xs:schema>

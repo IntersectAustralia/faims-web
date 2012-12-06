@@ -25,7 +25,7 @@ elementFormDefault="qualified">
 
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xs:import namespace="http://www.w3.org/2002/xforms"
-    schemaLocation="xforms11-with-xhtml-attributes.xsd" />
+    schemaLocation="ui_schema.xsd" />
     <xs:simpleType name="ContentType">
         <xs:annotation>
             <xs:documentation>media type, as per [RFC2045]</xs:documentation>
