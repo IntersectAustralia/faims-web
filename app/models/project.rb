@@ -20,6 +20,7 @@ class Project < ActiveRecord::Base
   end
 
   def create_project_from(tmpdir)
+    Dir.mkdir(Rails.root.join(projects_dir)) unless File.directory? Rails.root.join(projects_dir)
     dir_name = Rails.root.join(projects_dir, name).to_s
     Dir.mkdir(dir_name)
     FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml")
