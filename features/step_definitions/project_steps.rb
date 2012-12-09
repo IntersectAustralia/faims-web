@@ -19,13 +19,8 @@ And /^I have project "([^"]*)"$/ do |name|
   Project.create(:name => name)
 end
 
-Then /^I should see "([^"]*)" with error "([^"]*)" for "([^"]*)"$/ do |field, error, upload|
-  if upload == "true"
-    page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../../span[@class='help-inline' and text()=\"#{error}\"]")
-  else
-    page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and text()=\"#{error}\"]")
-  end
-
+Then /^I should see "([^"]*)" with error "([^"]*)"$/ do |field, error|
+  page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and text()=\"#{error}\"]")
 end
 
 Given /^I have projects$/ do |table|
