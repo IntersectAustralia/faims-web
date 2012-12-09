@@ -14,16 +14,16 @@ Feature: Manage projects
   Scenario: List projects
     Given I am on the home page
     And I have projects
-      | name |
-      | Project 1|
-      | Project 2|
-      | Project 3|
+      | name      |
+      | Project 1 |
+      | Project 2 |
+      | Project 3 |
     And I follow "Show Projects"
     Then I should see projects
-      | name |
-      | Project 1|
-      | Project 2|
-      | Project 3|
+      | name      |
+      | Project 1 |
+      | Project 2 |
+      | Project 3 |
 
   @javascript
   Scenario: Create a new project
@@ -39,7 +39,6 @@ Feature: Manage projects
     Then I should see "New project created."
     Then I should be on the projects page
 
-  @javascript
   Scenario Outline: Cannot create project due to errors
     Given I am on the home page
     And I have project "Project 1"
@@ -51,11 +50,12 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field         | value                 | error                  |
-    | Name          |                       | can't be blank         |
-    | Name          | Project 1             | has already been taken |
-    | Data Schema   |                       | can't be blank         |
-    | UI Schema     |                       | can't be blank         |
+    | field       | value     | error                  |
+    | Name        |           | can't be blank         |
+    | Name        | Project 1 | has already been taken |
+    | Name        | Project * | is invalid             |
+    | Data Schema |           | can't be blank         |
+    | UI Schema   |           | can't be blank         |
 
   @javascript
   Scenario Outline: Cannot create project due to errors
@@ -69,10 +69,10 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field         | value                 | error                  |
-    | Data Schema   |                       | can't be blank         |
-    | Data Schema   | garbage               | must be xml file       |
-    | Data Schema   | data_schema_error.xml | invalid xml            |
-    | Data Schema   |                       | can't be blank         |
-    | Data Schema   | garbage               | must be xml file       |
-    | Data Schema   | data_schema_error.xml | invalid xml            |
+    | field       | value                 | error            |
+    | Data Schema |                       | can't be blank   |
+    | Data Schema | garbage               | must be xml file |
+    | Data Schema | data_schema_error.xml | invalid xml      |
+    | Data Schema |                       | can't be blank   |
+    | Data Schema | garbage               | must be xml file |
+    | Data Schema | data_schema_error.xml | invalid xml      |

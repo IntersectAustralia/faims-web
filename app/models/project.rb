@@ -3,7 +3,8 @@ class Project < ActiveRecord::Base
 
   attr_accessible :name, :data_schema, :ui_schema
 
-  validates :name, :presence => true, :uniqueness => true
+  validates :name, :presence => true, :uniqueness => true, :length => { :maximum => 255 },
+            :format => { :with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i } # do not allow file name reserved characters
 
   before_validation :update_project
 
