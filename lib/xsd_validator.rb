@@ -6,7 +6,7 @@ module XSDValidator
   end
 
   def self.validate_ui_schema(file)
-    validate_schema(File.expand_path("../assets/ui_schema.xsd", __FILE__), file)
+    validate_schema(File.expand_path("../assets/data_schema.xsd", __FILE__), file)
   end
 
   def self.validate_schema(xsd, file)
