@@ -1,35 +1,32 @@
 .container
-  .step-container
-    .number-circle 1
-    .step-box
-      %h4 Choose project name
-      = simple_form_for @project, :url => projects_path, :method => "post", :html => {:id => 'project-form'} do |f|
+  = simple_form_for @project, :url => projects_path, :method => "post", :multipart => true do |f|
+    .step-container
+      .number-circle 1
+      .step-body
+        %h4 Choose project name
         = f.label :name, "Name:"
         = f.text_field :name
         = f.error :name
-  .step-container
-    .number-circle 2
-    .step-box
-      %h4 Upload Data Definition Schema
-      - if session[:data_schema]
-        %span.file-uploaded File Uploaded!
-      - else
-        = simple_form_for @project, :url => upload_data_schema_projects_path, :method => "post", :multipart => true, :html => {:id => 'data-schema-form'} do |f|
+    .step-container
+      .number-circle 2
+      .step-body
+        %h4 Upload Data Definition Schema
+        - if session[:data_schema]
+          %span.uploaded-inline Data Schema Uploaded!
+        - else
           = f.label :data_schema, "Data Schema:"
           = f.file_field :data_schema
-          = button_to "Upload", '#', :class => "btn data-schema-upload-btn"
           = f.error :data_schema
-  .step-container
-    .number-circle 3
-    .step-box
-      %h4 Upload User Interface Schema
-      - if session[:ui_schema]
-        %span.file-uploaded File Uploaded!
-      - else
-        = simple_form_for @project, :url => upload_ui_schema_projects_path, :method => "post", :multipart => true, :html => {:id => 'ui-schema-form'} do |f|
+    .step-container
+      .number-circle 3
+      .step-body
+        %h4 Upload User Interface Schema
+        - if session[:ui_schema]
+          %span.uploaded-inline UI Schema Uploaded!
+        - else
           = f.label :ui_schema, "UI Schema:"
           = f.file_field :ui_schema
-          = button_to "Upload", '#', :class => "btn ui-schema-upload-btn"
           = f.error :ui_schema
-  .clear
-  = button_to "Submit", '#', :class => "btn btn-primary project-submit-btn"
+    .form-actions
+      = f.submit "Submit", :class => "btn btn-primary"
+      = link_to "Clear", new_project_path, :class => "btn"

@@ -1,9 +1,11 @@
 class Project < ActiveRecord::Base
   include XSDValidator
+  include DatabaseGenerator
 
   attr_accessible :name, :data_schema, :ui_schema
 
-  validates :name, :presence => true, :uniqueness => true
+  validates :name, :presence => true, :uniqueness => true, :length => { :maximum => 255 },
+            :format => { :with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i } # do not allow file name reserved characters
 
   before_validation :update_project
 
@@ -20,10 +22,12 @@ class Project < ActiveRecord::Base
   end
 
   def create_project_from(tmpdir)
+    Dir.mkdir(Rails.root.join(projects_dir)) unless File.directory? Rails.root.join(projects_dir)
     dir_name = Rails.root.join(projects_dir, name).to_s
     Dir.mkdir(dir_name)
     FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml")
     FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
+    DatabaseGenerator.generate_database(dir_name + "/db.sqlite3")
   end
 
   def self.validate_data_schema(schema)
