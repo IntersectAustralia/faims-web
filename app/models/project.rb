@@ -1,5 +1,6 @@
 class Project < ActiveRecord::Base
   include XSDValidator
+  include DatabaseGenerator
 
   attr_accessible :name, :data_schema, :ui_schema
 
@@ -26,6 +27,7 @@ class Project < ActiveRecord::Base
     Dir.mkdir(dir_name)
     FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml")
     FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
+    DatabaseGenerator.generate_database(dir_name + "/db.sqlite3")
   end
 
   def self.validate_data_schema(schema)

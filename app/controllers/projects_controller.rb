@@ -20,10 +20,13 @@ class ProjectsController < ApplicationController
     valid = create_project
 
     if valid
-      @project.save
 
-      @project.create_project_from(session[:tmpdir])
-      FileUtils.remove_entry_secure session[:tmpdir]
+      @project.transaction do
+        @project.save
+
+        @project.create_project_from(session[:tmpdir])
+        FileUtils.remove_entry_secure session[:tmpdir]
+      end
 
       flash[:notice] = t 'projects.new.success'
       redirect_to :projects
