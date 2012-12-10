@@ -1,4 +1,3 @@
-require File.dirname(__FILE__) + '/sample_data_populator.rb'
 begin
   namespace :projects do
     desc "Cleanup all projects"

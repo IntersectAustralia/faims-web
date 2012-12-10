@@ -68,5 +68,8 @@ module FaimsWeb
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
+
+    # specify port number for discovery server
+    config.discovery_server_port = 4000
   end
 end
