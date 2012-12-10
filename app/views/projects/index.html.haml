@@ -14,4 +14,4 @@
         %h1.pull-left.project-number.hidden-phone= index.to_s + "."
         .project-body
           %h4.project-name= project.name
-          = project.created_at
+          = project.created_at.localtime.strftime("%d/%m/%Y %I:%M%p")

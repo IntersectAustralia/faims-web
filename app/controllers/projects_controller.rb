@@ -107,8 +107,10 @@ class ProjectsController < ApplicationController
     def create_temp_file(filename, upload)
       tmpdir = session[:tmpdir]
       #logger.debug tmpdir + "/" + filename
-      File.open(tmpdir + "/" + filename, 'w') do |file|
-        file.write(upload.read)
+      File.open(upload.tempfile, 'r') do |upload_file|
+        File.open(tmpdir + "/" + filename, 'w') do |temp_file|
+          temp_file.write(upload_file.read)
+        end
       end
     end
 

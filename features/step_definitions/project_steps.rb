@@ -34,3 +34,10 @@ Then /^I should see projects$/ do |table|
     Project.find_by_name(hash[:name]).should_not be_nil
   end
 end
+
+Then /^I have project files for "([^"]*)"$/ do |name|
+  File.directory?(Rails.root.join('tmp/projects', name)).should be_true
+  File.exists?(Rails.root.join('tmp/projects', name, 'db.sqlite3')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', name, 'ui_schema.xml')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', name, 'project.settings')).should be_true
+end

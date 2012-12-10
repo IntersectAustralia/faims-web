@@ -37,7 +37,8 @@ Feature: Manage projects
     And I pick file "ui_schema.xml" for "UI Schema"
     And I press "Submit"
     Then I should see "New project created."
-    Then I should be on the projects page
+    And I should be on the projects page
+    And I have project files for "Project 1"
 
   Scenario Outline: Cannot create project due to errors
     Given I am on the home page
