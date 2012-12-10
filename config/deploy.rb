@@ -1,4 +1,4 @@
-$:.unshift(File.expand_path('./lib', ENV['rvm_path']))
+# $:.unshift(File.expand_path('./lib', ENV['rvm_path']))
 require 'bundler/capistrano'
 require 'capistrano/ext/multistage'
 require 'capistrano_colors'
@@ -7,7 +7,8 @@ require 'rvm/capistrano'
 set :application, 'faims-web'
 set :stages, %w(qa staging production)
 set :default_stage, "qa"
-set :rpms, "openssl openssl-devel curl-devel httpd-devel apr-devel apr-util-devel zlib zlib-devel libxml2 libxml2-devel libxslt libxslt-devel libffi mod_ssl mod_xsendfile"
+set :packages, "openssl libssl-dev libcurl4-openssl-dev apache2-prefork-dev libapr1-dev libaprutil1-dev zlib1g-dev libxml2 libxml2-dev libxslt1-dev libffi-dev"
+# zlib mod_ssl mod_xsendfile
 set :shared_children, shared_children + %w(log_archive)
 set :shell, '/bin/bash'
 set :rvm_ruby_string, 'ruby-1.9.3-p286@faims'
@@ -27,8 +28,8 @@ set(:deploy_to) { "#{user_home}/#{application}" }
 default_run_options[:pty] = true
 
 namespace :server_setup do
-  task :rpm_install, :roles => :app do
-    run "#{try_sudo} yum install -y #{rpms}"
+  task :package_install, :roles => :app do
+    run "#{try_sudo} apt-get install -y #{packages}"
   end
   namespace :filesystem do
     task :dir_perms, :roles => :app do
@@ -72,7 +73,7 @@ namespace :server_setup do
   end
 end
 before 'deploy:setup' do
-  server_setup.rpm_install
+  server_setup.package_install
   server_setup.rvm.trust_rvmrc
   server_setup.gem_install
   server_setup.passenger
@@ -233,7 +234,12 @@ end
 desc "After updating code we need to populate a new database.yml"
 task :generate_database_yml, :roles => :app do
   require "yaml"
-  set :production_database_password, proc { Capistrano::CLI.password_prompt("Database password: ") }
+  
+  #
+  # we are using sqlite3 and don't have a database password
+  #
+  
+  #set :production_database_password, proc { Capistrano::CLI.password_prompt("Database password: ") }
 
   buffer = YAML::load_file('config/database.yml')
   # get rid of unneeded configurations
@@ -243,7 +249,7 @@ task :generate_database_yml, :roles => :app do
   buffer.delete('spec')
 
   # Populate production password
-  buffer[rails_env]['password'] = production_database_password
+  #buffer[rails_env]['password'] = production_database_password
 
   put YAML::dump(buffer), "#{release_path}/config/database.yml", :mode => 0664
 end
