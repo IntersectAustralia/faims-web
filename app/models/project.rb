@@ -22,6 +22,7 @@ class Project < ActiveRecord::Base
   end
 
   def create_project_from(tmpdir)
+    setup_projects_dir
     dir_name = Rails.root.join(projects_dir, name).to_s
     Dir.mkdir(dir_name)
     FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
@@ -53,6 +54,11 @@ class Project < ActiveRecord::Base
   end
 
   private
+
+    def setup_projects_dir
+      Dir.mkdir(Rails.root.join('tmp')) unless File.directory? Rails.root.join('tmp')
+      Dir.mkdir(Rails.root.join(projects_dir)) unless File.directory? Rails.root.join(projects_dir) # make sure directory existsq
+    end
 
     def update_project
       name.squish! if name

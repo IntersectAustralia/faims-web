@@ -25,6 +25,7 @@ end
 def clean_projects
   Project.destroy_all
   FileUtils.rm_rf Rails.root.join(projects_dir) if File.directory? projects_dir
+  Dir.mkdir(Rails.root.join(projects_dir)) unless File.directory? Rails.root.join(projects_dir)
 end
 
 def projects_dir
