@@ -69,10 +69,10 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field       | value                 | error            |
-    | Data Schema |                       | can't be blank   |
-    | Data Schema | garbage               | must be xml file |
-    | Data Schema | data_schema_error.xml | invalid xml      |
-    | Data Schema |                       | can't be blank   |
-    | Data Schema | garbage               | must be xml file |
-    | Data Schema | data_schema_error.xml | invalid xml      |
+    | field       | value                  | error            |
+    | Data Schema |                        | can't be blank   |
+    | Data Schema | garbage                | must be xml file |
+    | Data Schema | data_schema_error1.xml | invalid xml      |
+    | UI Schema   |                        | can't be blank   |
+    | UI Schema   | garbage                | must be xml file |
+    | UI Schema   | ui_schema_error1.xml   | invalid xml      |

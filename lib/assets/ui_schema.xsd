@@ -7,10 +7,10 @@
            elementFormDefault="qualified">
 
   <xs:import namespace="http://www.w3.org/1999/xhtml"
-             schemaLocation="ui_schema_checker.xsd" />
+             schemaLocation="lib/assets/ui_schema_checker.xsd" />
   <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
   <xs:redefine
-          schemaLocation="core_ui_schema.xsd">
+          schemaLocation="lib/assets/core_ui_schema.xsd">
 
     <xs:attributeGroup name="UI.Common.Attrs">
       <xs:attributeGroup ref="xforms:UI.Common.Attrs"/>

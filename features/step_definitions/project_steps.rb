@@ -1,5 +1,5 @@
 And /^I pick file "([^"]*)" for "([^"]*)"$/ do |file, field|
-  attach_file(field, File.expand_path("../../resources/" + file, __FILE__)) unless file.blank?
+  attach_file(field, File.expand_path("../../assets/" + file, __FILE__)) unless file.blank?
 end
 
 When /^(?:|I )press "([^"]*)" for "([^"]*)"$/ do |button, field|
