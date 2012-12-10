@@ -25,9 +25,12 @@ class Project < ActiveRecord::Base
     Dir.mkdir(Rails.root.join(projects_dir)) unless File.directory? Rails.root.join(projects_dir)
     dir_name = Rails.root.join(projects_dir, name).to_s
     Dir.mkdir(dir_name)
-    FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml")
+    FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
     FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
     DatabaseGenerator.generate_database(dir_name + "/db.sqlite3")
+    File.open(dir_name + "/project.settings", 'w') do |file|
+      file.write({:project => name}.to_json)
+    end
   end
 
   def self.validate_data_schema(schema)
