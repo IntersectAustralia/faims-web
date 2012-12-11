@@ -26,6 +26,7 @@ class Project < ActiveRecord::Base
   def create_project_from(tmpdir)
     setup_projects_dir
     dir_name = Rails.root.join(projects_dir, name).to_s
+    FileUtils.rm_rf dir_name if File.directory? dir_name
     Dir.mkdir(dir_name)
     FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
     FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")

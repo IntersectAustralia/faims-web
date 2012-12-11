@@ -20,14 +20,10 @@ end
     end
   end
 
-  resources :projects do
+  resources :projects
 
-    collection do
-      post :upload_data_schema
-      post :upload_ui_schema
-      get :valid_name
-    end
-  end
+  get "android/projects", :to => "android#projects"
+  get "android/project/:id/download", :to => "android#download"
 
   root :to => "pages#home"
 
