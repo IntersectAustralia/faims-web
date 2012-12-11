@@ -1,19 +1,18 @@
 class AndroidController < ApplicationController
 
   def projects
-    respond_to do |format|
-      format.html do
-        render :json => Project.all.to_json
-      end
-      format.json do
-        render :json => Project.all.to_json
-      end
-    end
+    render :json => Project.all.to_json
+  end
+
+  def archive
+    project = Project.find(params[:id])
+    info = project.archive_info
+    render :json => info.to_json
   end
 
   def download
     project = Project.find(params[:id])
-    send_file Rails.root.join('projects', project.name, 'db.sqlite3')
+    send_file project.archive_info[:file]
   end
 
 end

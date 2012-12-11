@@ -7,6 +7,7 @@ When /^(?:|I )press "([^"]*)" for "([^"]*)"$/ do |button, field|
 end
 
 And /^I have a projects dir$/ do
+  Dir.mkdir('tmp') unless File.directory? 'tmp'
   FileUtils.rm_rf('tmp/projects')
   Dir.mkdir('tmp/projects')
 end
@@ -16,7 +17,7 @@ And /^I should not see errors for upload "([^"]*)"$/ do |field|
 end
 
 And /^I have project "([^"]*)"$/ do |name|
-  Project.create(:name => name)
+  make_project name
 end
 
 Then /^I should see "([^"]*)" with error "([^"]*)"$/ do |field, error|
@@ -25,7 +26,7 @@ end
 
 Given /^I have projects$/ do |table|
   table.hashes.each do |hash|
-    Project.create(:name => hash[:name])
+    make_project hash[:name]
   end
 end
 
@@ -36,8 +37,29 @@ Then /^I should see projects$/ do |table|
 end
 
 Then /^I have project files for "([^"]*)"$/ do |name|
-  File.directory?(Rails.root.join('tmp/projects', name)).should be_true
-  File.exists?(Rails.root.join('tmp/projects', name, 'db.sqlite3')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', name, 'ui_schema.xml')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', name, 'project.settings')).should be_true
+  filename = Project.find_by_name(name).filename
+  File.directory?(Rails.root.join('tmp/projects', filename)).should be_true
+  File.exists?(Rails.root.join('tmp/projects', filename, 'db.sqlite3')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', filename, 'ui_schema.xml')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', filename, 'project.settings')).should be_true
+end
+
+Then /^I should see json for projects$/ do
+  page.should have_content(Project.all.to_json)
+end
+
+Then /^I should see json for "([^"]*)" archived file$/ do |name|
+end
+
+Then /^I should download file for "([^"]*)"$/ do |name|
+end
+
+def make_project(name)
+  p = Project.create(:name => name)
+  filename = p.filename
+  `mkdir #{Rails.root.join('tmp', 'projects', filename).to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', filename, 'db.sqlite3').to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', filename, 'ui_schema.xml').to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', filename, 'project.settings').to_s}`
+  p.archive
 end

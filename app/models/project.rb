@@ -23,16 +23,50 @@ class Project < ActiveRecord::Base
   def ui_schema=(value)
   end
 
+  def filename
+    name.gsub(/\s/, '_') if name
+  end
+
+  def archive
+    file = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
+    `tar zcf #{file} #{Rails.root.join(projects_dir).to_s + "/" + filename}`
+  end
+
+  def archive_info
+    file = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
+    {
+        :file => file,
+        :size => File.size(file),
+        :md5 => Digest::MD5.hexdigest(File.read(file))
+    }
+  end
+
   def create_project_from(tmpdir)
-    setup_projects_dir
-    dir_name = Rails.root.join(projects_dir, name).to_s
-    FileUtils.rm_rf dir_name if File.directory? dir_name
-    Dir.mkdir(dir_name)
-    FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
-    FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
-    DatabaseGenerator.generate_database(dir_name + "/db.sqlite3")
-    File.open(dir_name + "/project.settings", 'w') do |file|
-      file.write({:project => name}.to_json)
+    begin 
+      Dir.mkdir(Rails.root.join(projects_dir)) unless 
+        File.directory? Rails.root.join(projects_dir) # make sure directory exists
+
+      dir_name = Rails.root.join(projects_dir, filename).to_s
+
+      FileUtils.rm_rf dir_name if 
+        File.directory? dir_name # remove directory if one already exists
+
+      Dir.mkdir(dir_name)
+
+      # copy files into directory
+      FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
+      FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
+      DatabaseGenerator.generate_database(dir_name + "/db.sqlite3")
+      File.open(dir_name + "/project.settings", 'w') do |file|
+        file.write({:project => name}.to_json)
+      end
+
+      # generate archive
+      archive #Todo: this will need to be called each time the database or settings are updated
+    rescue Exception => e
+      FileUtils.rm_rf dir_name if 
+        File.directory? dir_name # cleanup directory
+      throw e
     end
   end
 
@@ -57,11 +91,6 @@ class Project < ActiveRecord::Base
   end
 
   private
-
-    def setup_projects_dir
-      Dir.mkdir(Rails.root.join('tmp')) unless File.directory? Rails.root.join('tmp')
-      Dir.mkdir(Rails.root.join(projects_dir)) unless File.directory? Rails.root.join(projects_dir) # make sure directory existsq
-    end
 
     def update_project
       name.squish! if name

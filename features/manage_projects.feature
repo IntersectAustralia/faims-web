@@ -77,3 +77,22 @@ Feature: Manage projects
     | UI Schema   |                        | can't be blank   |
     | UI Schema   | garbage                | must be xml file |
     | UI Schema   | ui_schema_error1.xml   | invalid xml      |
+
+  Scenario: Pull a list of projects
+    Given I have projects
+      | name      |
+      | Project 1 |
+      | Project 2 |
+      | Project 3 |
+    And I am on the android projects page
+    Then I should see json for projects
+
+  Scenario: Archive project
+    Given I have project "Project 1"
+    And I am on the android archive page for Project 1
+    Then I should see json for "Project 1" archived file
+
+  Scenario: Download project
+    Given I have project "Project 1"
+    And I am on the android download link for Project 1
+    Then I should download file for "Project 1"

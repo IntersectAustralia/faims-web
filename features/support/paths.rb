@@ -50,6 +50,15 @@ module NavigationHelpers
     when /the new projects page/
       new_project_path
 
+    when /the android projects page/
+      android_projects_path
+
+    when /the android archive page for (.*)$/
+      android_project_archive_path(Project.find_by_name($1))
+
+    when /the android download link for (.*)$/
+      android_project_download_path(Project.find_by_name($1))
+
 # Add more mappings here.
     # Here is an example that pulls values out of the Regexp:
     #
