@@ -28,5 +28,10 @@
           = f.file_field :ui_schema
           = f.error :ui_schema
     .form-actions
-      = f.submit "Submit", :class => "btn btn-primary"
+      = f.submit "Submit", :class => "btn btn-primary", :id => "submit-project-btn"
       = link_to "Clear", new_project_path, :class => "btn"
+
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Creating Project

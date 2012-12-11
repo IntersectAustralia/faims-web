@@ -9,6 +9,7 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require_self
+ *= require jquery.ui.all
  *= require_tree .
 */
 
@@ -69,4 +70,12 @@
     padding-top: 60px;
   }
 
+}
+
+.indicator {
+  text-align: center;
+}
+
+.ui-dialog-titlebar-close {
+  visibility: hidden;
 }
