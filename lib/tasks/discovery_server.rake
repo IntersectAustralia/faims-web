@@ -1,5 +1,5 @@
 begin
-  namespace :discover do
+  namespace :discovery do
     desc "Start discovery server"
     task :start => :environment do
       discover_server "start", "-f"
@@ -26,7 +26,7 @@ def discover_server(*args)
       :dir_mode   => :normal,
       :dir        => Rails.root.join('tmp').to_s,
       :multiple   => false,
-      :ontop      => false,
+      :ontop      => true,
       :mode       => :load,
       :backtrace  => true,
       :monitor    => true
