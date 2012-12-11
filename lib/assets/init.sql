@@ -1,5 +1,5 @@
 PRAGMA foreign_keys = off;
-  
+
 PRAGMA page_size = 1024;
 PRAGMA cache_size = 800000;
 vacuum;
@@ -17,7 +17,7 @@ CREATE TABLE ObservationType (
     CONSTRAINT Pk_ObservationType PRIMARY KEY ( ObsTypeID )
  );
  
-CREATE TABLE AttributeKey ( 
+CREATE TABLE AttributeKey (
     AttributeID          INTEGER NOT NULL,
     AttributeName        TEXT,
     AttributeDescription TEXT,
@@ -62,7 +62,6 @@ CREATE TABLE UnitOfObservation (
     UserID               INTEGER,
     DOI                  TEXT,
     ObsTypeID            INTEGER,
-    --GeoSpatialColumn     BLOB,
     GeoSpatialColumnType TEXT,
     CONSTRAINT Idx_UnitOfObservation PRIMARY KEY ( UUID, ObsTimestamp ),
     FOREIGN KEY ( UserID ) REFERENCES User( UserID ) ,
@@ -86,7 +85,6 @@ CREATE TABLE Relationship (
     RelationshipID       INTEGER NOT NULL,
     UserID               INTEGER NOT NULL,
     RelnTimestamp        DATETIME NOT NULL,
-    --GeospatialColumn     BLOB,
     GeoSpatialColumnType TEXT,
     RelnTypeID           INTEGER NOT NULL,
     CONSTRAINT Pk_Relationship PRIMARY KEY ( RelationshipID, UserID, RelnTimestamp ),

@@ -4,10 +4,13 @@ module DatabaseGenerator
 
   def self.generate_database(file)
     db = SQLite3::Database.new(file)
-    db.execute("create table empty( empty interger )")
-    #db.enable_load_extension(true)
-    #db.execute("select load_extension('#{spatialite_library}')")
-    #db.execute("select initspatialmetadata()")
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("select initspatialmetadata()")
+    content = File.read(Rails.root.join('lib', 'assets', 'init.sql'))
+    content = content.gsub("\n","")
+    db.execute_batch(content)
+
   end
 
   private
