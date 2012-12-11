@@ -63,8 +63,5 @@ gem 'simple_form'
 gem 'devise'
 gem 'email_spec', :group => :test
 gem 'cancan'
-gem 'capistrano-ext'
-gem 'capistrano'
-gem 'capistrano_colors'
 gem 'nokogiri'
 gem 'daemons'

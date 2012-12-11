@@ -9,6 +9,8 @@ class Project < ActiveRecord::Base
 
   before_validation :update_project
 
+  default_scope order(:name)
+
   def data_schema
   end
 
