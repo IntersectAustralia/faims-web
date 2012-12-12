@@ -1,9 +1,10 @@
 SERVER_IP = IPSocket.getaddress(Socket.gethostname)
-SERVER_PORT = Rails.application.config.discovery_server_port
+SERVER_PORT = Rails.application.config.server_port
+DISCOVERY_PORT = Rails.application.config.discovery_server_port
 
 puts "Server Started on #{SERVER_IP}:#{SERVER_PORT}"
 socket = UDPSocket.new
-socket.bind('0.0.0.0', SERVER_PORT)
+socket.bind('0.0.0.0', DISCOVERY_PORT)
 loop do
 
   data, addr = socket.recvfrom(1024) # max 1 kb

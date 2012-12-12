@@ -71,5 +71,8 @@ module FaimsWeb
 
     # specify port number for discovery server
     config.discovery_server_port = 4000
+
+    # specify port for server
+    config.server_port = 3000
   end
 end
