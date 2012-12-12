@@ -56,7 +56,7 @@ class Project < ActiveRecord::Base
       # copy files into directory
       FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
       FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
-      DatabaseGenerator.generate_database(dir_name + "/db.sqlite3")
+      DatabaseGenerator.generate_database(dir_name + "/db.sqlite3", dir_name + "/data_schema.xml")
       File.open(dir_name + "/project.settings", 'w') do |file|
         file.write({:project => name}.to_json)
       end
