@@ -37,11 +37,11 @@ Then /^I should see projects$/ do |table|
 end
 
 Then /^I have project files for "([^"]*)"$/ do |name|
-  filename = Project.find_by_name(name).filename
-  File.directory?(Rails.root.join('tmp/projects', filename)).should be_true
-  File.exists?(Rails.root.join('tmp/projects', filename, 'db.sqlite3')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', filename, 'ui_schema.xml')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', filename, 'project.settings')).should be_true
+  dirname = Project.find_by_name(name).dirname
+  File.directory?(Rails.root.join('tmp/projects', dirname)).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dirname, 'db.sqlite3')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_schema.xml')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dirname, 'project.settings')).should be_true
 end
 
 Then /^I should see json for projects$/ do
@@ -56,10 +56,10 @@ end
 
 def make_project(name)
   p = Project.create(:name => name)
-  filename = p.filename
-  `mkdir #{Rails.root.join('tmp', 'projects', filename).to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', filename, 'db.sqlite3').to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', filename, 'ui_schema.xml').to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', filename, 'project.settings').to_s}`
+  dirname = p.dirname
+  `mkdir #{Rails.root.join('tmp', 'projects', dirname).to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', dirname, 'db.sqlite3').to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', dirname, 'ui_schema.xml').to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', dirname, 'project.settings').to_s}`
   p.archive
 end

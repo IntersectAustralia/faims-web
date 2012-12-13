@@ -12,7 +12,11 @@ class AndroidController < ApplicationController
 
   def download
     project = Project.find(params[:id])
-    send_file project.archive_info[:file]
+    send_file Rails.root.join(project_dir, project.archive_info[:file])
+  end
+
+  def project_dir
+    return Rails.env == 'test' ? 'tmp/projects' : 'projects'
   end
 
 end
