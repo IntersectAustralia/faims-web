@@ -3,15 +3,73 @@
   <xs:element name="dataSchema">
     <xs:complexType>
       <xs:sequence>
-      <xs:element name="UserElement" maxOccurs="unbounded" minOccurs="0">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element type="xs:string" name="fname"/>
-            <xs:element type="xs:string" name="lname"/>
-          </xs:sequence>
-          <xs:attribute type="xs:integer" name="userId" use="optional"/>
-        </xs:complexType>
-      </xs:element>
+        <xs:element name="RelationshipElement" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="description"/>
+              <xs:element type="xs:string" name="parent" minOccurs="0"/>
+              <xs:element type="xs:string" name="child" minOccurs="0"/>
+              <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="description" minOccurs="0"/>
+                    <xs:element type="xs:string" name="bundle" minOccurs="0"/>
+                    <xs:element name="lookup" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element type="xs:string" name="term" maxOccurs="unbounded" minOccurs="0"/>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="type" use="optional"/>
+                  <xs:attribute type="xs:string" name="name" use="optional"/>
+                  <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
+                  <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name" use="optional"/>
+            <xs:attribute type="xs:string" name="type" use="optional"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ArchaeologicalElement" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="description"/>
+              <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType mixed="true">
+                  <xs:sequence>
+                    <xs:element type="xs:string" name="bundle" maxOccurs="unbounded" minOccurs="0"/>
+                    <xs:element name="lookup" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="term" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:simpleContent>
+                                <xs:extension base="xs:string">
+                                  <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
+                                </xs:extension>
+                              </xs:simpleContent>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="type" use="optional"/>
+                  <xs:attribute type="xs:string" name="name" use="optional"/>
+                  <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
+                  <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="type" use="optional"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="name"/>
+      <xs:attribute type="xs:string" name="preparer"/>
     </xs:complexType>
   </xs:element>
 </xs:schema>

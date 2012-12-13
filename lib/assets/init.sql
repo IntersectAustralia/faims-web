@@ -1,5 +1,5 @@
 PRAGMA foreign_keys = off;
-
+ 
 PRAGMA page_size = 4096;
 vacuum;
 
@@ -10,7 +10,7 @@ CREATE TABLE User (
 	CONSTRAINT Pk_User PRIMARY KEY ( UserID )
  );
 
-CREATE TABLE AEntType (
+CREATE TABLE AEntType ( 
 	AEntTypeID            TEXT NOT NULL,
 	AEntTypeName		  TEXT,
 	AEntTypeCategory	  TEXT,
@@ -18,7 +18,7 @@ CREATE TABLE AEntType (
 	CONSTRAINT Pk_AEntTypeID PRIMARY KEY ( AEntTypeID )
  );
 
-CREATE TABLE AttributeKey (
+CREATE TABLE AttributeKey ( 
 	AttributeID          TEXT NOT NULL,
 	AttributeType		 Text,
 	AttributeName        TEXT,
@@ -26,15 +26,15 @@ CREATE TABLE AttributeKey (
 	CONSTRAINT Pk_AttributeKey PRIMARY KEY ( AttributeID )
  );
 
-CREATE TABLE Vocabulary (
+CREATE TABLE Vocabulary ( 
 	VocabID              INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
 	VocabName          	 TEXT,
 	CONSTRAINT Pk_Vocabulary PRIMARY KEY ( VocabID ),
-	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID )
+	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID ) 
  );
 
-CREATE TABLE RelnType (
+CREATE TABLE RelnType ( 
 	RelnTypeID           INTEGER NOT NULL,
 	RelnTypeName		 TEXT,
 	RelnTypeDescription  TEXT,
@@ -44,37 +44,41 @@ CREATE TABLE RelnType (
 	CONSTRAINT Pk_RelnType PRIMARY KEY ( RelnTypeID )
  );
 
-CREATE TABLE IdealAEnt (
+CREATE TABLE IdealAEnt ( 
 	AEntTypeID           TEXT NOT NULL,
 	AttributeID          TEXT NOT NULL,
-	Description          TEXT,
-	CONSTRAINT Idx_IdealObs PRIMARY KEY ( AEntTypeID, AttributeID ),
+	AEntDescription      TEXT,
+	MinCardinality		 INTEGER,
+	MaxCardinality		 INTEGER,
+	CONSTRAINT Idx_IdealAEnt PRIMARY KEY ( AEntTypeID, AttributeID ),
 	FOREIGN KEY ( AEntTypeID ) REFERENCES AEntType( AEntTypeID ) ,
-	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID )
+	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID ) 
  );
 
-CREATE TABLE IdealReln (
+CREATE TABLE IdealReln ( 
 	RelnTypeID           INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
-	Description          TEXT,
+	RelnDescription      TEXT,
+	MinCardinality		 INTEGER,
+	MaxCardinality		 INTEGER,
 	CONSTRAINT Idx_IdealReln PRIMARY KEY ( RelnTypeID, AttributeID ),
 	FOREIGN KEY ( RelnTypeID ) REFERENCES RelnType( RelnTypeID ) ,
-	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID )
+	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID ) 
  );
 
-CREATE TABLE ArchEntity (
+CREATE TABLE ArchEntity ( 
 	UUID                 integer NOT NULL,
-	ObsTimestamp         DATETIME DEFAULT CURRENT_TIMESTAMP,
+	AEntTimestamp         DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UserID               INTEGER,
 	DOI                  TEXT,
 	AEntTypeID           TEXT,
 	GeoSpatialColumnType TEXT,
-	CONSTRAINT Idx_UnitOfObservation PRIMARY KEY ( UUID, ObsTimestamp ),
+	CONSTRAINT Idx_UnitOfAEntervation PRIMARY KEY ( UUID, AEntTimestamp ),
 	FOREIGN KEY ( UserID ) REFERENCES User( UserID ) ,
-	FOREIGN KEY ( AEntTypeID ) REFERENCES AEntType( AEntTypeID )
+	FOREIGN KEY ( AEntTypeID ) REFERENCES AEntType( AEntTypeID ) 
  );
 
-CREATE TABLE AEntValue (
+CREATE TABLE AEntValue ( 
 	UUID                 integer NOT NULL,
 	ValueTimestamp       DATETIME DEFAULT CURRENT_TIMESTAMP,
 	VocabID              INTEGER,
@@ -84,10 +88,10 @@ CREATE TABLE AEntValue (
 	Certainty            REAL,
 	FOREIGN KEY ( UUID ) REFERENCES ArchEntity( UUID ) ,
 	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID ) ,
-	FOREIGN KEY ( VocabID ) REFERENCES Vocabulary( VocabID )
+	FOREIGN KEY ( VocabID ) REFERENCES Vocabulary( VocabID ) 
  );
 
-CREATE TABLE Relationship (
+CREATE TABLE Relationship ( 
 	RelationshipID       INTEGER NOT NULL,
 	UserID               INTEGER NOT NULL,
 	RelnTimestamp        DATETIME NOT NULL,
@@ -95,20 +99,20 @@ CREATE TABLE Relationship (
 	RelnTypeID           INTEGER NOT NULL,
 	CONSTRAINT Pk_Relationship PRIMARY KEY ( RelationshipID, UserID, RelnTimestamp ),
 	FOREIGN KEY ( RelnTypeID ) REFERENCES RelnType( RelnTypeID ) ,
-	FOREIGN KEY ( UserID ) REFERENCES User( UserID )
+	FOREIGN KEY ( UserID ) REFERENCES User( UserID ) 
  );
 
-CREATE TABLE AEntReln (
+CREATE TABLE AEntReln ( 
 	UUID                 INTEGER NOT NULL,
 	RelationshipID       INTEGER NOT NULL,
 	ParticipatesVerb     TEXT,
-	ObsRelnTimestamp     DATETIME,
-	CONSTRAINT Idx_ObsReln PRIMARY KEY ( RelationshipID, UUID ),
+	AEntRelnTimestamp     DATETIME,
+	CONSTRAINT Idx_AEntReln PRIMARY KEY ( RelationshipID, UUID ),
 	FOREIGN KEY ( RelationshipID ) REFERENCES Relationship( RelationshipID ) ,
-	FOREIGN KEY ( UUID ) REFERENCES ArchEntity( UUID )
+	FOREIGN KEY ( UUID ) REFERENCES ArchEntity( UUID ) 
  );
 
-CREATE TABLE RelnValue (
+CREATE TABLE RelnValue ( 
 	RelationshipID       INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
 	VocabID              INTEGER NOT NULL,
@@ -116,7 +120,7 @@ CREATE TABLE RelnValue (
 	Freetext             TEXT,
 	FOREIGN KEY ( RelationshipID ) REFERENCES Relationship( RelationshipID ) ,
 	FOREIGN KEY ( AttributeID ) REFERENCES AttributeKey( AttributeID ) ,
-	FOREIGN KEY ( VocabID ) REFERENCES Vocabulary( VocabID )
+	FOREIGN KEY ( VocabID ) REFERENCES Vocabulary( VocabID ) 
  );
 
 SELECT AddGeometryColumn('ArchEntity', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
