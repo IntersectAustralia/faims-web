@@ -23,57 +23,72 @@ class Project < ActiveRecord::Base
   def ui_schema=(value)
   end
 
-  def filename
+  def dirname
     name.gsub(/\s/, '_') if name
   end
 
-  def archive
-    file = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
-    `tar zcf #{file} -C #{Rails.root.join(projects_dir).to_s} #{filename}` # todo: find purely ruby method
+  def dirpath
+    Rails.root.join(projects_dir, name.gsub(/\s/, '_')).to_s if name
   end
 
+  def filename
+    name.gsub(/\s/, '_') + '.tar.gz'
+  end
+
+  def filepath
+    dirpath + '.tar.gz'
+  end
+  
+  def projects_dir
+    Rails.env == 'test' ? 'tmp/projects' : 'projects'
+  end
+
+  def projects_path
+    Rails.root.join(projects_dir).to_s
+  end
+    
+  def archive
+    `tar zcf #{filepath} -C #{projects_path} #{dirname}` # todo: find purely ruby method
+  end
+  
   def archive_info
-    file = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
     {
-        :file => filename + ".tar.gz",
-        :size => File.size(file),
-        :md5 => Digest::MD5.hexdigest(File.read(file))
+      :file => filename,
+      :size => File.size(filepath),
+      :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
   end
 
   def create_project_from(tmpdir)
     begin 
-      Dir.mkdir(Rails.root.join(projects_dir)) unless 
-        File.directory? Rails.root.join(projects_dir) # make sure directory exists
+      Dir.mkdir(projects_path) unless File.directory? projects_path # make sure directory exists
 
-      dir_name = Rails.root.join(projects_dir, filename).to_s
-      archive_name = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
+      FileUtils.rm_rf dirpath if 
+        File.directory? dirpath # remove directory if one already exists
+      FileUtils.rm_rf filepath if 
+        File.exists? filepath # remove archive if one already exists
 
-      FileUtils.rm_rf dir_name if 
-        File.directory? dir_name # remove directory if one already exists
-      FileUtils.rm archive_name if 
-        File.exists? archive_name # remove archive if one already exists
-
-      Dir.mkdir(dir_name)
+      Dir.mkdir(dirpath)
 
       # copy files into directory
-      FileUtils.mv(tmpdir + "/data_schema.xml", dir_name + "/data_schema.xml") #temporary
-      FileUtils.mv(tmpdir + "/ui_schema.xml", dir_name + "/ui_schema.xml")
-      DatabaseGenerator.generate_database(dir_name + "/db.sqlite3", dir_name + "/data_schema.xml")
-      File.open(dir_name + "/project.settings", 'w') do |file|
+      FileUtils.mv(tmpdir + "/data_schema.xml", dirpath + "/data_schema.xml") #temporary
+      FileUtils.mv(tmpdir + "/ui_schema.xml", dirpath + "/ui_schema.xml")
+      DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
+      File.open(dirpath + "/project.settings", 'w') do |file|
         file.write({:project => name}.to_json)
       end
-
+    
       # generate archive
       archive #Todo: this will need to be called each time the database or settings are updated
     rescue Exception => e
-      FileUtils.rm_rf dir_name if 
-        File.directory? dir_name # cleanup directory
-        FileUtils.rm archive_name if archive_name and File.exists? archive_name
+      FileUtils.rm_rf dirpath if 
+        File.directory? dirpath # cleanup directory
+      FileUtils.rm filepath if 
+        filepath and File.exists? filepath # cleanup archive
       raise e
     end
   end
-
+  
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
@@ -93,16 +108,12 @@ class Project < ActiveRecord::Base
     return "invalid xml" unless result.empty?
     return nil
   end
-
+  
   private
-
+  
     def update_project
       name.squish! if name
       name.strip! if name
-    end
-
-    def projects_dir
-      Rails.env == 'test' ? 'tmp/projects' : 'projects'
     end
 
     def self.create_temp_schema(schema)

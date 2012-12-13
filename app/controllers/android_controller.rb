@@ -12,7 +12,6 @@ class AndroidController < ApplicationController
 
   def download
     project = Project.find(params[:id])
-    logger.debug Rails.root.join(project_dir, project.archive_info[:file])
     send_file Rails.root.join(project_dir, project.archive_info[:file])
   end
 

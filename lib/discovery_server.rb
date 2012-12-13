@@ -10,11 +10,10 @@ ensure
 end
 
 
-SERVER_IP = local_ip
 SERVER_PORT = Rails.application.config.server_port
 DISCOVERY_PORT = Rails.application.config.discovery_server_port
 
-puts "Server Started on #{SERVER_IP}:#{SERVER_PORT}"
+puts "Server Started on port #{SERVER_PORT}"
 socket = UDPSocket.new
 socket.bind('0.0.0.0', DISCOVERY_PORT)
 loop do
@@ -27,7 +26,7 @@ loop do
   puts "Received broadcast from #{ip}:#{port}"
 
   s = UDPSocket.new
-  s.send({ip:SERVER_IP, port:SERVER_PORT}.to_json, 0, ip, port)
+  s.send({ip:local_ip, port:SERVER_PORT}.to_json, 0, ip, port)
   s.close
   puts "Sent message to #{ip}:#{port}"
 
