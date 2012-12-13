@@ -29,13 +29,13 @@ class Project < ActiveRecord::Base
 
   def archive
     file = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
-    `tar zcf #{file} #{Rails.root.join(projects_dir).to_s + "/" + filename}`
+    `tar zcf #{file} -C #{Rails.root.join(projects_dir).to_s} #{filename}` # todo: find purely ruby method
   end
 
   def archive_info
     file = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
     {
-        :file => file,
+        :file => filename + ".tar.gz",
         :size => File.size(file),
         :md5 => Digest::MD5.hexdigest(File.read(file))
     }
@@ -47,9 +47,12 @@ class Project < ActiveRecord::Base
         File.directory? Rails.root.join(projects_dir) # make sure directory exists
 
       dir_name = Rails.root.join(projects_dir, filename).to_s
+      archive_name = Rails.root.join(projects_dir).to_s + "/" + filename + ".tar.gz"
 
       FileUtils.rm_rf dir_name if 
         File.directory? dir_name # remove directory if one already exists
+      FileUtils.rm archive_name if 
+        File.exists? archive_name # remove archive if one already exists
 
       Dir.mkdir(dir_name)
 
@@ -66,7 +69,8 @@ class Project < ActiveRecord::Base
     rescue Exception => e
       FileUtils.rm_rf dir_name if 
         File.directory? dir_name # cleanup directory
-      throw e
+        FileUtils.rm archive_name if archive_name and File.exists? archive_name
+      raise e
     end
   end
 
