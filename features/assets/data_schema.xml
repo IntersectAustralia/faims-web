@@ -1,7 +1,19 @@
 <?xml version="1.0"?>
-<note>
-  <to>Tove</to>
-  <from>Jani</from>
-  <heading>Reminder</heading>
-  <body>Don't forget me this weekend!</body>
-</note>
+<dataSchema>
+  <UserElement userId="1">
+    <fname>
+      Malcolm
+    </fname>
+    <lname>
+      Anderson
+    </lname>
+  </UserElement>
+  <UserElement userId="2">
+    <fname>
+      John
+    </fname>
+    <lname>
+      Murphy
+    </lname>
+  </UserElement>
+</dataSchema>

@@ -11,8 +11,8 @@ module DatabaseGenerator
     content = content.gsub("\n","")
     db.execute_batch(content)
     data_definition = XSLTParser.parse_data_schema(xml)
-    #data_definition = data_definition.gsub("\n","");
-    #data_definition = data_definition.gsub("\t","");
+    data_definition = data_definition.gsub("\n","");
+    data_definition = data_definition.gsub("\t","");
     db.execute_batch(data_definition)
 
   end
