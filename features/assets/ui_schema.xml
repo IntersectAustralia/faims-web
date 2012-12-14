@@ -46,9 +46,7 @@
 					</tabset>
 				</faims>
                         </instance>
-						<bind nodeset="/faims/tabset/tab1/input1" type="int" />
-                        <bind nodeset="/faims/tabset/BasicInfo/input2" type="long" />
-						<bind nodeset="/faims/tabset/BasicInfo/date" type="date" />
+						<bind nodeset="/faims/tabset/BasicInfo/Date" type="date" />
 						<bind nodeset="/faims/tabset/UnitDescription/Description" type="string" />
 						<bind nodeset="/faims/tabset/UnitDescription/StructureOther" type="string" />
 						<bind nodeset="/faims/tabset/Where/SurveyDataComm" type="string" />
