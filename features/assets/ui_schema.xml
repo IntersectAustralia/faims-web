@@ -596,5 +596,6 @@
 					<label>Save</label>
 				</trigger>
 			</group>
+          </group>
         </h:body>
 </h:html>
