@@ -10,66 +10,144 @@
                         <instance>
                                 <faims id="faimsform">
 					<tabset>
-		                                <tab1>
-				                        <input1 />
-				                        <input2 />
-						</tab1>
-		                                <tab2>
-				                        <input3 />
-				                        <input4 />
-							<input5 />
-						</tab2>
+		                                <general>
+				                        <excavator />
+				                        <date />
+				                        <trench_no />
+				                        <unit_no />
+				                        <grid />
+				                        <type_of_unit />
+				                        <length />
+				                        <width />
+				                        <diameter />
+				                        <height_depth />
+						</general>
+		                                <soils>
+				                        <colour />
+				                        <texture />
+							<moisture />
+				                        <components />
+						</soils>
+		                                <structures>
+				                        <major_constituents />
+				                        <minor_constituents />
+							<matrix />
+				                        <other />
+						</structures>
+		                                <descriptions>
+				                        <description />
+						</descriptions>
+		                                <findings>
+				                        <artefacts_general_description />
+				                        <special_finds />
+							<interpretive_comments />
+				                        <plan_nos />
+				                        <section_nos />
+				                        <photos />
+				                        <samples />
+				                        <sheet />
+						</findings>
+		                                <comments>
+				                        <comment />
+						</comments>
 		                        </tabset>
 				</faims>
                         </instance>
-			<bind nodeset="/faims/tabset/tab1/input1" type="int" />
-                        <bind nodeset="/faims/tabset/tab1/input2" type="long" />
+			<bind nodeset="/faims/tabset/general/date" type="date" />
+			<bind nodeset="/faims/tabset/general/trench_no" type="integer" />
+			<bind nodeset="/faims/tabset/general/unit_no" type="integer" />
+			<bind nodeset="/faims/tabset/general/length" type="decimal" />
+			<bind nodeset="/faims/tabset/general/width" type="decimal" />
+			<bind nodeset="/faims/tabset/general/diameter" type="decimal" />
+			<bind nodeset="/faims/tabset/general/height_depth" type="decimal" />
+			<bind nodeset="/faims/tabset/findings/plain_nos" type="integer" />
+			<bind nodeset="/faims/tabset/findings/section_nos" type="integer" />
                 </model>
         </h:head>
 
         <h:body>
 		<group ref="tabset">
 			<label>tabset</label>
-			<group ref="tab1">
-				<label>tab 1</label>
-				<input ref="input1">
-					<label>input1</label>
+			<group ref="general">
+				<label>General</label>
+				<input ref="excavator">
+					<label>Excavator:</label>
 				</input>
-				<input ref="input2">
-					<label>input2</label>
+				<input ref="date">
+					<label>Date:</label>
+				</input>
+				<input ref="trench_no">
+					<label>Trench No:</label>
+				</input>
+				<input ref="unit_no">
+					<label>Unit No:</label>
+				</input>
+				<input ref="grid">
+					<label>Grid:</label>
+				</input>
+				<input ref="type_of_unit">
+					<label>Type Of Unit:</label>
+				</input>
+				<input ref="length">
+					<label>Length:</label>
+				</input>
+				<input ref="width">
+					<label>Width:</label>
+				</input>
+				<input ref="diameter">
+					<label>Diameter:</label>
+				</input>
+				<input ref="height_depth">
+					<label>Height/Depth:</label>
 				</input>
 			</group>
-			<group ref="tab2">
-				<label>tab 2</label>
-				<input ref="input3">
-					<label>input3</label>
+			<group ref="soils">
+				<label>Soils</label>
+				<input ref="colour">
+					<label>Colour:</label>
 				</input>
-				<upload ref="input4" mediatype="image/*">
-					<label>input4</label>
+				<input ref="texture">
+					<label>Texture:</label>
+				</input>
+				<input ref="moisture">
+					<label>Moisture:</label>
+				</input>
+				<input ref="components">
+					<label>Components:</label>
+				</input>
+			</group>
+			<group ref="descriptions">
+				<label>Descriptions</label>
+				<input ref="description">
+					<label>Description:</label>
+				</input>
+			</group>
+			<group ref="findings">
+				<label>Findings</label>
+				<input ref="artefacts_general_description">
+					<label>Artefacts General Description:</label>
+				</input>
+				<input ref="special_finds">
+					<label>Special Finds:</label>
+				</input>
+				<input ref="interpretive_comments">
+					<label>Interpretive Comments:</label>
+				</input>
+				<input ref="plan_nos">
+					<label>Plan Nos:</label>
+				</input>
+				<input ref="section_nos">
+					<label>Plan Nos:</label>
+				</input>
+				<upload ref="photos" mediatype="image/*">
+					<label>Photos:</label>
 				</upload>
-				<select1 ref="input5" type="image">
-					<label>input5</label>
-					<item>
-						<label>pict1</label>
-						<value>/mnt/sdcard/faims/1.gif</value>
-					</item>
-					<item>
-						<label>pict2</label>
-						<value>/mnt/sdcard/faims/2.gif</value>
-					</item>
-					<item>
-						<label>pict3</label>
-						<value>/mnt/sdcard/faims/3.jpg</value>
-					</item>
-					<item>
-						<label>pict4</label>
-						<value>/mnt/sdcard/faims/4.jpg</value>
-					</item>
-					<item>
-						<label>pict5</label>
-						<value>/mnt/sdcard/faims/5.jpg</value>
-					</item>
-				</select1>
+				<input ref="samples">
+					<label>Samples:</label>
+				</input>
+				<input ref="sheet">
+					<label>Sheet:</label>
+				</input>
 			</group>
 		</group>
         </h:body>
