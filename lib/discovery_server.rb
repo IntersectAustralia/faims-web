@@ -21,13 +21,13 @@ loop do
   data, addr = socket.recvfrom(1024) # max 1 kb
 
   object = JSON.parse(data)
-  ip = object['ip']
-  port = object['port']
+  ip = object['android_ip']
+  port = object['android_port']
   puts "Received broadcast from #{ip}:#{port}"
 
   s = UDPSocket.new
-  s.send({ip:local_ip, port:SERVER_PORT}.to_json, 0, ip, port)
+  s.send({server_ip:local_ip, server_port:SERVER_PORT}.to_json, 0, ip, port)
   s.close
-  puts "Sent message to #{ip}:#{port}"
+  puts "Sent Server@#{local_ip}:#{SERVER_PORT} to #{ip}:#{port}"
 
 end
