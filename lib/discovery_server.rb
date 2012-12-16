@@ -13,7 +13,7 @@ end
 SERVER_PORT = Rails.application.config.server_port
 DISCOVERY_PORT = Rails.application.config.discovery_server_port
 
-puts "Server Started on port #{SERVER_PORT}"
+puts "Server Started on port #{DISCOVERY_PORT}"
 socket = UDPSocket.new
 socket.bind('0.0.0.0', DISCOVERY_PORT)
 loop do
