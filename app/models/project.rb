@@ -95,7 +95,7 @@ class Project < ActiveRecord::Base
     file = create_temp_schema(schema)
     result = XSDValidator.validate_data_schema(file.path)
     file.unlink
-    return "invalid xml" unless result.empty?
+    return "invalid xml" if result.nil? || !result.empty?
     return nil
   end
 
@@ -105,7 +105,8 @@ class Project < ActiveRecord::Base
     file = create_temp_schema(schema)
     result = XSDValidator.validate_ui_schema(file.path)
     file.unlink
-    return "invalid xml" unless result.empty?
+    logger.debug result
+    return "invalid xml" if result.nil? || !result.empty?
     return nil
   end
   
