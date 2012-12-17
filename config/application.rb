@@ -70,7 +70,7 @@ module FaimsWeb
     config.assets.version = '1.0'
 
     # specify port number for discovery server
-    config.discovery_server_port = 4000
+    config.discovery_server_port = 3001
 
     # specify port for server
     config.server_port = 3000
