@@ -18,16 +18,19 @@ socket = UDPSocket.new
 socket.bind('0.0.0.0', DISCOVERY_PORT)
 loop do
 
-  data, addr = socket.recvfrom(1024) # max 1 kb
+  begin
+    data, addr = socket.recvfrom(1024) # max 1 kb
 
-  object = JSON.parse(data)
-  ip = object['android_ip']
-  port = object['android_port']
-  puts "Received broadcast from #{ip}:#{port}"
+    object = JSON.parse(data)
+    ip = object['android_ip']
+    port = object['android_port']
+    puts "Received broadcast from #{ip}:#{port}"
 
-  s = UDPSocket.new
-  s.send({server_ip:local_ip, server_port:SERVER_PORT}.to_json, 0, ip, port)
-  s.close
-  puts "Sent Server@#{local_ip}:#{SERVER_PORT} to #{ip}:#{port}"
-
+    s = UDPSocket.new
+    s.send({server_ip:local_ip, server_port:SERVER_PORT}.to_json, 0, ip, port)
+    s.close
+    puts "Sent Server@#{local_ip}:#{SERVER_PORT} to #{ip}:#{port}"
+  rescue Execption => e
+    puts e
+  end
 end
