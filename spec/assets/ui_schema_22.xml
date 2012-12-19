@@ -1,0 +1,76 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+        <h:head>
+                <h:title>àáâãåæçèéêëìíîïðñòóôõöøùúûüýÿā</h:title>
+
+                <model>
+                        <instance>
+                                <faims id="faimsform">
+					<tabset>
+		                                <tab1>
+				                        <input1 />
+				                        <input2 />
+						</tab1>
+		                                <tab2>
+				                        <input3 />
+				                        <input4 />
+							<input5 />
+						</tab2>
+		                        </tabset>
+				</faims>
+                        </instance>
+			<bind nodeset="/faims/tabset/tab1/input1" type="int" />
+                        <bind nodeset="/faims/tabset/tab1/input2" type="long" />
+                </model>
+        </h:head>
+
+        <h:body>
+		<group ref="tabset">
+			<label>tabset</label>
+			<group ref="tab1">
+				<label>tab 1</label>
+				<input ref="input1">
+					<label>input1</label>
+				</input>
+				<input ref="input2">
+					<label>input2</label>
+				</input>
+			</group>
+			<group ref="tab2">
+				<label>tab 2</label>
+				<input ref="input3">
+					<label>input3</label>
+				</input>
+				<upload ref="input4" mediatype="image/*">
+					<label>input4</label>
+				</upload>
+				<select1 ref="input5" type="image">
+					<label>input5</label>
+					<item>
+						<label>pict1</label>
+						<value>/mnt/sdcard/faims/1.gif</value>
+					</item>
+					<item>
+						<label>pict2</label>
+						<value>/mnt/sdcard/faims/2.gif</value>
+					</item>
+					<item>
+						<label>pict3</label>
+						<value>/mnt/sdcard/faims/3.jpg</value>
+					</item>
+					<item>
+						<label>pict4</label>
+						<value>/mnt/sdcard/faims/4.jpg</value>
+					</item>
+					<item>
+						<label>pict5</label>
+						<value>/mnt/sdcard/faims/5.jpg</value>
+					</item>
+				</select1>
+			</group>
+		</group>
+        </h:body>
+</h:html>

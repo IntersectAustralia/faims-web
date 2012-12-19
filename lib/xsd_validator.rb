@@ -20,7 +20,6 @@ module XSDValidator
 
       result
     rescue Nokogiri::XML::SyntaxError => e
-      p e
       return [e]
     end
   end

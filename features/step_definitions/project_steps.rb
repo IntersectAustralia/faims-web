@@ -49,9 +49,14 @@ Then /^I should see json for projects$/ do
 end
 
 Then /^I should see json for "([^"]*)" archived file$/ do |name|
+  page.should have_content(Project.find_by_name(name).archive_info.to_json)
 end
 
 Then /^I should download file for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.filename + "\""
+  file = File.open(project.filepath, 'r')
+  page.source == file.read
 end
 
 def make_project(name)

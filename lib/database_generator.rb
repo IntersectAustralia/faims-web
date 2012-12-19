@@ -17,10 +17,9 @@ module DatabaseGenerator
 
   end
 
-  private
-    def self.spatialite_library
-      return 'libspatialite.dylib' if (/darwin/ =~ RUBY_PLATFORM) != nil
-      return 'libspatialite.so'
-    end
+  def self.spatialite_library
+    return 'libspatialite.dylib' if (/darwin/ =~ RUBY_PLATFORM) != nil
+    return 'libspatialite.so'
+  end
 
 end
