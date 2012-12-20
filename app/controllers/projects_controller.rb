@@ -52,6 +52,7 @@ class ProjectsController < ApplicationController
       session[:tmpdir] = tmpdir
       session[:data_schema] = false
       session[:ui_schema] = false
+      session[:ui_logic] = false
     end
 
     def clear_tmp_dir
@@ -98,6 +99,25 @@ class ProjectsController < ApplicationController
         else
           create_temp_file("ui_schema.xml", params[:project][:ui_schema])
           session[:ui_schema] = true
+        end
+      end
+
+      # check if ui logic is valid
+      if !session[:ui_logic]
+        error = nil
+        if params[:project].nil? ||
+            params[:project][:ui_logic].nil?
+          error = "can't be blank"
+        end
+
+        # TODO: what is the content type of the file? should it be checked?
+
+        if error
+          @project.errors.add(:ui_logic, error)
+          valid = false
+        else
+          create_temp_file("ui_logic.bsh", params[:project][:ui_logic])
+          session[:ui_logic] = true
         end
       end
       

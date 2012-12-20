@@ -41,6 +41,7 @@ Then /^I have project files for "([^"]*)"$/ do |name|
   File.directory?(Rails.root.join('tmp/projects', dirname)).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'db.sqlite3')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_schema.xml')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_logic.bsh')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'project.settings')).should be_true
 end
 
@@ -65,6 +66,7 @@ def make_project(name)
   `mkdir #{Rails.root.join('tmp', 'projects', dirname).to_s}`
   `touch #{Rails.root.join('tmp', 'projects', dirname, 'db.sqlite3').to_s}`
   `touch #{Rails.root.join('tmp', 'projects', dirname, 'ui_schema.xml').to_s}`
+  `touch #{Rails.root.join('tmp', 'projects', dirname, 'ui_logic.bsh').to_s}`
   `touch #{Rails.root.join('tmp', 'projects', dirname, 'project.settings').to_s}`
   p.archive
 end

@@ -2,7 +2,7 @@ class Project < ActiveRecord::Base
   include XSDValidator
   include DatabaseGenerator
 
-  attr_accessible :name, :data_schema, :ui_schema
+  attr_accessible :name, :data_schema, :ui_schema, :ui_logic
 
   validates :name, :presence => true, :uniqueness => true, :length => { :maximum => 255 },
             :format => { :with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i } # do not allow file name reserved characters
@@ -21,6 +21,12 @@ class Project < ActiveRecord::Base
   end
 
   def ui_schema=(value)
+  end
+
+  def ui_logic
+  end
+
+  def ui_logic=(value)
   end
 
   def dirname
@@ -73,6 +79,7 @@ class Project < ActiveRecord::Base
       # copy files into directory
       FileUtils.mv(tmpdir + "/data_schema.xml", dirpath + "/data_schema.xml") #temporary
       FileUtils.mv(tmpdir + "/ui_schema.xml", dirpath + "/ui_schema.xml")
+      FileUtils.mv(tmpdir + "/ui_logic.bsh", dirpath + "/ui_logic.bsh")
       DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
       File.open(dirpath + "/project.settings", 'w') do |file|
         file.write({:project => name}.to_json)
@@ -92,9 +99,13 @@ class Project < ActiveRecord::Base
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
-    file = create_temp_schema(schema)
-    result = XSDValidator.validate_data_schema(file.path)
-    file.unlink
+    begin
+      file = create_temp_schema(schema)
+      result = XSDValidator.validate_data_schema(file.path)
+      file.unlink
+    rescue
+      result = nil
+    end
     return "invalid xml" if result.nil? || !result.empty?
     return nil
   end
@@ -102,10 +113,13 @@ class Project < ActiveRecord::Base
   def self.validate_ui_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
-    file = create_temp_schema(schema)
-    result = XSDValidator.validate_ui_schema(file.path)
-    file.unlink
-    logger.debug result
+    begin
+      file = create_temp_schema(schema)
+      result = XSDValidator.validate_ui_schema(file.path)
+      file.unlink
+    rescue
+      result = nil
+    end
     return "invalid xml" if result.nil? || !result.empty?
     return nil
   end
@@ -119,6 +133,7 @@ class Project < ActiveRecord::Base
 
     def self.create_temp_schema(schema)
       file = Tempfile.new('schema')
+      file.binmode
       file.write(schema.read)
       file.close
       file

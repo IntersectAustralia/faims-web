@@ -27,6 +27,16 @@
           = f.label :ui_schema, "UI Schema:"
           = f.file_field :ui_schema
           = f.error :ui_schema
+    .step-container
+      .number-circle 4
+      .step-body
+        %h4 Upload User Interface Logic
+        - if session[:ui_logic]
+          %span.uploaded-inline UI Logic Uploaded!
+        - else
+          = f.label :ui_logic, "UI Logic:"
+          = f.file_field :ui_logic
+          = f.error :ui_logic
     .form-actions
       = f.submit "Submit", :class => "btn btn-primary", :id => "submit-project-btn"
       = link_to "Clear", new_project_path, :class => "btn"

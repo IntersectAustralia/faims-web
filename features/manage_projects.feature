@@ -35,6 +35,7 @@ Feature: Manage projects
     And I fill in "Name" with "Project 1"
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "ui_logic.bsh" for "UI Logic"
     And I press "Submit"
     Then I should see "New project created."
     And I should be on the projects page
@@ -57,6 +58,7 @@ Feature: Manage projects
     | Name        | Project * | is invalid             |
     | Data Schema |           | can't be blank         |
     | UI Schema   |           | can't be blank         |
+    | UI Logic    |           | can't be blank         |
 
   @javascript
   Scenario Outline: Cannot create project due to errors
@@ -77,6 +79,7 @@ Feature: Manage projects
     | UI Schema   |                        | can't be blank   |
     | UI Schema   | garbage                | must be xml file |
     | UI Schema   | ui_schema_error1.xml   | invalid xml      |
+    | UI Logic    |                        | can't be blank   |
 
   Scenario: Pull a list of projects
     Given I have projects
