@@ -62,11 +62,6 @@ end
 
 def make_project(name)
   p = Project.create(:name => name)
-  dirname = p.dirname
-  `mkdir #{Rails.root.join('tmp', 'projects', dirname).to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', dirname, 'db.sqlite3').to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', dirname, 'ui_schema.xml').to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', dirname, 'ui_logic.bsh').to_s}`
-  `touch #{Rails.root.join('tmp', 'projects', dirname, 'project.settings').to_s}`
+  p.create_project_from(Rails.root.join('features', 'assets').to_s)
   p.archive
 end

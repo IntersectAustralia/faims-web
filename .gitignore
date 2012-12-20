@@ -19,3 +19,6 @@
 
 # Ignore all project directories
 /projects
+
+# Ignore all swp files
+*.swp
