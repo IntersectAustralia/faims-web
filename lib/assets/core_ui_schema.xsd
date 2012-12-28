@@ -9,8 +9,10 @@ xmlns:ev="http://www.w3.org/2001/xml-events"
 xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
 xmlns:xforms="http://www.w3.org/2002/xforms" 
 elementFormDefault="qualified">
-	<xsd:import namespace="http://www.w3.org/2001/xml-events" schemaLocation="http://www.w3.org/MarkUp/SCHEMA/xml-events-attribs-1.xsd"/>
-	<xsd:import namespace="http://www.w3.org/2001/XMLSchema" schemaLocation="http://www.w3.org/2001/XMLSchema.xsd"/>
+	<xsd:import namespace="http://www.w3.org/2001/xml-events" 
+    schemaLocation="xml-events-attribs-1.xsd"/>
+	<xsd:import namespace="http://www.w3.org/2001/XMLSchema" 
+    schemaLocation="XMLSchema.xsd"/>
 
 	<!--
 structural elements
@@ -20,6 +22,7 @@ structural elements
 			<xsd:documentation>Attributes for _every_ element in XForms</xsd:documentation>
 		</xsd:annotation>
 		<xsd:attribute name="id" type="xsd:ID" use="optional"/>
+    <xsd:attribute name="faims_data" type="xsd:string" use="optional"/>
 		<xsd:anyAttribute namespace="##other"/>
 	</xsd:attributeGroup>
 

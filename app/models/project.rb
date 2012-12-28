@@ -88,6 +88,7 @@ class Project < ActiveRecord::Base
       # generate archive
       archive #Todo: this will need to be called each time the database or settings are updated
     rescue Exception => e
+      puts "Error copying files"
       FileUtils.rm_rf dirpath if 
         File.directory? dirpath # cleanup directory
       FileUtils.rm filepath if 
@@ -104,6 +105,8 @@ class Project < ActiveRecord::Base
       result = XSDValidator.validate_data_schema(file.path)
       file.unlink
     rescue
+      logger.error "Exception validating data schema"
+      logger.error $!.backtrace
       result = nil
     end
     return "invalid xml" if result.nil? || !result.empty?
@@ -114,10 +117,13 @@ class Project < ActiveRecord::Base
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
     begin
+      logger.debug "Validating UI Schema"
       file = create_temp_schema(schema)
       result = XSDValidator.validate_ui_schema(file.path)
+      logger.debug "Results = #{result}"
       file.unlink
-    rescue
+    rescue => e
+      logger.error "Exception validating ui schema #{e}"
       result = nil
     end
     return "invalid xml" if result.nil? || !result.empty?
