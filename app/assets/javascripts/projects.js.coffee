@@ -5,21 +5,18 @@ show_modal_dialog = ->
   $('#submit-project-btn').click(
     =>
       $('#loading').dialog({
-      autoOpen: false,
-      closeOnEscape: false,
-      draggable: false,
-      title: "Message",
-      width: 300,
-      minHeight: 50,
-      modal: true,
-      buttons:
-        {},
-      resizable: false
-      })
-      ;
+        autoOpen: false,
+        closeOnEscape: false,
+        draggable: false,
+        title: "Message",
+        width: 300,
+        minHeight: 50,
+        modal: true,
+        buttons: {},
+        resizable: false
+      });
       $('#loading').removeClass('hidden')
       $('#loading').dialog('open')
-      ;
   )
 $(document).ready(
   =>
