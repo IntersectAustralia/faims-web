@@ -268,7 +268,7 @@
       </group>
       <group ref="tab3">
         <label>Simple Entity 3 Tab 3</label>
-        <select1 ref="location" faims_attribute_name="location">
+        <select1 ref="location" faims_attribute_name="location" appearance="full">
           <label>Location:</label>
           <item>
             <label>Loc A</label>
