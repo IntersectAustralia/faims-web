@@ -12,7 +12,7 @@ describe User do
         u2 = FactoryGirl.create(:user, :status => 'A')
         u3 = FactoryGirl.create(:user, :status => 'U', :email => "asdf1@intersect.org.au")
         u2 = FactoryGirl.create(:user, :status => 'R')
-        User.pending_approval.should eq([u3,u1])
+        User.pending_approval.should eq([u3, u1])
       end
     end
     describe "Approved Users Scope" do
@@ -22,7 +22,7 @@ describe User do
         u3 = FactoryGirl.create(:user, :status => 'A', :email => "asdf1@intersect.org.au")
         u4 = FactoryGirl.create(:user, :status => 'R')
         u5 = FactoryGirl.create(:user, :status => 'D')
-        User.approved.should eq([u3,u1])
+        User.approved.should eq([u3, u1])
       end
     end
     describe "Deactivated or Approved Users Scope" do
@@ -32,7 +32,7 @@ describe User do
         u3 = FactoryGirl.create(:user, :status => 'A', :email => "asdf1@intersect.org.au")
         u4 = FactoryGirl.create(:user, :status => 'R')
         u5 = FactoryGirl.create(:user, :status => 'D', :email => "zz@inter.org")
-        User.deactivated_or_approved.should eq([u3,u1, u5])
+        User.deactivated_or_approved.should eq([u3, u1, u5])
       end
     end
     describe "Approved superusers Scope" do
@@ -166,7 +166,7 @@ describe User do
       user.role.has_permission("Abc", "ghi").should be_false
     end
   end
-  
+
   describe "Find the number of superusers method" do
     it "should return true if there are at least 2 superusers" do
       super_role = FactoryGirl.create(:role, :name => 'superuser')
@@ -181,8 +181,8 @@ describe User do
       user_1 = FactoryGirl.create(:user, :role => super_role, :status => 'A', :email => 'user1@intersect.org.au')
       user_1.check_number_of_superusers(1, 1).should eq(false)
     end
-    
-    it "should return true if the logged in user does not match the user record being modified" do  
+
+    it "should return true if the logged in user does not match the user record being modified" do
       super_role = FactoryGirl.create(:role, :name => 'superuser')
       research_role = FactoryGirl.create(:role, :name => 'Researcher')
       user_1 = FactoryGirl.create(:user, :role => super_role, :status => 'A', :email => 'user1@intersect.org.au')
@@ -263,5 +263,5 @@ describe User do
       supers.should eq(["a@intersect.org.au", "c@intersect.org.au"])
     end
   end
-  
+
 end

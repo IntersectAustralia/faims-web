@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xs:schema 
-    targetNamespace="http://www.w3.org/2001/xml-events" 
-    xmlns:ev="http://www.w3.org/2001/xml-events" 
-    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-    xsi:schemaLocation="XMLSchema.xsd" 
-    elementFormDefault="unqualified" 
-    blockDefault="#all" 
-    finalDefault="#all" 
-    attributeFormDefault="unqualified">
+<xs:schema
+        targetNamespace="http://www.w3.org/2001/xml-events"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xs="http://www.w3.org/2001/XMLSchema"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="XMLSchema.xsd"
+        elementFormDefault="unqualified"
+        blockDefault="#all"
+        finalDefault="#all"
+        attributeFormDefault="unqualified">
 
   <xs:annotation>
     <xs:documentation>
@@ -23,10 +23,10 @@
   <xs:annotation>
     <xs:documentation>
       XML Event Attributes
-		
-        These "global" event attributes are defined in "Attaching
-        Attributes Directly to the Observer Element" of the XML
-        Events specification.
+
+      These "global" event attributes are defined in "Attaching
+      Attributes Directly to the Observer Element" of the XML
+      Events specification.
     </xs:documentation>
   </xs:annotation>
 

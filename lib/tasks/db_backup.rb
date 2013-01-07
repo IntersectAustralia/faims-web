@@ -25,7 +25,7 @@ end
 def trim_backups(log_dir, limit)
   # Deletes oldest logs leaving (at most) _limit_ backups
 
-  lognames = Dir.entries(log_dir).find_all {|name| name =~ /^\d{8}-\d{6}.dump$/}
+  lognames = Dir.entries(log_dir).find_all { |name| name =~ /^\d{8}-\d{6}.dump$/ }
   lognames.sort! # files sorted by name => oldest first
 
   to_delete = lognames.slice(0...-limit)

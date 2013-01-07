@@ -2,13 +2,13 @@ Feature: Logging Out
   In order to keep the system secure
   As a user
   I want to logout
-  
+
   Background:
     Given I have a user "georgina@intersect.org.au"
     And I am on the login page
     And I am logged in as "georgina@intersect.org.au"
     And I should see "Logged in successfully."
-  
+
   Scenario: Successful logout
     Given I am on the home page
     When I follow "Logout"

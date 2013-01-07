@@ -5,23 +5,23 @@ describe Project do
   describe "Validations" do
     it { should_not allow_value("").for(:name) }
 
-    it { should_not allow_value("Project \\").for(:name)}
-    it { should_not allow_value("Project /").for(:name)}
-    it { should_not allow_value("Project ?").for(:name)}
-    it { should_not allow_value("Project %").for(:name)}
-    it { should_not allow_value("Project *").for(:name)}
-    it { should_not allow_value("Project :").for(:name)}
-    it { should_not allow_value("Project |").for(:name)}
-    it { should_not allow_value("Project \"").for(:name)}
-    it { should_not allow_value("Project '").for(:name)}
-    it { should_not allow_value("Project <").for(:name)}
-    it { should_not allow_value("Project >").for(:name)}
-    it { should_not allow_value("Project .").for(:name)}
+    it { should_not allow_value("Project \\").for(:name) }
+    it { should_not allow_value("Project /").for(:name) }
+    it { should_not allow_value("Project ?").for(:name) }
+    it { should_not allow_value("Project %").for(:name) }
+    it { should_not allow_value("Project *").for(:name) }
+    it { should_not allow_value("Project :").for(:name) }
+    it { should_not allow_value("Project |").for(:name) }
+    it { should_not allow_value("Project \"").for(:name) }
+    it { should_not allow_value("Project '").for(:name) }
+    it { should_not allow_value("Project <").for(:name) }
+    it { should_not allow_value("Project >").for(:name) }
+    it { should_not allow_value("Project .").for(:name) }
 
-    it { should allow_value("Project 1").for(:name)}
-    it { should allow_value("Project Test 1").for(:name)}
-    it { should allow_value("Project Test #1").for(:name)}
-    it { should allow_value("Project Test @Something").for(:name)}
+    it { should allow_value("Project 1").for(:name) }
+    it { should allow_value("Project Test 1").for(:name) }
+    it { should allow_value("Project Test #1").for(:name) }
+    it { should allow_value("Project Test @Something").for(:name) }
 
     it "project names should be unique" do
       p1 = FactoryGirl.build(:project, :name => "Project 1")

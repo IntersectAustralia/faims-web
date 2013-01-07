@@ -1,6 +1,7 @@
 module XSDValidator
 
   require 'nokogiri'
+
   def self.validate_data_schema(file)
     validate_schema(File.expand_path("../assets/data_schema.xsd", __FILE__), file)
   end

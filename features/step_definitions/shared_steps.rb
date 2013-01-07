@@ -108,8 +108,8 @@ end
 
 Given /^I am the admin$/ do |table|
   table.hashes.each do |hash|
-    r = Role.create(name:'superuser')
-    u = User.new(hash.merge({password:"Pas$w0rd", password_confirmation:"Pas$w0rd"}))
+    r = Role.create(name: 'superuser')
+    u = User.new(hash.merge({password: "Pas$w0rd", password_confirmation: "Pas$w0rd"}))
     u.activate
     u.role = r
     u.save!

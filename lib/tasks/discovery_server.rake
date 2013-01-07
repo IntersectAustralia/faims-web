@@ -25,13 +25,13 @@ end
 
 def options(extra)
   {
-      :app_name   => "discovery_server",
-      :dir_mode   => :normal,
-      :dir        => Rails.root.join('tmp').to_s,
-      :multiple   => false,
-      :ontop      => true,
-      :mode       => :load,
-      :backtrace  => true,
-      :monitor    => true
+      :app_name => "discovery_server",
+      :dir_mode => :normal,
+      :dir => Rails.root.join('tmp').to_s,
+      :multiple => false,
+      :ontop => true,
+      :mode => :load,
+      :backtrace => true,
+      :monitor => true
   }.merge(extra)
 end

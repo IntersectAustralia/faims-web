@@ -126,15 +126,15 @@ Then /^(?:I|they) should see \/([^\"]*)\/ in the email "([^"]*?)" header$/ do |t
 end
 
 Then /^I should see it is a multi\-part email$/ do
-    current_email.should be_multipart
+  current_email.should be_multipart
 end
 
 Then /^(?:I|they) should see "([^"]*?)" in the email html part body$/ do |text|
-    current_email.html_part.body.to_s.should include(text)
+  current_email.html_part.body.to_s.should include(text)
 end
 
 Then /^(?:I|they) should see "([^"]*?)" in the email text part body$/ do |text|
-    current_email.text_part.body.to_s.should include(text)
+  current_email.text_part.body.to_s.should include(text)
 end
 
 #

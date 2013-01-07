@@ -1,11 +1,11 @@
 require File.dirname(__FILE__) + '/db_backup.rb'
 require 'fileutils'
 
-begin  
-  namespace :db do  
+begin
+  namespace :db do
 
     desc "Backup the database"
-    task :backup => :environment do  
+    task :backup => :environment do
       backup_dir = Rails.root.join 'db_dumps'
       FileUtils.mkdir_p backup_dir
 
@@ -19,5 +19,5 @@ begin
 
       trim_backups backup_dir, at_most
     end
-  end  
+  end
 end

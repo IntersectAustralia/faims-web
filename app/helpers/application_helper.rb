@@ -21,11 +21,11 @@ module ApplicationHelper
 
   def user_dropdown_menu
     "#{h current_user.full_name}<b class=\"caret\"></b>".html_safe
-  end  
+  end
 
   private
   def render_field_content(label, content)
-    div_class = cycle("field_bg","field_nobg")
+    div_class = cycle("field_bg", "field_nobg")
     div_id = label.tr(" ,", "_").downcase
     html = "<div class='#{div_class} inlineblock' id='display_#{div_id}'>"
     html << '<span class="label_view">'

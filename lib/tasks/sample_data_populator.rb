@@ -27,8 +27,8 @@ def create_test_users
 end
 
 def set_role(email, role)
-  user      = User.where(:email => email).first
-  role      = Role.where(:name => role).first
+  user = User.where(:email => email).first
+  role = Role.where(:name => role).first
   user.role = role
   user.save!
 end
@@ -55,14 +55,14 @@ def load_password
 
   if Rails.env.development?
     puts "#{password_file} missing.\n" +
-         "Set sample user password:"
-          input = STDIN.gets.chomp
-          buffer = Hash[:password => input]
-          Dir.mkdir("#{Rails.root}/tmp", 0755) unless Dir.exists?("#{Rails.root}/tmp")
-          Dir.mkdir("#{Rails.root}/tmp/env_config", 0755) unless Dir.exists?("#{Rails.root}/tmp/env_config")
-          File.open(password_file, 'w') do |out|
-            YAML::dump(buffer, out)
-          end
+             "Set sample user password:"
+    input = STDIN.gets.chomp
+    buffer = Hash[:password => input]
+    Dir.mkdir("#{Rails.root}/tmp", 0755) unless Dir.exists?("#{Rails.root}/tmp")
+    Dir.mkdir("#{Rails.root}/tmp/env_config", 0755) unless Dir.exists?("#{Rails.root}/tmp/env_config")
+    File.open(password_file, 'w') do |out|
+      YAML::dump(buffer, out)
+    end
     @password = input
   else
     raise "No sample password file provided, and it is required for any environment that isn't development\n" +

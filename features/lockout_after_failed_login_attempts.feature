@@ -64,7 +64,7 @@ Feature: Locking out users after multiple failed password attempts
     And I fill in "Confirm Password" with "Pass.456"
     And I press "Change Your Password"
     Then I should see "Your password was changed successfully. You are now signed in."
-    # to verify we are actually logged in
+  # to verify we are actually logged in
     And I should not see "Login"
     And the failed attempt count for "shuqian@intersect.org.au" should be "0"
     And I should be able to log in with "shuqian@intersect.org.au" and "Pass.456"

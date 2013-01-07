@@ -53,12 +53,12 @@ Feature: Logging In
     Then I should see "Invalid email or password."
     And I should be on the login page
   Examples:
-    | email                     | password         | explanation    |
-    |                           |                  | nothing        |
-    |                           | Pas$w0rd         | missing email  |
-    | georgina@intersect.org.au |                  | missing password |
-    | fred@intersect.org.au     | Pas$w0rd         | invalid email  |
-    | georgina@intersect.org.au | blah             | wrong password |
+    | email                     | password | explanation      |
+    |                           |          | nothing          |
+    |                           | Pas$w0rd | missing email    |
+    | georgina@intersect.org.au |          | missing password |
+    | fred@intersect.org.au     | Pas$w0rd | invalid email    |
+    | georgina@intersect.org.au | blah     | wrong password   |
 
   Scenario Outline: Logging in as a deactivated / pending approval / rejected as spam with correct password
     Given I have a deactivated user "deact@intersect.org.au"

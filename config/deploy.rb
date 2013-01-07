@@ -234,11 +234,11 @@ end
 desc "After updating code we need to populate a new database.yml"
 task :generate_database_yml, :roles => :app do
   require "yaml"
-  
+
   #
   # we are using sqlite3 and don't have a database password
   #
-  
+
   #set :production_database_password, proc { Capistrano::CLI.password_prompt("Database password: ") }
 
   buffer = YAML::load_file('config/database.yml')
@@ -255,5 +255,5 @@ task :generate_database_yml, :roles => :app do
 end
 
 after 'multistage:ensure' do
-  set (:rails_env) {"#{defined?(rails_env) ? rails_env : stage.to_s}" }
+  set (:rails_env) {"#{defined?(rails_env) ? rails_env : stage.to_s}"}
 end

@@ -7,6 +7,6 @@ class RolesPermissions < ActiveRecord::Migration
   end
 
   def down
-drop_table :roles_permissions
+    drop_table :roles_permissions
   end
 end

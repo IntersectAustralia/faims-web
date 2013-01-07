@@ -1,12 +1,12 @@
 def local_ip
-  orig, Socket.do_not_reverse_lookup = 
-    Socket.do_not_reverse_lookup, true  # turn off reverse DNS resolution temporarily
+  orig, Socket.do_not_reverse_lookup =
+      Socket.do_not_reverse_lookup, true # turn off reverse DNS resolution temporarily
   UDPSocket.open do |s|
     s.connect '64.233.187.99', 1
     s.addr.last
   end
 ensure
-    Socket.do_not_reverse_lookup = orig
+  Socket.do_not_reverse_lookup = orig
 end
 
 
@@ -27,7 +27,7 @@ loop do
     puts "Received broadcast from #{ip}:#{port}"
 
     s = UDPSocket.new
-    s.send({server_ip:local_ip, server_port:SERVER_PORT}.to_json, 0, ip, port)
+    s.send({server_ip: local_ip, server_port: SERVER_PORT}.to_json, 0, ip, port)
     s.close
     puts "Sent Server@#{local_ip}:#{SERVER_PORT} to #{ip}:#{port}"
   rescue Execption => e

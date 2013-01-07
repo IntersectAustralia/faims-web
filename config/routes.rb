@@ -1,12 +1,12 @@
 FaimsWeb::Application.routes.draw do
   devise_for :users, controllers: {passwords: "user_passwords"}
-devise_scope :user do
-  get "/users/profile", :to => "user_registers#profile"
-  get "/users/edit", :to => "user_registers#edit"
-  put "/users/update", :to => "user_registers#update"
-  get "/users/edit_password", :to => "user_registers#edit_password" #allow users to edit their own password
-  put "/users/update_password", :to => "user_registers#update_password" #allow users to edit their own password
-end
+  devise_scope :user do
+    get "/users/profile", :to => "user_registers#profile"
+    get "/users/edit", :to => "user_registers#edit"
+    put "/users/update", :to => "user_registers#update"
+    get "/users/edit_password", :to => "user_registers#edit_password" #allow users to edit their own password
+    put "/users/update_password", :to => "user_registers#update_password" #allow users to edit their own password
+  end
 
   resources :users, :only => [:show] do
 

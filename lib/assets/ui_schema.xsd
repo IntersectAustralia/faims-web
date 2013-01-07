@@ -7,8 +7,8 @@
            elementFormDefault="qualified">
 
   <xs:import namespace="http://www.w3.org/1999/xhtml"
-             schemaLocation="lib/assets/ui_schema_checker.xsd" />
-  <xs:import namespace="http://www.w3.org/XML/1998/namespace" />
+             schemaLocation="lib/assets/ui_schema_checker.xsd"/>
+  <xs:import namespace="http://www.w3.org/XML/1998/namespace"/>
   <xs:redefine
           schemaLocation="lib/assets/core_ui_schema.xsd">
 
@@ -58,9 +58,9 @@
       </xs:documentation>
     </xs:annotation>
     <!--  <xs:attribute name="id" type="xs:ID" /> -->
-    <xs:attribute name="class" type="xs:NMTOKENS" />
-    <xs:attribute name="style" type="xhtml:StyleSheet" />
-    <xs:attribute name="title" type="xhtml:Text" />
+    <xs:attribute name="class" type="xs:NMTOKENS"/>
+    <xs:attribute name="style" type="xhtml:StyleSheet"/>
+    <xs:attribute name="title" type="xhtml:Text"/>
   </xs:attributeGroup>
   <xs:attributeGroup name="i18n">
     <xs:annotation>
@@ -70,13 +70,13 @@
         text
       </xs:documentation>
     </xs:annotation>
-    <xs:attribute name="lang" type="xhtml:LanguageCode" />
-    <xs:attribute ref="xml:lang" />
+    <xs:attribute name="lang" type="xhtml:LanguageCode"/>
+    <xs:attribute ref="xml:lang"/>
     <xs:attribute name="dir">
       <xs:simpleType>
         <xs:restriction base="xs:token">
-          <xs:enumeration value="ltr" />
-          <xs:enumeration value="rtl" />
+          <xs:enumeration value="ltr"/>
+          <xs:enumeration value="rtl"/>
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
@@ -93,16 +93,16 @@
         released
       </xs:documentation>
     </xs:annotation>
-    <xs:attribute name="onclick" type="xhtml:Script" />
-    <xs:attribute name="ondblclick" type="xhtml:Script" />
-    <xs:attribute name="onmousedown" type="xhtml:Script" />
-    <xs:attribute name="onmouseup" type="xhtml:Script" />
-    <xs:attribute name="onmouseover" type="xhtml:Script" />
-    <xs:attribute name="onmousemove" type="xhtml:Script" />
-    <xs:attribute name="onmouseout" type="xhtml:Script" />
-    <xs:attribute name="onkeypress" type="xhtml:Script" />
-    <xs:attribute name="onkeydown" type="xhtml:Script" />
-    <xs:attribute name="onkeyup" type="xhtml:Script" />
+    <xs:attribute name="onclick" type="xhtml:Script"/>
+    <xs:attribute name="ondblclick" type="xhtml:Script"/>
+    <xs:attribute name="onmousedown" type="xhtml:Script"/>
+    <xs:attribute name="onmouseup" type="xhtml:Script"/>
+    <xs:attribute name="onmouseover" type="xhtml:Script"/>
+    <xs:attribute name="onmousemove" type="xhtml:Script"/>
+    <xs:attribute name="onmouseout" type="xhtml:Script"/>
+    <xs:attribute name="onkeypress" type="xhtml:Script"/>
+    <xs:attribute name="onkeydown" type="xhtml:Script"/>
+    <xs:attribute name="onkeyup" type="xhtml:Script"/>
   </xs:attributeGroup>
   <xs:attributeGroup name="focus">
     <xs:annotation>
@@ -112,14 +112,14 @@
         the focus onblur the element lost the focus
       </xs:documentation>
     </xs:annotation>
-    <xs:attribute name="accesskey" type="xhtml:Character" />
-    <xs:attribute name="tabindex" type="xhtml:tabindexNumber" />
-    <xs:attribute name="onfocus" type="xhtml:Script" />
-    <xs:attribute name="onblur" type="xhtml:Script" />
+    <xs:attribute name="accesskey" type="xhtml:Character"/>
+    <xs:attribute name="tabindex" type="xhtml:tabindexNumber"/>
+    <xs:attribute name="onfocus" type="xhtml:Script"/>
+    <xs:attribute name="onblur" type="xhtml:Script"/>
   </xs:attributeGroup>
   <xs:attributeGroup name="attrs">
-    <xs:attributeGroup ref="xhtml:coreattrs" />
-    <xs:attributeGroup ref="xhtml:i18n" />
-    <xs:attributeGroup ref="xhtml:events" />
+    <xs:attributeGroup ref="xhtml:coreattrs"/>
+    <xs:attributeGroup ref="xhtml:i18n"/>
+    <xs:attributeGroup ref="xhtml:events"/>
   </xs:attributeGroup>
 </xs:schema>

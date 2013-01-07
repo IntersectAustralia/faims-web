@@ -19,7 +19,7 @@ class UsersController < ApplicationController
   end
 
   def deactivate
-    if !@user.check_number_of_superusers(params[:id], current_user.id) 
+    if !@user.check_number_of_superusers(params[:id], current_user.id)
       redirect_to(@user, :alert => "You cannot deactivate this account as it is the only account with superuser privileges.")
     else
       @user.deactivate
@@ -58,7 +58,7 @@ class UsersController < ApplicationController
 
   def update_role
     if params[:user][:role].blank?
-        redirect_to(edit_role_user_path(@user), :alert => "Please select a role for the user.")
+      redirect_to(edit_role_user_path(@user), :alert => "Please select a role for the user.")
     else
       @user.role_id = params[:user][:role]
       if !@user.check_number_of_superusers(params[:id], current_user.id)

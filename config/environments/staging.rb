@@ -1,7 +1,7 @@
 FaimsWeb::Application.configure do
 
   # TODO: set your own correct URL for action mailer
-  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  config.action_mailer.default_url_options = {:host => 'localhost:3000'}
 
   # Settings specified here will take precedence over those in config/application.rb
 
@@ -9,7 +9,7 @@ FaimsWeb::Application.configure do
   config.cache_classes = true
 
   # Full error reports are disabled and caching is turned on
-  config.consider_all_requests_local       = false
+  config.consider_all_requests_local = false
   config.action_controller.perform_caching = true
 
   # Disable Rails's static asset server (Apache or nginx will already do this)

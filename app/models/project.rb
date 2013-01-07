@@ -4,8 +4,8 @@ class Project < ActiveRecord::Base
 
   attr_accessible :name, :data_schema, :ui_schema, :ui_logic
 
-  validates :name, :presence => true, :uniqueness => true, :length => { :maximum => 255 },
-            :format => { :with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i } # do not allow file name reserved characters
+  validates :name, :presence => true, :uniqueness => true, :length => {:maximum => 255},
+            :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
 
   before_validation :update_project
 
@@ -44,7 +44,7 @@ class Project < ActiveRecord::Base
   def filepath
     dirpath + '.tar.gz'
   end
-  
+
   def projects_dir
     Rails.env == 'test' ? 'tmp/projects' : 'projects'
   end
@@ -52,27 +52,25 @@ class Project < ActiveRecord::Base
   def projects_path
     Rails.root.join(projects_dir).to_s
   end
-    
+
   def archive
     `tar zcf #{filepath} -C #{projects_path} #{dirname}` # todo: find purely ruby method
   end
-  
+
   def archive_info
     {
-      :file => filename,
-      :size => File.size(filepath),
-      :md5 => Digest::MD5.hexdigest(File.read(filepath))
+        :file => filename,
+        :size => File.size(filepath),
+        :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
   end
 
   def create_project_from(tmpdir)
-    begin 
+    begin
       Dir.mkdir(projects_path) unless File.directory? projects_path # make sure directory exists
 
-      FileUtils.rm_rf dirpath if 
-        File.directory? dirpath # remove directory if one already exists
-      FileUtils.rm_rf filepath if 
-        File.exists? filepath # remove archive if one already exists
+      FileUtils.rm_rf dirpath if File.directory? dirpath # remove directory if one already exists
+      FileUtils.rm_rf filepath if File.exists? filepath # remove archive if one already exists
 
       Dir.mkdir(dirpath)
 
@@ -84,19 +82,17 @@ class Project < ActiveRecord::Base
       File.open(dirpath + "/project.settings", 'w') do |file|
         file.write({:project => name}.to_json)
       end
-    
+
       # generate archive
       archive #Todo: this will need to be called each time the database or settings are updated
     rescue Exception => e
       puts "Error copying files"
-      FileUtils.rm_rf dirpath if 
-        File.directory? dirpath # cleanup directory
-      FileUtils.rm filepath if 
-        filepath and File.exists? filepath # cleanup archive
+      FileUtils.rm_rf dirpath if File.directory? dirpath # cleanup directory
+      FileUtils.rm filepath if filepath and File.exists? filepath # cleanup archive
       raise e
     end
   end
-  
+
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
@@ -129,20 +125,20 @@ class Project < ActiveRecord::Base
     return "invalid xml" if result.nil? || !result.empty?
     return nil
   end
-  
-  private
-  
-    def update_project
-      name.squish! if name
-      name.strip! if name
-    end
 
-    def self.create_temp_schema(schema)
-      file = Tempfile.new('schema')
-      file.binmode
-      file.write(schema.read)
-      file.close
-      file
-    end
+  private
+
+  def update_project
+    name.squish! if name
+    name.strip! if name
+  end
+
+  def self.create_temp_schema(schema)
+    file = Tempfile.new('schema')
+    file.binmode
+    file.write(schema.read)
+    file.close
+    file
+  end
 
 end

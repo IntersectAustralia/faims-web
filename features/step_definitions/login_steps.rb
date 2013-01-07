@@ -23,8 +23,8 @@ Given /^I have a user "([^"]*)" with an expired lock$/ do |email|
 end
 
 Given /^I have a user "([^"]*)" with role "([^"]*)"$/ do |email, role|
-  user            = FactoryGirl.create(:user, :email => email, :password => "Pas$w0rd", :status => 'A')
-  role         = Role.where(:name => role).first
+  user = FactoryGirl.create(:user, :email => email, :password => "Pas$w0rd", :status => 'A')
+  role = Role.where(:name => role).first
   user.role_id = role.id
   user.save!
 end

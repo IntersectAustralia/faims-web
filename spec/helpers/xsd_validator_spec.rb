@@ -3,7 +3,7 @@ require 'spec_helper'
 describe XSDValidator do
 
   def validate_data_schema(name)
-    XSDValidator.validate_data_schema Rails.root.join('spec','assets', name).to_s
+    XSDValidator.validate_data_schema Rails.root.join('spec', 'assets', name).to_s
   end
 
   def validate_ui_schema(name)
@@ -60,6 +60,8 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_21.xml').should_not be_empty }
     # accented characters
     it { validate_ui_schema('ui_schema_22.xml').should be_empty }
+    # ui schema logic example
+    it { validate_ui_schema('ui_schema_23.xml').should be_empty }
   end
 
 end

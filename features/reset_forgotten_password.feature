@@ -24,7 +24,7 @@ Feature: Reset forgotten password
     And I press "Change Your Password"
     Then I should see "Your password was changed successfully. You are now signed in."
     And I should be able to log in with "georgina@intersect.org.au" and "Pass.456"
-    
+
   Scenario: Deactivated user gets an email saying they can't reset their password
     Given I have a deactivated user "deac@intersect.org.au"
     When I request a reset for "deac@intersect.org.au"
@@ -70,27 +70,27 @@ Feature: Reset forgotten password
     Then I should see "Email can't be blank"
     And I should see "Forgot Your Password?"
 
-   Scenario: New password and confirmation must match
-     Given I have a user "georgina@intersect.org.au"
-     When I request a reset for "georgina@intersect.org.au"
-     And "georgina@intersect.org.au" should receive an email
-     And I open the email
-     And I follow "Change my password" in the email
-     And I fill in "Password" with "Pass.456"
-     And I fill in "Confirm Password" with "Pass.123"
-     And I press "Change Your Password"
-     Then I should see "Password doesn't match confirmation"
+  Scenario: New password and confirmation must match
+    Given I have a user "georgina@intersect.org.au"
+    When I request a reset for "georgina@intersect.org.au"
+    And "georgina@intersect.org.au" should receive an email
+    And I open the email
+    And I follow "Change my password" in the email
+    And I fill in "Password" with "Pass.456"
+    And I fill in "Confirm Password" with "Pass.123"
+    And I press "Change Your Password"
+    Then I should see "Password doesn't match confirmation"
 
-   Scenario: New password must meet minimum requirements
-     Given I have a user "georgina@intersect.org.au"
-     When I request a reset for "georgina@intersect.org.au"
-     And "georgina@intersect.org.au" should receive an email
-     And I open the email
-     And I follow "Change my password" in the email
-     And I fill in "Password" with "Pass"
-     And I fill in "Confirm Password" with "Pass"
-     And I press "Change Your Password"
-     Then I should see "Password must be between 6 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one symbol"
+  Scenario: New password must meet minimum requirements
+    Given I have a user "georgina@intersect.org.au"
+    When I request a reset for "georgina@intersect.org.au"
+    And "georgina@intersect.org.au" should receive an email
+    And I open the email
+    And I follow "Change my password" in the email
+    And I fill in "Password" with "Pass"
+    And I fill in "Confirm Password" with "Pass"
+    And I press "Change Your Password"
+    Then I should see "Password must be between 6 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one symbol"
 
   Scenario: Link in email should only work once
     Given I have a user "georgina@intersect.org.au"
