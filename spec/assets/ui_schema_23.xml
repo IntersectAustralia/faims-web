@@ -173,13 +173,13 @@
         <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
         </input>
-        <input ref="count" faims_attribute_name="count">
+        <input ref="count" faims_attribute_name="count" faims_attribute_type="measure">
           <label>Count:</label>
         </input>
-        <input ref="count-description" faims_attribute_name="count_description">
+        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="freetext">
           <label>Description:</label>
         </input>
-        <input ref="count-certainty" faims_attribute_name="count_certainty">
+        <input ref="count-certainty" faims_attribute_name="count" faims_attribute_type="certainty">
           <label>Certainty:</label>
         </input>
         <input ref="date" faims_attribute_name="date">
@@ -207,7 +207,7 @@
             <value>locd</value>
           </item>
         </select1>
-        <input ref="location-certainty" faims_attribute_name="location_certainty">
+        <input ref="location-certainty" faims_attribute_name="location" faims_attribute_type="certainty">
           <label>Certainty:</label>
         </input>
         <select ref="type" faims_attribute_name="type">
@@ -244,13 +244,13 @@
         <input ref="name" faims_attribute_name="name">
           <label>Name:</label>
         </input>
-        <input ref="count" faims_attribute_name="count">
+        <input ref="count" faims_attribute_name="count" faims_attribute_type="measure">
           <label>Count:</label>
         </input>
-        <input ref="count-description" faims_attribute_name="count_description">
+        <input ref="count-description" faims_attribute_name="count" faims_attribute_type="freetext">
           <label>Description:</label>
         </input>
-        <input ref="count-certainty" faims_attribute_name="count_certainty">
+        <input ref="count-certainty" faims_attribute_name="count" faims_attribute_type="certainty">
           <label>Certainty:</label>
         </input>
         <trigger ref="save">

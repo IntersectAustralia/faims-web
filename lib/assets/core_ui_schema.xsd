@@ -141,6 +141,7 @@
   <xsd:attributeGroup name="FAIMS.ArchEntity.Attrs">
     <xsd:attribute name="faims_attribute_name" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_attribute_required" type="xsd:boolean" use="optional"/>
+    <xsd:attribute name="faims_attribute_type" type="xsd:string" use="optional"/>
   </xsd:attributeGroup>
 
   <xsd:group name="UI.Content">
