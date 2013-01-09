@@ -66,7 +66,6 @@ CREATE TABLE IdealReln (
 
 CREATE TABLE ArchEntity (
 	UUID                 INTEGER NOT NULL,
-	MSB_UUID			 INTEGER NOT NULL,
 	AEntTimestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UserID               INTEGER,
 	DOI                  TEXT,
@@ -110,7 +109,7 @@ create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp)
 CREATE TABLE RelnValue (
 	RelationshipID       INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
-	VocabID              INTEGER NOT NULL,
+	VocabID              INTEGER,
 	RelnValueTimestamp   DATETIME DEFAULT CURRENT_TIMESTAMP,
 	Freetext             TEXT
  );
