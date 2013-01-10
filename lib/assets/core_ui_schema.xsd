@@ -310,6 +310,7 @@
       <xsd:attribute name="inputmode" type="xsd:string" use="optional"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
       <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Relationship.Attrs"/>
       <xsd:attribute name="incremental" type="xsd:boolean" use="optional" default="false"/>
     </xsd:complexType>
   </xsd:element>
@@ -369,6 +370,7 @@
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
       <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Relationship.Attrs"/>
       <xsd:attribute name="selection" use="optional" default="closed">
         <xsd:simpleType>
           <xsd:restriction base="xsd:string">
@@ -392,6 +394,7 @@
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
       <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Relationship.Attrs"/>
       <xsd:attribute name="selection" use="optional" default="closed">
         <xsd:simpleType>
           <xsd:restriction base="xsd:string">
@@ -506,6 +509,7 @@
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
       <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Relationship"/>
     </xsd:complexType>
   </xsd:element>
   <xsd:element name="switch">
