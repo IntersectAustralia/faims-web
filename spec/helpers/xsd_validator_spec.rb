@@ -62,6 +62,10 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_22.xml').should be_empty }
     # ui schema logic example
     it { validate_ui_schema('ui_schema_23.xml').should be_empty }
+    # hidden attribute to tabs
+    it { validate_ui_schema('ui_schema_24.xml').should be_empty }
+    # scrollable attribute to tabs
+    it { validate_ui_schema('ui_schema_25.xml').should be_empty }
   end
 
 end

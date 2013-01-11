@@ -155,6 +155,7 @@
 
   <xsd:attributeGroup name="FAIMS.Optional">
     <xsd:attribute name="faims_hidden" type="xsd:boolean" use="optional"/>
+    <xsd:attribute name="faims_scrollable" type="xsd:boolean" use="optional"/>
   </xsd:attributeGroup>
 
   <xsd:group name="UI.Content">
