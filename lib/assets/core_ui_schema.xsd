@@ -153,6 +153,10 @@
     <xsd:attribute name="faims_rel_attribute_type" type="xsd:string" use="optional"/>
   </xsd:attributeGroup>
 
+  <xsd:attributeGroup name="FAIMS.Optional">
+    <xsd:attribute name="faims_hidden" type="xsd:boolean" use="optional"/>
+  </xsd:attributeGroup>
+
   <xsd:group name="UI.Content">
     <xsd:sequence>
       <xsd:choice minOccurs="0">
@@ -510,6 +514,7 @@
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
       <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity"/>
       <xsd:attributeGroup ref="xforms:FAIMS.Relationship"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Optional"/>
     </xsd:complexType>
   </xsd:element>
   <xsd:element name="switch">

@@ -257,7 +257,7 @@
           <label>Save</label>
         </trigger>
       </group>
-      <group ref="tab2">
+      <group ref="tab2" faims_hidden="true">
         <label>Simple Entity 3 Tab 2</label>
         <input ref="date" faims_archent_attribute_name="date">
           <label>Date:</label>
