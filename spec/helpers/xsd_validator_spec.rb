@@ -66,6 +66,8 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_24.xml').should be_empty }
     # scrollable attribute to tabs
     it { validate_ui_schema('ui_schema_25.xml').should be_empty }
+    # latest example
+    it { validate_ui_schema('ui_schema_26.xml').should be_empty }
   end
 
 end

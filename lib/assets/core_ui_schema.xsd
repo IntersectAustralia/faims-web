@@ -135,22 +135,16 @@
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="FAIMS.ArchEntity">
-    <xsd:attribute name="faims_archent_id" type="xsd:string" use="optional"/>
+    <xsd:attribute name="faims_archent_type" type="xsd:string" use="optional"/>
   </xsd:attributeGroup>
 
-  <xsd:attributeGroup name="FAIMS.ArchEntity.Attrs">
-    <xsd:attribute name="faims_archent_attribute_name" type="xsd:string" use="optional"/>
-    <xsd:attribute name="faims_archent_attribute_required" type="xsd:boolean" use="optional"/>
-    <xsd:attribute name="faims_archent_attribute_type" type="xsd:string" use="optional"/>
+  <xsd:attributeGroup name="FAIMS.Attrs">
+    <xsd:attribute name="faims_attribute_name" type="xsd:string" use="optional"/>
+    <xsd:attribute name="faims_attribute_type" type="xsd:string" use="optional"/>
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="FAIMS.Relationship">
-    <xsd:attribute name="faims_rel_id" type="xsd:string" use="optional"/>
-  </xsd:attributeGroup>
-
-  <xsd:attributeGroup name="FAIMS.Relationship.Attrs">
-    <xsd:attribute name="faims_rel_attribute_name" type="xsd:string" use="optional"/>
-    <xsd:attribute name="faims_rel_attribute_type" type="xsd:string" use="optional"/>
+    <xsd:attribute name="faims_rel_type" type="xsd:string" use="optional"/>
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="FAIMS.Optional">
@@ -314,8 +308,7 @@
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attribute name="inputmode" type="xsd:string" use="optional"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
-      <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity.Attrs"/>
-      <xsd:attributeGroup ref="xforms:FAIMS.Relationship.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Attrs"/>
       <xsd:attribute name="incremental" type="xsd:boolean" use="optional" default="false"/>
     </xsd:complexType>
   </xsd:element>
@@ -374,8 +367,7 @@
       <xsd:attributeGroup ref="xforms:Common.Attributes"/>
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
-      <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity.Attrs"/>
-      <xsd:attributeGroup ref="xforms:FAIMS.Relationship.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Attrs"/>
       <xsd:attribute name="selection" use="optional" default="closed">
         <xsd:simpleType>
           <xsd:restriction base="xsd:string">
@@ -398,8 +390,7 @@
       <xsd:attributeGroup ref="xforms:Common.Attributes"/>
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
-      <xsd:attributeGroup ref="xforms:FAIMS.ArchEntity.Attrs"/>
-      <xsd:attributeGroup ref="xforms:FAIMS.Relationship.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Attrs"/>
       <xsd:attribute name="selection" use="optional" default="closed">
         <xsd:simpleType>
           <xsd:restriction base="xsd:string">
