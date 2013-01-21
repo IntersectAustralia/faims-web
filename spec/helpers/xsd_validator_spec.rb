@@ -68,6 +68,8 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_25.xml').should be_empty }
     # latest example
     it { validate_ui_schema('ui_schema_26.xml').should be_empty }
+    # map
+    it { validate_ui_schema('ui_schema_27.xml').should be_empty }
   end
 
 end
