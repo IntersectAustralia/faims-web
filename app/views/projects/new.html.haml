@@ -37,6 +37,16 @@
           = f.label :ui_logic, "UI Logic:"
           = f.file_field :ui_logic
           = f.error :ui_logic
+    .step-container
+      .number-circle 5
+      .step-body
+        %h4 Upload Arch16n file
+        - if session[:arch16n]
+          %span.uploaded-inline Arch16n Uploaded!
+        - else
+          = f.label :arch16n, "Arch16n:"
+          = f.file_field :arch16n
+          = f.error :arch16n
     .form-actions
       = f.submit "Submit", :class => "btn btn-primary", :id => "submit-project-btn"
       = link_to "Clear", new_project_path, :class => "btn"

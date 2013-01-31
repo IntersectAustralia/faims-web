@@ -53,6 +53,7 @@ class ProjectsController < ApplicationController
     session[:data_schema] = false
     session[:ui_schema] = false
     session[:ui_logic] = false
+    session[:arch16n] = false
   end
 
   def clear_tmp_dir
@@ -119,6 +120,25 @@ class ProjectsController < ApplicationController
         session[:ui_logic] = true
       end
     end
+
+    # check if arch16n is valid
+    if !session[:arch16n]
+      error = if params[:project].nil? ||
+                params[:project][:arch16n].nil?
+                "can't be blank"
+              else
+                Project.validate_arch16n(params[:project][:arch16n])
+              end
+
+      if error
+        @project.errors.add(:arch16n, error)
+        valid = false
+      else
+        create_temp_file("faims.properties", params[:project][:arch16n])
+        session[:arch16n] = true
+      end
+    end
+
     logger.debug "Valid = #{valid}"
     valid
   end
