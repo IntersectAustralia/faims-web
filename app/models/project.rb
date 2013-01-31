@@ -133,11 +133,9 @@ class Project < ActiveRecord::Base
     return nil
   end
 
-  def self.validate_arch16n(arch16n)
+  def self.validate_arch16n(arch16n,projectname)
     return "can't be blank" if arch16n.blank?
-    puts arch16n.original_filename
-    puts "faims_"+ name.gsub(/\s/, '_')+".properties"
-    return "invalid file name" if !(arch16n.original_filename).eql?("faims_"+ name.gsub(/\s/, '_')+".properties")
+    return "invalid file name" if !(arch16n.original_filename).eql?("faims_"+ projectname.gsub(/\s/, '_')+".properties")
     begin
       logger.debug "Validating arch16n"
       file = create_temp_file(arch16n)

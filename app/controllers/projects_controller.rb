@@ -127,7 +127,7 @@ class ProjectsController < ApplicationController
                 params[:project][:arch16n].nil?
                 "can't be blank"
               else
-                Project.validate_arch16n(params[:project][:arch16n])
+                Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
               end
 
       if error

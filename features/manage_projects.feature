@@ -70,6 +70,7 @@ Feature: Manage projects
     Then I should be on the projects page
     And I follow "Create Project"
     Then I should be on the new projects page
+    And I fill in "Name" with "Project 2"
     And I pick file "<value>" for "<field>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
@@ -84,7 +85,7 @@ Feature: Manage projects
     | UI Logic    |                           | can't be blank         |
     | Arch16n     |                           | can't be blank         |
     | Arch16n     | faims.properties          | invalid file name      |
-    | Arch16n     | faims_Project.properties| invalid properties file|
+    | Arch16n     | faims_Project_2.properties  | invalid properties file|
 
 
   Scenario: Pull a list of projects
