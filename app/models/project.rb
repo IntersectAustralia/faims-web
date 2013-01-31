@@ -84,7 +84,7 @@ class Project < ActiveRecord::Base
       FileUtils.cp(tmpdir + "/data_schema.xml", dirpath + "/data_schema.xml") #temporary
       FileUtils.cp(tmpdir + "/ui_schema.xml", dirpath + "/ui_schema.xml")
       FileUtils.cp(tmpdir + "/ui_logic.bsh", dirpath + "/ui_logic.bsh")
-      FileUtils.cp(tmpdir + "/faims.properties", dirpath + "/faims_"+ name.gsub(/\s/, '') +".properties")
+      FileUtils.cp(tmpdir + "/faims.properties", dirpath + "/faims_"+ name.gsub(/\s/, '_') +".properties")
       DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
       File.open(dirpath + "/project.settings", 'w') do |file|
         file.write({:project => name}.to_json)
@@ -135,6 +135,9 @@ class Project < ActiveRecord::Base
 
   def self.validate_arch16n(arch16n)
     return "can't be blank" if arch16n.blank?
+    puts arch16n.original_filename
+    puts "faims_"+ name.gsub(/\s/, '_')+".properties"
+    return "invalid file name" if !(arch16n.original_filename).eql?("faims_"+ name.gsub(/\s/, '_')+".properties")
     begin
       logger.debug "Validating arch16n"
       file = create_temp_file(arch16n)

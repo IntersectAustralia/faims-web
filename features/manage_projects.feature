@@ -74,16 +74,17 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field       | value                  | error                  |
-    | Data Schema |                        | can't be blank         |
-    | Data Schema | garbage                | must be xml file       |
-    | Data Schema | data_schema_error1.xml | invalid xml            |
-    | UI Schema   |                        | can't be blank         |
-    | UI Schema   | garbage                | must be xml file       |
-    | UI Schema   | ui_schema_error1.xml   | invalid xml            |
-    | UI Logic    |                        | can't be blank         |
-    | Arch16n     |                        | can't be blank         |
-    | Arch16n     | faims_error.properties | invalid properties file|
+    | field       | value                     | error                  |
+    | Data Schema |                           | can't be blank         |
+    | Data Schema | garbage                   | must be xml file       |
+    | Data Schema | data_schema_error1.xml    | invalid xml            |
+    | UI Schema   |                           | can't be blank         |
+    | UI Schema   | garbage                   | must be xml file       |
+    | UI Schema   | ui_schema_error1.xml      | invalid xml            |
+    | UI Logic    |                           | can't be blank         |
+    | Arch16n     |                           | can't be blank         |
+    | Arch16n     | faims.properties          | invalid file name      |
+    | Arch16n     | faims_Project.properties| invalid properties file|
 
 
   Scenario: Pull a list of projects
