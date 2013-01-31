@@ -36,7 +36,7 @@ Feature: Manage projects
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims.properties" for "Arch16n"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
     Then I should see "New project created."
     And I should be on the projects page
@@ -84,7 +84,7 @@ Feature: Manage projects
     | UI Schema   | ui_schema_error1.xml      | invalid xml            |
     | UI Logic    |                           | can't be blank         |
     | Arch16n     |                           | can't be blank         |
-    | Arch16n     | faims.properties          | invalid file name      |
+    | Arch16n     | faims_error.properties          | invalid file name      |
     | Arch16n     | faims_Project_2.properties  | invalid properties file|
 
 
