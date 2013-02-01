@@ -43,6 +43,7 @@ Then /^I have project files for "([^"]*)"$/ do |name|
   File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_schema.xml')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_logic.bsh')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'project.settings')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dirname, 'faims.properties')).should be_true
 end
 
 Then /^I should see json for projects$/ do
