@@ -14,11 +14,11 @@ def create_full_database
   n = 5
   (0..n).each do |i|
     DatabaseGenerator.execute_query(file.path, "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " +
-        "VALUES (cast('#{rand(1000)}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP);")
+        "VALUES (cast('#{i}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP);")
 
     (0..n).each do |j|
       DatabaseGenerator.execute_query(file.path, "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
-          "SELECT cast('#{rand(1000)}' as integer), '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP " +
+          "SELECT cast('#{i*n + j}' as integer), '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
@@ -26,11 +26,11 @@ def create_full_database
 
   (0..n).each do |i|
     DatabaseGenerator.execute_query(file.path, "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " +
-        "VALUES (cast('#{rand(1000)}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP);")
+        "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP);")
 
     (0..n).each do |j|
       DatabaseGenerator.execute_query(file.path, "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-          "SELECT cast('#{rand(1000)}' as integer), '0', attributeId, 'Text', CURRENT_TIMESTAMP " +
+          "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', CURRENT_TIMESTAMP " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
@@ -89,5 +89,9 @@ def is_table_merged(db, db1, db2, table)
   rows1 = DatabaseGenerator.execute_query(db1.path, "select * from #{table};")
   rows2 = DatabaseGenerator.execute_query(db2.path, "select * from #{table};")
 
-  return expected_rows == rows1.concat(rows2)
+  return expected_rows == merge_rows(rows1, rows2)
+end
+
+def merge_rows(rows1, rows2)
+  rows1.concat(rows2.each { |x| rows1.include? x  })
 end

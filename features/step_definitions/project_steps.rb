@@ -65,3 +65,19 @@ def make_project(name)
   p.create_project_from(Rails.root.join('features', 'assets').to_s)
   p.archive
 end
+
+And /^I upload database "([^"]*)" to (.*)$/ do |db_file, name|
+
+end
+
+Then /^I should have merged "([^"]*)" into (.*)$/ do |db_file, name|
+
+end
+
+And /^I upload corrupted database "([^"]*)" to (.*)$/ do |db_file, name|
+
+end
+
+Then /^I should have not merged "([^"]*)" into (.*)$/ do |db_file, name|
+
+end
