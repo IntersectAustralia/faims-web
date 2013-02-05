@@ -80,7 +80,7 @@ class Project < ActiveRecord::Base
       FileUtils.cp(tmpdir + "/ui_logic.bsh", dirpath + "/ui_logic.bsh")
       DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
       File.open(dirpath + "/project.settings", 'w') do |file|
-        file.write({:project => name}.to_json)
+        file.write({:name => name, id:id}.to_json)
       end
 
       # generate archive
@@ -93,11 +93,18 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def merge_database(db)
+    # create temporary database file
+    temp_db_file = db.tempfile
+
+    DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", temp_db_file.path)
+  end
+
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
     begin
-      file = create_temp_schema(schema)
+      file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
       file.unlink
     rescue
@@ -114,7 +121,7 @@ class Project < ActiveRecord::Base
     return "must be xml file" if schema.content_type != "text/xml"
     begin
       logger.debug "Validating UI Schema"
-      file = create_temp_schema(schema)
+      file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
       logger.debug "Results = #{result}"
       file.unlink
@@ -133,10 +140,10 @@ class Project < ActiveRecord::Base
     name.strip! if name
   end
 
-  def self.create_temp_schema(schema)
-    file = Tempfile.new('schema')
+  def self.create_temp_file(file)
+    file = Tempfile.new('temp_file')
     file.binmode
-    file.write(schema.read)
+    file.write(file.read)
     file.close
     file
   end

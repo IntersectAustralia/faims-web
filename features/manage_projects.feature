@@ -99,3 +99,13 @@ Feature: Manage projects
     Given I have project "Project 1"
     And I am on the android download link for Project 1
     Then I should download file for "Project 1"
+
+  Scenario: Upload project
+    Given I have project "Project 1"
+    And I upload database "db.sqlite3" to Project 1
+    Then I should have merged "db.sqlite3" into Project 1
+
+  Scenario: Upload project
+    Given I have project "Project 1"
+    And I upload corrupted database "db.sqlite3" to Project 1
+    Then I should have not merged "db.sqlite3" into Project 1

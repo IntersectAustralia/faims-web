@@ -119,7 +119,7 @@ class ProjectsController < ApplicationController
         session[:ui_logic] = true
       end
     end
-    logger.debug "Valid = #{valid}"
+    #logger.debug "Valid = #{valid}"
     valid
   end
 

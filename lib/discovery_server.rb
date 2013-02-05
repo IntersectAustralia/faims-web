@@ -30,7 +30,8 @@ loop do
     s.send({server_ip: local_ip, server_port: SERVER_PORT}.to_json, 0, ip, port)
     s.close
     puts "Sent Server@#{local_ip}:#{SERVER_PORT} to #{ip}:#{port}"
-  rescue Execption => e
+  rescue Exception => e
     puts e
+    exit(0);
   end
 end
