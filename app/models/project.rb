@@ -106,10 +106,8 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
-      file.unlink
-    rescue
-      logger.error "Exception validating data schema"
-      logger.error $!.backtrace
+    rescue => e
+      logger.error "Exception validating data schema #{e}"
       result = nil
     end
     return "invalid xml" if result.nil? || !result.empty?
@@ -120,11 +118,8 @@ class Project < ActiveRecord::Base
     return "can't be blank" if schema.blank?
     return "must be xml file" if schema.content_type != "text/xml"
     begin
-      logger.debug "Validating UI Schema"
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
-      logger.debug "Results = #{result}"
-      file.unlink
     rescue => e
       logger.error "Exception validating ui schema #{e}"
       result = nil
