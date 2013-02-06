@@ -27,6 +27,9 @@ class AndroidController < ApplicationController
     else
       render :json => {}.to_json, :status => 400
     end
+
+    # rearchive the project
+    project.archive
   end
 
   private
