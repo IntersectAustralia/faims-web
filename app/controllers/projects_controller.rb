@@ -123,10 +123,7 @@ class ProjectsController < ApplicationController
 
     # check if arch16n is valid
     if !session[:arch16n]
-      error = if params[:project].nil? ||
-                params[:project][:arch16n].nil?
-                "can't be blank"
-              else
+      error = if !params[:project][:arch16n].nil?
                 Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
               end
 
@@ -134,8 +131,10 @@ class ProjectsController < ApplicationController
         @project.errors.add(:arch16n, error)
         valid = false
       else
-        create_temp_file("faims.properties", params[:project][:arch16n])
-        session[:arch16n] = true
+        if !params[:project][:arch16n].nil?
+          create_temp_file("faims_"+params[:project][:name].gsub(/\s/, '_')+".properties", params[:project][:arch16n])
+          session[:arch16n] = true
+        end
       end
     end
 

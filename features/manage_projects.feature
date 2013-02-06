@@ -36,7 +36,7 @@ Feature: Manage projects
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims.properties" for "Arch16n"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
     Then I should see "New project created."
     And I should be on the projects page
@@ -60,7 +60,6 @@ Feature: Manage projects
     | Data Schema |           | can't be blank         |
     | UI Schema   |           | can't be blank         |
     | UI Logic    |           | can't be blank         |
-    | Arch16n     |           | can't be blank         |
 
   @javascript
   Scenario Outline: Cannot create project due to errors
@@ -83,9 +82,8 @@ Feature: Manage projects
     | UI Schema   | garbage                   | must be xml file       |
     | UI Schema   | ui_schema_error1.xml      | invalid xml            |
     | UI Logic    |                           | can't be blank         |
-    | Arch16n     |                           | can't be blank         |
-    | Arch16n     | faims.properties          | invalid file name      |
-    | Arch16n     | faims_Project_2.properties  | invalid properties file|
+    | Arch16n     | faims_error.properties    | invalid file name      |
+    | Arch16n     | faims_Project_2.properties| invalid properties file|
 
 
   Scenario: Pull a list of projects

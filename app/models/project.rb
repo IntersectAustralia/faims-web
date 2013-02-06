@@ -84,7 +84,10 @@ class Project < ActiveRecord::Base
       FileUtils.cp(tmpdir + "/data_schema.xml", dirpath + "/data_schema.xml") #temporary
       FileUtils.cp(tmpdir + "/ui_schema.xml", dirpath + "/ui_schema.xml")
       FileUtils.cp(tmpdir + "/ui_logic.bsh", dirpath + "/ui_logic.bsh")
-      FileUtils.cp(tmpdir + "/faims.properties", dirpath + "/faims_"+ name.gsub(/\s/, '_') +".properties")
+      if File.exist?(tmpdir + "/faims_"+name.gsub(/\s/, '_')+".properties")
+        FileUtils.cp(tmpdir + "/faims_"+name.gsub(/\s/, '_')+".properties", dirpath + "/faims_"+ name.gsub(/\s/, '_') +".properties")
+      end
+      FileUtils.cp(File.expand_path("../../../lib/assets/faims.properties", __FILE__), dirpath + "/faims.properties")
       DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
       File.open(dirpath + "/project.settings", 'w') do |file|
         file.write({:name => name, id:id}.to_json)
@@ -136,7 +139,6 @@ class Project < ActiveRecord::Base
   end
 
   def self.validate_arch16n(arch16n,projectname)
-    return "can't be blank" if arch16n.blank?
     return "invalid file name" if !(arch16n.original_filename).eql?("faims_"+ projectname.gsub(/\s/, '_')+".properties")
     begin
       file = arch16n.tempfile
