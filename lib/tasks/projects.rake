@@ -4,6 +4,10 @@ begin
     task :clean => :environment do
       clean_projects
     end
+    desc "Archive all projects"
+    task :archive => :environment do
+      Project.all.each { |p| p.archive }
+    end
   end
 rescue LoadError
   puts "It looks like some Gems are missing: please run bundle install"
