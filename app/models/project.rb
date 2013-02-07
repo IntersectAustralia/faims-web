@@ -44,7 +44,7 @@ class Project < ActiveRecord::Base
   end
 
   def filename
-    name.gsub(/\s/, '_') + '.tar.gz'
+    dirname + '.tar.gz'
   end
 
   def filepath
@@ -59,6 +59,14 @@ class Project < ActiveRecord::Base
     Rails.root.join(projects_dir).to_s
   end
 
+  def dbname
+    dirname + '_db.tar.gz'
+  end
+
+  def dbpath
+    dirpath + '_db.tar.gz'
+  end
+
   def archive
     `tar zcf #{filepath} -C #{projects_path} #{dirname}` # todo: find purely ruby method
   end
@@ -68,6 +76,18 @@ class Project < ActiveRecord::Base
         :file => filename,
         :size => File.size(filepath),
         :md5 => Digest::MD5.hexdigest(File.read(filepath))
+    }
+  end
+
+  def archive_db
+    `tar zcf #{dbpath} -C #{dirpath} db.sqlite3` # todo: find purely ruby method
+  end
+
+  def archive_db_info
+    {
+        :file => dbname,
+        :size => File.size(dbpath),
+        :md5 => Digest::MD5.hexdigest(File.read(dbpath))
     }
   end
 
@@ -95,6 +115,7 @@ class Project < ActiveRecord::Base
 
       # generate archive
       archive #Todo: this will need to be called each time the database or settings are updated
+      archive_db
     rescue Exception => e
       puts "Error copying files"
       FileUtils.rm_rf dirpath if File.directory? dirpath # cleanup directory

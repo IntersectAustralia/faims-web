@@ -6,7 +6,7 @@ begin
     end
     desc "Archive all projects"
     task :archive => :environment do
-      Project.all.each { |p| p.archive }
+      Project.all.each { |p| p.archive; p.archive_db }
     end
   end
 rescue LoadError

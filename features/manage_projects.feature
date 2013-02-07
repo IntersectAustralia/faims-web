@@ -114,3 +114,13 @@ Feature: Manage projects
     Given I have project "Project 1"
     And I upload corrupted database "db.sqlite3" to Project 1
     Then I should have not merged "db.sqlite3" into Project 1
+
+  Scenario: Archive project database
+    Given I have project "Project 1"
+    And I am on the android archive db page for Project 1
+    Then I should see json for "Project 1" archived db file
+
+  Scenario: Download project database
+    Given I have project "Project 1"
+    And I am on the android download db link for Project 1
+    Then I should download db file for "Project 1"

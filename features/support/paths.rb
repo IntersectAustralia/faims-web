@@ -59,6 +59,12 @@ module NavigationHelpers
       when /the android download link for (.*)$/
         android_project_download_path(Project.find_by_name($1))
 
+      when /the android archive db page for (.*)$/
+        android_project_archive_db_path(Project.find_by_name($1))
+
+      when /the android download db link for (.*)$/
+        android_project_download_db_path(Project.find_by_name($1))
+
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:
 #

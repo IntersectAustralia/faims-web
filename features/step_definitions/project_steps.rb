@@ -82,3 +82,14 @@ end
 Then /^I should have not merged "([^"]*)" into (.*)$/ do |db_file, name|
 
 end
+
+Then /^I should see json for "([^"]*)" archived db file$/ do |name|
+  page.should have_content(Project.find_by_name(name).archive_db_info.to_json)
+end
+
+Then /^I should download db file for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.dbname + "\""
+  file = File.open(project.dbpath, 'r')
+  page.source == file.read
+end

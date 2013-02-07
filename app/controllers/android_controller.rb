@@ -28,8 +28,20 @@ class AndroidController < ApplicationController
       render :json => {}.to_json, :status => 400
     end
 
-    # rearchive the project
+    # rearchive the project and database
     project.archive
+    project.archive_db
+  end
+
+  def archive_db
+    project = Project.find(params[:id])
+    info = project.archive_db_info
+    render :json => info.to_json
+  end
+
+  def download_db
+    project = Project.find(params[:id])
+    send_file Rails.root.join(project_dir, project.archive_db_info[:file])
   end
 
   private
