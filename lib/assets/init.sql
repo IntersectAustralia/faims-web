@@ -32,7 +32,9 @@ create index atkeyname on attributekey(attributename);
 CREATE TABLE Vocabulary (
 	VocabID              INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
-	VocabName          	 TEXT
+	VocabName          	 TEXT,
+	SemanticMapURL		 TEXT,
+	PictureURL			 TEXT
  );
 
 create index vocabindex on vocabulary (vocabid);
