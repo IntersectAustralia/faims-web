@@ -142,6 +142,7 @@
     <xsd:attribute name="faims_attribute_name" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_attribute_type" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_certainty" type="xsd:boolean" use="optional"/>
+    <xsd:attribute name="faims_annotation" type="xsd:boolean" use="optional"/>
     <xsd:attribute name="faims_map" type="xsd:string" use="optional"/>
   </xsd:attributeGroup>
 
