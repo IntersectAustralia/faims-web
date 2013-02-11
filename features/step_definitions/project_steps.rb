@@ -1,3 +1,5 @@
+require File.expand_path("../../../spec/tools/helpers/database_generator_spec_helper", __FILE__)
+
 And /^I pick file "([^"]*)" for "([^"]*)"$/ do |file, field|
   attach_file(field, File.expand_path("../../assets/" + file, __FILE__)) unless file.blank?
 end
@@ -68,19 +70,35 @@ def make_project(name)
 end
 
 And /^I upload database "([^"]*)" to (.*)$/ do |db_file, name|
-
+  project = Project.find_by_name(name)
+  upload_db_file = File.open(File.expand_path("../../../spec/assets/" + db_file, __FILE__))
+  md5 = Digest::MD5.hexdigest(File.read(upload_db_file))
+  project.check_sum(upload_db_file,md5).should be_true
 end
 
 Then /^I should have merged "([^"]*)" into (.*)$/ do |db_file, name|
+  project = Project.find_by_name(name)
+  upload_db_file = File.open(File.expand_path("../../../spec/assets/" + db_file, __FILE__), 'r+')
+  proj_db_file = File.open(File.expand_path(project.dirpath+"/db.sqlite3", __FILE__), 'r+')
+  temp_db_file = backup_database(proj_db_file)
+  project.merge_database(upload_db_file)
 
+  is_database_merged(proj_db_file, temp_db_file, upload_db_file).should be_true
 end
 
 And /^I upload corrupted database "([^"]*)" to (.*)$/ do |db_file, name|
-
+  project = Project.find_by_name(name)
+  upload_db_file = File.open(File.expand_path("../../../spec/assets/" + db_file, __FILE__))
+  md5 = Digest::MD5.hexdigest(File.read(upload_db_file)) + '55'
+  project.check_sum(upload_db_file,md5).should be_false
 end
 
 Then /^I should have not merged "([^"]*)" into (.*)$/ do |db_file, name|
-
+  project = Project.find_by_name(name)
+  upload_db_file = File.open(File.expand_path("../../../spec/assets/" + db_file, __FILE__), 'r+')
+  proj_db_file = File.open(File.expand_path(project.dirpath+"/db.sqlite3", __FILE__), 'r+')
+  temp_db_file = backup_database(proj_db_file)
+  is_database_merged(proj_db_file, temp_db_file, upload_db_file).should be_false
 end
 
 Then /^I should see json for "([^"]*)" archived db file$/ do |name|

@@ -124,11 +124,14 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def merge_database(db)
-    # create temporary database file
-    temp_db_file = db.tempfile
+  def check_sum(db_file,md5)
+    current_md5 = Digest::MD5.hexdigest(File.read(db_file))
+    return true if current_md5 == md5
+    return false
+  end
 
-    DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", temp_db_file.path)
+  def merge_database(db)
+    DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", db.path)
   end
 
   def self.validate_data_schema(schema)

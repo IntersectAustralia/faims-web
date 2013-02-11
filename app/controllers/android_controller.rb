@@ -18,11 +18,11 @@ class AndroidController < ApplicationController
   def upload_db
     project = Project.find(params[:id])
     file = params[:file]
-    md5 = Digest::MD5.hexdigest(file.read)
+    md5 = params[:md5]
     #logger.debug md5
     #logger.debug params[:md5]
-    if params[:md5] == md5
-      project.merge_database(params[:file])
+    if project.check_sum(file,md5)
+      project.merge_database(file)
       render :json => {}.to_json, :status => 200
     else
       render :json => {}.to_json, :status => 400
