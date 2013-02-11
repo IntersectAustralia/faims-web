@@ -124,11 +124,18 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def merge_database(db)
-    # create temporary database file
-    temp_db_file = db.tempfile
-
-    DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", temp_db_file.path)
+  def merge_database(file)
+    tmp_dir = dirpath + '/tmp/'
+    # create tmp dir
+    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    FileUtils.mkdir tmp_dir
+    # untar database into tmp dir
+    `tar xfz #{file.path} -C #{tmp_dir}`
+    # merge database
+    file = Dir.entries(tmp_dir)[2]
+    DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", tmp_dir + file)
+    # cleanup
+    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
   end
 
   def self.validate_data_schema(schema)
