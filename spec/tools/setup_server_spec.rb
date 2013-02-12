@@ -8,7 +8,6 @@ describe "Server setup" do
     create_server_properties(file.path)
     uuid = file.read.gsub('server_key=', '')
     parts = uuid.split('-')
-    count = 0
     [8, 4, 4, 4, 12].each do |length|
       parts.shift.length.should == length
     end
