@@ -22,3 +22,6 @@
 
 # Ignore all swp files
 *.swp
+
+# Ignore server properties file
+server.properties

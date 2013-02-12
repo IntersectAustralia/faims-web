@@ -74,5 +74,9 @@ module FaimsWeb
 
     # specify port for server
     config.server_port = 3000
+
+    config.server_properties_file = Rails.root + "server.properties"
+
+    config.server_projects_directory = Rails.root + "projects"
   end
 end

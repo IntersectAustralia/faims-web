@@ -65,3 +65,4 @@ gem 'email_spec', :group => :test
 gem 'cancan'
 gem 'nokogiri'
 gem 'daemons'
+gem 'webget_ruby_secure_random'
