@@ -107,13 +107,13 @@ Feature: Manage projects
 
   Scenario: Upload project
     Given I have project "Project 1"
-    And I upload database "db.sqlite3" to Project 1
-    Then I should have merged "db.sqlite3" into Project 1
+    And I upload database "db" to Project 1
+    Then I should have merged "db" into Project 1
 
   Scenario: Upload project
     Given I have project "Project 1"
-    And I upload corrupted database "db.sqlite3" to Project 1
-    Then I should have not merged "db.sqlite3" into Project 1
+    And I upload corrupted database "db" to Project 1
+    Then I should have not merged "db" into Project 1
 
   Scenario: Archive project database
     Given I have project "Project 1"
