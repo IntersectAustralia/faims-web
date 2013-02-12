@@ -138,7 +138,7 @@ class Project < ActiveRecord::Base
     # untar database into tmp dir
     `tar xfz #{file.path} -C #{tmp_dir}`
     # merge database
-    file = Dir.entries(tmp_dir)[2]
+    file = Dir.entries(tmp_dir).select { |f| !File.directory? f }.first
     DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", tmp_dir + file)
     # cleanup
     FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
