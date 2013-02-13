@@ -1,4 +1,5 @@
 require File.expand_path("../../../spec/tools/helpers/database_generator_spec_helper", __FILE__)
+require File.expand_path("../../support/projects", __FILE__)
 
 And /^I pick file "([^"]*)" for "([^"]*)"$/ do |file, field|
   attach_file(field, File.expand_path("../../assets/" + file, __FILE__)) unless file.blank?
@@ -46,10 +47,14 @@ Then /^I have project files for "([^"]*)"$/ do |name|
   File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_logic.bsh')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'project.settings')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dirname, 'faims.properties')).should be_true
+
+  settings_file = Rails.root.join('tmp/projects', dirname, 'project.settings')
+  is_valid_settings_file settings_file
 end
 
 Then /^I should see json for projects$/ do
-  page.should have_content(Project.all.to_json)
+  projects = Project.all.map { |p| {key:p.key, name:p.name} }
+  page.should have_content(projects.to_json)
 end
 
 Then /^I should see json for "([^"]*)" archived file$/ do |name|
@@ -61,12 +66,6 @@ Then /^I should download file for "([^"]*)"$/ do |name|
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.filename + "\""
   file = File.open(project.filepath, 'r')
   page.source == file.read
-end
-
-def make_project(name)
-  p = Project.create(:name => name)
-  p.create_project_from(Rails.root.join('features', 'assets').to_s)
-  p.archive
 end
 
 And /^I upload database "([^"]*)" to (.*)$/ do |db_file, name|
@@ -100,6 +99,7 @@ Then /^I should have not merged "([^"]*)" into (.*)$/ do |db_file, name|
   upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".sqlite3", __FILE__), 'r+')
   proj_db_file = File.open(File.expand_path(project.dirpath+"/db.sqlite3", __FILE__), 'r+')
   temp_db_file = backup_database(proj_db_file)
+
   is_database_merged(proj_db_file, temp_db_file, upload_db_file).should be_false
 end
 

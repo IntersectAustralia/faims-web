@@ -3,5 +3,6 @@
 FactoryGirl.define do
   factory :project do |f|
     f.sequence(:name) { |n| "Project #{n}" }
+    f.sequence(:key) { |n| SecureRandom.uuid }
   end
 end

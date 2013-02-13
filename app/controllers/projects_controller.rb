@@ -66,7 +66,7 @@ class ProjectsController < ApplicationController
 
     valid = false
     if params[:project]
-      @project = Project.new(:name => params[:project][:name]) if params[:project]
+      @project = Project.new(:name => params[:project][:name], :key => SecureRandom.uuid) if params[:project]
       valid = @project.valid?
     end
 

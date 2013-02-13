@@ -2,14 +2,18 @@ class Project < ActiveRecord::Base
   include XSDValidator
   include DatabaseGenerator
 
-  attr_accessible :name, :data_schema, :ui_schema, :ui_logic, :arch16n
+  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n
 
   validates :name, :presence => true, :uniqueness => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
 
-  before_validation :update_project
+  validates :key, :presence => true, :uniqueness => true
 
   default_scope order(:name)
+
+  def name=(value)
+    write_attribute(:name, value.strip.squish) if value
+  end
 
   def data_schema
   end
@@ -110,18 +114,22 @@ class Project < ActiveRecord::Base
       FileUtils.cp(File.expand_path("../../../lib/assets/faims.properties", __FILE__), dirpath + "/faims.properties")
       DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
       File.open(dirpath + "/project.settings", 'w') do |file|
-        file.write({:name => name, id:id}.to_json)
+        file.write({:name => name, id:key}.to_json)
       end
 
       # generate archive
-      archive #Todo: this will need to be called each time the database or settings are updated
-      archive_db
+      update_archives
     rescue Exception => e
       puts "Error copying files"
       FileUtils.rm_rf dirpath if File.directory? dirpath # cleanup directory
       FileUtils.rm filepath if filepath and File.exists? filepath # cleanup archive
       raise e
     end
+  end
+
+  def update_archives
+    archive
+    archive_db
   end
 
   def check_sum(db_file,md5)
@@ -131,17 +139,24 @@ class Project < ActiveRecord::Base
   end
 
   def merge_database(file)
-    tmp_dir = Dir.mktmpdir(dirpath + '/') + '/'
-    # create tmp dir
-    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-    FileUtils.mkdir tmp_dir
-    # untar database into tmp dir
-    `tar xfz #{file.path} -C #{tmp_dir}`
-    # merge database
-    file = Dir.entries(tmp_dir).select { |f| !File.directory? f }.first
-    DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", tmp_dir + file)
-    # cleanup
-    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    begin
+      tmp_dir = Dir.mktmpdir(dirpath + '/') + '/'
+      # create tmp dir
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      FileUtils.mkdir tmp_dir
+      # untar database into tmp dir
+      `tar xfz #{file.path} -C #{tmp_dir}`
+      # merge database
+      file = Dir.entries(tmp_dir).select { |f| !File.directory? f }.first
+      DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", tmp_dir + file)
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    rescue Exception => e
+      puts "Error merging database"
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      raise e
+    end
+
   end
 
   def self.validate_data_schema(schema)
@@ -189,11 +204,6 @@ class Project < ActiveRecord::Base
     return nil
   end
   private
-
-  def update_project
-    name.squish! if name
-    name.strip! if name
-  end
 
   def self.create_temp_file(file)
     file = Tempfile.new('temp_file')

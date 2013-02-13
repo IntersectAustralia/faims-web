@@ -6,11 +6,8 @@ describe "Server setup" do
   it "generates properties file with uuid" do
     file = Tempfile.new('server.properties')
     create_server_properties(file.path)
-    uuid = file.read.gsub('server_key=', '')
-    parts = uuid.split('-')
-    [8, 4, 4, 4, 12].each do |length|
-      parts.shift.length.should == length
-    end
+    result = file.read =~ /^server_key=\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$/
     file.unlink
+    result.should be_true
   end
 end

@@ -35,6 +35,16 @@ describe Project do
       p4.save.should == false
       p5.save.should == false
     end
+
+    it { should_not allow_value("").for(:key) }
+
+    it "project keys should be unique" do
+      uuid = SecureRandom.uuid
+      p1 = FactoryGirl.build(:project, :key => uuid)
+      p2 = FactoryGirl.build(:project, :key => uuid)
+      p1.save.should == true
+      p2.save.should == false
+    end
   end
 
   describe "Should order by name" do
