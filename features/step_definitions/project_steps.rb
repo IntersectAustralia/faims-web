@@ -40,15 +40,15 @@ Then /^I should see projects$/ do |table|
 end
 
 Then /^I have project files for "([^"]*)"$/ do |name|
-  dirname = Project.find_by_name(name).dirname
-  File.directory?(Rails.root.join('tmp/projects', dirname)).should be_true
-  File.exists?(Rails.root.join('tmp/projects', dirname, 'db.sqlite3')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_schema.xml')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', dirname, 'ui_logic.bsh')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', dirname, 'project.settings')).should be_true
-  File.exists?(Rails.root.join('tmp/projects', dirname, 'faims.properties')).should be_true
+  dir_name = Project.find_by_name(name).dir_name
+  File.directory?(Rails.root.join('tmp/projects', dir_name)).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dir_name, 'db.sqlite3')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dir_name, 'ui_schema.xml')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dir_name, 'ui_logic.bsh')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dir_name, 'project.settings')).should be_true
+  File.exists?(Rails.root.join('tmp/projects', dir_name, 'faims.properties')).should be_true
 
-  settings_file = Rails.root.join('tmp/projects', dirname, 'project.settings')
+  settings_file = Rails.root.join('tmp/projects', dir_name, 'project.settings')
   is_valid_settings_file settings_file
 end
 
@@ -79,7 +79,7 @@ Then /^I should have merged "([^"]*)" into (.*)$/ do |db_file, name|
   project = Project.find_by_name(name)
   archived_upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
   upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".sqlite3", __FILE__), 'r+')
-  proj_db_file = File.open(File.expand_path(project.dirpath+"/db.sqlite3", __FILE__), 'r+')
+  proj_db_file = File.open(File.expand_path(project.dir_path+"/db.sqlite3", __FILE__), 'r+')
   temp_db_file = backup_database(proj_db_file)
   project.merge_database(archived_upload_db_file)
 
@@ -97,7 +97,7 @@ Then /^I should have not merged "([^"]*)" into (.*)$/ do |db_file, name|
   project = Project.find_by_name(name)
   #archived_upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
   upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".sqlite3", __FILE__), 'r+')
-  proj_db_file = File.open(File.expand_path(project.dirpath+"/db.sqlite3", __FILE__), 'r+')
+  proj_db_file = File.open(File.expand_path(project.dir_path+"/db.sqlite3", __FILE__), 'r+')
   temp_db_file = backup_database(proj_db_file)
 
   is_database_merged(proj_db_file, temp_db_file, upload_db_file).should be_false
@@ -109,7 +109,7 @@ end
 
 Then /^I should download db file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.dbname + "\""
-  file = File.open(project.dbpath, 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.db_file_name + "\""
+  file = File.open(project.db_file_path, 'r')
   page.source == file.read
 end

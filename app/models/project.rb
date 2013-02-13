@@ -1,6 +1,7 @@
 class Project < ActiveRecord::Base
   include XSDValidator
   include DatabaseGenerator
+  include Archive::Tar
 
   attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n
 
@@ -39,20 +40,20 @@ class Project < ActiveRecord::Base
   def arch16n=(value)
   end
 
-  def dirname
+  def dir_name
     name.gsub(/\s/, '_') if name
   end
 
-  def dirpath
+  def dir_path
     Rails.root.join(projects_dir, name.gsub(/\s/, '_')).to_s if name
   end
 
   def filename
-    dirname + '.tar.gz'
+    'project.tar.gz'
   end
 
   def filepath
-    dirpath + '.tar.gz'
+    dir_path + '/' + filename
   end
 
   def projects_dir
@@ -63,16 +64,97 @@ class Project < ActiveRecord::Base
     Rails.root.join(projects_dir).to_s
   end
 
-  def dbname
-    dirname + '_db.tar.gz'
+  def db_file_name
+    'db.tar.gz'
   end
 
-  def dbpath
-    dirpath + '_db.tar.gz'
+  def db_file_path
+    dir_path + '/' + db_file_name
+  end
+
+  def data_schema_name
+    'data_schema.xml'
+  end
+
+  def data_schema_path
+    dir_path + '/' + data_schema_name
+  end
+
+  def db_name
+    'db.sqlite3'
+  end
+
+  def db_path
+    dir_path + '/' + db_name
+  end
+
+  def ui_schema_name
+    'ui_schema.xml'
+  end
+
+  def ui_schema_path
+    dir_path + '/' + ui_schema_name
+  end
+
+  def ui_logic_name
+    'ui_logic.bsh'
+  end
+
+  def ui_logic_path
+    dir_path + '/' + ui_logic_name
+  end
+
+  def faims_properties_name
+    'faims.properties'
+  end
+
+  def faims_properties_path
+    dir_path + '/' + faims_properties_name
+  end
+
+  def faims_project_properties_name
+    'faims_' + name.gsub(/\s+/, '_') + '.properties'
+  end
+
+  def faims_project_properties_path
+    dir_path + '/' + faims_project_properties_name
+  end
+
+  def project_settings_name
+    'project.settings'
+  end
+
+  def project_settings_path
+    dir_path + '/' + project_settings_name
   end
 
   def archive
-    `tar zcf #{filepath} -C #{projects_path} #{dirname}` # todo: find purely ruby method
+    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
+    begin
+      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+
+      # create app database
+      db_file = tmp_dir + 'db.sqlite3'
+      DatabaseGenerator.create_app_database(db_path, db_file)
+
+      # copy files to tmp directory
+      FileUtils.cp(ui_schema_path, tmp_dir + ui_schema_name)
+      FileUtils.cp(ui_logic_path, tmp_dir + ui_logic_name)
+      FileUtils.cp(project_settings_path, tmp_dir + project_settings_name)
+      FileUtils.cp(faims_properties_path, tmp_dir + faims_properties_name)
+      FileUtils.cp(faims_project_properties_path, tmp_dir + faims_project_properties_name) if
+          File.exists? faims_project_properties_path
+
+      # archive project
+      tgz = Zlib::GzipWriter.new(File.open(filepath, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
+      Minitar.pack(tmp_dir, tgz)
+    rescue Exception => e
+      puts "Error archiving project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
   end
 
   def archive_info
@@ -84,52 +166,69 @@ class Project < ActiveRecord::Base
   end
 
   def archive_db
-    `tar zcf #{dbpath} -C #{dirpath} db.sqlite3` # todo: find purely ruby method
+    # archive includes database
+    begin
+      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+
+      # create app database
+      db_file = tmp_dir + 'db.sqlite3'
+      DatabaseGenerator.create_app_database(db_path, db_file)
+
+      # archive database
+      tgz = Zlib::GzipWriter.new(File.open(db_file_path, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
+      Minitar.pack(db_file, tgz)
+    rescue Exception => e
+      puts "Error archiving project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
   end
 
   def archive_db_info
     {
-        :file => dbname,
-        :size => File.size(dbpath),
-        :md5 => Digest::MD5.hexdigest(File.read(dbpath))
+        :file => db_file_name,
+        :size => File.size(db_file_path),
+        :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
-  end
-
-  def create_project_from(tmpdir)
-    begin
-      Dir.mkdir(projects_path) unless File.directory? projects_path # make sure directory exists
-
-      FileUtils.rm_rf dirpath if File.directory? dirpath # remove directory if one already exists
-      FileUtils.rm_rf filepath if File.exists? filepath # remove archive if one already exists
-
-      Dir.mkdir(dirpath)
-
-      # copy files into directory
-      FileUtils.cp(tmpdir + "/data_schema.xml", dirpath + "/data_schema.xml") #temporary
-      FileUtils.cp(tmpdir + "/ui_schema.xml", dirpath + "/ui_schema.xml")
-      FileUtils.cp(tmpdir + "/ui_logic.bsh", dirpath + "/ui_logic.bsh")
-      if File.exist?(tmpdir + "/faims_"+name.gsub(/\s/, '_')+".properties")
-        FileUtils.cp(tmpdir + "/faims_"+name.gsub(/\s/, '_')+".properties", dirpath + "/faims_"+ name.gsub(/\s/, '_') +".properties")
-      end
-      FileUtils.cp(File.expand_path("../../../lib/assets/faims.properties", __FILE__), dirpath + "/faims.properties")
-      DatabaseGenerator.generate_database(dirpath + "/db.sqlite3", dirpath + "/data_schema.xml")
-      File.open(dirpath + "/project.settings", 'w') do |file|
-        file.write({:name => name, id:key}.to_json)
-      end
-
-      # generate archive
-      update_archives
-    rescue Exception => e
-      puts "Error copying files"
-      FileUtils.rm_rf dirpath if File.directory? dirpath # cleanup directory
-      FileUtils.rm filepath if filepath and File.exists? filepath # cleanup archive
-      raise e
-    end
   end
 
   def update_archives
     archive
     archive_db
+  end
+
+  def create_project_from(tmp_dir)
+    begin
+      Dir.mkdir(projects_path) unless File.directory? projects_path # make sure projects directory exists
+
+      FileUtils.rm_rf dir_path if File.directory? dir_path # overwrite current project directory
+      Dir.mkdir(dir_path)
+
+      # copy files from temp directory to projects directory
+      Dir.entries(tmp_dir).each { |f| FileUtils.cp(tmp_dir + '/' + f, dir_path + '/') unless File.directory? f }
+
+      # generate database
+      DatabaseGenerator.generate_database(dir_path + "/db.sqlite3", dir_path + "/data_schema.xml")
+
+      # create project settings
+      File.open(dir_path + "/project.settings", 'w') do |file|
+        file.write({:name => name, id:key}.to_json)
+      end
+
+      # create default faims properties
+      File.open(dir_path + "/faims.properties", 'w') do |file|
+        file.write("")
+      end
+
+      # generate archive
+      update_archives
+    rescue Exception => e
+      puts "Error creating project"
+      FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
+      raise e
+    end
   end
 
   def check_sum(db_file,md5)
@@ -140,21 +239,22 @@ class Project < ActiveRecord::Base
 
   def merge_database(file)
     begin
-      tmp_dir = Dir.mktmpdir(dirpath + '/') + '/'
       # create tmp dir
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-      FileUtils.mkdir tmp_dir
-      # untar database into tmp dir
-      `tar xfz #{file.path} -C #{tmp_dir}`
+      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+
+      # unarchive database
+      tgz = Zlib::GzipReader.new(File.open(file, 'rb'))
+      Minitar.unpack(tgz, tmp_dir)
+
       # merge database
       file = Dir.entries(tmp_dir).select { |f| !File.directory? f }.first
-      DatabaseGenerator.merge_database(dirpath + "/db.sqlite3", tmp_dir + file)
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      DatabaseGenerator.merge_database(dir_path + "/db.sqlite3", tmp_dir + file)
     rescue Exception => e
       puts "Error merging database"
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
       raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
     end
 
   end
@@ -204,13 +304,5 @@ class Project < ActiveRecord::Base
     return nil
   end
   private
-
-  def self.create_temp_file(file)
-    file = Tempfile.new('temp_file')
-    file.binmode
-    file.write(file.read)
-    file.close
-    file
-  end
 
 end

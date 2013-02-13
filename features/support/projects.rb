@@ -1,7 +1,17 @@
 def make_project(name)
-  p = Project.create(:name => name, :key => SecureRandom.uuid)
-  p.create_project_from(Rails.root.join('features', 'assets').to_s)
-  p.archive
+  begin
+    tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
+    assets_dir = Rails.root.to_s + '/features/assets/'
+    FileUtils.cp(assets_dir + 'data_schema.xml', tmp_dir + '/data_schema.xml' )
+    FileUtils.cp(assets_dir + 'ui_schema.xml', tmp_dir + '/ui_schema.xml' )
+    FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
+    p = Project.create(:name => name, :key => SecureRandom.uuid)
+    p.create_project_from(tmp_dir)
+  rescue Exception => e
+    raise e
+  ensure
+    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+  end
 end
 
 def is_valid_settings_file(filename)

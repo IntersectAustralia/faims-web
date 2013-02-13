@@ -13,7 +13,7 @@ class AndroidController < ApplicationController
 
   def download
     project = Project.find_by_key(params[:key])
-    send_file Rails.root.join(project_dir, project.archive_info[:file])
+    send_file project.filepath
   end
 
   def upload_db
@@ -41,7 +41,7 @@ class AndroidController < ApplicationController
 
   def download_db
     project = Project.find_by_key(params[:key])
-    send_file Rails.root.join(project_dir, project.archive_db_info[:file])
+    send_file project.db_file_path
   end
 
   private

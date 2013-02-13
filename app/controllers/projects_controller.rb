@@ -132,7 +132,7 @@ class ProjectsController < ApplicationController
         valid = false
       else
         if !params[:project][:arch16n].nil?
-          create_temp_file("faims_"+params[:project][:name].gsub(/\s/, '_')+".properties", params[:project][:arch16n])
+          create_temp_file("faims_"+params[:project][:name].gsub(/\s+/, '_')+".properties", params[:project][:arch16n])
           session[:arch16n] = true
         end
       end
