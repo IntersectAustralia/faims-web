@@ -1,4 +1,5 @@
 require 'spec_helper'
+require File.expand_path("../../../features/support/projects", __FILE__)
 
 describe Project do
 
@@ -54,6 +55,39 @@ describe Project do
       p3 = FactoryGirl.create(:project, :name => "C Project")
       projects = Project.all
       projects.should == [p2, p1, p3]
+    end
+  end
+
+  it "Archiving project" do
+    begin
+      project = make_project("Project 1")
+      tmp_dir = Dir.mktmpdir(project.dir_path)
+      `tar zxf #{project.filepath} -C #{tmp_dir}`
+      entries = Dir.entries(tmp_dir + '/' + project.dir_name)
+      entries.include?(project.db_name).should be_true
+      entries.include?(project.ui_schema_name).should be_true
+      entries.include?(project.ui_logic_name).should be_true
+      entries.include?(project.project_settings_name).should be_true
+      entries.include?(project.faims_properties_name).should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
+
+  end
+
+  it "Archiving database" do
+    begin
+      project = make_project("Project 1")
+      tmp_dir = Dir.mktmpdir(project.dir_path)
+      `tar zxf #{project.db_file_path} -C #{tmp_dir}`
+      entries = Dir.entries(tmp_dir)
+      entries.include?(project.db_name).should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
     end
   end
 

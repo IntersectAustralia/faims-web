@@ -7,6 +7,7 @@ def make_project(name)
     FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
     p = Project.create(:name => name, :key => SecureRandom.uuid)
     p.create_project_from(tmp_dir)
+    p
   rescue Exception => e
     raise e
   ensure

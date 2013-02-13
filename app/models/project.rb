@@ -133,21 +133,28 @@ class Project < ActiveRecord::Base
     begin
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
+      # create project directory to archive
+      dir = tmp_dir + dir_name + '/'
+      Dir.mkdir(dir)
+
       # create app database
-      db_file = tmp_dir + 'db.sqlite3'
+      db_file = dir + 'db.sqlite3'
       DatabaseGenerator.create_app_database(db_path, db_file)
 
       # copy files to tmp directory
-      FileUtils.cp(ui_schema_path, tmp_dir + ui_schema_name)
-      FileUtils.cp(ui_logic_path, tmp_dir + ui_logic_name)
-      FileUtils.cp(project_settings_path, tmp_dir + project_settings_name)
-      FileUtils.cp(faims_properties_path, tmp_dir + faims_properties_name)
-      FileUtils.cp(faims_project_properties_path, tmp_dir + faims_project_properties_name) if
+      FileUtils.cp(ui_schema_path, dir + ui_schema_name)
+      FileUtils.cp(ui_logic_path, dir + ui_logic_name)
+      FileUtils.cp(project_settings_path, dir + project_settings_name)
+      FileUtils.cp(faims_properties_path, dir + faims_properties_name)
+      FileUtils.cp(faims_project_properties_path, dir + faims_project_properties_name) if
           File.exists? faims_project_properties_path
 
       # archive project
-      tgz = Zlib::GzipWriter.new(File.open(filepath, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
-      Minitar.pack(tmp_dir, tgz)
+      #tgz = Zlib::GzipWriter.new(File.open(filepath, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
+      #Minitar.pack(tmp_dir, tgz)
+
+      # TODO currently minitar doesn't have directory change option
+      `tar zcf #{filepath} -C #{tmp_dir} #{File.basename(dir)}`
     rescue Exception => e
       puts "Error archiving project"
       raise e
@@ -175,8 +182,11 @@ class Project < ActiveRecord::Base
       DatabaseGenerator.create_app_database(db_path, db_file)
 
       # archive database
-      tgz = Zlib::GzipWriter.new(File.open(db_file_path, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
-      Minitar.pack(db_file, tgz)
+      #tgz = Zlib::GzipWriter.new(File.open(db_file_path, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
+      #Minitar.pack(db_file, tgz)
+
+      # TODO currently minitar doesn't have directory change option
+      `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(db_file)}`
     rescue Exception => e
       puts "Error archiving project"
       raise e
