@@ -253,11 +253,15 @@ class Project < ActiveRecord::Base
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # unarchive database
-      tgz = Zlib::GzipReader.new(File.open(file, 'rb'))
-      Minitar.unpack(tgz, tmp_dir)
+      #tgz = Zlib::GzipReader.new(File.open(file, 'rb'))
+      #Minitar.unpack(tgz, tmp_dir)
+
+      # TODO minitar doesn't have directory change option
+      `tar zxf #{file.path} -C #{tmp_dir}`
 
       # merge database
       file = Dir.entries(tmp_dir).select { |f| !File.directory? f }.first
+
       DatabaseGenerator.merge_database(dir_path + "/db.sqlite3", tmp_dir + file)
     rescue Exception => e
       puts "Error merging database"
