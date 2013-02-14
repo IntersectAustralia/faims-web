@@ -55,7 +55,6 @@ Feature: Manage projects
   Examples:
     | field       | value     | error                  |
     | Name        |           | can't be blank         |
-    | Name        | Project 1 | has already been taken |
     | Name        | Project * | is invalid             |
     | Data Schema |           | can't be blank         |
     | UI Schema   |           | can't be blank         |
@@ -85,6 +84,20 @@ Feature: Manage projects
     | Arch16n     | faims_error.properties    | invalid file name      |
     | Arch16n     | faims_Project_2.properties| invalid properties file|
 
+  Scenario Outline: Edit static data
+    Given I am on the home page
+    And I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Project Setting"
+    And I fill in "<field>" with "<value>"
+    And I press "Update"
+    Then I should see "<field>" with error "<error>"
+  Examples:
+    | field         | value     | error          |
+    | Project Name  |           | can't be blank |
+    | Project Name  | Project * | is invalid     |
 
   Scenario: Pull a list of projects
     Given I have projects

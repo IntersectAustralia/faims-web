@@ -22,6 +22,8 @@ FaimsWeb::Application.routes.draw do
 
   resources :projects
 
+  get "projects/:id/edit_project_setting", :to => "projects#edit_project_setting", :as => "edit_project_setting"
+  post "projects/:id/edit_project_setting", :to => "projects#update_project_setting", :as => "update_project_setting"
   get "android/projects", :to => "android#projects", :as => "android_projects"
   get "android/project/:key/archive", :to => "android#archive", :as => "android_project_archive"
   get "android/project/:key/download", :to => "android#download", :as => "android_project_download"

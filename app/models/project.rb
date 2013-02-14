@@ -3,9 +3,9 @@ class Project < ActiveRecord::Base
   include DatabaseGenerator
   include Archive::Tar
 
-  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n
+  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant
 
-  validates :name, :presence => true, :uniqueness => true, :length => {:maximum => 255},
+  validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
 
   validates :key, :presence => true, :uniqueness => true
@@ -28,6 +28,42 @@ class Project < ActiveRecord::Base
   def ui_schema=(value)
   end
 
+  def season
+  end
+
+  def season=(value)
+  end
+
+  def description
+  end
+
+  def description=(value)
+  end
+
+  def permit_no
+  end
+
+  def permit_no=(value)
+  end
+
+  def permit_holder
+  end
+
+  def permit_holder=(value)
+  end
+
+  def contact_address
+  end
+
+  def contact_address=(value)
+  end
+
+  def participant
+  end
+
+  def participant=(value)
+  end
+
   def ui_logic
   end
 
@@ -41,11 +77,11 @@ class Project < ActiveRecord::Base
   end
 
   def dir_name
-    name.gsub(/\s/, '_') if name
+    key
   end
 
   def dir_path
-    Rails.root.join(projects_dir, name.gsub(/\s/, '_')).to_s if name
+    projects_path + '/' + dir_name
   end
 
   def filename
@@ -126,6 +162,10 @@ class Project < ActiveRecord::Base
 
   def project_settings_path
     dir_path + '/' + project_settings_name
+  end
+
+  def project_setting
+    File.read(dir_path + "/project.settings").as_json
   end
 
   def archive
@@ -221,11 +261,6 @@ class Project < ActiveRecord::Base
 
       # generate database
       DatabaseGenerator.generate_database(dir_path + "/db.sqlite3", dir_path + "/data_schema.xml")
-
-      # create project settings
-      File.open(dir_path + "/project.settings", 'w') do |file|
-        file.write({:name => name, id:key}.to_json)
-      end
 
       # create default faims properties
       File.open(dir_path + "/faims.properties", 'w') do |file|

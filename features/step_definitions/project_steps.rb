@@ -113,3 +113,7 @@ Then /^I should download db file for "([^"]*)"$/ do |name|
   file = File.open(project.db_file_path, 'r')
   page.source == file.read
 end
+When /^I click on "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  visit ("/projects/" + project.id.to_s)
+end

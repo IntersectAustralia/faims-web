@@ -44,3 +44,25 @@
 .uploaded-inline {
   color: #0C0;
 }
+
+.project-textarea {
+  width: 300px;
+  height: 100px;
+}
+
+.new_project ul li {
+  display: inline-block;
+  vertical-align: top;
+}
+.tabs {
+  list-style: none;
+  width: 100%;
+}
+
+.tabs li.settings .step-container .step-body {
+  width: 315px;
+}
+
+.tabs li.upload .step-container > .step-body {
+  width: 375px;
+}

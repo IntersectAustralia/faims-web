@@ -5,6 +5,8 @@ def make_project(name)
     FileUtils.cp(assets_dir + 'data_schema.xml', tmp_dir + '/data_schema.xml' )
     FileUtils.cp(assets_dir + 'ui_schema.xml', tmp_dir + '/ui_schema.xml' )
     FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
+    FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
+    FileUtils.cp(assets_dir + 'project.settings', tmp_dir + '/project.settings' )
     p = Project.create(:name => name, :key => SecureRandom.uuid)
     p.create_project_from(tmp_dir)
     p
@@ -16,5 +18,5 @@ def make_project(name)
 end
 
 def is_valid_settings_file(filename)
-  JSON.parse(File.read(filename))["id"].should =~ /^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$/
+  JSON.parse(File.read(filename))["key"].should =~ /^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$/
 end
