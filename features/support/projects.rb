@@ -16,5 +16,5 @@ def make_project(name)
 end
 
 def is_valid_settings_file(filename)
-  JSON.parse(File.read(filename))["id"].should =~ /^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$/
+  JSON.parse(File.read(filename))["key"].should =~ /^\S{8}-\S{4}-\S{4}-\S{4}-\S{12}$/
 end

@@ -224,7 +224,7 @@ class Project < ActiveRecord::Base
 
       # create project settings
       File.open(dir_path + "/project.settings", 'w') do |file|
-        file.write({:name => name, id:key}.to_json)
+        file.write({:name => name, key:key}.to_json)
       end
 
       # create default faims properties
