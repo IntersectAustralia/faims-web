@@ -41,12 +41,12 @@ class Project < ActiveRecord::Base
   end
 
   def projects_path
-    return Rails.root.to_s + '/tmp/projects' if Rails.env = 'test'
+    return Rails.root.to_s + '/tmp/projects' if Rails.env == 'test'
     Rails.application.config.server_projects_directory
   end
 
   def uploads_path
-    return Rails.root.to_s + '/tmp/uploads' if Rails.env = 'test'
+    return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
     Rails.application.config.server_uploads_directory
   end
 
@@ -212,6 +212,8 @@ class Project < ActiveRecord::Base
   end
 
   def create_project_from(tmp_dir)
+
+    logger.debug projects_path
     begin
       Dir.mkdir(projects_path) unless File.directory? projects_path # make sure projects directory exists
 
