@@ -22,21 +22,22 @@ module DatabaseGenerator
     return 'libspatialite.so'
   end
 
-  def self.merge_database(toDB, fromDB)
+  def self.merge_database(toDB, fromDB, version, userid)
     db = SQLite3::Database.new(toDB)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     content = <<EOF
-attach database "?" as import;
-insert into archentity select * from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
-insert into aentvalue select * from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
-insert into aentreln select * from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
-insert into relationship select * from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
-insert into relnvalue select * from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
+attach database "#{fromDB}" as import;
+insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, versionnum, geospatialcolumn) select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, #{version}, geospatialcolumn from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
+insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, versionnum) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, #{version} from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
+insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, versionnum, geospatialcolumn) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, #{version}, geospatialcolumn from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
+insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, versionnum) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, #{version} from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
+insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, versionnum) select uuid, relationshipid, participatesverb, aentrelntimestamp, #{version} from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
 detach database import;
+
+insert into version (versionnum, versiontimestamp, userid) select #{version}, CURRENT_TIMESTAMP, #{userid};
 EOF
     content = content.gsub("\n", "")
-    content = content.gsub("?", fromDB)
     db.execute_batch(content)
   end
 
@@ -57,7 +58,7 @@ EOF
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     content = <<EOF
-attach database "?" as export;
+attach database "#{toDB}" as export;
 create table export.user as select * from user;
 create table export.aenttype as select * from aenttype;
 create table export.attributekey as select * from attributekey;
@@ -73,7 +74,6 @@ create table export.aentreln as select uuid, relationshipid, participatesverb, a
 detach database export;
 EOF
     content = content.gsub("\n", "")
-    content = content.gsub("?", toDB)
     db.execute_batch(content)
   end
 

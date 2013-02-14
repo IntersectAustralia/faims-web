@@ -5,6 +5,12 @@ PRAGMA page_size = 4096;
 PRAGMA cache_size = 400000;
 vacuum;
 
+CREATE TABLE Version (
+  VersionNum           INTEGER NOT NULL,
+  VersionTimestamp     DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UserID               INTEGER
+);
+
 CREATE TABLE User (
 	UserID               INTEGER NOT NULL,
 	FName                TEXT,
@@ -72,7 +78,8 @@ CREATE TABLE ArchEntity (
 	UserID               INTEGER,
 	DOI                  TEXT,
 	AEntTypeID           TEXT,
-	GeoSpatialColumnType TEXT
+	GeoSpatialColumnType TEXT,
+	VersionNum           INTEGER
  );
 
 create index aentindex on archentity (uuid);
@@ -84,7 +91,8 @@ CREATE TABLE AEntValue (
 	AttributeID          TEXT NOT NULL,
 	Measure              INT,
 	FreeText             TEXT,
-	Certainty            REAL
+	Certainty            REAL,
+	VersionNum           INTEGER
  );
 
 create index aentvalueindex on AentValue (uuid, attributeid, valuetimestamp desc);
@@ -94,7 +102,8 @@ CREATE TABLE Relationship (
 	UserID               INTEGER NOT NULL,
 	RelnTimestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
 	GeoSpatialColumnType TEXT,
-	RelnTypeID           INTEGER NOT NULL
+	RelnTypeID           INTEGER NOT NULL,
+	VersionNum           INTEGER
  );
 
 create index relnindex on relationship (relationshipid);
@@ -103,7 +112,8 @@ CREATE TABLE AEntReln (
 	UUID                 INTEGER NOT NULL,
 	RelationshipID       INTEGER NOT NULL,
 	ParticipatesVerb     TEXT,
-	AEntRelnTimestamp    DATETIME DEFAULT CURRENT_TIMESTAMP
+	AEntRelnTimestamp    DATETIME DEFAULT CURRENT_TIMESTAMP,
+	VersionNum           INTEGER
  );
 
 create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp);
@@ -113,7 +123,8 @@ CREATE TABLE RelnValue (
 	AttributeID          TEXT NOT NULL,
 	VocabID              INTEGER,
 	RelnValueTimestamp   DATETIME DEFAULT CURRENT_TIMESTAMP,
-	Freetext             TEXT
+	Freetext             TEXT,
+	VersionNum           INTEGER
  );
 
 create index relnvalueindex on relnvalue (relationshipid, attributeid, relnvaluetimestamp desc);

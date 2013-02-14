@@ -51,6 +51,7 @@ loop do
     s.close
     puts "Sent Server@#{server_ip}:#{SERVER_PORT} to #{ip}:#{port}"
   rescue Exception => e
+    puts "Error sending discovery packet"
     puts e
     exit(0);
   end

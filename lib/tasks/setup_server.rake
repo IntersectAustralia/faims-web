@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/setup_server.rb'
 begin
   namespace :server do
     desc "Initialise server with a uuid"
-    task :setup => :environment do
+    task :setup do
       if File.exists? Rails.application.config.server_properties_file
         puts "Properties file already exists. Do you want to create a new one?"
         input = STDIN.gets.chomp

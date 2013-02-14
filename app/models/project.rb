@@ -40,12 +40,22 @@ class Project < ActiveRecord::Base
   def arch16n=(value)
   end
 
+  def projects_path
+    return Rails.root.to_s + '/tmp/projects' if Rails.env = 'test'
+    Rails.application.config.server_projects_directory
+  end
+
+  def uploads_path
+    return Rails.root.to_s + '/tmp/uploads' if Rails.env = 'test'
+    Rails.application.config.server_uploads_directory
+  end
+
   def dir_name
     name.gsub(/\s/, '_') if name
   end
 
   def dir_path
-    Rails.root.join(projects_dir, name.gsub(/\s/, '_')).to_s if name
+    projects_path + '/' + dir_name
   end
 
   def filename
@@ -54,14 +64,6 @@ class Project < ActiveRecord::Base
 
   def filepath
     dir_path + '/' + filename
-  end
-
-  def projects_dir
-    Rails.env == 'test' ? 'tmp/projects' : 'projects'
-  end
-
-  def projects_path
-    Rails.root.join(projects_dir).to_s
   end
 
   def db_file_name
@@ -247,9 +249,8 @@ class Project < ActiveRecord::Base
     return false
   end
 
-  def merge_database(file)
+  def store_database(file, user)
     begin
-      # create tmp dir
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # unarchive database
@@ -259,10 +260,17 @@ class Project < ActiveRecord::Base
       # TODO minitar doesn't have directory change option
       `tar zxf #{file.path} -C #{tmp_dir}`
 
-      # merge database
-      file = Dir.entries(tmp_dir).select { |f| !File.directory? f }.first
+      version = DatabaseGenerator.execute_query(db_path, "select max(versionnum) from version;").first.first
+      version ||= 0
 
-      DatabaseGenerator.merge_database(dir_path + "/db.sqlite3", tmp_dir + file)
+      # move file to upload directory
+      unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
+      stored_file = "#{uploads_path}/#{key}_#{version}_#{user}.sqlite3"
+
+      # create upload directory if it doesn't exist
+      Dir.mkdir(uploads_path) unless File.directory? uploads_path
+
+      FileUtils.mv(unarchived_file, stored_file)
     rescue Exception => e
       puts "Error merging database"
       raise e
@@ -308,7 +316,7 @@ class Project < ActiveRecord::Base
       File.open(file,'r').read.each_line do |line|
         line.strip!
         return "invalid properties file" if line[0] == ?=
-        i = line.index('=');
+        i = line.index('=')
         return "invalid properties file" if !i
         return "invalid properties file" if line[i + 1..-1].strip.blank?
       end

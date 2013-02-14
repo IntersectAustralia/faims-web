@@ -20,6 +20,9 @@
 # Ignore all project directories
 /projects
 
+# Ignore all uploads
+/uploads
+
 # Ignore all swp files
 *.swp
 

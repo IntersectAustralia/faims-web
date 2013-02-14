@@ -105,15 +105,14 @@ Feature: Manage projects
     And I am on the android download link for Project 1
     Then I should download file for "Project 1"
 
-  Scenario: Upload project
+  Scenario: Upload project database
     Given I have project "Project 1"
-    And I upload database "db" to Project 1
-    Then I should have merged "db" into Project 1
+    And I upload database "db" to Project 1 succeeds
+    Then I should have stored "db" into Project 1
 
-  Scenario: Upload project
+  Scenario: Upload project database but fails because of corruption
     Given I have project "Project 1"
-    And I upload corrupted database "db" to Project 1
-    Then I should have not merged "db" into Project 1
+    And I upload corrupted database "db" to Project 1 fails
 
   Scenario: Archive project database
     Given I have project "Project 1"

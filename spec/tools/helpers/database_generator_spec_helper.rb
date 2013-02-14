@@ -13,32 +13,32 @@ def create_full_database
 
   n = 5
   (0..n).each do |i|
-    DatabaseGenerator.execute_query(file.path, "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp) " +
-        "VALUES (cast('#{i}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP);")
+    DatabaseGenerator.execute_query(file.path, "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, VersionNum) " +
+        "VALUES (cast('#{i}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, 0);")
 
     (0..n).each do |j|
-      DatabaseGenerator.execute_query(file.path, "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP " +
+      DatabaseGenerator.execute_query(file.path, "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, VersionNum) " +
+          "SELECT cast('#{i*n + j}' as integer), '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, 0 " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
   end
 
   (0..n).each do |i|
-    DatabaseGenerator.execute_query(file.path, "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp) " +
-        "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP);")
+    DatabaseGenerator.execute_query(file.path, "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, VersionNum) " +
+        "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, 0);")
 
     (0..n).each do |j|
-      DatabaseGenerator.execute_query(file.path, "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', CURRENT_TIMESTAMP " +
+      DatabaseGenerator.execute_query(file.path, "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp, VersionNum) " +
+          "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', CURRENT_TIMESTAMP, 0 " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
   end
 
   (0..n).each do |i|
-    DatabaseGenerator.execute_query(file.path, "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp) " +
-                                        "VALUES ('#{rand(1000)}', '#{rand(1000)}', '', CURRENT_TIMESTAMP);")
+    DatabaseGenerator.execute_query(file.path, "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
+                                        "VALUES ('#{rand(1000)}', '#{rand(1000)}', '', CURRENT_TIMESTAMP, 0);")
   end
   file.close
   file
@@ -71,6 +71,20 @@ def is_database_same(db1, db2)
       DatabaseGenerator.execute_query(db2.path, "select * from relnvalue;")
   return false if DatabaseGenerator.execute_query(db1.path, "select * from aentreln;") !=
       DatabaseGenerator.execute_query(db2.path, "select * from aentreln;")
+  return true
+end
+
+def is_version_database_same(db1, db2, version)
+  return false if DatabaseGenerator.execute_query(db1.path, "select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum = #{version};") !=
+      DatabaseGenerator.execute_query(db2.path, "select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity;")
+  return false if DatabaseGenerator.execute_query(db1.path, "select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from aentvalue where versionnum = #{version};") !=
+      DatabaseGenerator.execute_query(db2.path, "select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from aentvalue;")
+  return false if DatabaseGenerator.execute_query(db1.path, "select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn from relationship where versionnum = #{version};") !=
+      DatabaseGenerator.execute_query(db2.path, "select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn from relationship;")
+  return false if DatabaseGenerator.execute_query(db1.path, "select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext from relnvalue where versionnum = #{version};") !=
+      DatabaseGenerator.execute_query(db2.path, "select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext from relnvalue;")
+  return false if DatabaseGenerator.execute_query(db1.path, "select uuid, relationshipid, participatesverb, aentrelntimestamp from aentreln where versionnum = #{version};") !=
+      DatabaseGenerator.execute_query(db2.path, "select uuid, relationshipid, participatesverb, aentrelntimestamp from aentreln;")
   return true
 end
 
