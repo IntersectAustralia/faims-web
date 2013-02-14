@@ -68,7 +68,7 @@ Feature: Manage projects
     Then I should be on the projects page
     And I follow "Create Project"
     Then I should be on the new projects page
-    And I fill in "Name" with "Project 2"
+    And I fill in "Project Name" with "Project 2"
     And I pick file "<value>" for "<field>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
