@@ -17,12 +17,11 @@ class MergeDaemon
     Dir.entries(Rails.application.config.server_uploads_directory).select { |f| not File.directory? f }.each do |db_file|
 
       # match file name for key and version
-      match = /^(?<key>[^_]*)_(?<version>[^\_])_(?<user>[\.]).sqlite3$/.match(db_file)
+      match = /^(?<key>[^_]*)_v(?<version>.*)$/.match(db_file)
       next unless match # file is not valid
 
       key = match[:key]
       version = match[:version]
-      user = match[:user]
 
       # get projects directory
       project_dir = find_project_dir(key)
@@ -34,11 +33,17 @@ class MergeDaemon
       merge_database_file = Rails.application.config.server_uploads_directory + '/' + db_file
 
       # merge database
-      DatabaseGenerator.merge_database(project_database_file, merge_database_file, version, user)
+      DatabaseGenerator.merge_database(project_database_file, merge_database_file, version)
 
       FileUtils.rm_rf merge_database_file
 
       puts "Finished merging database"
+
+      # archive project
+
+      Project.find_by_key(key).update_archives
+
+      puts "Archiving projects"
 
     end
   end
@@ -54,7 +59,7 @@ loop do
 
   rescue Exception => e
     puts "Error merging database"
-    puts e.backtrace
+    puts e
     exit(0)
   end
 

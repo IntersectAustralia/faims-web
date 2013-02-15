@@ -213,7 +213,6 @@ class Project < ActiveRecord::Base
 
   def create_project_from(tmp_dir)
 
-    logger.debug projects_path
     begin
       Dir.mkdir(projects_path) unless File.directory? projects_path # make sure projects directory exists
 
@@ -262,16 +261,16 @@ class Project < ActiveRecord::Base
       # TODO minitar doesn't have directory change option
       `tar zxf #{file.path} -C #{tmp_dir}`
 
-      version = DatabaseGenerator.execute_query(db_path, "select max(versionnum) from version;").first.first
-      version ||= 0
+      # add new version
+      version = DatabaseGenerator.add_version(db_path, user)
 
-      # move file to upload directory
       unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
-      stored_file = "#{uploads_path}/#{key}_#{version}_#{user}.sqlite3"
+      stored_file = "#{uploads_path}/#{key}_v#{version}"
 
       # create upload directory if it doesn't exist
       Dir.mkdir(uploads_path) unless File.directory? uploads_path
 
+      # move file to upload directory
       FileUtils.mv(unarchived_file, stored_file)
     rescue Exception => e
       puts "Error merging database"

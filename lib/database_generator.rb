@@ -22,7 +22,19 @@ module DatabaseGenerator
     return 'libspatialite.so'
   end
 
-  def self.merge_database(toDB, fromDB, version, userid)
+  def self.add_version(db, userid)
+    db = SQLite3::Database.new(db)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    content = <<EOF
+    insert into version (versionnum, versiontimestamp, userid) select count(*) + 1, CURRENT_TIMESTAMP, #{userid} from version;
+EOF
+    content = content.gsub("\n", "")
+    db.execute_batch(content)
+    db.execute("select count(*) from version").first.first
+  end
+
+  def self.merge_database(toDB, fromDB, version)
     db = SQLite3::Database.new(toDB)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -34,8 +46,6 @@ insert into relationship (relationshipid, userid, relntimestamp, geospatialcolum
 insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, versionnum) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, #{version} from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
 insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, versionnum) select uuid, relationshipid, participatesverb, aentrelntimestamp, #{version} from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
 detach database import;
-
-insert into version (versionnum, versiontimestamp, userid) select #{version}, CURRENT_TIMESTAMP, #{userid};
 EOF
     content = content.gsub("\n", "")
     db.execute_batch(content)

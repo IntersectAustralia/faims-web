@@ -19,7 +19,7 @@ class AndroidController < ApplicationController
   def upload_db
     # TODO for now fail if merge daemon is not running
     if `rake merge_daemon:status` =~ /no instances running/
-      return render :json => {}.to_json, :status => 400
+      return render :json => {message: "database cannot be merge at this time"}.to_json, :status => 400
     end
 
     project = Project.find_by_key(params[:key])
@@ -31,9 +31,9 @@ class AndroidController < ApplicationController
 
       project.store_database(file, user)
 
-      render :json => {}.to_json, :status => 200
+      render :json => {message: "successfully uploaded database"}.to_json, :status => 200
     else
-      render :json => {}.to_json, :status => 400
+      render :json => {message: "database is corrupted"}.to_json, :status => 400
     end
 
   end
