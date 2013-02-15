@@ -63,7 +63,7 @@ end
 
 Then /^I should download file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.filename + "\""
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.filename + "\""
   file = File.open(project.filepath, 'r')
   page.source == file.read
 end
@@ -80,7 +80,7 @@ Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
   uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
   project.store_database(uploaded_file, 0)
 
-  stored_file = project.uploads_path + '/' + Dir.entries(project.uploads_path).select { |f| f unless File.directory? f }.first
+  stored_file = Project.uploads_path + '/' + Dir.entries(Project.uploads_path).select { |f| f unless File.directory? f }.first
 
   # check if uploaded_file unarchived matches stored_file
   archived_file_match(uploaded_file.path, stored_file).should be_true
@@ -99,7 +99,7 @@ end
 
 Then /^I should download db file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.db_file_name + "\""
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.db_file_name + "\""
   file = File.open(project.db_file_path, 'r')
   page.source == file.read
 end

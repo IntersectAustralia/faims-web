@@ -1,17 +1,9 @@
+ENV['RAILS_ENV'] = ARGV.first || ENV['RAILS_ENV'] || 'development'
+require Rails.root.to_s + "/config/environment"
+
 Dir.mkdir(Rails.application.config.server_uploads_directory) unless Rails.application.config.server_uploads_directory
 
 class MergeDaemon
-
-  # find project directory with given key
-  def self.find_project_dir(project_key)
-    Dir.entries(Rails.application.config.server_projects_directory).select do |dir|
-      settings_file = Rails.application.config.server_projects_directory + '/' + dir + '/project.settings'
-      if File.exists? settings_file
-        settings = JSON.parse(File.read(settings_file))
-        return dir if settings['key'] == project_key
-      end
-    end.first
-  end
 
   def self.do_merge
     Dir.entries(Rails.application.config.server_uploads_directory).select { |f| not File.directory? f }.each do |db_file|
@@ -24,7 +16,7 @@ class MergeDaemon
       version = match[:version]
 
       # get projects directory
-      project_dir = find_project_dir(key)
+      project_dir = Project.find_dir_for(key)
       next unless project_dir # key doesn't exist
 
       puts "Merging #{db_file}"
@@ -35,15 +27,12 @@ class MergeDaemon
       # merge database
       DatabaseGenerator.merge_database(project_database_file, merge_database_file, version)
 
+      # update project archives
+      Project.update_archives_for(key)
+
       FileUtils.rm_rf merge_database_file
 
       puts "Finished merging database"
-
-      # archive project
-
-      Project.find_by_key(key).update_archives
-
-      puts "Archiving projects"
 
     end
   end

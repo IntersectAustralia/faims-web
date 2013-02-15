@@ -107,5 +107,5 @@ def is_table_merged(db, db1, db2, table)
 end
 
 def merge_rows(rows1, rows2)
-  rows1.concat(rows2.each { |x| rows1.include? x  })
+  rows1.concat(rows2.select { |x| !rows1.include? x  })
 end

@@ -64,11 +64,11 @@ describe Project do
       tmp_dir = Dir.mktmpdir(project.dir_path)
       `tar zxf #{project.filepath} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir + '/' + project.dir_name)
-      entries.include?(project.db_name).should be_true
-      entries.include?(project.ui_schema_name).should be_true
-      entries.include?(project.ui_logic_name).should be_true
-      entries.include?(project.project_settings_name).should be_true
-      entries.include?(project.faims_properties_name).should be_true
+      entries.include?(Project.db_name).should be_true
+      entries.include?(Project.ui_schema_name).should be_true
+      entries.include?(Project.ui_logic_name).should be_true
+      entries.include?(Project.project_settings_name).should be_true
+      entries.include?(Project.faims_properties_name).should be_true
     rescue Exception => e
       raise e
     ensure
@@ -83,7 +83,7 @@ describe Project do
       tmp_dir = Dir.mktmpdir(project.dir_path)
       `tar zxf #{project.db_file_path} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir)
-      entries.include?(project.db_name).should be_true
+      entries.include?(Project.db_name).should be_true
     rescue Exception => e
       raise e
     ensure

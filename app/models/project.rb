@@ -40,78 +40,40 @@ class Project < ActiveRecord::Base
   def arch16n=(value)
   end
 
-  def projects_path
-    return Rails.root.to_s + '/tmp/projects' if Rails.env == 'test'
-    Rails.application.config.server_projects_directory
-  end
-
-  def uploads_path
-    return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
-    Rails.application.config.server_uploads_directory
-  end
-
   def dir_name
     name.gsub(/\s/, '_') if name
   end
 
   def dir_path
-    projects_path + '/' + dir_name
-  end
-
-  def filename
-    'project.tar.gz'
+    Project.projects_path + '/' + dir_name
   end
 
   def filepath
-    dir_path + '/' + filename
-  end
-
-  def db_file_name
-    'db.tar.gz'
+    dir_path + '/' + Project.filename
   end
 
   def db_file_path
-    dir_path + '/' + db_file_name
-  end
-
-  def data_schema_name
-    'data_schema.xml'
+    dir_path + '/' + Project.db_file_name
   end
 
   def data_schema_path
-    dir_path + '/' + data_schema_name
-  end
-
-  def db_name
-    'db.sqlite3'
-  end
-
-  def db_path
-    dir_path + '/' + db_name
-  end
-
-  def ui_schema_name
-    'ui_schema.xml'
-  end
-
-  def ui_schema_path
-    dir_path + '/' + ui_schema_name
-  end
-
-  def ui_logic_name
-    'ui_logic.bsh'
+    dir_path + '/' + Project.data_schema_name
   end
 
   def ui_logic_path
-    dir_path + '/' + ui_logic_name
+    dir_path + '/' + Project.ui_logic_name
   end
 
-  def faims_properties_name
-    'faims.properties'
+  def ui_schema_path
+    dir_path + '/' + Project.ui_schema_name
+  end
+
+  def db_path
+    dir_path + '/' + Project.db_name
   end
 
   def faims_properties_path
-    dir_path + '/' + faims_properties_name
+    dir_path + '/' + Project.faims_properties_name
   end
 
   def faims_project_properties_name
@@ -122,99 +84,34 @@ class Project < ActiveRecord::Base
     dir_path + '/' + faims_project_properties_name
   end
 
-  def project_settings_name
-    'project.settings'
-  end
-
   def project_settings_path
-    dir_path + '/' + project_settings_name
-  end
-
-  def archive
-    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
-    begin
-      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
-
-      # create project directory to archive
-      dir = tmp_dir + dir_name + '/'
-      Dir.mkdir(dir)
-
-      # create app database
-      db_file = dir + 'db.sqlite3'
-      DatabaseGenerator.create_app_database(db_path, db_file)
-
-      # copy files to tmp directory
-      FileUtils.cp(ui_schema_path, dir + ui_schema_name)
-      FileUtils.cp(ui_logic_path, dir + ui_logic_name)
-      FileUtils.cp(project_settings_path, dir + project_settings_name)
-      FileUtils.cp(faims_properties_path, dir + faims_properties_name)
-      FileUtils.cp(faims_project_properties_path, dir + faims_project_properties_name) if
-          File.exists? faims_project_properties_path
-
-      # archive project
-      #tgz = Zlib::GzipWriter.new(File.open(filepath, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
-      #Minitar.pack(tmp_dir, tgz)
-
-      # TODO currently minitar doesn't have directory change option
-      `tar zcf #{filepath} -C #{tmp_dir} #{File.basename(dir)}`
-    rescue Exception => e
-      puts "Error archiving project"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-    end
+    dir_path + '/' + Project.project_settings_name
   end
 
   def archive_info
     {
-        :file => filename,
+        :file => Project.filename,
         :size => File.size(filepath),
         :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
   end
 
-  def archive_db
-    # archive includes database
-    begin
-      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
-
-      # create app database
-      db_file = tmp_dir + 'db.sqlite3'
-      DatabaseGenerator.create_app_database(db_path, db_file)
-
-      # archive database
-      #tgz = Zlib::GzipWriter.new(File.open(db_file_path, 'wb'), Zlib::BEST_COMPRESSION, Zlib::DEFAULT_STRATEGY)
-      #Minitar.pack(db_file, tgz)
-
-      # TODO currently minitar doesn't have directory change option
-      `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(db_file)}`
-    rescue Exception => e
-      puts "Error archiving project"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-    end
-  end
-
   def archive_db_info
     {
-        :file => db_file_name,
+        :file => Project.db_file_name,
         :size => File.size(db_file_path),
         :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
   end
 
   def update_archives
-    archive
-    archive_db
+    Project.update_archives_for(key)
   end
 
   def create_project_from(tmp_dir)
 
     begin
-      Dir.mkdir(projects_path) unless File.directory? projects_path # make sure projects directory exists
+      Dir.mkdir(Project.projects_path) unless File.directory? Project.projects_path # make sure projects directory exists
 
       FileUtils.rm_rf dir_path if File.directory? dir_path # overwrite current project directory
       Dir.mkdir(dir_path)
@@ -254,10 +151,6 @@ class Project < ActiveRecord::Base
     begin
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
-      # unarchive database
-      #tgz = Zlib::GzipReader.new(File.open(file, 'rb'))
-      #Minitar.unpack(tgz, tmp_dir)
-
       # TODO minitar doesn't have directory change option
       `tar zxf #{file.path} -C #{tmp_dir}`
 
@@ -265,10 +158,10 @@ class Project < ActiveRecord::Base
       version = DatabaseGenerator.add_version(db_path, user)
 
       unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
-      stored_file = "#{uploads_path}/#{key}_v#{version}"
+      stored_file = "#{Project.uploads_path}/#{key}_v#{version}"
 
       # create upload directory if it doesn't exist
-      Dir.mkdir(uploads_path) unless File.directory? uploads_path
+      Dir.mkdir(Project.uploads_path) unless File.directory? Project.uploads_path
 
       # move file to upload directory
       FileUtils.mv(unarchived_file, stored_file)
@@ -326,6 +219,124 @@ class Project < ActiveRecord::Base
     end
     return nil
   end
+
+  # static
+
+  def self.filename
+    'project.tar.gz'
+  end
+
+  def self.db_file_name
+    'db.tar.gz'
+  end
+
+  def self.data_schema_name
+    'data_schema.xml'
+  end
+
+  def self.db_name
+    'db.sqlite3'
+  end
+
+  def self.ui_schema_name
+    'ui_schema.xml'
+  end
+
+  def self.ui_logic_name
+    'ui_logic.bsh'
+  end
+
+  def self.faims_properties_name
+    'faims.properties'
+  end
+
+  def self.project_settings_name
+    'project.settings'
+  end
+
+  def self.projects_path
+    return Rails.root.to_s + '/tmp/projects' if Rails.env == 'test'
+    Rails.application.config.server_projects_directory
+  end
+
+  def self.uploads_path
+    return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
+    Rails.application.config.server_uploads_directory
+  end
+
+  def self.find_dir_for(project_key)
+    Dir.entries(projects_path).select do |dir|
+      settings_file = projects_path + '/' + dir + '/project.settings'
+      if File.exists? settings_file
+        settings = JSON.parse(File.read(settings_file))
+        return dir if settings['key'] == project_key
+      end
+    end.first
+  end
+
+  def self.update_archives_for(project_key)
+    archive_project_for(project_key)
+    archive_database_for(project_key)
+  end
+
+  def self.archive_project_for(project_key)
+    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
+    dir_path = projects_path + '/' + find_dir_for(project_key) + '/'
+    dir_name = File.basename(dir_path)
+    settings = JSON.parse(File.read(dir_path + Project.project_settings_name))
+    filepath = dir_path + Project.filename
+
+    begin
+      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+
+      # create project directory to archive
+      project_dir = tmp_dir + dir_name + '/'
+      Dir.mkdir(project_dir)
+
+      # create app database
+      DatabaseGenerator.create_app_database(dir_path + Project.db_name, project_dir + Project.db_name)
+
+      files = [Project.ui_schema_name, Project.ui_logic_name, Project.project_settings_name,
+               Project.faims_properties_name, 'faims_' + settings['name'].gsub(/\s+/, '_') + '.properties']
+
+      # copy files to tmp directory
+      files.each do |file|
+        FileUtils.cp(dir_path + file, project_dir + file) if File.exists? dir_path + file
+      end
+
+      # TODO currently minitar doesn't have directory change option
+      `tar zcf #{filepath} -C #{tmp_dir} #{File.basename(dir_path)}`
+    rescue Exception => e
+      puts "Error archiving project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
+  end
+
+  def self.archive_database_for(project_key)
+    # archive includes database
+    dir_path = projects_path + '/' + find_dir_for(project_key) + '/'
+    db_file_path = dir_path + Project.db_file_name
+
+    begin
+      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+
+      # create app database
+      DatabaseGenerator.create_app_database(dir_path + Project.db_name, tmp_dir + Project.db_name)
+
+      # TODO currently minitar doesn't have directory change option
+      `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`
+    rescue Exception => e
+      puts "Error archiving project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
+  end
+
   private
 
 end

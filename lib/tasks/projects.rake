@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_project_creator.rb'
+require Rails.root.to_s + '/lib/tasks/test_project_creator.rb'
 
 begin
   namespace :projects do
@@ -7,8 +7,12 @@ begin
       clean_projects
     end
     desc "Archive all projects"
-    task :archive => :environment do
-      Project.all.each { |p| p.update_archives }
+    task :archive, [:key] => :environment do |t, args|
+      if args[:key]
+        Project.find_by_key(args[:key]).update_archives
+      else
+        Project.all.each { |p| p.update_archives }
+      end
     end
     namespace :test do
       desc "Generate test projects"

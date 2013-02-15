@@ -25,7 +25,7 @@ describe DatabaseGenerator do
       db1 = create_empty_database()
       db2 = create_empty_database()
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0, 0)
+      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
 
       is_database_empty(db1).should be_true
 
@@ -37,7 +37,7 @@ describe DatabaseGenerator do
       db1 = create_empty_database()
       db2 = create_full_database()
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0, 0)
+      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
 
       is_database_same(db1, db2).should be_true
 
@@ -51,7 +51,7 @@ describe DatabaseGenerator do
 
       backup_db1 = backup_database(db1)
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0, 0)
+      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -66,7 +66,7 @@ describe DatabaseGenerator do
 
       backup_db1 = backup_database(db1)
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0, 0)
+      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
 
       is_database_merged(db1, backup_db1, db2).should be_true
 
@@ -80,7 +80,7 @@ describe DatabaseGenerator do
 
       backup_db1 = backup_database(db1)
 
-      DatabaseGenerator.merge_database(db1.path, backup_db1.path, 0, 0)
+      DatabaseGenerator.merge_database(db1.path, backup_db1.path, 0)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -93,8 +93,8 @@ describe DatabaseGenerator do
       db2 = create_full_database()
       db3 = create_full_database()
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 1, 0)
-      DatabaseGenerator.merge_database(db1.path, db3.path, 2, 0)
+      DatabaseGenerator.merge_database(db1.path, db2.path, 1)
+      DatabaseGenerator.merge_database(db1.path, db3.path, 2)
 
       is_version_database_same(db1, db2, 1).should be_true
       is_version_database_same(db1, db3, 2).should be_true
@@ -104,20 +104,6 @@ describe DatabaseGenerator do
       db3.unlink
     end
 
-    it "Merging adds to version table" do
-      db1 = create_empty_database()
-      db2 = create_full_database()
-      db3 = create_full_database()
-
-      DatabaseGenerator.merge_database(db1.path, db2.path, 1 ,0)
-      DatabaseGenerator.merge_database(db1.path, db3.path, 2, 0)
-
-      DatabaseGenerator.execute_query(db1.path, "select * from version;").length.should == 2
-
-      db1.unlink
-      db2.unlink
-      db3.unlink
-    end
   end
 
 end
