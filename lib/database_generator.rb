@@ -22,6 +22,13 @@ module DatabaseGenerator
     return 'libspatialite.so'
   end
 
+  def self.current_version(db)
+    db = SQLite3::Database.new(db)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("select versionnum, versiontimestamp from version where versiontimestamp IN (select max(versiontimestamp) from version)").first
+  end
+
   def self.add_version(db, userid)
     db = SQLite3::Database.new(db)
     db.enable_load_extension(true)

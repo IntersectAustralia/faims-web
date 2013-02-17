@@ -89,18 +89,24 @@ class Project < ActiveRecord::Base
   end
 
   def archive_info
+    version = DatabaseGenerator.current_version(db_path)
     {
         :file => Project.filename,
         :size => File.size(filepath),
-        :md5 => Digest::MD5.hexdigest(File.read(filepath))
+        :md5 => Digest::MD5.hexdigest(File.read(filepath)),
+        :version => version.first,
+        :timestamp => version.second
     }
   end
 
   def archive_db_info
+    version = DatabaseGenerator.current_version(db_path)
     {
         :file => Project.db_file_name,
         :size => File.size(db_file_path),
-        :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
+        :md5 => Digest::MD5.hexdigest(File.read(db_file_path)),
+        :version => version.first,
+        :timestamp => version.second
     }
   end
 

@@ -100,6 +100,12 @@ Feature: Manage projects
     And I am on the android archive page for Project 1
     Then I should see json for "Project 1" archived file
 
+  Scenario: Archive project after sync
+    Given I have project "Project 1"
+    And I have synced 20 times for "Project 1"
+    And I am on the android archive page for Project 1
+    Then I should see json for "Project 1" archived file with version 20
+
   Scenario: Download project
     Given I have project "Project 1"
     And I am on the android download link for Project 1
@@ -118,6 +124,12 @@ Feature: Manage projects
     Given I have project "Project 1"
     And I am on the android archive db page for Project 1
     Then I should see json for "Project 1" archived db file
+
+  Scenario: Archive project database after sync
+    Given I have project "Project 1"
+    And I have synced 20 times for "Project 1"
+    And I am on the android archive db page for Project 1
+    Then I should see json for "Project 1" archived db file with version 20
 
   Scenario: Download project database
     Given I have project "Project 1"
