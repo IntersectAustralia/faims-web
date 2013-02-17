@@ -32,9 +32,9 @@ describe Project do
       p5 = FactoryGirl.build(:project, :name => "    Project 1    ")
       p1.save.should == true
       p2.save.should == true
-      p3.save.should == false
-      p4.save.should == false
-      p5.save.should == false
+      p3.save.should == true
+      p4.save.should == true
+      p5.save.should == true
     end
 
     it { should_not allow_value("").for(:key) }
