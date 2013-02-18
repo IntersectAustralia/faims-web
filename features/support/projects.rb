@@ -5,6 +5,7 @@ def make_project(name)
     FileUtils.cp(assets_dir + 'data_schema.xml', tmp_dir + '/data_schema.xml' )
     FileUtils.cp(assets_dir + 'ui_schema.xml', tmp_dir + '/ui_schema.xml' )
     FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
+    FileUtils.cp(assets_dir + 'project.settings', tmp_dir + '/project.settings' )
     project = Project.create(:name => name, :key => SecureRandom.uuid)
     project.create_project_from(tmp_dir)
     project

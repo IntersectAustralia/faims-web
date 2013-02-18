@@ -3,9 +3,9 @@ class Project < ActiveRecord::Base
   include DatabaseGenerator
   include Archive::Tar
 
-  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n
+  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant
 
-  validates :name, :presence => true, :uniqueness => true, :length => {:maximum => 255},
+  validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
 
   validates :key, :presence => true, :uniqueness => true
@@ -28,6 +28,42 @@ class Project < ActiveRecord::Base
   def ui_schema=(value)
   end
 
+  def season
+  end
+
+  def season=(value)
+  end
+
+  def description
+  end
+
+  def description=(value)
+  end
+
+  def permit_no
+  end
+
+  def permit_no=(value)
+  end
+
+  def permit_holder
+  end
+
+  def permit_holder=(value)
+  end
+
+  def contact_address
+  end
+
+  def contact_address=(value)
+  end
+
+  def participant
+  end
+
+  def participant=(value)
+  end
+
   def ui_logic
   end
 
@@ -41,7 +77,7 @@ class Project < ActiveRecord::Base
   end
 
   def dir_name
-    name.gsub(/\s/, '_') if name
+    key
   end
 
   def dir_path
@@ -88,26 +124,28 @@ class Project < ActiveRecord::Base
     dir_path + '/' + Project.project_settings_name
   end
 
+  def project_setting
+    File.read(dir_path + '/' + Project.project_settings_name)
+  end
+
   def archive_info
-    version = DatabaseGenerator.current_version(db_path)
-    {
+    info = {
         :file => Project.filename,
         :size => File.size(filepath),
-        :md5 => Digest::MD5.hexdigest(File.read(filepath)),
-        :version => version.first,
-        :timestamp => version.second
+        :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
+    version = DatabaseGenerator.current_version(db_path)
+    info.merge({ :version => version.first, :timestamp => version.second }) if version
   end
 
   def archive_db_info
-    version = DatabaseGenerator.current_version(db_path)
-    {
+    info = {
         :file => Project.db_file_name,
         :size => File.size(db_file_path),
-        :md5 => Digest::MD5.hexdigest(File.read(db_file_path)),
-        :version => version.first,
-        :timestamp => version.second
+        :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
+    version = DatabaseGenerator.current_version(db_path)
+    info.merge({ :version => version.first, :timestamp => version.second }) if version
   end
 
   def update_archives
@@ -127,11 +165,6 @@ class Project < ActiveRecord::Base
 
       # generate database
       DatabaseGenerator.generate_database(dir_path + "/db.sqlite3", dir_path + "/data_schema.xml")
-
-      # create project settings
-      File.open(dir_path + "/project.settings", 'w') do |file|
-        file.write({:name => name, key:key}.to_json)
-      end
 
       # create default faims properties
       File.open(dir_path + "/faims.properties", 'w') do |file|
@@ -270,16 +303,6 @@ class Project < ActiveRecord::Base
     Rails.application.config.server_uploads_directory
   end
 
-  def self.find_dir_for(project_key)
-    Dir.entries(projects_path).select do |dir|
-      settings_file = projects_path + '/' + dir + '/project.settings'
-      if File.exists? settings_file
-        settings = JSON.parse(File.read(settings_file))
-        return dir if settings['key'] == project_key
-      end
-    end.first
-  end
-
   def self.update_archives_for(project_key)
     archive_project_for(project_key)
     archive_database_for(project_key)
@@ -287,7 +310,7 @@ class Project < ActiveRecord::Base
 
   def self.archive_project_for(project_key)
     # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
-    dir_path = projects_path + '/' + find_dir_for(project_key) + '/'
+    dir_path = projects_path + '/' + project_key + '/'
     dir_name = File.basename(dir_path)
     settings = JSON.parse(File.read(dir_path + Project.project_settings_name))
     filepath = dir_path + Project.filename
@@ -323,7 +346,7 @@ class Project < ActiveRecord::Base
 
   def self.archive_database_for(project_key)
     # archive includes database
-    dir_path = projects_path + '/' + find_dir_for(project_key) + '/'
+    dir_path = projects_path + '/' + project_key + '/'
     db_file_path = dir_path + Project.db_file_name
 
     begin

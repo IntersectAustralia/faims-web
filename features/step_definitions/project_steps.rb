@@ -107,8 +107,9 @@ end
 And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   project = Project.find_by_name(name)
   (1..num.to_i).each do |i|
-    DatabaseGenerator.execute_query(project.db_path, "insert into version (versionnum, versiontimestamp, userid) select count(*) + 1, CURRENT_TIMESTAMP, 0 from version;")
+    DatabaseGenerator.execute_query(project.db_path, "insert into version (versionnum, versiontimestamp, userid) select #{i}, CURRENT_TIMESTAMP, 0;")
   end
+  p DatabaseGenerator.current_version(project.db_path)
 end
 
 Then /^I should see json for "([^"]*)" archived file with version (.*)$/ do |name, version|
@@ -119,4 +120,9 @@ end
 Then /^I should see json for "([^"]*)" archived db file with version (.*)$/ do |name, version|
   page.should have_content(Project.find_by_name(name).archive_db_info.to_json)
   page.should have_content("\"version\":#{version}")
+end
+
+When /^I click on "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  visit ("/projects/" + project.id.to_s)
 end

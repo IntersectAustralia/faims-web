@@ -40,6 +40,33 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
   end
 
+  def edit_project_setting
+    @project = Project.find(params[:id])
+    @project_setting = JSON.parse(@project.project_setting)
+  end
+
+  def update_project_setting
+    if @project.update_attributes(:name => params[:project][:name])
+        File.open(@project.dir_path + "/project.settings", 'w') do |file|
+        file.write({:name => params[:project][:name], key:@project.key,
+                    :season => params[:project][:season],
+                    :description => params[:project][:description],
+                    :permit_no => params[:project][:permit_no],
+                    :permit_holder => params[:project][:permit_holder],
+                    :contact_address => params[:project][:contact_address],
+                    :participant => params[:project][:participant]
+                   }.to_json)
+      end
+      @project.update_archives
+      session[:name] = ""
+      flash[:notice] = "Static data updated"
+      redirect_to :project
+    else
+      @project_setting = JSON.parse(@project.project_setting)
+      render 'edit_project_setting'
+    end
+  end
+
   def update
 
   end
@@ -68,6 +95,17 @@ class ProjectsController < ApplicationController
     if params[:project]
       @project = Project.new(:name => params[:project][:name], :key => SecureRandom.uuid) if params[:project]
       valid = @project.valid?
+      tmpdir = session[:tmpdir]
+      File.open(tmpdir + "/project.settings", 'w') do |file|
+        file.write({:name => @project.name, key:@project.key,
+                    :season => params[:project][:season],
+                    :description => params[:project][:description],
+                    :permit_no => params[:project][:permit_no],
+                    :permit_holder => params[:project][:permit_holder],
+                    :contact_address => params[:project][:contact_address],
+                    :participant => params[:project][:participant]
+                   }.to_json)
+      end
     end
 
     # check if data schema is valid
@@ -137,7 +175,21 @@ class ProjectsController < ApplicationController
         end
       end
     end
-
+    if !valid
+      session[:season] = params[:project][:season]
+      session[:description] = params[:project][:description]
+      session[:permit_no] = params[:project][:permit_no]
+      session[:permit_holder] = params[:project][:permit_holder]
+      session[:contact_address] = params[:project][:contact_address]
+      session[:participant] = params[:project][:participant]
+    else
+      session[:season] = ""
+      session[:description] = ""
+      session[:permit_no] = ""
+      session[:permit_holder] = ""
+      session[:contact_address] = ""
+      session[:participant] = ""
+    end
     valid
   end
 

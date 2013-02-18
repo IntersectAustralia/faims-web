@@ -16,7 +16,7 @@ class MergeDaemon
       version = match[:version]
 
       # get projects directory
-      project_dir = Project.find_dir_for(key)
+      project_dir = key
       next unless project_dir # key doesn't exist
 
       puts "Merging #{db_file}"
