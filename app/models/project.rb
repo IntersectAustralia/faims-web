@@ -136,7 +136,6 @@ class Project < ActiveRecord::Base
     }
     version = DatabaseGenerator.current_version(db_path)
     info.merge({ :version => version.first, :timestamp => version.second }) if version
-    info
   end
 
   def archive_db_info
@@ -147,7 +146,6 @@ class Project < ActiveRecord::Base
     }
     version = DatabaseGenerator.current_version(db_path)
     info.merge({ :version => version.first, :timestamp => version.second }) if version
-    info
   end
 
   def update_archives

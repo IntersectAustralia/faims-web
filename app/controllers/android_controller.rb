@@ -17,7 +17,7 @@ class AndroidController < ApplicationController
   end
 
   def upload_db
-    # TODO for now fail if merge daemon is not running
+    # TODO start merge daemon if not running
     if `rake merge_daemon:status` =~ /no instances running/
       return render :json => {message: "database cannot be merge at this time"}.to_json, :status => 400
     end
