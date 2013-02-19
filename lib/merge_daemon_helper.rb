@@ -5,30 +5,16 @@ class MergeDaemon
   end
 
   def self.sort_files_by_version(files)
-    # group files by project
-    project_files_map = {}
-    files.each do |f|
-      match = match_file(f)
-      key = match[:key]
-      project_files_map[key] ||= []
-      project_files_map[key].push(f)
-    end
-
     # sort files by version
-    sorted_project_files = project_files_map.map do |pair|
-      files = pair.second
-      sorted_files = files.sort do |a, b|
-        ma = match_file a
-        mb = match_file b
-        s = 1
-        s = -1 if ma[:version] < mb[:version]
-        s = 0 if ma[:version] == mb[:version]
-        s
-      end
-      sorted_files
-    end.flatten
-
-    sorted_project_files
+    sorted_files = files.sort do |a, b|
+      ma = match_file a
+      mb = match_file b
+      s = 1
+      s = -1 if ma[:version] < mb[:version]
+      s = 0 if ma[:version] == mb[:version]
+      s
+    end
+    sorted_files
   end
 
   def self.do_merge

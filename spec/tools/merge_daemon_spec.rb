@@ -20,8 +20,8 @@ describe MergeDaemon do
       a = b
       b = tmp
     end
-    files = [a + '_v2', b + '_v1', a + '_v3', b + '_v4']
-    MergeDaemon.sort_files_by_version(files).should == [a + '_v2', a + '_v3', b + '_v1', b + '_v4']
+    files = [a + '_v4', b + '_v1', b + '_v3', a + '_v2']
+    MergeDaemon.sort_files_by_version(files).should == [b + '_v1', a + '_v2', b + '_v3', a + '_v4']
   end
 
 end
