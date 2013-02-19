@@ -62,8 +62,6 @@ class MergeDaemon
         # update project archives
         Project.update_archives_for(key)
 
-        FileUtils.rm_rf merge_database_file
-
         puts "Finished merging database"
       end
     ensure
