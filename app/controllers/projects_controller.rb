@@ -1,5 +1,6 @@
 class ProjectsController < ApplicationController
 
+  require File.expand_path("../../projects/models/database",__FILE__)
   before_filter :authenticate_user!
   load_and_authorize_resource
 
@@ -38,6 +39,44 @@ class ProjectsController < ApplicationController
 
   def show
     @project = Project.find(params[:id])
+  end
+
+  def list_arch_ent_records
+    @project = Project.find(params[:id])
+    limit = 25
+    offset = params[:offset]
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    @uuid = Database.load_arch_entity(@project.db_path,limit,offset)
+  end
+
+  def edit_arch_ent_records
+    @project = Project.find(params[:id])
+    uuid = params[:uuid]
+    session[:uuid] = uuid
+    @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
+  end
+
+  def update_arch_ent_records
+    @project = Project.find(params[:id])
+    uuid = params[:uuid]
+    vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
+    attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
+    measure = !params[:project][:measure].blank? ? params[:project][:measure] : nil
+    freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
+    certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
+
+    Database.update_arch_entity_attribute(@project.db_path,uuid,vocab_id,attribute_id, measure, freetext, certainty)
+    @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
+    render 'edit_arch_ent_records'
+  end
+
+  def delete_arch_ent_records
+    @project = Project.find(params[:id])
+    uuid = params[:uuid]
+    Database.delete_arch_entity(@project.db_path,uuid)
+    redirect_to(list_arch_ent_records_path(@project,0))
   end
 
   def edit_project_setting

@@ -66,3 +66,27 @@
 .tabs li.upload .step-container > .step-body {
   width: 375px;
 }
+
+.arch_ent_record_content > input {
+
+}
+
+ul.inner
+  {
+  list-style-type:none;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+}
+ul.inner li
+  {
+  float:left;
+}
+ul.inner li a
+  {
+  display:block;
+  width:200px;
+  background-color:#eeeeee;
+  margin:3px;
+  border:1px solid black;
+}

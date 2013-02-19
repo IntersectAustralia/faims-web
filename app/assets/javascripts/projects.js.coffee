@@ -18,6 +18,7 @@ show_modal_dialog = ->
       $('#loading').removeClass('hidden')
       $('#loading').dialog('open')
   )
+
 $(document).ready(
   =>
     show_modal_dialog()

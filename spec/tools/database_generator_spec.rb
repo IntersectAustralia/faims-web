@@ -3,14 +3,14 @@ require 'tempfile'
 require 'sqlite3'
 load File.expand_path("#{Rails.root}/spec/tools/helpers/database_generator_spec_helper.rb", __FILE__)
 
-describe DatabaseGenerator do
+describe Database do
 
   it "Generates and Parses database" do
     tempfile = Tempfile.new('db.sqlite3')
-    DatabaseGenerator.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'data_schema.xml').to_s)
+    Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'data_schema.xml').to_s)
     db = SQLite3::Database.new(tempfile.path)
     db.enable_load_extension(true)
-    db.execute("select load_extension('#{DatabaseGenerator.spatialite_library}')")
+    db.execute("select load_extension('#{Database.spatialite_library}')")
     result = db.execute("select count(*) || 'ideal arch ent' from idealAEnt union select count(*) || 'ideal reln'  from idealreln union select count(*) || 'aent type' from aenttype union select count(*) || 'relntype' from relntype union select count(*) || 'attributekey'  from attributekey;")
     result[0].should == ["2aent type"]
     result[1].should == ["30attributekey"]
@@ -25,7 +25,7 @@ describe DatabaseGenerator do
       db1 = create_empty_database()
       db2 = create_empty_database()
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
+      Database.merge_database(db1.path, db2.path,0)
 
       is_database_empty(db1).should be_true
 
@@ -37,7 +37,7 @@ describe DatabaseGenerator do
       db1 = create_empty_database()
       db2 = create_full_database()
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
+      Database.merge_database(db1.path, db2.path,0)
 
       is_database_same(db1, db2).should be_true
 
@@ -51,7 +51,7 @@ describe DatabaseGenerator do
 
       backup_db1 = backup_database(db1)
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
+      Database.merge_database(db1.path, db2.path,0)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -66,7 +66,7 @@ describe DatabaseGenerator do
 
       backup_db1 = backup_database(db1)
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 0)
+      Database.merge_database(db1.path, db2.path, 0)
 
       is_database_merged(db1, backup_db1, db2).should be_true
 
@@ -80,7 +80,7 @@ describe DatabaseGenerator do
 
       backup_db1 = backup_database(db1)
 
-      DatabaseGenerator.merge_database(db1.path, backup_db1.path, 0)
+      Database.merge_database(db1.path, backup_db1.path,0)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -93,8 +93,8 @@ describe DatabaseGenerator do
       db2 = create_full_database()
       db3 = create_full_database()
 
-      DatabaseGenerator.merge_database(db1.path, db2.path, 1)
-      DatabaseGenerator.merge_database(db1.path, db3.path, 2)
+      Database.merge_database(db1.path, db2.path, 1)
+      Database.merge_database(db1.path, db3.path, 2)
 
       is_version_database_same(db1, db2, 1).should be_true
       is_version_database_same(db1, db3, 2).should be_true

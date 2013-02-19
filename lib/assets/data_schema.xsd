@@ -34,6 +34,7 @@
                   <xs:attribute type="xs:string" name="type" use="optional"/>
                   <xs:attribute type="xs:string" name="name" use="optional"/>
                   <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
+                  <xs:attribute type="xs:string" name="isIdentifier" use="optional"/>
                   <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
                 </xs:complexType>
               </xs:element>
@@ -72,6 +73,7 @@
                   <xs:attribute type="xs:string" name="name" use="optional"/>
                   <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
                   <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
+                  <xs:attribute type="xs:string" name="isIdentifier" use="optional"/>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>

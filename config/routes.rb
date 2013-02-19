@@ -24,6 +24,14 @@ FaimsWeb::Application.routes.draw do
 
   get "projects/:id/edit_project_setting", :to => "projects#edit_project_setting", :as => "edit_project_setting"
   post "projects/:id/edit_project_setting", :to => "projects#update_project_setting", :as => "update_project_setting"
+
+  get "projects/:id/list_arch_ent_records/:offset", :to => "projects#list_arch_ent_records", :as => "list_arch_ent_records"
+  get "projects/:id/delete_arch_ent_records/:uuid", :to => "projects#delete_arch_ent_records", :as => "delete_arch_ent_records"
+  get "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#edit_arch_ent_records", :as => "edit_arch_ent_records"
+  post "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#update_arch_ent_records", :as => "update_arch_ent_records"
+
+  get "projects/:id/list_rel_records/:offset", :to => "projects#list_rel_records", :as => "list_rel_records"
+
   get "android/projects", :to => "android#projects", :as => "android_projects"
   get "android/project/:key/archive", :to => "android#archive", :as => "android_project_archive"
   get "android/project/:key/download", :to => "android#download", :as => "android_project_download"

@@ -26,5 +26,5 @@
         = f.label :participant, "Participants:"
         = f.text_area :participant, :size => "40x5", :class => 'project-textarea', :value => @project_setting['participant']
     .form-actions
-      = f.submit "Update", :class => "btn btn-primary", :id => "submit-project-btn"
+      = f.submit "Update", :class => "btn btn-primary", :id => "update-project-setting-btn"
       = link_to "Back", project_path(@project), :class => 'btn'

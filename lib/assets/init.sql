@@ -22,7 +22,7 @@ CREATE TABLE AEntType (
 	AEntTypeID            TEXT NOT NULL,
 	AEntTypeName		  TEXT,
 	AEntTypeCategory	  TEXT,
-	AEntTypeDescription   TEXT
+	AEntTypeDescription   TEX
  );
 
 CREATE TABLE AttributeKey (
@@ -40,7 +40,7 @@ CREATE TABLE Vocabulary (
 	VocabID              INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
 	VocabName          	 TEXT,
-	SemanticMapURL		 TEXT,
+	SemanticMapURL	     TEXT,
 	PictureURL			 TEXT
  );
 
@@ -61,6 +61,7 @@ CREATE TABLE IdealAEnt (
 	AEntTypeID           TEXT NOT NULL,
 	AttributeID          TEXT NOT NULL,
 	AEntDescription      TEXT,
+	IsIdentifier		 BOOLEAN,
 	MinCardinality		 INTEGER,
 	MaxCardinality		 INTEGER
  );
@@ -69,16 +70,18 @@ CREATE TABLE IdealReln (
 	RelnTypeID           INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
 	RelnDescription      TEXT,
+	IsIdentifier		 BOOLEAN,
 	MinCardinality		 INTEGER,
 	MaxCardinality		 INTEGER
  );
 
 CREATE TABLE ArchEntity (
-	UUID                 INTEGER NOT NULL,
+	UUID                 integer NOT NULL,
 	AEntTimestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UserID               INTEGER,
 	DOI                  TEXT,
 	AEntTypeID           TEXT,
+	Deleted				 BOOLEAN,
 	GeoSpatialColumnType TEXT,
 	VersionNum           INTEGER
  );
@@ -86,13 +89,14 @@ CREATE TABLE ArchEntity (
 create index aentindex on archentity (uuid);
 
 CREATE TABLE AEntValue (
-	UUID                 INTEGER NOT NULL,
+	UUID                 integer NOT NULL,
 	ValueTimestamp       DATETIME DEFAULT CURRENT_TIMESTAMP,
 	VocabID              INTEGER,
 	AttributeID          TEXT NOT NULL,
 	Measure              INT,
 	FreeText             TEXT,
 	Certainty            REAL,
+	Deleted				 BOOLEAN,
 	VersionNum           INTEGER
  );
 
@@ -103,6 +107,7 @@ CREATE TABLE Relationship (
 	UserID               INTEGER NOT NULL,
 	RelnTimestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
 	GeoSpatialColumnType TEXT,
+	Deleted				 BOOLEAN,
 	RelnTypeID           INTEGER NOT NULL,
 	VersionNum           INTEGER
  );
@@ -113,6 +118,7 @@ CREATE TABLE AEntReln (
 	UUID                 INTEGER NOT NULL,
 	RelationshipID       INTEGER NOT NULL,
 	ParticipatesVerb     TEXT,
+	Deleted				 BOOLEAN,
 	AEntRelnTimestamp    DATETIME DEFAULT CURRENT_TIMESTAMP,
 	VersionNum           INTEGER
  );
@@ -122,8 +128,9 @@ create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp)
 CREATE TABLE RelnValue (
 	RelationshipID       INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
-	VocabID              INTEGER,
+	VocabID              INTEGER NOT NULL,
 	RelnValueTimestamp   DATETIME DEFAULT CURRENT_TIMESTAMP,
+	Deleted				 BOOLEAN,
 	Freetext             TEXT,
 	VersionNum           INTEGER
  );

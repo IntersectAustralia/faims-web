@@ -1,6 +1,5 @@
 class Project < ActiveRecord::Base
   include XSDValidator
-  include DatabaseGenerator
   include Archive::Tar
 
   attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant
@@ -125,7 +124,7 @@ class Project < ActiveRecord::Base
   end
 
   def project_setting
-    File.read(dir_path + '/' + Project.project_settings_name)
+    File.read(dir_path + '/' + Project.project_settings_name).as_json
   end
 
   def archive_info
@@ -134,7 +133,7 @@ class Project < ActiveRecord::Base
         :size => File.size(filepath),
         :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
-    version = DatabaseGenerator.current_version(db_path)
+    version = Database.current_version(db_path)
     info = info.merge({ :version => version.first }) if version
     info
   end
@@ -145,7 +144,7 @@ class Project < ActiveRecord::Base
         :size => File.size(db_file_path),
         :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
-    version = DatabaseGenerator.current_version(db_path)
+    version = Database.current_version(db_path)
     info = info.merge({ :version => version.first }) if version
     info
   end
@@ -166,7 +165,7 @@ class Project < ActiveRecord::Base
       Dir.entries(tmp_dir).each { |f| FileUtils.cp(tmp_dir + '/' + f, dir_path + '/') unless File.directory? f }
 
       # generate database
-      DatabaseGenerator.generate_database(dir_path + "/db.sqlite3", dir_path + "/data_schema.xml")
+      Database.generate_database(dir_path + "/db.sqlite3", dir_path + "/data_schema.xml")
 
       # create default faims properties
       File.open(dir_path + "/faims.properties", 'w') do |file|
@@ -196,7 +195,7 @@ class Project < ActiveRecord::Base
       `tar zxf #{file.path} -C #{tmp_dir}`
 
       # add new version
-      version = DatabaseGenerator.add_version(db_path, user)
+      version = Database.add_version(db_path, user)
 
       unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
       stored_file = "#{Project.uploads_path}/#{key}_v#{version}"
@@ -206,6 +205,7 @@ class Project < ActiveRecord::Base
 
       # move file to upload directory
       FileUtils.mv(unarchived_file, stored_file)
+
     rescue Exception => e
       puts "Error storing database"
       raise e
@@ -327,7 +327,7 @@ class Project < ActiveRecord::Base
       Dir.mkdir(project_dir)
 
       # create app database
-      DatabaseGenerator.create_app_database(dir_path + Project.db_name, project_dir + Project.db_name)
+      Database.create_app_database(dir_path + Project.db_name, project_dir + Project.db_name)
 
       files = [Project.ui_schema_name, Project.ui_logic_name, Project.project_settings_name,
                Project.faims_properties_name, 'faims_' + settings['name'].gsub(/\s+/, '_') + '.properties']
@@ -357,7 +357,7 @@ class Project < ActiveRecord::Base
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # create app database
-      DatabaseGenerator.create_app_database(dir_path + Project.db_name, tmp_dir + Project.db_name)
+      Database.create_app_database(dir_path + Project.db_name, tmp_dir + Project.db_name)
 
       # TODO currently minitar doesn't have directory change option
       `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`

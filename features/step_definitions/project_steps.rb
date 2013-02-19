@@ -107,9 +107,9 @@ end
 And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   project = Project.find_by_name(name)
   (1..num.to_i).each do |i|
-    DatabaseGenerator.execute_query(project.db_path, "insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
+    Database.execute_query(project.db_path, "insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
   end
-  p DatabaseGenerator.current_version(project.db_path)
+  p Database.current_version(project.db_path)
 end
 
 Then /^I should see json for "([^"]*)" archived file with version (.*)$/ do |name, version|
