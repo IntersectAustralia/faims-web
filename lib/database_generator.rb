@@ -26,7 +26,7 @@ module DatabaseGenerator
     db = SQLite3::Database.new(db)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("select versionnum, uploadtimestamp from version where ismerged = 1 order by versionnum desc").first
+    db.execute("select versionnum from version where ismerged = 1 order by versionnum desc").first
   end
 
   def self.add_version(db, userid)

@@ -135,7 +135,7 @@ class Project < ActiveRecord::Base
         :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
     version = DatabaseGenerator.current_version(db_path)
-    info = info.merge({ :version => version.first, :timestamp => version.second }) if version
+    info = info.merge({ :version => version.first }) if version
     info
   end
 
@@ -146,7 +146,7 @@ class Project < ActiveRecord::Base
         :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
     version = DatabaseGenerator.current_version(db_path)
-    info = info.merge({ :version => version.first, :timestamp => version.second }) if version
+    info = info.merge({ :version => version.first }) if version
     info
   end
 
