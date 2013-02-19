@@ -135,7 +135,8 @@ class Project < ActiveRecord::Base
         :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
     version = DatabaseGenerator.current_version(db_path)
-    info.merge({ :version => version.first, :timestamp => version.second }) if version
+    info = info.merge({ :version => version.first, :timestamp => version.second }) if version
+    info
   end
 
   def archive_db_info
@@ -145,7 +146,8 @@ class Project < ActiveRecord::Base
         :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
     version = DatabaseGenerator.current_version(db_path)
-    info.merge({ :version => version.first, :timestamp => version.second }) if version
+    info = info.merge({ :version => version.first, :timestamp => version.second }) if version
+    info
   end
 
   def update_archives
@@ -205,8 +207,10 @@ class Project < ActiveRecord::Base
       # move file to upload directory
       FileUtils.mv(unarchived_file, stored_file)
     rescue Exception => e
-      puts "Error merging database"
+      puts "Error storing database"
       raise e
+
+      # TODO remove added version in database if created
     ensure
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir

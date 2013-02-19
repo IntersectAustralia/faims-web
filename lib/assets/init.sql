@@ -7,8 +7,9 @@ vacuum;
 
 CREATE TABLE Version (
   VersionNum           INTEGER NOT NULL,
-  VersionTimestamp     DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UserID               INTEGER
+  UploadTimestamp      DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UserID               INTEGER,
+  IsMerged             INTEGER
 );
 
 CREATE TABLE User (
@@ -26,7 +27,7 @@ CREATE TABLE AEntType (
 
 CREATE TABLE AttributeKey (
 	AttributeID          TEXT NOT NULL,
-	AttributeType		 Text,
+	AttributeType		 TEXT,
 	AttributeName        TEXT,
 	AttributeDescription TEXT
  );
