@@ -274,3 +274,7 @@ end
 Then /^show me the page$/ do
   save_and_open_page
 end
+
+And /^I wait$/ do
+  sleep(1)
+end

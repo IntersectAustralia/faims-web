@@ -76,6 +76,9 @@ And /^I upload database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
 end
 
 Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
+  # clear uploads directory
+  FileUtils.rm_rf Project.uploads_path
+
   project = Project.find_by_name(name)
   uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
   project.store_database(uploaded_file, 0)

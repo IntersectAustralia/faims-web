@@ -192,7 +192,7 @@ class Project < ActiveRecord::Base
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # TODO minitar doesn't have directory change option
-      `tar zxf #{file.path} -C #{tmp_dir}`
+      `tar xfz #{file.path} -C #{tmp_dir}`
 
       # add new version
       version = Database.add_version(db_path, user)
