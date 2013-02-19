@@ -33,12 +33,15 @@ FaimsWeb::Application.routes.draw do
   get "projects/:id/list_rel_records/:offset", :to => "projects#list_rel_records", :as => "list_rel_records"
 
   get "android/projects", :to => "android#projects", :as => "android_projects"
+  
   get "android/project/:key/archive", :to => "android#archive", :as => "android_project_archive"
   get "android/project/:key/download", :to => "android#download", :as => "android_project_download"
-  post "android/project/:key/upload_db", :to => "android#upload_db", :as => "android_project_upload_db"
+  
   get "android/project/:key/archive_db", :to => "android#archive_db", :as => "android_project_archive_db"
   get "android/project/:key/download_db", :to => "android#download_db", :as => "android_project_download_db"
 
+  post "android/project/:key/upload_db", :to => "android#upload_db", :as => "android_project_upload_db"
+  
   root :to => "pages#home"
 
   get "pages/home"

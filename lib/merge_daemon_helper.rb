@@ -1,3 +1,5 @@
+require Rails.root.to_s + '/app/projects/models/database'
+
 class MergeDaemon
 
   def self.match_file(file)
@@ -43,7 +45,7 @@ class MergeDaemon
         merge_database_file = db_file_path
 
         # merge database
-        DatabaseGenerator.merge_database(project_database_file, merge_database_file, version)
+        Database.merge_database(project_database_file, merge_database_file, version)
 
         # update project archives
         Project.update_archives_for(key)

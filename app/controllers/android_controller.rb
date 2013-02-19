@@ -40,13 +40,24 @@ class AndroidController < ApplicationController
 
   def archive_db
     project = Project.find_by_key(params[:key])
-    info = project.archive_db_info
+    info = nil
+    unless params[:version]
+      info = project.archive_db_info
+    else
+      info = project.archive_db_version_info(params[:version])
+    end
     render :json => info.to_json
   end
 
   def download_db
     project = Project.find_by_key(params[:key])
-    send_file project.db_file_path
+    unless params[:version]
+      send_file project.db_file_path
+    else
+      project.archive_db_version_info(params[:version])
+      temp_db_file = project.temp_db_version_file_path(params[:version])
+      send_file temp_db_file
+    end
   end
 
   private

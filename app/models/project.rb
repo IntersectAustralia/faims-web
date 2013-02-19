@@ -127,6 +127,14 @@ class Project < ActiveRecord::Base
     File.read(dir_path + '/' + Project.project_settings_name).as_json
   end
 
+  def temp_db_version_file_path(version) 
+    temp_db_dir_path + '/' + Project.db_version_file_name(version)
+  end
+
+  def temp_db_dir_path
+    dir_path + '/tmp'
+  end
+
   def archive_info
     info = {
         :file => Project.filename,
@@ -147,6 +155,23 @@ class Project < ActiveRecord::Base
     version = Database.current_version(db_path)
     info = info.merge({ :version => version.first }) if version
     info
+  end
+
+  def archive_db_version_info(version_num)
+      # create db tmp dir
+      FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
+
+      # create temporary archive of database
+      temp_path = temp_db_version_file_path(version_num)
+      Project.archive_db_version(version_num, temp_path) unless File.exists? temp_path 
+      info = {
+        :file => Project.db_version_file_name(version_num),
+        :size => File.size(temp_path),
+        :md5 => Digest::MD5.hexdigest(File.read(temp_path))
+      }
+      version = Database.current_version(db_path)
+      info = info.merge({ :version => version.first }) if version
+      info
   end
 
   def update_archives
@@ -297,6 +322,10 @@ class Project < ActiveRecord::Base
     'project.settings'
   end
 
+  def self.db_version_file_name(version)
+    'db_v' + version + '.sqlite3'
+  end
+
   def self.projects_path
     return Rails.root.to_s + '/tmp/projects' if Rails.env == 'test'
     Rails.application.config.server_projects_directory
@@ -362,12 +391,35 @@ class Project < ActiveRecord::Base
       # TODO currently minitar doesn't have directory change option
       `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`
     rescue Exception => e
-      puts "Error archiving project"
+      puts "Error archiving database"
       raise e
     ensure
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
     end
+  end
+
+  def self.archive_database_version_for(project_key, version, dir)
+     # archive includes database
+    dir_path = projects_path + '/' + project_key + '/'
+    db_file_path = dir + Project.db_version_file_name(version)
+
+    begin
+      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+
+      # create app database
+      Database.create_app_database(dir_path + Project.db_name, tmp_dir + Project.db_name)
+
+      # TODO currently minitar doesn't have directory change option
+      `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`
+    rescue Exception => e
+      puts "Error archiving database"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
+
   end
 
   private
