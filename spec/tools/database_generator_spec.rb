@@ -25,7 +25,7 @@ describe Database do
       db1 = create_empty_database()
       db2 = create_empty_database()
 
-      Database.merge_database(db1.path, db2.path,0)
+      Database.merge_database(db1.path, db2.path,1)
 
       is_database_empty(db1).should be_true
 
@@ -34,10 +34,12 @@ describe Database do
     end
 
     it "Empty database and Full database" do
-      db1 = create_empty_database()
-      db2 = create_full_database()
+      version = 1
 
-      Database.merge_database(db1.path, db2.path,0)
+      db1 = create_empty_database()
+      db2 = create_full_database(version)
+
+      Database.merge_database(db1.path, db2.path, version)
 
       is_database_same(db1, db2).should be_true
 
@@ -46,12 +48,14 @@ describe Database do
     end
 
     it "Full database and Empty database" do
-      db1 = create_full_database()
+      version = 1
+
+      db1 = create_full_database(version)
       db2 = create_empty_database()
 
       backup_db1 = backup_database(db1)
 
-      Database.merge_database(db1.path, db2.path,0)
+      Database.merge_database(db1.path, db2.path, version)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -61,12 +65,14 @@ describe Database do
     end
 
     it "Full database and Full database" do
-      db1 = create_full_database()
-      db2 = create_full_database()
+      version = 1
+
+      db1 = create_full_database(version)
+      db2 = create_full_database() # version doesn't matter
 
       backup_db1 = backup_database(db1)
 
-      Database.merge_database(db1.path, db2.path, 0)
+      Database.merge_database(db1.path, db2.path, version)
 
       is_database_merged(db1, backup_db1, db2).should be_true
 
@@ -76,11 +82,12 @@ describe Database do
     end
 
     it "Does not insert duplicate records" do
-      db1 = create_full_database()
+      version = 1
+      db1 = create_full_database(version)
 
       backup_db1 = backup_database(db1)
 
-      Database.merge_database(db1.path, backup_db1.path,0)
+      Database.merge_database(db1.path, backup_db1.path, version)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -90,8 +97,8 @@ describe Database do
 
     it "Merge rows must have correct version number" do
       db1 = create_empty_database()
-      db2 = create_full_database()
-      db3 = create_full_database()
+      db2 = create_full_database() #version doesn't matter
+      db3 = create_full_database() #version doesn't matter
 
       Database.merge_database(db1.path, db2.path, 1)
       Database.merge_database(db1.path, db3.path, 2)

@@ -88,6 +88,17 @@ Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
   archived_file_match(uploaded_file.path, stored_file).should be_true
 end
 
+Then /^I should not have stored "([^"]*)" into (.*)$/ do |db_file, name|
+  project = Project.find_by_name(name)
+  uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
+  project.store_database(uploaded_file, 0)
+
+  stored_file = Project.uploads_path + '/' + Dir.entries(Project.uploads_path).select { |f| f unless File.directory? f }.first
+
+  # check if uploaded_file unarchived matches stored_file
+  archived_file_match(uploaded_file.path, stored_file).should be_true
+end
+
 And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
   project = Project.find_by_name(name)
   upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
@@ -111,7 +122,6 @@ And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   (1..num.to_i).each do |i|
     Database.execute_query(project.db_path, "insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
   end
-  p Database.current_version(project.db_path)
 end
 
 Then /^I should see json for "([^"]*)" archived file with version (.*)$/ do |name, version|
@@ -124,7 +134,16 @@ Then /^I should see json for "([^"]*)" archived db file with version (.*)$/ do |
   page.should have_content("\"version\":#{version}")
 end
 
+Then /^I should see json for "([^"]*)" archived version (.*) db file with version (.*)$/ do |name, requested_version, version|
+  page.should have_content(Project.find_by_name(name).archive_db_version_info(requested_version).to_json)
+  page.should have_content("\"version\":#{version}")
+end
+
 When /^I click on "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   visit ("/projects/" + project.id.to_s)
+end
+
+Then /^I should see bad request page$/ do
+  page.status_code.should == 400
 end

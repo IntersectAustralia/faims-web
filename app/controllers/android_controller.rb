@@ -7,12 +7,16 @@ class AndroidController < ApplicationController
 
   def archive
     project = Project.find_by_key(params[:key])
+    return render :json => "bad request", :status => 400 unless project
+
     info = project.archive_info
     render :json => info.to_json
   end
 
   def download
     project = Project.find_by_key(params[:key])
+    return render :json => "bad request", :status => 400 unless project
+
     send_file project.filepath
   end
 
@@ -23,6 +27,8 @@ class AndroidController < ApplicationController
     end
 
     project = Project.find_by_key(params[:key])
+    return render :json => "bad request", :status => 400 unless project
+
     file = params[:file]
     user = params[:user]
     md5 = params[:md5]
@@ -40,6 +46,8 @@ class AndroidController < ApplicationController
 
   def archive_db
     project = Project.find_by_key(params[:key])
+    return render :json => "bad request", :status => 400 unless project
+
     unless project.validate_version(params[:version])
       info = project.archive_db_info
     else
@@ -50,6 +58,8 @@ class AndroidController < ApplicationController
 
   def download_db
     project = Project.find_by_key(params[:key])
+    return render :json => "bad request", :status => 400 unless project
+
     unless project.validate_version(params[:version])
       send_file project.db_file_path
     else

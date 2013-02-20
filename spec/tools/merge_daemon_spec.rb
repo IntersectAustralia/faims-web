@@ -43,7 +43,7 @@ describe MergeDaemon do
 
     # create uploads database
     filename = uploads_dir + '/' + project.key + '_v1'
-    create_full_database(filename)
+    create_full_database(1, filename)
 
     # backup database
     FileUtils.cp filename, uploads_dir + '/temp.sqlite3'
@@ -73,7 +73,7 @@ describe MergeDaemon do
 
     # create uploads database
     filename = uploads_dir + '/' + project.key
-    create_full_database(filename)
+    create_full_database(1, filename)
 
     # backup database
     FileUtils.cp filename, uploads_dir + '/temp.sqlite3'

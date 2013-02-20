@@ -53,12 +53,12 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field       | value     | error                  |
-    | Name        |           | can't be blank         |
-    | Name        | Project * | is invalid             |
-    | Data Schema |           | can't be blank         |
-    | UI Schema   |           | can't be blank         |
-    | UI Logic    |           | can't be blank         |
+    | field       | value     | error          |
+    | Name        |           | can't be blank |
+    | Name        | Project * | is invalid     |
+    | Data Schema |           | can't be blank |
+    | UI Schema   |           | can't be blank |
+    | UI Logic    |           | can't be blank |
 
   @javascript
   Scenario Outline: Cannot create project due to errors
@@ -74,16 +74,16 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field       | value                     | error                  |
-    | Data Schema |                           | can't be blank         |
-    | Data Schema | garbage                   | must be xml file       |
-    | Data Schema | data_schema_error1.xml    | invalid xml            |
-    | UI Schema   |                           | can't be blank         |
-    | UI Schema   | garbage                   | must be xml file       |
-    | UI Schema   | ui_schema_error1.xml      | invalid xml            |
-    | UI Logic    |                           | can't be blank         |
-    | Arch16n     | faims_error.properties    | invalid file name      |
-    | Arch16n     | faims_Project_2.properties| invalid properties file|
+    | field       | value                      | error                   |
+    | Data Schema |                            | can't be blank          |
+    | Data Schema | garbage                    | must be xml file        |
+    | Data Schema | data_schema_error1.xml     | invalid xml             |
+    | UI Schema   |                            | can't be blank          |
+    | UI Schema   | garbage                    | must be xml file        |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml             |
+    | UI Logic    |                            | can't be blank          |
+    | Arch16n     | faims_error.properties     | invalid file name       |
+    | Arch16n     | faims_Project_2.properties | invalid properties file |
 
   Scenario Outline: Edit static data
     Given I am on the home page
@@ -96,9 +96,9 @@ Feature: Manage projects
     And I press "Update"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field         | value     | error          |
-    | Project Name  |           | can't be blank |
-    | Project Name  | Project * | is invalid     |
+    | field        | value     | error          |
+    | Project Name |           | can't be blank |
+    | Project Name | Project * | is invalid     |
 
   Scenario: Pull a list of projects
     Given I have projects
@@ -109,43 +109,91 @@ Feature: Manage projects
     And I am on the android projects page
     Then I should see json for projects
 
-  Scenario: Archive project
+  Scenario: See archive info for project
     Given I have project "Project 1"
     And I am on the android archive page for Project 1
     Then I should see json for "Project 1" archived file
 
-  Scenario: Archive project after sync
+  Scenario: See archive info for project after syncing
     Given I have project "Project 1"
     And I have synced 20 times for "Project 1"
     And I am on the android archive page for Project 1
     Then I should see json for "Project 1" archived file with version 20
 
-  Scenario: Download project
+  Scenario: Cannot see archive info if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android archive page for Project 2
+    Then I should see bad request page
+
+  Scenario: Can download project
     Given I have project "Project 1"
     And I am on the android download link for Project 1
     Then I should download file for "Project 1"
 
-  Scenario: Upload project database
+  Scenario: Cannot download project if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android download link for Project 2
+    Then I should see bad request page
+
+  Scenario: Can upload project database
     Given I have project "Project 1"
     And I upload database "db" to Project 1 succeeds
     Then I should have stored "db" into Project 1
 
-  Scenario: Upload project database but fails because of corruption
+  Scenario: Cannot upload project database because of corruption
     Given I have project "Project 1"
     And I upload corrupted database "db" to Project 1 fails
 
-  Scenario: Archive project database
+  Scenario: See archive info for database
     Given I have project "Project 1"
     And I am on the android archive db page for Project 1
     Then I should see json for "Project 1" archived db file
 
-  Scenario: Archive project database after sync
+  Scenario: See archive info for database after syncing
     Given I have project "Project 1"
     And I have synced 20 times for "Project 1"
     And I am on the android archive db page for Project 1
     Then I should see json for "Project 1" archived db file with version 20
 
-  Scenario: Download project database
+  Scenario: Cannot see archive info for database if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android archive db page for Project 2
+    Then I should see bad request page
+
+  Scenario: Can download project database
     Given I have project "Project 1"
     And I am on the android download db link for Project 1
     Then I should download db file for "Project 1"
+
+  Scenario: Cannot download project database if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android download db link for Project 2
+    Then I should see bad request page
+
+  Scenario Outline: See archive info for database with version
+    Given I have project "Project 1"
+    And I have synced 20 times for "Project 1"
+    And I am on the android archive db page for "Project 1" with request version <version>
+    Then I should see json for "Project 1" archived version <version> db file with version 20
+  Examples:
+    | version |
+    | 1       |
+    | 10      |
+    | 20      |
+
+  Scenario Outline: Cannot see archive info for database with invalid version
+    Given I have project "Project 1"
+    And I have synced 20 times for "Project 1"
+    And I am on the android archive db page for "Project 1" with request version <version>
+    Then I should see json for "Project 1" archived db file with version 20
+  Examples:
+    | version |
+    | 0       |
+    | -1      |
+    | 21      |
+
+  Scenario: Cannot see archive info for database with version if project doesn't exist
+    Given I have project "Project 1"
+    And I have synced 20 times for "Project 1"
+    And I am on the android archive db page for Project 2 with request version 10
+    Then I should see bad request page

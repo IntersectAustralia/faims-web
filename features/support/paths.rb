@@ -54,16 +54,30 @@ module NavigationHelpers
         android_projects_path
 
       when /the android archive page for (.*)$/
-        android_project_archive_path(Project.find_by_name($1).key)
+        project = Project.find_by_name($1)
+        android_project_archive_path(project ? project.key : "na")
 
       when /the android download link for (.*)$/
-        android_project_download_path(Project.find_by_name($1).key)
+        project = Project.find_by_name($1)
+        android_project_download_path(project ? project.key : "na")
+
+      when /the android archive db page for "([^"]*)" with request version (.*)$/
+        project = Project.find_by_name($1)
+        "/android/project/#{project ? project.key : "na"}/archive_db?version=#{$2}"
+
+      when /the android download db link for "([^"]*)" with request version (.*)$/
+        project = Project.find_by_name($1)
+        "/android/project/#{project ? project.key : "na"}/download_db?version=#{$2}"
 
       when /the android archive db page for (.*)$/
-        android_project_archive_db_path(Project.find_by_name($1).key)
+        project = Project.find_by_name($1)
+        android_project_archive_db_path(project ? project.key : "na")
 
       when /the android download db link for (.*)$/
-        android_project_download_db_path(Project.find_by_name($1).key)
+        project = Project.find_by_name($1)
+        android_project_download_db_path(project ? project.key : "na")
+
+
 
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:
