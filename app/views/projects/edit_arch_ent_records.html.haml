@@ -1,4 +1,4 @@
-%h1= @project.name
+%h1= @project.name + " - Archaeological Entity"
 = link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
 = link_to "Back", list_arch_ent_records_path(@project,session[:cur_offset]), :class => 'btn'
 .container

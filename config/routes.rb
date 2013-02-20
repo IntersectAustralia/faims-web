@@ -31,6 +31,9 @@ FaimsWeb::Application.routes.draw do
   post "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#update_arch_ent_records", :as => "update_arch_ent_records"
 
   get "projects/:id/list_rel_records/:offset", :to => "projects#list_rel_records", :as => "list_rel_records"
+  get "projects/:id/delete_rel_records/:relationshipid", :to => "projects#delete_rel_records", :as => "delete_rel_records"
+  get "projects/:id/edit_rel_records/:relationshipid", :to => "projects#edit_rel_records", :as => "edit_rel_records"
+  post "projects/:id/edit_rel_records/:relationshipid", :to => "projects#update_rel_records", :as => "update_rel_records"
 
   get "android/projects", :to => "android#projects", :as => "android_projects"
   

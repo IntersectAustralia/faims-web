@@ -11,7 +11,7 @@ def create_empty_database(filename = nil)
   file
 end
 
-def create_full_database(version = nil, filename = nil)
+def create_full_database(version = nil, filename = nil, index = nil)
   version ||= 1 # default version
 
   if filename
@@ -22,12 +22,13 @@ def create_full_database(version = nil, filename = nil)
 
   Database.generate_database(file.path, "#{Rails.root}/spec/assets/data_schema.xml")
 
-  n = 5
-  (0..n).each do |i|
+  s = index ? index : 0
+  n = s + 5
+  (s..n).each do |i|
       Database.execute_query(file.path, "INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, VersionNum) " +
         "VALUES (cast('#{i}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
-    (0..n).each do |j|
+    (s..n).each do |j|
       Database.execute_query(file.path, "INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, VersionNum) " +
           "SELECT cast('#{i*n + j}' as integer), '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
@@ -35,11 +36,11 @@ def create_full_database(version = nil, filename = nil)
     end
   end
 
-  (0..n).each do |i|
+  (s..n).each do |i|
     Database.execute_query(file.path, "INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, VersionNum) " +
         "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
-    (0..n).each do |j|
+    (s..n).each do |j|
       Database.execute_query(file.path, "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp, VersionNum) " +
           "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
@@ -47,7 +48,7 @@ def create_full_database(version = nil, filename = nil)
     end
   end
 
-  (0..n).each do |i|
+  (s..n).each do |i|
     Database.execute_query(file.path, "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
                                         "VALUES ('#{i}', '#{i}', '', CURRENT_TIMESTAMP, #{version});")
   end

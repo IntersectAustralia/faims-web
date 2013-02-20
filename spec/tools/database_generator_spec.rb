@@ -97,8 +97,8 @@ describe Database do
 
     it "Merge rows must have correct version number" do
       db1 = create_empty_database()
-      db2 = create_full_database() #version doesn't matter
-      db3 = create_full_database() #version doesn't matter
+      db2 = create_full_database(nil, nil, 0) #version doesn't matter
+      db3 = create_full_database(nil, nil, 1000) #version doesn't matter
 
       Database.merge_database(db1.path, db2.path, 1)
       Database.merge_database(db1.path, db3.path, 2)

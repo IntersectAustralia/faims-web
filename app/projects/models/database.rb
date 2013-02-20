@@ -6,15 +6,15 @@ class Database
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     uuid = db.execute("
-      SELECT uuid, aentdescription, attributeid, attributename, coalesce(vocabname, measure, freetext, certainty) as response
+      SELECT uuid, aentdescription, attributeid, attributename, coalesce(vocabname, measure, freetext) as response
               FROM (    SELECT uuid, attributeid, aentdescription
                        FROM (SELECT aenttypeid, attributeid, aentdescription
                                FROM idealaent
                               WHERE isIdentifier = 'true'
                               )
-                       JOIN (select uuid, aenttypeid
+                       JOIN (select *
                                from archentity
-                               where deleted is null
+                               where deleted is null and uuid not in (select uuid from archentity where deleted is 'true')
                                GROUP BY uuid
                                having max(aenttimestamp)
                                limit ? offset ?) USING (aenttypeid)
@@ -57,15 +57,90 @@ class Database
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("insert into AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp) values
-              (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);",uuid, vocab_id, attribute_id, measure, freetext, certainty)
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
+    db.execute("insert into AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP
+              , (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));",uuid, vocab_id, attribute_id, measure, freetext, certainty)
   end
 
   def self.delete_arch_entity(file, uuid)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("update archentity set deleted = 'true' where uuid = ?;",uuid)
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
+    db.execute("insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, deleted, versionnum)
+              select uuid, userid,AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, CURRENT_TIMESTAMP,'true',
+              (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from archentity where uuid = ?",uuid)
+  end
+
+  def self.load_rel(file, limit, offset)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    rel_uuid = db.execute("
+
+      SELECT relationshipid, RelnTypeName, attributename, coalesce(vocabname, freetext) as responce, vocabid, attributeid
+          FROM (SELECT relationshipid, attributeid, RelnTypeName
+                  FROM (SELECT relntypeid, attributeid, relntypename
+                          FROM idealreln join relntype using (relntypeid)
+                         WHERE isIdentifier = 'true')
+                  JOIN (SELECT relationshipid, relntypeid
+                          FROM relationship
+                         WHERE deleted is null and relationshipid not in (select relationshipid from relationship where deleted is 'true')
+                          and relntypeid in (select relntypeid from idealreln)
+                      GROUP BY relationshipid
+                        HAVING max(relntimestamp)
+                         LIMIT ? OFFSET ?) USING (relntypeid)
+                )
+          JOIN relnvalue USING (relationshipid, attributeid)
+          JOIN attributekey using (attributeid)
+          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+      GROUP BY relationshipid, attributeid
+        HAVING max(relnvaluetimestamp);",limit, offset)
+    rel_uuid
+  end
+
+  def self.get_rel_attributes(file, relationshipid)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    attributes = db.execute("
+      SELECT relationshipid, vocabid, attributeid, RelnTypeName, attributename, vocabname, freetext, certainty
+          FROM (SELECT relationshipid, attributeid, RelnTypeName
+                  FROM (SELECT relntypeid, attributeid, relntypename
+                          FROM idealreln join relntype using (relntypeid)
+                         WHERE isIdentifier = 'true')
+                  JOIN (SELECT relationshipid, relntypeid
+                          FROM relationship
+                         WHERE deleted is null and relationshipid = ?
+                          and relntypeid in (select relntypeid from idealreln)
+                      GROUP BY relationshipid
+                        HAVING max(relntimestamp)) USING (relntypeid)
+                )
+          JOIN relnvalue USING (relationshipid, attributeid)
+          JOIN attributekey using (attributeid)
+          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+      GROUP BY relationshipid, attributeid
+        HAVING max(relnvaluetimestamp);",relationshipid)
+    attributes
+  end
+
+  def self.update_rel_attribute(file, relationshipid, vocab_id, attribute_id, freetext, certainty)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
+    db.execute("insert into RelnValue (RelationshipID, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP,
+              (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));",relationshipid, attribute_id, vocab_id, freetext, certainty)
+  end
+
+  def self.delete_relationship(file, relationshipid)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
+    db.execute("insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, deleted, versionnum)
+              select RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, CURRENT_TIMESTAMP,'true',
+              (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from relationship where RelationshipID = ?;",relationshipid)
   end
 
   def self.generate_database(file, xml)
