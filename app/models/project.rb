@@ -1,3 +1,5 @@
+load Rails.root.to_s + "/app/projects/models/database.rb"
+
 class Project < ActiveRecord::Base
   include XSDValidator
   include Archive::Tar
@@ -291,9 +293,10 @@ class Project < ActiveRecord::Base
 
   def validate_version(version)
     return false unless version
+    return false if version.to_i < 1
     current_version = Database.current_version(db_path)
     return false unless current_version
-    return version.to_i < current_version.first.to_i
+    return version.to_i <= current_version.first.to_i
   end
 
   # static
@@ -331,7 +334,7 @@ class Project < ActiveRecord::Base
   end
 
   def self.db_version_file_name(version)
-    'db_v' + version + '.sqlite3'
+    'db_v' + version + '.tar.gz'
   end
 
   def self.projects_path
@@ -407,16 +410,15 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def self.archive_database_version_for(project_key, version, dir)
+  def self.archive_database_version_for(project_key, version, db_file_path)
      # archive includes database
     dir_path = projects_path + '/' + project_key + '/'
-    db_file_path = dir + Project.db_version_file_name(version)
 
     begin
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # create app database
-      Database.create_app_database(dir_path + Project.db_name, tmp_dir + Project.db_name)
+      Database.create_app_database_from_version(dir_path + Project.db_name, tmp_dir + Project.db_name, version)
 
       # TODO currently minitar doesn't have directory change option
       `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`

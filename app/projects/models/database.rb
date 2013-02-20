@@ -117,7 +117,7 @@ insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatial
 insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, versionnum, deleted) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, #{version}, deleted from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
 insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, versionnum, geospatialcolumn, deleted) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, #{version}, geospatialcolumn, deleted from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
 insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, versionnum, deleted) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, #{version},deleted from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
-insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, versionnum, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, #{version},deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
+insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, versionnum, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, #{version}, deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
 detach database import;
 
 update version set ismerged = 1 where versionnum = #{version};
@@ -156,6 +156,29 @@ create table export.aentvalue as select uuid, valuetimestamp, vocabid, attribute
 create table export.relationship as select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from relationship;
 create table export.relnvalue as select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext,deleted from relnvalue;
 create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln;
+detach database export;
+EOF
+    content = content.gsub("\n", "")
+    content = content.gsub("?", toDB)
+    db.execute_batch(content)
+  end
+
+  def self.create_app_database_from_version(fromDB, toDB, version)
+    db = SQLite3::Database.new(toDB)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("select initspatialmetadata()")
+
+    db = SQLite3::Database.new(fromDB)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    content = <<EOF
+attach database "?" as export;
+create table export.archentity as select uuid, aenttimestamp, userid, doi, deleted, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum >= #{version};
+create table export.aentvalue as select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, deleted from aentvalue where versionnum >= #{version};
+create table export.relationship as select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from relationship where versionnum >= #{version};
+create table export.relnvalue as select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext,deleted from relnvalue where versionnum >= #{version};
+create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln where versionnum >= #{version};
 detach database export;
 EOF
     content = content.gsub("\n", "")

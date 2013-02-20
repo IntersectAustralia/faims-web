@@ -80,8 +80,5 @@ module FaimsWeb
     config.server_projects_directory = Rails.root.join("projects").to_s
 
     config.server_uploads_directory = Rails.root.join("uploads").to_s
-
-    # auto app/projects
-    config.autoload_paths += Dir["#{config.root}/app/projects/*/"]
   end
 end
