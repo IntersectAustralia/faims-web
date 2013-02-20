@@ -1,5 +1,7 @@
 require 'spec_helper'
 require Rails.root.to_s + '/lib/merge_daemon_helper'
+require Rails.root.to_s + '/features/support/projects'
+require Rails.root.to_s + '/spec/tools/helpers/database_generator_spec_helper'
 
 describe MergeDaemon do
 
@@ -22,6 +24,36 @@ describe MergeDaemon do
     end
     files = [a + '_v4', b + '_v1', b + '_v3', a + '_v2']
     MergeDaemon.sort_files_by_version(files).should == [b + '_v1', a + '_v2', b + '_v3', a + '_v4']
+  end
+
+  it "should merge file uploads directory" do
+    projects_dir = Rails.root.to_s + '/tmp/projects'
+    uploads_dir = Rails.root.to_s + '/tmp/uploads'
+
+    # cleanup projects and uploads directory
+    FileUtils.rm_rf projects_dir
+    FileUtils.rm_rf uploads_dir
+
+    FileUtils.mkdir projects_dir
+    FileUtils.mkdir uploads_dir
+
+    # create project
+    project = make_project "Project"
+
+    # create uploads database
+    filename = uploads_dir + '/' + project.key + '_v1'
+    create_full_database(filename)
+
+    # backup database
+    FileUtils.cp filename, uploads_dir + '/temp.sqlite3'
+
+    MergeDaemon.do_merge(uploads_dir, projects_dir)
+
+    # check that upload is removed
+    File.exists?(filename).should be_false
+
+    # check that database is merged into project
+    is_database_same(File.open(project.db_path), File.open(uploads_dir + '/temp.sqlite3')).should be_true
   end
 
 end

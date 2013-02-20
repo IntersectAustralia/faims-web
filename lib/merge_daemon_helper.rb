@@ -19,14 +19,17 @@ class MergeDaemon
     sorted_files
   end
 
-  def self.do_merge
+  def self.do_merge(uploads_dir = nil, projects_dir = nil)
+    uploads_dir ||= Rails.application.config.server_uploads_directory
+     projects_dir ||= Rails.application.config.server_projects_directory
+
     begin
       db_file_path = nil
-      directory_files = Dir.entries(Rails.application.config.server_uploads_directory).select { |f| not File.directory? f }
+      directory_files = Dir.entries(uploads_dir).select { |f| not File.directory? f }
       project_files = directory_files.select { |f| match_file(f) }
       sorted_files = sort_files_by_version(project_files)
       sorted_files.each do |db_file|
-        db_file_path = Rails.application.config.server_uploads_directory + '/' + db_file
+        db_file_path = uploads_dir + '/' + db_file
 
         # match file name for key and version
         match = /^(?<key>[^_]*)_v(?<version>.*)$/.match(db_file)
@@ -41,7 +44,7 @@ class MergeDaemon
 
         puts "Merging #{db_file}"
 
-        project_database_file = Rails.application.config.server_projects_directory + '/' + project_dir + '/db.sqlite3'
+        project_database_file = projects_dir + '/' + project_dir + '/db.sqlite3'
         merge_database_file = db_file_path
 
         # merge database
