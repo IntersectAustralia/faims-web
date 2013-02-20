@@ -40,8 +40,7 @@ class AndroidController < ApplicationController
 
   def archive_db
     project = Project.find_by_key(params[:key])
-    info = nil
-    unless params[:version]
+    unless project.validate_version(params[:version])
       info = project.archive_db_info
     else
       info = project.archive_db_version_info(params[:version])
@@ -51,7 +50,7 @@ class AndroidController < ApplicationController
 
   def download_db
     project = Project.find_by_key(params[:key])
-    unless params[:version]
+    unless project.validate_version(params[:version])
       send_file project.db_file_path
     else
       project.archive_db_version_info(params[:version])
@@ -59,11 +58,5 @@ class AndroidController < ApplicationController
       send_file temp_db_file
     end
   end
-
-  private
-
-    def project_dir
-      return Rails.env == 'test' ? 'tmp/projects' : 'projects'
-    end
 
 end

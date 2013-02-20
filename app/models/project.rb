@@ -158,12 +158,13 @@ class Project < ActiveRecord::Base
   end
 
   def archive_db_version_info(version_num)
+
       # create db tmp dir
       FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
 
       # create temporary archive of database
       temp_path = temp_db_version_file_path(version_num)
-      Project.archive_db_version(version_num, temp_path) unless File.exists? temp_path 
+      Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
       info = {
         :file => Project.db_version_file_name(version_num),
         :size => File.size(temp_path),
@@ -286,6 +287,13 @@ class Project < ActiveRecord::Base
       return "invalid properties file"
     end
     return nil
+  end
+
+  def validate_version(version)
+    return false unless version
+    current_version = Database.current_version(db_path)
+    return false unless current_version
+    return version.to_i < current_version.first.to_i
   end
 
   # static
