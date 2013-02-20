@@ -1,0 +1,31 @@
+%h1= @project.name + " - Relationship"
+= link_to "Delete", delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+= link_to "Back", list_rel_records_path(@project,session[:cur_offset]), :class => 'btn'
+.container
+  - for attribute in @attributes
+    = simple_form_for @project, :url => update_rel_records_path, :method => "post" do|f|
+      .step-container
+        .step-body{:style => "width: 315px;"}
+          .arch_ent_record_content
+            = f.hidden_field :relationshipid, :value => attribute[0]
+            = f.hidden_field :attribute_id, :value => attribute[2]
+            = f.hidden_field :vocab_id, :value => attribute[1]
+            %table
+              %tr
+                %td
+                  = f.label :attribute_name, "Attribute name:"
+                %td
+                  = f.text_field :attribute_name, :value => attribute[4], :disabled => 'disabled'
+              %tr
+                %td
+                  = f.label :freetext, "Freetext:"
+                %td
+                  = f.text_field :freetext, :value => attribute[6]
+              %tr
+                %td
+                  = f.label :certainty, "Certainty:"
+                %td
+                  = f.text_field :certainty, :value => attribute[7]
+            .form-actions
+              = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
+              = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'

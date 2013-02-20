@@ -79,6 +79,43 @@ class ProjectsController < ApplicationController
     redirect_to(list_arch_ent_records_path(@project,0))
   end
 
+  def list_rel_records
+    @project = Project.find(params[:id])
+    limit = 25
+    offset = params[:offset]
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    @relationshipid = Database.load_rel(@project.db_path,limit,offset)
+  end
+
+  def edit_rel_records
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    session[:relationshipid] = relationshipid
+    @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
+  end
+
+  def update_rel_records
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
+    attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
+    freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
+    certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
+
+    Database.update_rel_attribute(@project.db_path,relationshipid,vocab_id,attribute_id, freetext, certainty)
+    @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
+    render 'edit_rel_records'
+  end
+
+  def delete_rel_records
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    Database.delete_relationship(@project.db_path,relationshipid)
+    redirect_to(list_rel_records_path(@project,0))
+  end
+
   def edit_project_setting
     @project = Project.find(params[:id])
     @project_setting = JSON.parse(@project.project_setting)

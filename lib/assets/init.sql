@@ -128,9 +128,10 @@ create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp)
 CREATE TABLE RelnValue (
 	RelationshipID       INTEGER NOT NULL,
 	AttributeID          TEXT NOT NULL,
-	VocabID              INTEGER NOT NULL,
+	VocabID              INTEGER,
 	RelnValueTimestamp   DATETIME DEFAULT CURRENT_TIMESTAMP,
 	Deleted				 BOOLEAN,
+	Certainty            REAL,
 	Freetext             TEXT,
 	VersionNum           INTEGER
  );
