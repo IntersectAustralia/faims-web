@@ -38,7 +38,7 @@ def create_full_database
 
   (0..n).each do |i|
     Database.execute_query(file.path, "INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
-                                        "VALUES ('#{rand(1000)}', '#{rand(1000)}', '', CURRENT_TIMESTAMP, 0);")
+                                        "VALUES ('#{i}', '#{i}', '', CURRENT_TIMESTAMP, 0);")
   end
   file.close
   file
