@@ -3,7 +3,7 @@ require Rails.root.to_s + '/app/projects/models/database'
 class MergeDaemon
 
   def self.match_file(file)
-    /^(?<key>[^_]*)_v(?<version>\d*)$/.match(file)
+    /^(?<key>[^_]+)_v(?<version>\d+)$/.match(file)
   end
 
   def self.sort_files_by_version(files)
@@ -21,7 +21,7 @@ class MergeDaemon
 
   def self.do_merge(uploads_dir = nil, projects_dir = nil)
     uploads_dir ||= Rails.application.config.server_uploads_directory
-     projects_dir ||= Rails.application.config.server_projects_directory
+    projects_dir ||= Rails.application.config.server_projects_directory
 
     begin
       db_file_path = nil
@@ -32,15 +32,15 @@ class MergeDaemon
         db_file_path = uploads_dir + '/' + db_file
 
         # match file name for key and version
-        match = /^(?<key>[^_]*)_v(?<version>.*)$/.match(db_file)
-        next unless match # file is not valid
+        match = match_file(db_file)
+        raise Exception unless match
 
         key = match[:key]
         version = match[:version]
 
         # get projects directory
         project_dir = key
-        next unless project_dir # key doesn't exist
+        raise Exception unless project_dir # key doesn't exist
 
         puts "Merging #{db_file}"
 
