@@ -129,8 +129,10 @@ class Project < ActiveRecord::Base
     File.read(dir_path + '/' + Project.project_settings_name).as_json
   end
 
-  def temp_db_version_file_path(version) 
-    temp_db_dir_path + '/' + Project.db_version_file_name(version)
+  def temp_db_version_file_path(version)
+    latest_version = Database.current_version(db_path)
+    latest_version = '0' unless version
+    temp_db_dir_path + '/' + Project.db_version_file_name(version) + '-' + latest_version
   end
 
   def temp_db_dir_path
@@ -160,13 +162,14 @@ class Project < ActiveRecord::Base
   end
 
   def archive_db_version_info(version_num)
-
       # create db tmp dir
-      FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
+      #FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
 
       # create temporary archive of database
-      temp_path = temp_db_version_file_path(version_num)
-      Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
+      #temp_path = temp_db_version_file_path(version_num)
+      #Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
+
+      temp_path = Project.archive_database_version_for(key, version_num)
       info = {
         :file => Project.db_version_file_name(version_num),
         :size => File.size(temp_path),
@@ -410,10 +413,11 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def self.archive_database_version_for(project_key, version, db_file_path)
+  def self.archive_database_version_for(project_key, version)
      # archive includes database
     dir_path = projects_path + '/' + project_key + '/'
-
+    db_file = Tempfile.new('db')
+    db_file_path = db_file.path
     begin
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
@@ -422,6 +426,8 @@ class Project < ActiveRecord::Base
 
       # TODO currently minitar doesn't have directory change option
       `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`
+
+      return db_file_path
     rescue Exception => e
       puts "Error archiving database"
       raise e
