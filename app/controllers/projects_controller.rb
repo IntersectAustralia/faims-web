@@ -43,12 +43,19 @@ class ProjectsController < ApplicationController
 
   def list_arch_ent_records
     @project = Project.find(params[:id])
+    @type = Database.get_arch_ent_types(@project.db_path)
+  end
+
+  def list_typed_arch_ent_records
+    @project = Project.find(params[:id])
     limit = 25
+    type = params[:type]
     offset = params[:offset]
+    session[:type] = type
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    @uuid = Database.load_arch_entity(@project.db_path,limit,offset)
+    @uuid = Database.load_arch_entity(@project.db_path,type,limit,offset)
   end
 
   def edit_arch_ent_records
@@ -56,6 +63,11 @@ class ProjectsController < ApplicationController
     uuid = params[:uuid]
     session[:uuid] = uuid
     @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
+    @vocab_name = {}
+    for attribute in @attributes
+      @vocab_name[attribute[1]] = Database.get_vocab(@project.db_path,attribute[1])
+    end
+    puts @vocab_name
   end
 
   def update_arch_ent_records
@@ -69,6 +81,10 @@ class ProjectsController < ApplicationController
 
     Database.update_arch_entity_attribute(@project.db_path,uuid,vocab_id,attribute_id, measure, freetext, certainty)
     @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
+    @vocab_name = {}
+    for attribute in @attributes
+      @vocab_name[attribute[1]] = Database.get_vocab(@project.db_path,attribute[1])
+    end
     render 'edit_arch_ent_records'
   end
 
@@ -81,12 +97,19 @@ class ProjectsController < ApplicationController
 
   def list_rel_records
     @project = Project.find(params[:id])
+    @type = Database.get_rel_types(@project.db_path)
+  end
+
+  def list_typed_rel_records
+    @project = Project.find(params[:id])
     limit = 25
+    type=params[:type]
     offset = params[:offset]
+    session[:type] = type
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    @relationshipid = Database.load_rel(@project.db_path,limit,offset)
+    @relationshipid = Database.load_rel(@project.db_path,type,limit,offset)
   end
 
   def edit_rel_records
@@ -94,6 +117,10 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
     @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
+    @vocab_name = {}
+    for attribute in @attributes
+      @vocab_name[attribute[2]] = Database.get_vocab(@project.db_path,attribute[2])
+    end
   end
 
   def update_rel_records
@@ -106,6 +133,10 @@ class ProjectsController < ApplicationController
 
     Database.update_rel_attribute(@project.db_path,relationshipid,vocab_id,attribute_id, freetext, certainty)
     @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
+    @vocab_name = {}
+    for attribute in @attributes
+      @vocab_name[attribute[2]] = Database.get_vocab(@project.db_path,attribute[2])
+    end
     render 'edit_rel_records'
   end
 
@@ -114,6 +145,13 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     Database.delete_relationship(@project.db_path,relationshipid)
     redirect_to(list_rel_records_path(@project,0))
+  end
+
+  def compare_arch_ents
+    @project = Project.find(params[:id])
+    uuids = params[:uuids]
+    @first_arch_ent = Database.get_arch_entity_attributes(@project.db_path, uuids[0])
+    @second_arch_ent = Database.get_arch_entity_attributes(@project.db_path, uuids[1])
   end
 
   def edit_project_setting

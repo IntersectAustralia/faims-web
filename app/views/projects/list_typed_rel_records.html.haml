@@ -1,0 +1,36 @@
+%h1= @project.name + " - Relationship Records"
+.content
+  - if (!@relationshipid.empty?)
+    = link_to "Back", list_rel_records_path(@project), :class => 'btn'
+    - prev_relationshipid = @relationshipid[0][0]
+    - relationshipid_array = []
+    - array = []
+    - for relationshipid in @relationshipid
+      - if prev_relationshipid != relationshipid[0]
+        - relationshipid_array << array
+        - array = []
+        - prev_relationshipid = relationshipid[0]
+      - array << relationshipid
+    - relationshipid_array << array
+    - for relationshipid_group in relationshipid_array
+      %ul.inner
+        - for relationshipids in relationshipid_group
+          %li
+            %a{:href => edit_rel_records_path(@project,relationshipids[0])}
+              =relationshipids[2].to_s + ": " + relationshipids[3].to_s
+  -else
+    %p No Record Found
+    = link_to "Back", list_rel_records_path(@project), :class => 'btn'
+-if !@relationshipid.empty?
+  .footer
+    - if (session[:prev_offset] >= 0)
+      %form{:action => list_typed_rel_records_path, :method => "get"}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
+        %input{:type => 'hidden', :value => session[:type], :name => 'type'}
+        %input{:type => 'submit', :value => "Previous"}
+    %form{:action => list_typed_rel_records_path, :method => "get"}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
+      %input{:type => 'hidden', :value => session[:type], :name => 'type'}
+      %input{:type => 'submit', :value => "Next"}

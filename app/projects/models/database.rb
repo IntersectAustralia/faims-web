@@ -1,30 +1,74 @@
 class Database
   require 'sqlite3'
 
-  def self.load_arch_entity(file, limit, offset)
+  def self.load_arch_entity(file,type, limit, offset)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    uuid = db.execute("
-      SELECT uuid, aentdescription, attributeid, attributename, coalesce(vocabname, measure, freetext) as response
-              FROM (    SELECT uuid, attributeid, aentdescription
-                       FROM (SELECT aenttypeid, attributeid, aentdescription
-                               FROM idealaent
-                              WHERE isIdentifier = 'true'
-                              )
-                       JOIN (select *
-                               from archentity
-                               where deleted is null and uuid not in (select uuid from archentity where deleted is 'true')
-                               GROUP BY uuid
-                               having max(aenttimestamp)
-                               limit ? offset ?) USING (aenttypeid)
+    if !type.eql?"all"
+      uuid = db.execute("
 
-                       )
-              JOIN aentvalue USING (uuid, attributeid)
-              JOIN attributekey using (attributeid)
-              left outer join vocabulary using (vocabid, attributeid)
-        group by uuid, attributeid
-        having max(valuetimestamp);",limit, offset)
+        SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS responce, vocabid, attributeid, max(tstamp, astamp)
+             FROM idealaent
+             JOIN aenttype USING (aenttypeid)
+             JOIN archentity USING (aenttypeid)
+             JOIN aentvalue USING (UUID, attributeid)
+             JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+             JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+             JOIN attributekey USING (attributeid)
+             LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+            WHERE isIdentifier = 'true'
+              AND uuid in (SELECT uuid
+                             FROM (SELECT uuid, aenttypeid, max(aenttimestamp) as aenttimestamp
+                                     FROM archentity
+                                    WHERE aenttypeid = ?
+                                 GROUP BY uuid, aenttypeid
+                                   HAVING max(aenttimestamp)
+                                      AND deleted IS null)
+                             JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
+                                     FROM aentvalue
+                                 GROUP BY uuid
+                                   HAVING max(valuetimestamp)
+                                   AND deleted IS null) USING (uuid)
+                         ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                            LIMIT ?
+                           OFFSET ?)
+         GROUP BY uuid, attributeid
+           HAVING max(valuetimestamp)
+              AND max(aenttimestamp)
+         ORDER BY max(tstamp,astamp) desc, uuid, attributename;",type,limit, offset)
+    else
+      uuid = db.execute("
+
+          SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS responce, vocabid, attributeid, max(tstamp, astamp)
+               FROM idealaent
+               JOIN aenttype USING (aenttypeid)
+               JOIN archentity USING (aenttypeid)
+               JOIN aentvalue USING (UUID, attributeid)
+               JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+               JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+               JOIN attributekey USING (attributeid)
+               LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+              WHERE isIdentifier = 'true'
+                AND uuid in (SELECT uuid
+                               FROM (SELECT uuid, aenttypeid, max(aenttimestamp) as aenttimestamp
+                                       FROM archentity
+                                   GROUP BY uuid, aenttypeid
+                                     HAVING max(aenttimestamp)
+                                        AND deleted IS null)
+                               JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
+                                       FROM aentvalue
+                                   GROUP BY uuid
+                                     HAVING max(valuetimestamp)
+                                     AND deleted IS null) USING (uuid)
+                           ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                              LIMIT ?
+                             OFFSET ?)
+           GROUP BY uuid, attributeid
+             HAVING max(valuetimestamp)
+                AND max(aenttimestamp)
+           ORDER BY max(tstamp,astamp) desc, uuid, attributename;",limit, offset)
+    end
     uuid
   end
 
@@ -34,10 +78,9 @@ class Database
     db.execute("select load_extension('#{spatialite_library}')")
     attributes = db.execute("
       SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty
-              FROM (    SELECT uuid, attributeid, aentdescription
+              FROM (    SELECT uuid, attributeid, aenttypeid
                        FROM (SELECT aenttypeid, attributeid, aentdescription
                                FROM idealaent
-                              WHERE isIdentifier = 'true'
                               )
                        JOIN (select uuid, aenttypeid
                                from archentity
@@ -49,7 +92,7 @@ class Database
               JOIN attributekey using (attributeid)
               left outer join vocabulary using (vocabid, attributeid)
         group by uuid, attributeid
-        having max(valuetimestamp);",uuid)
+        having max(valuetimestamp) order by uuid, attributename asc;",uuid)
     attributes
   end
 
@@ -72,30 +115,72 @@ class Database
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from archentity where uuid = ?",uuid)
   end
 
-  def self.load_rel(file, limit, offset)
+  def self.load_rel(file, type, limit, offset)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    rel_uuid = db.execute("
-
-      SELECT relationshipid, RelnTypeName, attributename, coalesce(vocabname, freetext) as responce, vocabid, attributeid
-          FROM (SELECT relationshipid, attributeid, RelnTypeName
-                  FROM (SELECT relntypeid, attributeid, relntypename
-                          FROM idealreln join relntype using (relntypeid)
-                         WHERE isIdentifier = 'true')
-                  JOIN (SELECT relationshipid, relntypeid
-                          FROM relationship
-                         WHERE deleted is null and relationshipid not in (select relationshipid from relationship where deleted is 'true')
-                          and relntypeid in (select relntypeid from idealreln)
-                      GROUP BY relationshipid
-                        HAVING max(relntimestamp)
-                         LIMIT ? OFFSET ?) USING (relntypeid)
-                )
-          JOIN relnvalue USING (relationshipid, attributeid)
-          JOIN attributekey using (attributeid)
-          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-      GROUP BY relationshipid, attributeid
-        HAVING max(relnvaluetimestamp);",limit, offset)
+    if !type.eql?"all"
+      rel_uuid = db.execute("
+          SELECT relationshipid, RelnTypeName, attributename, coalesce(vocabname, freetext) as responce, vocabid, attributeid, max(tstamp, astamp)
+              FROM idealreln
+              JOIN relntype using (relntypeid)
+              JOIN Relationship USING (relntypeid)
+              JOIN relnvalue USING (relationshipid, attributeid)
+              JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)
+              JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM Relationship GROUP BY relationshipid) USING (relationshipid)
+              JOIN attributekey USING (attributeid)
+              LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+             WHERE isIdentifier = 'true'
+               AND relationshipid in (SELECT relationshipid
+                                   FROM (SELECT relationshipid, relntypeid, max(relntimestamp) as relntimestamp
+                                           FROM relationship
+                                          WHERE relntypeid = ?
+                                       GROUP BY relationshipid, relntypeid
+                                         HAVING max(relntimestamp)
+                                            AND deleted IS null)
+                                   JOIN (SELECT relationshipid, max(relnvaluetimestamp) as valuetimestamp
+                                           FROM relnvalue
+                                       GROUP BY relationshipid
+                                         HAVING max(relnvaluetimestamp)
+                                         AND deleted IS null) USING (relationshipid)
+                               ORDER BY max(valuetimestamp, relntimestamp) desc, relationshipid
+                                  LIMIT ?
+                                 OFFSET ?)
+           GROUP BY relationshipid, attributeid
+             HAVING max(relntimestamp)
+                AND max(relnvaluetimestamp)
+           ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;",type,limit, offset)
+    else
+      rel_uuid = db.execute("
+          SELECT relationshipid, RelnTypeName, attributename, coalesce(vocabname, freetext) as responce, vocabid, attributeid, max(tstamp, astamp)
+              FROM idealreln
+              JOIN relntype using (relntypeid)
+              JOIN Relationship USING (relntypeid)
+              JOIN relnvalue USING (relationshipid, attributeid)
+              JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)
+              JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM Relationship GROUP BY relationshipid) USING (relationshipid)
+              JOIN attributekey USING (attributeid)
+              LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+             WHERE isIdentifier = 'true'
+               AND relationshipid in (SELECT relationshipid
+                                   FROM (SELECT relationshipid, relntypeid, max(relntimestamp) as relntimestamp
+                                           FROM relationship
+                                       GROUP BY relationshipid, relntypeid
+                                         HAVING max(relntimestamp)
+                                            AND deleted IS null)
+                                   JOIN (SELECT relationshipid, max(relnvaluetimestamp) as valuetimestamp
+                                           FROM relnvalue
+                                       GROUP BY relationshipid
+                                         HAVING max(relnvaluetimestamp)
+                                         AND deleted IS null) USING (relationshipid)
+                               ORDER BY max(valuetimestamp, relntimestamp) desc, relationshipid
+                                  LIMIT ?
+                                 OFFSET ?)
+           GROUP BY relationshipid, attributeid
+             HAVING max(relntimestamp)
+                AND max(relnvaluetimestamp)
+           ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;",limit, offset)
+    end
     rel_uuid
   end
 
@@ -107,8 +192,7 @@ class Database
       SELECT relationshipid, vocabid, attributeid, RelnTypeName, attributename, vocabname, freetext, certainty
           FROM (SELECT relationshipid, attributeid, RelnTypeName
                   FROM (SELECT relntypeid, attributeid, relntypename
-                          FROM idealreln join relntype using (relntypeid)
-                         WHERE isIdentifier = 'true')
+                          FROM idealreln join relntype using (relntypeid))
                   JOIN (SELECT relationshipid, relntypeid
                           FROM relationship
                          WHERE deleted is null and relationshipid = ?
@@ -120,7 +204,7 @@ class Database
           JOIN attributekey using (attributeid)
           LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
       GROUP BY relationshipid, attributeid
-        HAVING max(relnvaluetimestamp);",relationshipid)
+        HAVING max(relnvaluetimestamp) order by relationshipid, attributename asc;",relationshipid)
     attributes
   end
 
@@ -141,6 +225,30 @@ class Database
     db.execute("insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, deleted, versionnum)
               select RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, CURRENT_TIMESTAMP,'true',
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from relationship where RelationshipID = ?;",relationshipid)
+  end
+
+  def self.get_vocab(file,attributeid)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    vocabs = db.execute("select vocabname, vocabid from vocabulary where attributeid = ?",attributeid)
+    vocabs
+  end
+
+  def self.get_arch_ent_types(file)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    types = db.execute("select aenttypename, aenttypeid from aenttype")
+    types
+  end
+
+  def self.get_rel_types(file)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    types = db.execute("select relntypename, relntypeid from relntype")
+    types
   end
 
   def self.generate_database(file, xml)

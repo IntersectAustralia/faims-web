@@ -87,6 +87,7 @@ CREATE TABLE ArchEntity (
  );
 
 create index aentindex on archentity (uuid);
+create index aenttimeindex on archentity (uuid, aenttimestamp);
 
 CREATE TABLE AEntValue (
 	UUID                 integer NOT NULL,

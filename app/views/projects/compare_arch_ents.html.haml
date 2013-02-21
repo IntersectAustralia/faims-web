@@ -1,0 +1,9 @@
+%h1= @project.name
+.content
+  = simple_form_for @project, :url => select_arch_ents_path, :method => "post" do|f|
+    %table
+      %tr
+        %th Values
+        %th
+          =f.text_field :attribute_name, :value => @first_arch_ent
+        %th

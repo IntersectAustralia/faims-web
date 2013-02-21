@@ -1,0 +1,36 @@
+%h1= @project.name + " - Archaeological Entity Records"
+= link_to "Back", list_arch_ent_records_path(@project), :class => 'btn'
+.content
+  - if (!@uuid.empty?)
+    - prev_uuid = @uuid[0][0]
+    - uuid_array = []
+    - array = []
+    - for uuid in @uuid
+      - if prev_uuid != uuid[0]
+        - uuid_array << array
+        - array = []
+        - prev_uuid = uuid[0]
+      - array << uuid
+    - uuid_array << array
+    - for uuid_group in uuid_array
+      %ul.inner
+        - for uuids in uuid_group
+          %li
+            %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+              =uuids[2].to_s + ": " + uuids[3].to_s
+  -else
+    %p No Record Found
+    = link_to "Back", list_arch_ent_records_path(@project), :class => 'btn'
+-if !@uuid.empty?
+  .footer
+    - if (session[:prev_offset] >= 0)
+      %form{:action => list_typed_arch_ent_records_path, :method => "get"}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
+        %input{:type => 'hidden', :value => session[:type], :name => 'type'}
+        %input{:type => 'submit', :value => "Previous"}
+    %form{:action => list_typed_arch_ent_records_path, :method => "get"}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
+      %input{:type => 'hidden', :value => session[:type], :name => 'type'}
+      %input{:type => 'submit', :value => "Next"}

@@ -25,15 +25,20 @@ FaimsWeb::Application.routes.draw do
   get "projects/:id/edit_project_setting", :to => "projects#edit_project_setting", :as => "edit_project_setting"
   post "projects/:id/edit_project_setting", :to => "projects#update_project_setting", :as => "update_project_setting"
 
-  get "projects/:id/list_arch_ent_records/:offset", :to => "projects#list_arch_ent_records", :as => "list_arch_ent_records"
+  get "projects/:id/list_arch_ent_records/", :to => "projects#list_arch_ent_records", :as => "list_arch_ent_records"
+  get "projects/:id/list_typed_arch_ent_records/", :to => "projects#list_typed_arch_ent_records", :as => "list_typed_arch_ent_records"
   get "projects/:id/delete_arch_ent_records/:uuid", :to => "projects#delete_arch_ent_records", :as => "delete_arch_ent_records"
   get "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#edit_arch_ent_records", :as => "edit_arch_ent_records"
   post "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#update_arch_ent_records", :as => "update_arch_ent_records"
 
-  get "projects/:id/list_rel_records/:offset", :to => "projects#list_rel_records", :as => "list_rel_records"
+  get "projects/:id/list_rel_records/", :to => "projects#list_rel_records", :as => "list_rel_records"
+  get "projects/:id/list_typed_rel_records/", :to => "projects#list_typed_rel_records", :as => "list_typed_rel_records"
   get "projects/:id/delete_rel_records/:relationshipid", :to => "projects#delete_rel_records", :as => "delete_rel_records"
   get "projects/:id/edit_rel_records/:relationshipid", :to => "projects#edit_rel_records", :as => "edit_rel_records"
   post "projects/:id/edit_rel_records/:relationshipid", :to => "projects#update_rel_records", :as => "update_rel_records"
+
+  post "projects/:id/compare_arch_ents", :to => "projects#compare_arch_ents", :as => "compare_arch_ents"
+  post "projects/:id/select_arch_ents", :to => "projects#select_arch_ents", :as => "select_arch_ents"
 
   get "android/projects", :to => "android#projects", :as => "android_projects"
   

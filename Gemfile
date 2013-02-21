@@ -54,6 +54,7 @@ end
 group :test do
   gem 'cucumber-rails', require: false
   gem 'shoulda'
+  gem 'spork'
 end
 
 gem 'haml'

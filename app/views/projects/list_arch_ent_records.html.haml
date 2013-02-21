@@ -1,26 +1,12 @@
 %h1= @project.name + " - Archaeological Entity Records"
 .content
-  - if (!@uuid.empty?)
-    - prev_uuid = @uuid[0][0]
-    - uuid_array = []
-    - array = []
-    - for uuid in @uuid
-      - if prev_uuid != uuid[0]
-        - uuid_array << array
-        - array = []
-        - prev_uuid = uuid[0]
-      - array << uuid
-    - uuid_array << array
-    - for uuid_group in uuid_array
-      %ul.inner
-        - for uuids in uuid_group
-          %li
-            %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-              =uuids[3].to_s + ": " + uuids[4].to_s
-  -else
-    No Record Found
--if !@uuid.empty?
-  - if (session[:prev_offset] >= 0)
-    = link_to "Previous", list_arch_ent_records_path(@project,session[:prev_offset]), :class => 'btn'
-  = link_to "Next", list_arch_ent_records_path(@project,session[:next_offset]), :class => 'btn'
+  %h2 Filter based on Archaeological Entity type
+  %form{:action => list_typed_arch_ent_records_path, :method => "get"}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %input{:type => 'hidden', :value => 0, :name => 'offset'}
+    %select{:name => 'type'}
+      %option{ :value => "all"}="Show All Records"
+      - for type in @type
+        %option{:value=>type[1]}=type[0]
+    %input{:type => 'submit', :value => "Filter"}
   = link_to "Back", project_path(@project), :class => 'btn'

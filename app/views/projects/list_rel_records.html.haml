@@ -1,26 +1,12 @@
 %h1= @project.name + " - Relationship Records"
 .content
-  - if (!@relationshipid.empty?)
-    - prev_relationshipid = @relationshipid[0][0]
-    - relationshipid_array = []
-    - array = []
-    - for relationshipid in @relationshipid
-      - if prev_relationshipid != relationshipid[0]
-        - relationshipid_array << array
-        - array = []
-        - prev_relationshipid = relationshipid[0]
-      - array << relationshipid
-    - relationshipid_array << array
-    - for relationshipid_group in relationshipid_array
-      %ul.inner
-        - for relationshipids in relationshipid_group
-          %li
-            %a{:href => edit_rel_records_path(@project,relationshipids[0])}
-              =relationshipids[2].to_s + ": " + relationshipids[3].to_s
-  -else
-    No Record Found
--if !@relationshipid.empty?
-  - if (session[:prev_offset] >= 0)
-    = link_to "Previous", list_rel_records_path(@project,session[:prev_offset]), :class => 'btn'
-  = link_to "Next", list_rel_records_path(@project,session[:next_offset]), :class => 'btn'
+  %h2 Filter based on Relationship type
+  %form{:action => list_typed_rel_records_path, :method => "get"}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %input{:type => 'hidden', :value => 0, :name => 'offset'}
+    %select{:name => 'type'}
+      %option{ :value => "all"}="Show All Records"
+      - for type in @type
+        %option{:value=>type[1]}=type[0]
+    %input{:type => 'submit', :value => "Filter"}
   = link_to "Back", project_path(@project), :class => 'btn'

@@ -78,6 +78,7 @@ ul.inner
   padding:0;
   overflow:hidden;
 }
+ul.inner input,
 ul.inner li
   {
   float:left;
@@ -89,4 +90,13 @@ ul.inner li a
   background-color:#eeeeee;
   margin:3px;
   border:1px solid black;
+}
+
+.footer {
+  float: right;
+  padding-right: 535px;
+}
+
+.footer form{
+  display: inline-block;
 }

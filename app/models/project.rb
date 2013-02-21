@@ -4,7 +4,7 @@ class Project < ActiveRecord::Base
   include XSDValidator
   include Archive::Tar
 
-  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant
+  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type
 
   validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
@@ -24,6 +24,12 @@ class Project < ActiveRecord::Base
   end
 
   def ui_schema
+  end
+
+  def vocab_id
+  end
+
+  def type
   end
 
   def ui_schema=(value)
