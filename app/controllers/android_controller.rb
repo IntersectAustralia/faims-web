@@ -63,7 +63,8 @@ class AndroidController < ApplicationController
     unless project.validate_version(params[:version])
       send_file project.db_file_path
     else
-      temp_db_file = Project.archive_database_version_for(project.key, params[:version])
+      project.archive_db_version_info(params[:version])
+      temp_db_file = Project.temp_db_version_file_path(params[:version])
       send_file temp_db_file
     end
   end

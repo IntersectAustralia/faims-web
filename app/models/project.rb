@@ -131,8 +131,8 @@ class Project < ActiveRecord::Base
 
   def temp_db_version_file_path(version)
     latest_version = Database.current_version(db_path)
-    latest_version = '0' unless version
-    temp_db_dir_path + '/' + Project.db_version_file_name(version) + '-' + latest_version
+    latest_version = [0] unless version
+    temp_db_dir_path + '/' + Project.db_version_file_name(version) + '-' + latest_version.first.to_s
   end
 
   def temp_db_dir_path
@@ -163,13 +163,11 @@ class Project < ActiveRecord::Base
 
   def archive_db_version_info(version_num)
       # create db tmp dir
-      #FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
+      FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
 
       # create temporary archive of database
-      #temp_path = temp_db_version_file_path(version_num)
-      #Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
-
-      temp_path = Project.archive_database_version_for(key, version_num)
+      temp_path = temp_db_version_file_path(version_num)
+      Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
       info = {
         :file => Project.db_version_file_name(version_num),
         :size => File.size(temp_path),
@@ -413,11 +411,10 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def self.archive_database_version_for(project_key, version)
+  def self.archive_database_version_for(project_key, version, temp_path)
      # archive includes database
     dir_path = projects_path + '/' + project_key + '/'
-    db_file = Tempfile.new('db')
-    db_file_path = db_file.path
+    db_file_path = temp_path
     begin
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 

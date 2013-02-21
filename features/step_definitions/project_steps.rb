@@ -135,9 +135,7 @@ Then /^I should see json for "([^"]*)" archived db file with version (.*)$/ do |
 end
 
 Then /^I should see json for "([^"]*)" archived version (.*) db file with version (.*)$/ do |name, requested_version, version|
-  project = Project.find_by_name(name)
-  temp_path = Project.archive_database_version_for(project.key, requested_version)
-  page.should have_content("\"file\":\"#{Project.db_version_file_name(requested_version)}\"")
+  page.should have_content(Project.find_by_name(name).archive_db_version_info(requested_version).to_json)
   page.should have_content("\"version\":#{version}")
 end
 
