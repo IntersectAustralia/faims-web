@@ -37,8 +37,14 @@ FaimsWeb::Application.routes.draw do
   get "projects/:id/edit_rel_records/:relationshipid", :to => "projects#edit_rel_records", :as => "edit_rel_records"
   post "projects/:id/edit_rel_records/:relationshipid", :to => "projects#update_rel_records", :as => "update_rel_records"
 
+  post "projects/:id/add_entity_to_compare/", :to => "projects#add_entity_to_compare", :as => "add_entity_to_compare"
+  post "projects/:id/remove_entity_to_compare/", :to => "projects#remove_entity_to_compare", :as => "remove_entity_to_compare"
+
   post "projects/:id/compare_arch_ents", :to => "projects#compare_arch_ents", :as => "compare_arch_ents"
   post "projects/:id/select_arch_ents", :to => "projects#select_arch_ents", :as => "select_arch_ents"
+
+  post "projects/:id/compare_rel", :to => "projects#compare_rel", :as => "compare_rel"
+  post "projects/:id/select_rel", :to => "projects#select_rel", :as => "select_rel"
 
   get "android/projects", :to => "android#projects", :as => "android_projects"
   

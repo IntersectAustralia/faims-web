@@ -15,18 +15,13 @@
                 %table
                   %tr
                     %td
-                      %h5=attribute[3]
+                      %h5=attribute[4]
                   %tr
-                    - if !attribute[4].blank?
+                    - if !attribute[5].blank?
                       %td
                         %label Vocab:
                       %td
-                        %input{:value => attribute[4], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Measure:
-                    %td
-                      %input{:value => attribute[5], :disabled => 'disabled'}
+                        %input{:value => attribute[5], :disabled => 'disabled'}
                   %tr
                     %td
                       %label Freetext:
@@ -49,18 +44,13 @@
                 %table
                   %tr
                     %td
-                      %h5=attribute[3]
+                      %h5=attribute[4]
                   %tr
-                    - if !attribute[4].blank?
+                    - if !attribute[5].blank?
                       %td
                         %label Vocab:
                       %td
-                        %input{:value => attribute[4], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Measure:
-                    %td
-                      %input{:value => attribute[5], :disabled => 'disabled'}
+                        %input{:value => attribute[5], :disabled => 'disabled'}
                   %tr
                     %td
                       %label Freetext:

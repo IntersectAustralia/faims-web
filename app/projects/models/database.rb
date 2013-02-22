@@ -134,7 +134,8 @@ class Database
                AND relationshipid in (SELECT relationshipid
                                    FROM (SELECT relationshipid, relntypeid, max(relntimestamp) as relntimestamp
                                            FROM relationship
-                                          WHERE relntypeid = ?
+                                           WHERE relntypeid in (select relntypeid from idealreln where isIdentifier = 'true' group by relntypeid)
+                                           and relntypeid = ?
                                        GROUP BY relationshipid, relntypeid
                                          HAVING max(relntimestamp)
                                             AND deleted IS null)
@@ -165,6 +166,7 @@ class Database
                AND relationshipid in (SELECT relationshipid
                                    FROM (SELECT relationshipid, relntypeid, max(relntimestamp) as relntimestamp
                                            FROM relationship
+                                           WHERE relntypeid in (select relntypeid from idealreln where isIdentifier = 'true' group by relntypeid)
                                        GROUP BY relationshipid, relntypeid
                                          HAVING max(relntimestamp)
                                             AND deleted IS null)

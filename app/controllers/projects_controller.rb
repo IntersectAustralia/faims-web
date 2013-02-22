@@ -44,6 +44,7 @@ class ProjectsController < ApplicationController
   def list_arch_ent_records
     @project = Project.find(params[:id])
     @type = Database.get_arch_ent_types(@project.db_path)
+    session[:values] = []
   end
 
   def list_typed_arch_ent_records
@@ -92,12 +93,13 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     Database.delete_arch_entity(@project.db_path,uuid)
-    redirect_to(list_arch_ent_records_path(@project,0))
+    redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
   def list_rel_records
     @project = Project.find(params[:id])
     @type = Database.get_rel_types(@project.db_path)
+    session[:values] = []
   end
 
   def list_typed_rel_records
@@ -144,14 +146,55 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     Database.delete_relationship(@project.db_path,relationshipid)
-    redirect_to(list_rel_records_path(@project,0))
+    redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+  end
+
+  def add_entity_to_compare
+    puts params[:value]
+    if !session[:values]
+      session[:values] = []
+    end
+    if !session[:values].include?(params[:value])
+      session[:values].push(params[:value])
+    end
+
+    render :nothing => true
+  end
+
+  def remove_entity_to_compare
+    puts params[:value]
+    if(session[:values])
+      session[:values].delete(params[:value])
+    end
+    render :nothing => true
   end
 
   def compare_arch_ents
     @project = Project.find(params[:id])
-    uuids = params[:uuids]
-    @first_arch_ent = Database.get_arch_entity_attributes(@project.db_path, uuids[0])
-    @second_arch_ent = Database.get_arch_entity_attributes(@project.db_path, uuids[1])
+    ids = params[:ids]
+    session[:values] = []
+    @first_arch_ent = Database.get_arch_entity_attributes(@project.db_path, ids[0])
+    @second_arch_ent = Database.get_arch_entity_attributes(@project.db_path, ids[1])
+  end
+
+  def select_arch_ents
+    deleted_id = params[:deleted_id]
+    Database.delete_arch_entity(@project.db_path, deleted_id)
+    redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+  end
+
+  def compare_rel
+    @project = Project.find(params[:id])
+    ids = params[:ids]
+    session[:values] = []
+    @first_rel = Database.get_rel_attributes(@project.db_path, ids[0])
+    @second_rel = Database.get_rel_attributes(@project.db_path, ids[1])
+  end
+
+  def select_rel
+    deleted_id = params[:deleted_id]
+    Database.delete_relationship(@project.db_path, deleted_id)
+    redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
   def edit_project_setting
