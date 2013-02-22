@@ -135,10 +135,14 @@ class Project < ActiveRecord::Base
     File.read(dir_path + '/' + Project.project_settings_name).as_json
   end
 
+  def latest_version
+    v = Database.current_version(db_path)
+    v = ['0'] unless v
+    v.first.to_s
+  end
+
   def temp_db_version_file_path(version)
-    latest_version = Database.current_version(db_path)
-    latest_version = [0] unless version
-    temp_db_dir_path + '/' + Project.db_version_file_name(version) + '-' + latest_version.first.to_s
+    temp_db_dir_path + '/' + Project.db_version_file_name(version, latest_version)
   end
 
   def temp_db_dir_path
@@ -151,8 +155,8 @@ class Project < ActiveRecord::Base
         :size => File.size(filepath),
         :md5 => Digest::MD5.hexdigest(File.read(filepath))
     }
-    version = Database.current_version(db_path)
-    info = info.merge({ :version => version.first }) if version
+    v = latest_version.to_i
+    info = info.merge({ :version => v }) if v > 0
     info
   end
 
@@ -162,8 +166,8 @@ class Project < ActiveRecord::Base
         :size => File.size(db_file_path),
         :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
     }
-    version = Database.current_version(db_path)
-    info = info.merge({ :version => version.first }) if version
+    v = latest_version.to_i
+    info = info.merge({ :version => v }) if v > 0
     info
   end
 
@@ -175,12 +179,12 @@ class Project < ActiveRecord::Base
       temp_path = temp_db_version_file_path(version_num)
       Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
       info = {
-        :file => Project.db_version_file_name(version_num),
+        :file => Project.db_version_file_name(version_num, latest_version),
         :size => File.size(temp_path),
         :md5 => Digest::MD5.hexdigest(File.read(temp_path))
       }
-      version = Database.current_version(db_path)
-      info = info.merge({ :version => version.first }) if version
+      v = latest_version.to_i
+      info = info.merge({ :version => v }) if v > 0
       info
   end
 
@@ -301,9 +305,9 @@ class Project < ActiveRecord::Base
   def validate_version(version)
     return false unless version
     return false if version.to_i < 1
-    current_version = Database.current_version(db_path)
-    return false unless current_version
-    return version.to_i <= current_version.first.to_i
+    v = latest_version.to_i
+    return false unless v > 0
+    return version.to_i <= v
   end
 
   # static
@@ -340,8 +344,8 @@ class Project < ActiveRecord::Base
     'project.settings'
   end
 
-  def self.db_version_file_name(version)
-    'db_v' + version + '.tar.gz'
+  def self.db_version_file_name(fromVersion, toVersion)
+    'db_v' + fromVersion + '-' + toVersion + '.tar.gz'
   end
 
   def self.projects_path
