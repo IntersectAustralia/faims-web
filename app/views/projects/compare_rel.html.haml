@@ -1,0 +1,73 @@
+%h1= @project.name + " - Compare Relationship Records"
+= link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
+%p
+.content
+  %ul.compare
+    %li
+      %form{:method => 'post', :action => select_rel_path(@project)}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'submit', :value => 'Select'}
+        %input{:type => 'hidden', :value => @second_rel[0][0], :name => 'deleted_id'}
+        - for attribute in @first_rel
+          .step-container
+            .step-body{:style => "width: 315px;"}
+              .arch_ent_record_content
+                %table
+                  %tr
+                    %td
+                      %h5=attribute[3]
+                  %tr
+                    - if !attribute[4].blank?
+                      %td
+                        %label Vocab:
+                      %td
+                        %input{:value => attribute[4], :disabled => 'disabled'}
+                  %tr
+                    %td
+                      %label Measure:
+                    %td
+                      %input{:value => attribute[5], :disabled => 'disabled'}
+                  %tr
+                    %td
+                      %label Freetext:
+                    %td
+                      %input{:value => attribute[6], :disabled => 'disabled'}
+                  %tr
+                    %td
+                      %label Certainty:
+                    %td
+                      %input{:value => attribute[7], :disabled => 'disabled'}
+    %li
+      %form{:method => 'post', :action => select_rel_path(@project)}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'submit', :value => 'Select'}
+        %input{:type => 'hidden', :value => @first_rel[0][0], :name => 'deleted_id'}
+        - for attribute in @second_rel
+          .step-container
+            .step-body{:style => "width: 315px;"}
+              .arch_ent_record_content
+                %table
+                  %tr
+                    %td
+                      %h5=attribute[3]
+                  %tr
+                    - if !attribute[4].blank?
+                      %td
+                        %label Vocab:
+                      %td
+                        %input{:value => attribute[4], :disabled => 'disabled'}
+                  %tr
+                    %td
+                      %label Measure:
+                    %td
+                      %input{:value => attribute[5], :disabled => 'disabled'}
+                  %tr
+                    %td
+                      %label Freetext:
+                    %td
+                      %input{:value => attribute[6], :disabled => 'disabled'}
+                  %tr
+                    %td
+                      %label Certainty:
+                    %td
+                      %input{:value => attribute[7], :disabled => 'disabled'}
