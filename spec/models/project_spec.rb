@@ -77,6 +77,27 @@ describe Project do
 
   end
 
+  it "Packaging project" do
+    begin
+      project = make_project("Project 1")
+      Project.package_project_for(project.key)
+      tmp_dir = Dir.mktmpdir(project.dir_path)
+      `tar jxf #{project.package_path} -C #{tmp_dir}`
+      entries = Dir.entries(tmp_dir+'/project')
+      entries.include?(Project.db_name).should be_true
+      entries.include?(Project.ui_schema_name).should be_true
+      entries.include?(Project.ui_logic_name).should be_true
+      entries.include?(Project.project_settings_name).should be_true
+      entries.include?(Project.faims_properties_name).should be_true
+      entries.include?('hash_sum').should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
+
+  end
+
   it "Archiving database" do
     begin
       project = make_project("Project 1")

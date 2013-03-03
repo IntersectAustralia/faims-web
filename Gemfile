@@ -57,6 +57,7 @@ group :test do
   gem 'spork'
 end
 
+gem 'delayed_job_active_record'
 gem 'haml'
 gem 'haml-rails'
 gem 'bootstrap-sass'

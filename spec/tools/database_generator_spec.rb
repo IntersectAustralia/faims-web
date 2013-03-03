@@ -25,7 +25,7 @@ describe Database do
       db1 = create_empty_database()
       db2 = create_empty_database()
 
-      Database.merge_database(db1.path, db2.path,1)
+      Database.merge_database(nil, db1.path, db2.path,1)
 
       is_database_empty(db1).should be_true
 
@@ -39,7 +39,7 @@ describe Database do
       db1 = create_empty_database()
       db2 = create_full_database(version)
 
-      Database.merge_database(db1.path, db2.path, version)
+      Database.merge_database(nil, db1.path, db2.path, version)
 
       is_database_same(db1, db2).should be_true
 
@@ -55,7 +55,7 @@ describe Database do
 
       backup_db1 = backup_database(db1)
 
-      Database.merge_database(db1.path, db2.path, version)
+      Database.merge_database(nil, db1.path, db2.path, version)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -72,7 +72,7 @@ describe Database do
 
       backup_db1 = backup_database(db1)
 
-      Database.merge_database(db1.path, db2.path, version)
+      Database.merge_database(nil, db1.path, db2.path, version)
 
       is_database_merged(db1, backup_db1, db2).should be_true
 
@@ -87,7 +87,7 @@ describe Database do
 
       backup_db1 = backup_database(db1)
 
-      Database.merge_database(db1.path, backup_db1.path, version)
+      Database.merge_database(nil, db1.path, backup_db1.path, version)
 
       is_database_same(backup_db1, db1).should be_true
 
@@ -100,8 +100,8 @@ describe Database do
       db2 = create_full_database(nil, nil, 0) #version doesn't matter
       db3 = create_full_database(nil, nil, 1000) #version doesn't matter
 
-      Database.merge_database(db1.path, db2.path, 1)
-      Database.merge_database(db1.path, db3.path, 2)
+      Database.merge_database(nil, db1.path, db2.path, 1)
+      Database.merge_database(nil, db1.path, db3.path, 2)
 
       is_version_database_same(db1, db2, 1).should be_true
       is_version_database_same(db1, db3, 2).should be_true

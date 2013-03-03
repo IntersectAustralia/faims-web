@@ -43,12 +43,20 @@ class ProjectsController < ApplicationController
 
   def list_arch_ent_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     @type = Database.get_arch_ent_types(@project.db_path)
     session[:values] = []
   end
 
   def list_typed_arch_ent_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     limit = 25
     type = params[:type]
     offset = params[:offset]
@@ -61,6 +69,10 @@ class ProjectsController < ApplicationController
 
   def edit_arch_ent_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     uuid = params[:uuid]
     session[:uuid] = uuid
     @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
@@ -68,11 +80,14 @@ class ProjectsController < ApplicationController
     for attribute in @attributes
       @vocab_name[attribute[1]] = Database.get_vocab(@project.db_path,attribute[1])
     end
-    puts @vocab_name
   end
 
   def update_arch_ent_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     uuid = params[:uuid]
     vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
     attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
@@ -80,7 +95,7 @@ class ProjectsController < ApplicationController
     freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
-    Database.update_arch_entity_attribute(@project.db_path,uuid,vocab_id,attribute_id, measure, freetext, certainty)
+    Database.update_arch_entity_attribute(@project.key, @project.db_path,uuid,vocab_id,attribute_id, measure, freetext, certainty)
     @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
     @vocab_name = {}
     for attribute in @attributes
@@ -91,19 +106,31 @@ class ProjectsController < ApplicationController
 
   def delete_arch_ent_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     uuid = params[:uuid]
-    Database.delete_arch_entity(@project.db_path,uuid)
+    Database.delete_arch_entity(@project.key, @project.db_path,uuid)
     redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
   def list_rel_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     @type = Database.get_rel_types(@project.db_path)
     session[:values] = []
   end
 
   def list_typed_rel_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     limit = 25
     type=params[:type]
     offset = params[:offset]
@@ -116,6 +143,10 @@ class ProjectsController < ApplicationController
 
   def edit_rel_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
     @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
@@ -127,13 +158,17 @@ class ProjectsController < ApplicationController
 
   def update_rel_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     relationshipid = params[:relationshipid]
     vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
     attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
     freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
-    Database.update_rel_attribute(@project.db_path,relationshipid,vocab_id,attribute_id, freetext, certainty)
+    Database.update_rel_attribute(@project.key, @project.db_path,relationshipid,vocab_id,attribute_id, freetext, certainty)
     @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
     @vocab_name = {}
     for attribute in @attributes
@@ -144,13 +179,16 @@ class ProjectsController < ApplicationController
 
   def delete_rel_records
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     relationshipid = params[:relationshipid]
-    Database.delete_relationship(@project.db_path,relationshipid)
+    Database.delete_relationship(@project.key, @project.db_path,relationshipid)
     redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
   def add_entity_to_compare
-    puts params[:value]
     if !session[:values]
       session[:values] = []
     end
@@ -162,7 +200,6 @@ class ProjectsController < ApplicationController
   end
 
   def remove_entity_to_compare
-    puts params[:value]
     if(session[:values])
       session[:values].delete(params[:value])
     end
@@ -171,20 +208,33 @@ class ProjectsController < ApplicationController
 
   def compare_arch_ents
     @project = Project.find(params[:id])
-    ids = params[:ids]
     session[:values] = []
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
+    ids = params[:ids]
     @first_arch_ent = Database.get_arch_entity_attributes(@project.db_path, ids[0])
     @second_arch_ent = Database.get_arch_entity_attributes(@project.db_path, ids[1])
   end
 
   def select_arch_ents
+    @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     deleted_id = params[:deleted_id]
-    Database.delete_arch_entity(@project.db_path, deleted_id)
+    Database.delete_arch_entity(@project.key, @project.db_path, deleted_id)
     redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
   def compare_rel
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     ids = params[:ids]
     session[:values] = []
     @first_rel = Database.get_rel_attributes(@project.db_path, ids[0])
@@ -192,17 +242,30 @@ class ProjectsController < ApplicationController
   end
 
   def select_rel
+    @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     deleted_id = params[:deleted_id]
-    Database.delete_relationship(@project.db_path, deleted_id)
+    Database.delete_relationship(@project.key, @project.db_path, deleted_id)
     redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
   def edit_project_setting
     @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     @project_setting = JSON.parse(@project.project_setting)
   end
 
   def update_project_setting
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
     if @project.update_attributes(:name => params[:project][:name])
         File.open(@project.dir_path + "/project.settings", 'w') do |file|
         file.write({:name => params[:project][:name], key:@project.key,
@@ -228,6 +291,78 @@ class ProjectsController < ApplicationController
 
   end
 
+  def archive_project
+    @project = Project.find(params[:id])
+    begin
+      session[:job] = Project.delay.package_project_for(@project.key)
+    rescue Exception => e
+      puts "Error archiving project"
+      FileUtils.rm (@project.dir_path + '/lock') if File.exists?(@project.dir_path + '/lock')
+      raise e
+    end
+    respond_to do |format|
+      format.json { render :json => {:archive => 'false'} } if @project.is_locked
+      format.json { render :json => {:archive => 'true'} } if !@project.is_locked
+    end
+  end
+
+  def check_archive_status
+    @project = Project.find(params[:id])
+    jobid = session[:job].id
+    if !Delayed::Job.exists?(jobid)
+      FileUtils.rm (@project.dir_path + '/lock') if File.exists?(@project.dir_path + '/lock')
+      session[:job] = nil
+    end
+    respond_to do |format|
+      format.json { render :json => {:finish => 'false'} } if Delayed::Job.exists?(jobid)
+      format.json { render :json => {:finish => 'true'} } if !Delayed::Job.exists?(jobid)
+    end
+  end
+
+  def download_project
+    @project = Project.find(params[:id])
+
+    send_file @project.temp_project_file_path, :type => "application/bzip2", :x_sendfile => true, :stream => false
+  end
+
+  def upload_project
+    @project = Project.new
+  end
+
+  def upload_new_project
+    if params[:project]
+      tar_file = params[:project][:project_file]
+      if !tar_file.content_type.eql?('application/x-bzip')
+        @project = Project.new
+        flash.now[:error] = 'Unsupported format of file, please upload the correct file'
+        render 'upload_project'
+      else
+        tmp_dir = Dir.mktmpdir(Project.projects_path + "/") + "/";
+        `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
+        project_settings = JSON.parse(File.read(tmp_dir + 'project/' + Project.project_settings_name).as_json)
+        if !Project.find_by_key(project_settings['key']).blank?
+          FileUtils.rm_rf tmp_dir
+          @project = Project.new
+          flash.now[:error] = 'Same project has existed in the system'
+          render 'upload_project'
+        elsif !Project.checksum_uploaded_file(tmp_dir + 'project/')
+          FileUtils.rm_rf tmp_dir
+          @project = Project.new
+          flash.now[:error] = 'Wrong hash sum for the project'
+          render 'upload_project'
+        else
+          @project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
+          @project.transaction do
+            @project.save
+            @project.create_project_from_compressed_file(tmp_dir + 'project')
+          end
+          FileUtils.rm_rf tmp_dir
+          flash[:notice] = 'Project has been successfully uploaded'
+          redirect_to :projects
+        end
+      end
+end
+  end
   private
 
   def create_tmp_dir

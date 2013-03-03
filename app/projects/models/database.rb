@@ -96,7 +96,8 @@ class Database
     attributes
   end
 
-  def self.update_arch_entity_attribute(file, uuid, vocab_id, attribute_id, measure, freetext, certainty)
+  def self.update_arch_entity_attribute(project_key,file, uuid, vocab_id, attribute_id, measure, freetext, certainty)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -105,7 +106,8 @@ class Database
               , (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));",uuid, vocab_id, attribute_id, measure, freetext, certainty)
   end
 
-  def self.delete_arch_entity(file, uuid)
+  def self.delete_arch_entity(project_key, file, uuid)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -210,7 +212,8 @@ class Database
     attributes
   end
 
-  def self.update_rel_attribute(file, relationshipid, vocab_id, attribute_id, freetext, certainty)
+  def self.update_rel_attribute(project_key, file, relationshipid, vocab_id, attribute_id, freetext, certainty)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -219,7 +222,8 @@ class Database
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));",relationshipid, attribute_id, vocab_id, freetext, certainty)
   end
 
-  def self.delete_relationship(file, relationshipid)
+  def self.delete_relationship(project_key, file, relationshipid)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -292,7 +296,8 @@ EOF
     db.execute("select count(*) from version").first.first
   end
 
-  def self.merge_database(toDB, fromDB, version)
+  def self.merge_database(project_key, toDB, fromDB, version)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(toDB)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -369,5 +374,14 @@ EOF
     content = content.gsub("\n", "")
     content = content.gsub("?", toDB)
     db.execute_batch(content)
+  end
+
+  def self.sleep_if_locked(project_key)
+    if !project_key.blank?
+      loop do
+        break unless File.exist?(Project.projects_path + '/' + project_key + '/lock')
+        sleep 1
+      end
+    end
   end
 end
