@@ -449,21 +449,34 @@ class Project < ActiveRecord::Base
     filepath = dir_path + '/' + Project.package_name
 
     begin
+      tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
+
+      # create project directory to archive
+      project_dir = tmp_dir + 'project/'
+      Dir.mkdir(project_dir)
+
       hash_sum = {}
       `touch #{dir_path + '/lock'}`
+
+      FileUtils.cp_r(Dir[dir_path + '*'],project_dir)
+
       Dir.glob(dir_path + '**/*') do |file|
         next if File.basename(file) == '.' or File.basename(file) == '..'
         next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
         hash_sum[File.basename(file)] = Digest::MD5.hexdigest(File.read(file)) if !File.directory?(file) and File.exists? file
       end
-      File.open(dir_path + '/hash_sum', 'w') do |file|
+
+      File.open(project_dir + '/hash_sum', 'w') do |file|
         file.write(hash_sum.to_json)
       end
 
-      `tar jcf #{filepath} -C #{projects_path} #{File.basename(dir_path)} --transform s/#{project_key}/project/ --exclude='lock' --exclude='#{Project.package_name}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
+      `tar jcf #{filepath} -C #{tmp_dir} #{File.basename(project_dir)} --exclude='lock' --exclude='#{Project.package_name}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
     rescue Exception => e
       puts "Error packaging project"
       raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
     end
   end
 

@@ -332,7 +332,8 @@ class ProjectsController < ApplicationController
   def upload_new_project
     if params[:project]
       tar_file = params[:project][:project_file]
-      if !tar_file.content_type.eql?('application/x-bzip')
+      p tar_file.content_type
+      if !(tar_file.content_type.eql?('application/x-bzip') || tar_file.content_type.eql?('application/x-bzip2'))
         @project = Project.new
         flash.now[:error] = 'Unsupported format of file, please upload the correct file'
         render 'upload_project'
