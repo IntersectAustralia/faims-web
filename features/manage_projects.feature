@@ -197,3 +197,55 @@ Feature: Manage projects
     And I have synced 20 times for "Project 1"
     And I am on the android archive db page for Project 2 with request version 10
     Then I should see bad request page
+
+  Scenario: Show empty server file list
+    Given I have project "Project 1"
+    And I am on the android server file list page for Project 1
+    Then I should see empty file list
+
+  Scenario: Cannot see server file list if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android server file list page for Project 2
+    Then I should see bad request page
+
+  Scenario: Show full server file list
+    Given I have project "Project 1"
+    And I have server only files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I am on the android server file list page for Project 1
+    Then I should see files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+
+  Scenario: Show empty app file list
+    Given I have project "Project 1"
+    And I am on the android app file list page for Project 1
+    Then I should see empty file list
+
+  Scenario: Cannot see app file list if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android app file list page for Project 2
+    Then I should see bad request page
+
+  Scenario: Show full app file list
+    Given I have project "Project 1"
+    And I have app files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I am on the android app file list page for Project 1
+    Then I should see files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |

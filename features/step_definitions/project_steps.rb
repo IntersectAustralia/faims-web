@@ -147,3 +147,30 @@ end
 Then /^I should see bad request page$/ do
   page.status_code.should == 400
 end
+
+Then /^I should see empty file list$/ do
+  page.should have_content({files:[]}.to_json)
+end
+
+And /^I have server only files for "([^"]*)"$/ do |name, table|
+  project = Project.find_by_name(name)
+  table.hashes.each do |row|
+    project.add_server_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
+  end
+end
+
+And /^I have app files for "([^"]*)"$/ do |name, table|
+  project = Project.find_by_name(name)
+  table.hashes.each do |row|
+    project.add_app_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
+  end
+end
+
+Then /^I should see files$/ do |table|
+  files = []
+  table.hashes.each do |row|
+      files.push(row[:file])
+  end
+  files = files.sort
+  page.should have_content({files:files}.to_json)
+end

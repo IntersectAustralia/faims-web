@@ -27,7 +27,7 @@ class AndroidController < ApplicationController
     end
 
     project = Project.find_by_key(params[:key])
-    return render :json => "bad request", :status => 400 unless project
+    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     file = params[:file]
     user = params[:user]
@@ -46,7 +46,7 @@ class AndroidController < ApplicationController
 
   def archive_db
     project = Project.find_by_key(params[:key])
-    return render :json => "bad request", :status => 400 unless project
+    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     unless project.validate_version(params[:version])
       info = project.archive_db_info
@@ -58,7 +58,7 @@ class AndroidController < ApplicationController
 
   def download_db
     project = Project.find_by_key(params[:key])
-    return render :json => "bad request", :status => 400 unless project
+    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     unless project.validate_version(params[:version])
       send_file project.db_file_path
@@ -67,6 +67,38 @@ class AndroidController < ApplicationController
       temp_db_file = project.temp_db_version_file_path(params[:version])
       send_file temp_db_file
     end
+  end
+
+  def server_file_list
+    project = Project.find_by_key(params[:key])
+    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
+
+    files = project.server_file_list
+    render :json => {files:files}.to_json
+  end
+
+  def server_file_archive
+
+  end
+
+  def server_file_download
+
+  end
+
+  def app_file_list
+    project = Project.find_by_key(params[:key])
+    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
+
+    files = project.app_file_list
+    render :json => {files:files}.to_json
+  end
+
+  def app_file_archive
+
+  end
+
+  def app_file_download
+
   end
 
 end
