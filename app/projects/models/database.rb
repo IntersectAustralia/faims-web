@@ -72,6 +72,43 @@ class Database
     uuid
   end
 
+  def self.search_arch_entity(file, limit, offset, query)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    uuid = db.execute("
+        SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS response, vocabid, attributeid, max(tstamp, astamp)
+             FROM aenttype
+             JOIN archentity USING (aenttypeid)
+             JOIN aentvalue USING (UUID)
+             JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+             JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+             JOIN attributekey USING (attributeid)
+             LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+              WHERE uuid in (SELECT uuid
+                             FROM (SELECT uuid, aenttypeid, max(aenttimestamp) as aenttimestamp
+                                     FROM archentity
+                                 GROUP BY uuid, aenttypeid
+                                   HAVING max(aenttimestamp)
+                                      AND deleted IS null)
+                             JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
+                                     FROM aentvalue LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+                                 GROUP BY uuid
+                                   HAVING max(valuetimestamp)
+                                   AND deleted IS null
+                                   AND ( vocabname LIKE '%'||?||'%'
+                                       OR freetext LIKE '%'||?||'%'
+                                       OR measure LIKE '%'||?||'%')) USING (uuid)
+                         ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                            LIMIT ?
+                           OFFSET ?)
+         GROUP BY uuid, attributeid
+           HAVING max(valuetimestamp)
+              AND max(aenttimestamp)
+         ORDER BY max(tstamp,astamp) desc, uuid, attributename;",query,query,query,limit, offset)
+    uuid
+  end
+
   def self.get_arch_entity_attributes(file, uuid)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
@@ -188,25 +225,43 @@ class Database
     rel_uuid
   end
 
+  def self.search_rel(file, limit, offset, query)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    rel_uuid = db.execute("
+          SELECT relationshipid, attributename, coalesce(vocabname, freetext) as response, vocabname
+              FROM relnvalue
+              JOIN attributekey using (attributeid)
+              JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)
+              LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+              WHERE relationshipid in (select relationshipid
+                                          FROM relnvalue left outer join vocabulary using (vocabid, attributeid) join (select relationshipid from relationship group by relationshipid having max(relntimestamp) and deleted is null) using (relationshipid)
+                                      GROUP BY relationshipid, attributeid
+                                        having max(relnvaluetimestamp)
+                                           AND deleted is null
+                                           AND (freetext like '%'||?||'%'
+                                            OR vocabname like '%'||?||'%')
+                                      ORDER BY max(relnvaluetimestamp) desc, relationshipid
+                                        limit ?
+                                       offset ?
+
+                )
+          GROUP BY relationshipid, attributeid
+            HAVING max(relnvaluetimestamp)
+          order by tstamp desc, relationshipid, attributename ;",query,query,limit, offset)
+    rel_uuid
+  end
+
   def self.get_rel_attributes(file, relationshipid)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     attributes = db.execute("
-      SELECT relationshipid, vocabid, attributeid, RelnTypeName, attributename, vocabname, freetext, certainty
-          FROM (SELECT relationshipid, attributeid, RelnTypeName
-                  FROM (SELECT relntypeid, attributeid, relntypename
-                          FROM idealreln join relntype using (relntypeid))
-                  JOIN (SELECT relationshipid, relntypeid
-                          FROM relationship
-                         WHERE deleted is null and relationshipid = ?
-                          and relntypeid in (select relntypeid from idealreln)
-                      GROUP BY relationshipid
-                        HAVING max(relntimestamp)) USING (relntypeid)
-                )
-          JOIN relnvalue USING (relationshipid, attributeid)
-          JOIN attributekey using (attributeid)
-          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+      SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname
+        from relnvalue join attributekey using(attributeid)
+        LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+        where relationshipid = ?
       GROUP BY relationshipid, attributeid
         HAVING max(relnvaluetimestamp) order by relationshipid, attributename asc;",relationshipid)
     attributes

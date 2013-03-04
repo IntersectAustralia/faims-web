@@ -48,7 +48,12 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     @type = Database.get_arch_ent_types(@project.db_path)
-    session[:values] = []
+    session.delete(:values)
+    session.delete(:type)
+    session.delete(:query)
+    session.delete(:cur_offset)
+    session.delete(:prev_offset)
+    session.delete(:next_offset)
   end
 
   def list_typed_arch_ent_records
@@ -65,6 +70,36 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     @uuid = Database.load_arch_entity(@project.db_path,type,limit,offset)
+  end
+
+  def search_arch_ent_records
+    @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
+    session.delete(:values)
+    session.delete(:type)
+    session.delete(:query)
+    session.delete(:cur_offset)
+    session.delete(:prev_offset)
+    session.delete(:next_offset)
+  end
+
+  def show_arch_ent_records
+    @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
+    limit = 25
+    query = params[:query]
+    offset = params[:offset]
+    session[:query] = query
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    @uuid = Database.search_arch_entity(@project.db_path,limit,offset,query)
   end
 
   def edit_arch_ent_records
@@ -112,7 +147,12 @@ class ProjectsController < ApplicationController
     end
     uuid = params[:uuid]
     Database.delete_arch_entity(@project.key, @project.db_path,uuid)
-    redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+    if session[:type]
+      redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+    else
+      redirect_to(show_arch_ent_records_path(@project) + "?query=" + session[:query] + "&offset=0")
+    end
+
   end
 
   def list_rel_records
@@ -139,6 +179,36 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     @relationshipid = Database.load_rel(@project.db_path,type,limit,offset)
+  end
+
+  def search_rel_records
+    @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
+    session.delete(:values)
+    session.delete(:type)
+    session.delete(:query)
+    session.delete(:cur_offset)
+    session.delete(:prev_offset)
+    session.delete(:next_offset)
+  end
+
+  def show_rel_records
+    @project = Project.find(params[:id])
+    if @project.is_locked
+      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      render 'show'
+    end
+    limit = 25
+    query = params[:query]
+    offset = params[:offset]
+    session[:query] = query
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    @relationshipid = Database.search_rel(@project.db_path,limit,offset,query)
   end
 
   def edit_rel_records
@@ -185,7 +255,11 @@ class ProjectsController < ApplicationController
     end
     relationshipid = params[:relationshipid]
     Database.delete_relationship(@project.key, @project.db_path,relationshipid)
-    redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+    if session[:type]
+      redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+    else
+      redirect_to(show_rel_records_path(@project) + "?query=" + session[:query] + "&offset=0")
+    end
   end
 
   def add_entity_to_compare

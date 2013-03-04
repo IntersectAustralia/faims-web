@@ -1,5 +1,8 @@
 %h1= @project.name + " - Compare Archaelogical Entity Records"
-= link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
+- if session[:type]
+  = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
+- else
+  = link_to "Back", show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset=0", :class => 'btn'
 %p
 .content
   %ul.compare

@@ -34,12 +34,16 @@ FaimsWeb::Application.routes.draw do
   get "projects/:id/download_project", :to => "projects#download_project", :as => "download_project"
   get "projects/:id/check_archive_status", :to => "projects#check_archive_status", :as => "check_archive_status"
 
+  get "projects/:id/search_arch_ent_records/", :to => "projects#search_arch_ent_records", :as => "search_arch_ent_records"
+  get "projects/:id/show_arch_ent_records/", :to => "projects#show_arch_ent_records", :as => "show_arch_ent_records"
   get "projects/:id/list_arch_ent_records/", :to => "projects#list_arch_ent_records", :as => "list_arch_ent_records"
   get "projects/:id/list_typed_arch_ent_records/", :to => "projects#list_typed_arch_ent_records", :as => "list_typed_arch_ent_records"
   get "projects/:id/delete_arch_ent_records/:uuid", :to => "projects#delete_arch_ent_records", :as => "delete_arch_ent_records"
   get "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#edit_arch_ent_records", :as => "edit_arch_ent_records"
   post "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#update_arch_ent_records", :as => "update_arch_ent_records"
 
+  get "projects/:id/search_rel_records/", :to => "projects#search_rel_records", :as => "search_rel_records"
+  get "projects/:id/show_rel_records/", :to => "projects#show_rel_records", :as => "show_rel_records"
   get "projects/:id/list_rel_records/", :to => "projects#list_rel_records", :as => "list_rel_records"
   get "projects/:id/list_typed_rel_records/", :to => "projects#list_typed_rel_records", :as => "list_typed_rel_records"
   get "projects/:id/delete_rel_records/:relationshipid", :to => "projects#delete_rel_records", :as => "delete_rel_records"

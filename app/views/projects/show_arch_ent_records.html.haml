@@ -1,0 +1,54 @@
+%h1= @project.name + " - Archaeological Entity Records"
+.content
+  - if (!@uuid.empty?)
+    - prev_uuid = @uuid[0][0]
+    - uuid_array = []
+    - array = []
+    - for uuid in @uuid
+      - if prev_uuid != uuid[0]
+        - uuid_array << array
+        - array = []
+        - prev_uuid = uuid[0]
+      - array << uuid
+    - uuid_array << array
+    %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add_entity'}
+    %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project), :id => 'remove_entity'}
+    %form{:method => 'post', :id => 'compare', :action => compare_arch_ents_path(@project)}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      - if session[:values]
+        - for value in session[:values]
+          %input{:type => 'hidden', :value => value, :name => 'ids[]', :id => value}
+      = link_to "Back", search_arch_ent_records_path(@project), :class => 'btn'
+      %input{:type => 'submit', :value => "Compare"}
+      %p
+      .records
+        - for uuid_group in uuid_array
+          %ul.inner
+            - if session[:values] and session[:values].include?(uuid_group[0][0].to_s)
+              %input{:type => 'checkbox', :value=> uuid_group[0][0],:checked => 'checked'}
+                - for uuids in uuid_group
+                  %li
+                    %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+                      =uuids[2].to_s + ": " + uuids[3].to_s
+            - else
+              %input{:type => 'checkbox', :value=> uuid_group[0][0]}
+                - for uuids in uuid_group
+                  %li
+                    %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+                      =uuids[2].to_s + ": " + uuids[3].to_s
+  -else
+    %p No Record Found
+    = link_to "Back", search_arch_ent_records_path(@project), :class => 'btn'
+-if !@uuid.empty?
+  .footer.search
+    - if (session[:prev_offset] >= 0)
+      %form{:action => show_arch_ent_records_path, :method => "get"}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
+        %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+        %input{:type => 'submit', :value => "Previous"}
+    %form{:action => show_arch_ent_records_path, :method => "get"}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
+      %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+      %input{:type => 'submit', :value => "Next"}

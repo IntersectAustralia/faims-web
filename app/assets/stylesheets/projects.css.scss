@@ -95,11 +95,25 @@ ul.inner li a {
   border:1px solid black;
 }
 
+.footer.search {
+  float: right;
+  padding-right: 0px;
+}
+
 .footer {
   float: right;
   padding-right: 535px;
 }
 
-.footer form{
+.footer form {
   display: inline-block;
+}
+
+.records {
+  width: 100%;
+  overflow: auto;
+}
+
+.records > .inner {
+  width: 120em;
 }

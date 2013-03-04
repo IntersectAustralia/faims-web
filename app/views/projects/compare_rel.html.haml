@@ -1,5 +1,8 @@
 %h1= @project.name + " - Compare Relationship Records"
-= link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
+- if session[:type]
+  = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
+- else
+  = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset=0", :class => 'btn'
 %p
 .content
   %ul.compare
@@ -15,23 +18,23 @@
                 %table
                   %tr
                     %td
-                      %h5=attribute[4]
+                      %h5=attribute[3]
                   %tr
-                    - if !attribute[5].blank?
+                    - if !attribute[6].blank?
                       %td
                         %label Vocab:
                       %td
-                        %input{:value => attribute[5], :disabled => 'disabled'}
+                        %input{:value => attribute[6], :disabled => 'disabled'}
                   %tr
                     %td
                       %label Freetext:
                     %td
-                      %input{:value => attribute[6], :disabled => 'disabled'}
+                      %input{:value => attribute[4], :disabled => 'disabled'}
                   %tr
                     %td
                       %label Certainty:
                     %td
-                      %input{:value => attribute[7], :disabled => 'disabled'}
+                      %input{:value => attribute[5], :disabled => 'disabled'}
     %li
       %form{:method => 'post', :action => select_rel_path(@project)}
         %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
@@ -44,20 +47,20 @@
                 %table
                   %tr
                     %td
-                      %h5=attribute[4]
+                      %h5=attribute[3]
                   %tr
-                    - if !attribute[5].blank?
+                    - if !attribute[6].blank?
                       %td
                         %label Vocab:
                       %td
-                        %input{:value => attribute[5], :disabled => 'disabled'}
+                        %input{:value => attribute[6], :disabled => 'disabled'}
                   %tr
                     %td
                       %label Freetext:
                     %td
-                      %input{:value => attribute[6], :disabled => 'disabled'}
+                      %input{:value => attribute[4], :disabled => 'disabled'}
                   %tr
                     %td
                       %label Certainty:
                     %td
-                      %input{:value => attribute[7], :disabled => 'disabled'}
+                      %input{:value => attribute[5], :disabled => 'disabled'}
