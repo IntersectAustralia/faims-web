@@ -90,6 +90,7 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
+    And I wait
     And I follow "Upload Project"
     And I pick file "project.tar.bz2" for "Project File"
     And I press "Upload"
