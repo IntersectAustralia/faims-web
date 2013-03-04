@@ -406,7 +406,6 @@ class ProjectsController < ApplicationController
   def upload_new_project
     if params[:project]
       tar_file = params[:project][:project_file]
-      p tar_file.content_type
       if !(tar_file.content_type.eql?('application/x-bzip') || tar_file.content_type.eql?('application/x-bzip2'))
         @project = Project.new
         flash.now[:error] = 'Unsupported format of file, please upload the correct file'
@@ -418,7 +417,7 @@ class ProjectsController < ApplicationController
         if !Project.find_by_key(project_settings['key']).blank?
           FileUtils.rm_rf tmp_dir
           @project = Project.new
-          flash.now[:error] = 'Same project has existed in the system'
+          flash.now[:error] = 'This project already exists in the system'
           render 'upload_project'
         elsif !Project.checksum_uploaded_file(tmp_dir + 'project/')
           FileUtils.rm_rf tmp_dir
@@ -436,7 +435,11 @@ class ProjectsController < ApplicationController
           redirect_to :projects
         end
       end
-end
+    else
+      @project = Project.new
+      flash.now[:error] = 'Please upload an archive of the project'
+      render 'upload_project'
+    end
   end
   private
 
