@@ -1,5 +1,13 @@
 class AndroidController < ApplicationController
 
+  before_filter :check_valid_project
+  skip_before_filter :check_valid_project, :only => [:projects]
+
+  def check_valid_project
+    project = Project.find_by_key(params[:key])
+    return render :json => "bad request", :status => 400 unless project
+  end
+
   def projects
     projects = Project.all.map { |p| {key:p.key, name:p.name} }
     render :json => projects.to_json
@@ -7,27 +15,22 @@ class AndroidController < ApplicationController
 
   def archive
     project = Project.find_by_key(params[:key])
-    return render :json => "bad request", :status => 400 unless project
-
     info = project.archive_info
     render :json => info.to_json
   end
 
   def download
     project = Project.find_by_key(params[:key])
-    return render :json => "bad request", :status => 400 unless project
-
     send_file project.filepath
   end
 
   def upload_db
+    project = Project.find_by_key(params[:key])
+
     # TODO start merge daemon if not running
     if `rake merge_daemon:status` =~ /no instances running/
       return render :json => {message: "database cannot be merge at this time"}.to_json, :status => 400
     end
-
-    project = Project.find_by_key(params[:key])
-    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     file = params[:file]
     user = params[:user]
@@ -46,7 +49,6 @@ class AndroidController < ApplicationController
 
   def archive_db
     project = Project.find_by_key(params[:key])
-    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     unless project.validate_version(params[:version])
       info = project.archive_db_info
@@ -58,7 +60,6 @@ class AndroidController < ApplicationController
 
   def download_db
     project = Project.find_by_key(params[:key])
-    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     unless project.validate_version(params[:version])
       send_file project.db_file_path
@@ -71,7 +72,6 @@ class AndroidController < ApplicationController
 
   def server_file_list
     project = Project.find_by_key(params[:key])
-    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     files = project.server_file_list
     render :json => {files:files}.to_json
@@ -87,7 +87,6 @@ class AndroidController < ApplicationController
 
   def app_file_list
     project = Project.find_by_key(params[:key])
-    return render :json => {message: "bad request"}.to_json, :status => 400 unless project
 
     files = project.app_file_list
     render :json => {files:files}.to_json
