@@ -93,12 +93,12 @@ class Database
                                       AND deleted IS null)
                              JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
                                      FROM aentvalue LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+                                    WHERE vocabname LIKE '%'||?||'%'
+                                       OR freetext LIKE '%'||?||'%'
+                                       OR measure LIKE '%'||?||'%'
                                  GROUP BY uuid
                                    HAVING max(valuetimestamp)
-                                   AND deleted IS null
-                                   AND ( vocabname LIKE '%'||?||'%'
-                                       OR freetext LIKE '%'||?||'%'
-                                       OR measure LIKE '%'||?||'%')) USING (uuid)
+                                   AND deleted IS null) USING (uuid)
                          ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
                             LIMIT ?
                            OFFSET ?)
@@ -114,22 +114,12 @@ class Database
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     attributes = db.execute("
-      SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty
-              FROM (    SELECT uuid, attributeid, aenttypeid
-                       FROM (SELECT aenttypeid, attributeid, aentdescription
-                               FROM idealaent
-                              )
-                       JOIN (select uuid, aenttypeid
-                               from archentity
-                               where deleted is null and uuid = ?
-                               GROUP BY uuid
-                               having max(aenttimestamp)) USING (aenttypeid)
-                       )
-              JOIN aentvalue USING (uuid, attributeid)
-              JOIN attributekey using (attributeid)
-              left outer join vocabulary using (vocabid, attributeid)
-        group by uuid, attributeid
-        having max(valuetimestamp) order by uuid, attributename asc;",uuid)
+        SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty
+          from aentvalue join attributekey using(attributeid)
+            LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+          where uuid = ? and deleted is null
+          GROUP BY uuid, attributeid
+          HAVING max(ValueTimestamp) order by uuid, attributename asc;",uuid)
     attributes
   end
 
@@ -261,7 +251,7 @@ class Database
       SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname
         from relnvalue join attributekey using(attributeid)
         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-        where relationshipid = ?
+        where relationshipid = ? and deleted is null
       GROUP BY relationshipid, attributeid
         HAVING max(relnvaluetimestamp) order by relationshipid, attributename asc;",relationshipid)
     attributes
