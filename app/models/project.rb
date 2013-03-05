@@ -377,7 +377,7 @@ class Project < ActiveRecord::Base
     `tar zcf #{temp_file.path} -C #{dir} #{files_str}`
 
     {
-        :file => File.basename(temp_file.path),
+        :file => temp_file.path,
         :size => File.size(temp_file.path),
         :md5 => Digest::MD5.hexdigest(File.read(temp_file.path))
     }

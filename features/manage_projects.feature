@@ -316,3 +316,58 @@ Feature: Manage projects
     And I am on the android app files archive page for Project 2
     Then I should see bad request page
 
+  Scenario: Download server files
+    Given I have project "Project 1"
+    And I have server only files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    Then I archive and download server files for "Project 1"
+
+  Scenario: Download new server files
+    Given I have project "Project 1"
+    And I have server only files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    Then I archive and download server files for "Project 1" given I already have files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+
+  Scenario: Cannot download server files if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android server file download link for Project 2
+    Then I should see bad request page
+
+  Scenario: Download app files
+    Given I have project "Project 1"
+    And I have app files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    Then I archive and download app files for "Project 1"
+
+  Scenario: Download new app files
+    Given I have project "Project 1"
+    And I have app files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    Then I archive and download app files for "Project 1" given I already have files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+
+  Scenario: Cannot download app files if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android app file download link for Project 2
+    Then I should see bad request page

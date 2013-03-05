@@ -216,3 +216,45 @@ And /^I am request (.+) with files$/ do |name, table|
   files_list = files.map{ |f| "files[]=#{f}&" }.join
   visit page_name + "?#{files_list}"
 end
+
+Then /^I archive and download server files for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.server_file_archive_info
+  check_archive_download_files(name, info)
+end
+
+Then /^I archive and download server files for "Project 1" given I already have files$/ do |name, table|
+  files = []
+  table.hashes.each do |row|
+    files.push(row)
+  end
+  project = Project.find_by_name(name)
+  info = project.server_file_archive_info(files)
+  check_archive_download_files(name, info)
+end
+
+Then /^I archive and download app files for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.app_file_archive_info
+  check_archive_download_files(name, info)
+end
+
+Then /^I archive and download app files for "Project 1" given I already have files$/ do |name, table|
+  files = []
+  table.hashes.each do |row|
+    files.push(row)
+  end
+  project = Project.find_by_name(name)
+  info = project.app_file_archive_info(files)
+  check_archive_download_files(name, info)
+end
+
+def check_archive_download_files(name, info)
+  File.exists?(info[:file]).should be_true
+
+  visit path_to("the android server files download link for #{name}") + "?file=#{info[:file]}"
+
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
+  file = File.open(info[:file], 'r')
+  page.source == file.read
+end
