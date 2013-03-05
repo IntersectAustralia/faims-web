@@ -174,3 +174,45 @@ Then /^I should see files$/ do |table|
   files = files.sort
   page.should have_content({files:files}.to_json)
 end
+
+Then /^I should see json for "([^"]*)" server files archive$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.server_file_archive_info
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" app files archive$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.app_file_archive_info
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" server files archive given I already have files$/ do |name, table|
+  project = Project.find_by_name(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  info = project.server_file_archive_info(files)
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" app files archive given I already have files$/ do |name, table|
+  project = Project.find_by_name(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  info = project.app_file_archive_info(files)
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+And /^I am request (.+) with files$/ do |name, table|
+  page_name = path_to(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  files_list = files.map{ |f| "files[]=#{f}&" }.join
+  visit page_name + "?#{files_list}"
+end

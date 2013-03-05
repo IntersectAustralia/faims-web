@@ -43,7 +43,7 @@ class SHPDump:
         ds = None
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Export .shp file[s] to .wkb file[s]")
+    parser = argparse.ArgumentParser(description="Dump .shp file[s]")
 
     parser.add_argument("filename", metavar="file",
                       help="dump .shp file")

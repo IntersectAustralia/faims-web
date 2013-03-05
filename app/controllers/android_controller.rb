@@ -78,7 +78,11 @@ class AndroidController < ApplicationController
   end
 
   def server_file_archive
+    project = Project.find_by_key(params[:key])
+    files = params[:files]
 
+    info = project.server_file_archive_info(files)
+    render :json => info.to_json
   end
 
   def server_file_download
@@ -93,7 +97,11 @@ class AndroidController < ApplicationController
   end
 
   def app_file_archive
+    project = Project.find_by_key(params[:key])
+    files = params[:files]
 
+    info = project.app_file_archive_info(files)
+    render :json => info.to_json
   end
 
   def app_file_download

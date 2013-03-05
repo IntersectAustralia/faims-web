@@ -320,15 +320,15 @@ class Project < ActiveRecord::Base
 
   def server_file_list
     return [] unless File.directory? server_files_dir_path
-    get_file_list(server_files_dir_path, '')
+    get_file_list(server_files_dir_path)
   end
 
   def app_file_list
     return [] unless File.directory? app_files_dir_path
-    get_file_list(app_files_dir_path, '')
+    get_file_list(app_files_dir_path)
   end
 
-  def get_file_list(dir, base)
+  def get_file_list(dir, base = '')
     list = []
     Dir.entries(dir).each do |file|
       next if file == '.' or file == '..'
@@ -356,6 +356,31 @@ class Project < ActiveRecord::Base
     full_path = dir + '/' + File.dirname(path)
     FileUtils.mkdir_p full_path
     full_path
+  end
+
+  def server_file_archive_info(exclude_files = nil)
+    file_archive_info(server_files_dir_path, exclude_files)
+  end
+
+  def app_file_archive_info(exclude_files = nil)
+    file_archive_info(app_files_dir_path, exclude_files)
+  end
+
+  def file_archive_info(dir, exclude_files)
+    temp_file = Tempfile.new('archive')
+
+    exclude_files ||= []
+    files = get_file_list(dir).select {|f| !exclude_files.include?(f) }
+
+    files_str = files.map { |f| "#{f} " }.join
+
+    `tar zcf #{temp_file.path} -C #{dir} #{files_str}`
+
+    {
+        :file => File.basename(temp_file.path),
+        :size => File.size(temp_file.path),
+        :md5 => Digest::MD5.hexdigest(File.read(temp_file.path))
+    }
   end
 
   # static

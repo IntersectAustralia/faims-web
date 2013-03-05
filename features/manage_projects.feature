@@ -249,3 +249,70 @@ Feature: Manage projects
       | file2.sqlite3               |
       | file3.txt                   |
       | dir1/dir2/dir3/file4.tar.gz |
+
+  Scenario: See server files archive info for project
+    Given I have project "Project 1"
+    And I have server only files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I am on the android server files archive page for Project 1
+    Then I should see json for "Project 1" server files archive
+
+  Scenario: See new server files archive info for project
+    Given I have project "Project 1"
+    And I have server only files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I am request the android server files archive page for Project 1 with files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+    Then I should see json for "Project 1" server files archive given I already have files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+
+  Scenario: Cannot see server files archive info if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android server files archive page for Project 2
+    Then I should see bad request page
+
+  Scenario: See app files archive info for project
+    Given I have project "Project 1"
+    And I have app files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I am on the android app files archive page for Project 1
+    Then I should see json for "Project 1" app files archive
+
+  Scenario: See new app files archive info for project
+    Given I have project "Project 1"
+    And I have app files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I am request the android app files archive page for Project 1 with files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+    Then I should see json for "Project 1" app files archive given I already have files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+
+  Scenario: Cannot see app files archive info if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android app files archive page for Project 2
+    Then I should see bad request page
+
