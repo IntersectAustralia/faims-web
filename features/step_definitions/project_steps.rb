@@ -148,6 +148,75 @@ Then /^I should see bad request page$/ do
   page.status_code.should == 400
 end
 
+Then /^I should see empty file list$/ do
+  page.should have_content({files:[]}.to_json)
+end
+
+And /^I have server only files for "([^"]*)"$/ do |name, table|
+  project = Project.find_by_name(name)
+  table.hashes.each do |row|
+    project.add_server_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
+  end
+end
+
+And /^I have app files for "([^"]*)"$/ do |name, table|
+  project = Project.find_by_name(name)
+  table.hashes.each do |row|
+    project.add_app_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
+  end
+end
+
+Then /^I should see files$/ do |table|
+  files = []
+  table.hashes.each do |row|
+      files.push(row[:file])
+  end
+  files = files.sort
+  page.should have_content({files:files}.to_json)
+end
+
+Then /^I should see json for "([^"]*)" server files archive$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.server_file_archive_info
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" app files archive$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.app_file_archive_info
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" server files archive given I already have files$/ do |name, table|
+  project = Project.find_by_name(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  info = project.server_file_archive_info(files)
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" app files archive given I already have files$/ do |name, table|
+  project = Project.find_by_name(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  info = project.app_file_archive_info(files)
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+And /^I am request (.+) with files$/ do |name, table|
+  page_name = path_to(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  files_list = files.map{ |f| "files[]=#{f}&" }.join
+  visit page_name + "?#{files_list}"
+end
+
 Then /^I should download project package file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.package_name + "\""

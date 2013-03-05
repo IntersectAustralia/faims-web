@@ -135,6 +135,14 @@ class Project < ActiveRecord::Base
     dir_path + '/' + Project.project_settings_name
   end
 
+  def server_files_dir_path
+    dir_path + '/' + Project.server_files_dir_name
+  end
+
+  def app_files_dir_path
+    dir_path + '/' + Project.app_files_dir_name
+  end
+
   def project_setting
     File.read(dir_path + '/' + Project.project_settings_name).as_json
   end
@@ -350,6 +358,71 @@ class Project < ActiveRecord::Base
     return version.to_i <= v
   end
 
+  def server_file_list
+    return [] unless File.directory? server_files_dir_path
+    get_file_list(server_files_dir_path)
+  end
+
+  def app_file_list
+    return [] unless File.directory? app_files_dir_path
+    get_file_list(app_files_dir_path)
+  end
+
+  def get_file_list(dir, base = '')
+    list = []
+    Dir.entries(dir).each do |file|
+      next if file == '.' or file == '..'
+      if File.directory? dir + '/' + file
+        list = list.concat(get_file_list(dir + '/' + file, base + file + '/'))
+      else
+        list.push(base + file)
+      end
+    end
+    list.sort
+  end
+
+  def add_server_file(file, path)
+    full_path = make_path(server_files_dir_path, path)
+    FileUtils.cp(file.path, full_path)
+  end
+
+  def add_app_file(file, path)
+    full_path = make_path(app_files_dir_path, path)
+    FileUtils.cp(file.path, full_path)
+  end
+
+  def make_path(dir, path)
+    FileUtils.mkdir_p dir unless File.directory? dir
+    full_path = dir + '/' + File.dirname(path)
+    FileUtils.mkdir_p full_path
+    full_path
+  end
+
+  def server_file_archive_info(exclude_files = nil)
+    file_archive_info(server_files_dir_path, exclude_files)
+  end
+
+  def app_file_archive_info(exclude_files = nil)
+    file_archive_info(app_files_dir_path, exclude_files)
+  end
+
+  def file_archive_info(dir, exclude_files)
+    temp_file = Tempfile.new('archive')
+
+    exclude_files ||= []
+    files = get_file_list(dir).select {|f| !exclude_files.include?(f) }
+
+    files_str = files.map { |f| "#{f} " }.join
+
+    `tar zcf #{temp_file.path} -C #{dir} #{files_str}`
+
+    {
+        :file => File.basename(temp_file.path),
+        :size => File.size(temp_file.path),
+        :md5 => Digest::MD5.hexdigest(File.read(temp_file.path))
+    }
+  end
+
   # static
 
   def self.filename
@@ -400,6 +473,14 @@ class Project < ActiveRecord::Base
   def self.uploads_path
     return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
     Rails.application.config.server_uploads_directory
+  end
+
+  def self.server_files_dir_name
+    'files/server'
+  end
+
+  def self.app_files_dir_name
+    'files/app'
   end
 
   def self.update_archives_for(project_key)
