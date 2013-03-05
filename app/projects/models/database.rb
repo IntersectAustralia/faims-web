@@ -93,12 +93,12 @@ class Database
                                       AND deleted IS null)
                              JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
                                      FROM aentvalue LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-                                    WHERE vocabname LIKE '%'||?||'%'
-                                       OR freetext LIKE '%'||?||'%'
-                                       OR measure LIKE '%'||?||'%'
-                                 GROUP BY uuid
+                                 GROUP BY uuid, attributeid
                                    HAVING max(valuetimestamp)
-                                   AND deleted IS null) USING (uuid)
+                                   AND deleted IS null
+                                   AND ( vocabname LIKE '%'||?||'%'
+                                       OR freetext LIKE '%'||?||'%'
+                                       OR measure LIKE '%'||?||'%')) USING (uuid)
                          ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
                             LIMIT ?
                            OFFSET ?)
