@@ -95,6 +95,10 @@ class Project < ActiveRecord::Base
     dir_path + '/' + Project.filename
   end
 
+  def package_path
+    dir_path + '/' + Project.package_name
+  end
+
   def db_file_path
     dir_path + '/' + Project.db_file_name
   end
@@ -145,8 +149,17 @@ class Project < ActiveRecord::Base
     temp_db_dir_path + '/' + Project.db_version_file_name(version, latest_version)
   end
 
+  def temp_project_file_path
+    dir_path + '/' + Project.package_name
+  end
+
   def temp_db_dir_path
     dir_path + '/tmp'
+  end
+
+  def is_locked
+    return true if File.exist?(dir_path + '/lock')
+    false
   end
 
   def archive_info
@@ -209,6 +222,33 @@ class Project < ActiveRecord::Base
       # create default faims properties
       File.open(dir_path + "/faims.properties", 'w') do |file|
         file.write("")
+      end
+
+      # generate archive
+      update_archives
+    rescue Exception => e
+      puts "Error creating project"
+      FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
+      raise e
+    end
+  end
+
+  def create_project_from_compressed_file(tmp_dir)
+
+    begin
+      Dir.mkdir(Project.projects_path) unless File.directory? Project.projects_path # make sure projects directory exists
+
+      FileUtils.rm_rf dir_path if File.directory? dir_path # overwrite current project directory
+      Dir.mkdir(dir_path)
+
+      # copy files from temp directory to projects directory
+      Dir.entries(tmp_dir).each do |f|
+        next if f == '.' or f == '..' or f == 'hash_sum'
+        if File.directory? tmp_dir + '/' + f
+          FileUtils.cp_r(tmp_dir + '/' + f, dir_path + '/')
+        else
+          FileUtils.cp(tmp_dir + '/' + f, dir_path + '/')
+        end
       end
 
       # generate archive
@@ -316,6 +356,10 @@ class Project < ActiveRecord::Base
     'project.tar.gz'
   end
 
+  def self.package_name
+    'project.tar.bz2'
+  end
+
   def self.db_file_name
     'db.tar.gz'
   end
@@ -397,6 +441,57 @@ class Project < ActiveRecord::Base
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
     end
+  end
+
+  def self.package_project_for(project_key)
+    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
+    dir_path = projects_path + '/' + project_key + '/'
+    filepath = dir_path + '/' + Project.package_name
+
+    begin
+      tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
+
+      # create project directory to archive
+      project_dir = tmp_dir + 'project/'
+      Dir.mkdir(project_dir)
+
+      hash_sum = {}
+      `touch #{dir_path + '/lock'}`
+
+      FileUtils.cp_r(Dir[dir_path + '*'],project_dir)
+
+      Dir.glob(dir_path + '**/*') do |file|
+        next if File.basename(file) == '.' or File.basename(file) == '..'
+        next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
+        hash_sum[File.basename(file)] = Digest::MD5.hexdigest(File.read(file)) if !File.directory?(file) and File.exists? file
+      end
+
+      File.open(project_dir + '/hash_sum', 'w') do |file|
+        file.write(hash_sum.to_json)
+      end
+
+      `tar jcf #{filepath} -C #{tmp_dir} #{File.basename(project_dir)} --exclude='lock' --exclude='#{Project.package_name}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
+    rescue Exception => e
+      puts "Error packaging project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
+  end
+
+  def self.checksum_uploaded_file(dir)
+    hash_sum = JSON.parse(File.read(dir + '/hash_sum').as_json)
+    settings = JSON.parse(File.read(dir + '/' + Project.project_settings_name))
+    Dir.glob(dir + "**/*") do |file|
+      next if File.basename(file) == '.' or File.basename(file) == '..' or File.basename(file) == 'hash_sum'
+      if !File.directory?(file)
+        if !hash_sum[File.basename(file)].eql?(Digest::MD5.hexdigest(File.read(file)))
+          return false
+        end
+      end
+    end
+    true
   end
 
   def self.archive_database_for(project_key)
