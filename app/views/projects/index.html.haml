@@ -3,6 +3,7 @@
     %h1 Projects
   .pull-right
     = link_to "Create Project", new_project_path, :class => "btn"
+    = link_to "Upload Project", upload_project_path, :class => "btn"
 .clear
 - if @projects
   %ul.project-list

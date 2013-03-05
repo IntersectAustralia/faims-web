@@ -1,0 +1,9 @@
+%h1= @project.name + " - Search For Relationship Records"
+.content
+  %h2 Search Relationship
+  %form{:action => show_rel_records_path, :method => "get"}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %input{:type => 'hidden', :value => 0, :name => 'offset'}
+    %input{:type => 'text', :name => 'query'}
+    %input{:type => 'submit', :value => "Search"}
+  = link_to "Back", project_path(@project), :class => 'btn'

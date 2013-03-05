@@ -216,3 +216,20 @@ And /^I am request (.+) with files$/ do |name, table|
   files_list = files.map{ |f| "files[]=#{f}&" }.join
   visit page_name + "?#{files_list}"
 end
+
+Then /^I should download project package file for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.package_name + "\""
+  file = File.open(project.package_path, 'r')
+  page.source == file.read
+end
+
+Then /^I automatically archive project package "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  Project.package_project_for(project.key)
+end
+
+Then /^I automatically download project package "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  visit ("/projects/" + project.id.to_s + "/download_project")
+end

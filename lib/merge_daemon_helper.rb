@@ -48,7 +48,7 @@ class MergeDaemon
         merge_database_file = db_file_path
 
         # merge database
-        Database.merge_database(project_database_file, merge_database_file, version)
+        Database.merge_database(project_dir,project_database_file, merge_database_file, version)
 
         # update project archives
         Project.update_archives_for(key)
