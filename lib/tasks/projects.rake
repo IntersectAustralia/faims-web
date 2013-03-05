@@ -15,7 +15,7 @@ begin
       end
     end
     desc "Package all projects"
-    task :archive, [:key] => :environment do |t, args|
+    task :package, [:key] => :environment do |t, args|
       if args[:key]
         Project.find_by_key(args[:key]).package_project_for
       else
