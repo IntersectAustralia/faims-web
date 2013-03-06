@@ -50,6 +50,9 @@ FaimsWeb::Application.routes.draw do
   get "projects/:id/edit_rel_records/:relationshipid", :to => "projects#edit_rel_records", :as => "edit_rel_records"
   post "projects/:id/edit_rel_records/:relationshipid", :to => "projects#update_rel_records", :as => "update_rel_records"
 
+  get "projects/:id/show_rel_members/:relationshipid", :to => "projects#show_rel_members", :as => "show_rel_members"
+  post "projects/:id/remove_arch_ent_member/", :to => "projects#remove_arch_ent_member", :as => "remove_arch_ent_member"
+
   post "projects/:id/add_entity_to_compare/", :to => "projects#add_entity_to_compare", :as => "add_entity_to_compare"
   post "projects/:id/remove_entity_to_compare/", :to => "projects#remove_entity_to_compare", :as => "remove_entity_to_compare"
 

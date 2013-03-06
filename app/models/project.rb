@@ -96,7 +96,7 @@ class Project < ActiveRecord::Base
   end
 
   def package_path
-    dir_path + '/' + Project.package_name
+    dir_path + '/' + Project.package_name(key)
   end
 
   def db_file_path
@@ -158,7 +158,7 @@ class Project < ActiveRecord::Base
   end
 
   def temp_project_file_path
-    dir_path + '/' + Project.package_name
+    dir_path + '/' + Project.package_name(key)
   end
 
   def temp_db_dir_path
@@ -429,8 +429,9 @@ class Project < ActiveRecord::Base
     'project.tar.gz'
   end
 
-  def self.package_name
-    'project.tar.bz2'
+  def self.package_name(projectkey)
+    settings = JSON.parse(File.read(Project.projects_path + '/' + projectkey + '/' + Project.project_settings_name))
+    settings['name'].gsub(/\s+/, '_') + '.tar.bz2'
   end
 
   def self.db_file_name
@@ -527,7 +528,7 @@ class Project < ActiveRecord::Base
   def self.package_project_for(project_key)
     # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
     dir_path = projects_path + '/' + project_key + '/'
-    filepath = dir_path + '/' + Project.package_name
+    filepath = dir_path + '/' + Project.package_name(project_key)
 
     begin
       tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
@@ -551,7 +552,7 @@ class Project < ActiveRecord::Base
         file.write(hash_sum.to_json)
       end
 
-      `tar jcf #{filepath} -C #{tmp_dir} #{File.basename(project_dir)} --exclude='lock' --exclude='#{Project.package_name}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
+      `tar jcf #{filepath} -C #{tmp_dir} #{File.basename(project_dir)} --exclude='lock' --exclude='#{Project.package_name(project_key)}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
     rescue Exception => e
       puts "Error packaging project"
       raise e

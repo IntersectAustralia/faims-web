@@ -219,7 +219,7 @@ end
 
 Then /^I should download project package file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.package_name + "\""
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.package_name(project.key) + "\""
   file = File.open(project.package_path, 'r')
   page.source == file.read
 end

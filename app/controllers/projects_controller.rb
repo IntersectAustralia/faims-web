@@ -262,6 +262,18 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def show_rel_members
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    session[[:relationshipid]] = relationshipid
+    limit = 25
+    offset = params[:offset]
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    @uuid = Database.get_rel_arch_ent_members(@project.db_path,relationshipid, limit, offset)
+  end
+
   def add_entity_to_compare
     if !session[:values]
       session[:values] = []
@@ -367,12 +379,14 @@ class ProjectsController < ApplicationController
 
   def archive_project
     @project = Project.find(params[:id])
-    begin
-      session[:job] = Project.delay.package_project_for(@project.key)
-    rescue Exception => e
-      puts "Error archiving project"
-      FileUtils.rm (@project.dir_path + '/lock') if File.exists?(@project.dir_path + '/lock')
-      raise e
+    if !@project.is_locked
+      begin
+        session[:job] = Project.delay.package_project_for(@project.key)
+      rescue Exception => e
+        puts "Error archiving project"
+        FileUtils.rm (@project.dir_path + '/lock') if File.exists?(@project.dir_path + '/lock')
+        raise e
+      end
     end
     respond_to do |format|
       format.json { render :json => {:archive => 'false'} } if @project.is_locked

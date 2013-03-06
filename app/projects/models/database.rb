@@ -278,6 +278,33 @@ class Database
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from relationship where RelationshipID = ?;",relationshipid)
   end
 
+  def self.get_rel_arch_ent_members(file, relationshipid, limit, offset)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    uuids = db.execute("
+        SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS response, vocabid, attributeid, max(tstamp, astamp)
+             FROM aenttype
+             JOIN archentity USING (aenttypeid)
+             JOIN aentvalue USING (UUID)
+             JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+             JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+             JOIN attributekey USING (attributeid)
+             LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+              WHERE uuid in (SELECT uuid
+                             FROM aentreln
+                             where relationshipid = ?
+                             group by uuid, relationshipid
+                             having deleted is null
+                            LIMIT ?
+                           OFFSET ?)
+         GROUP BY uuid, attributeid
+           HAVING max(valuetimestamp)
+              AND max(aenttimestamp)
+         ORDER BY max(tstamp,astamp) desc, uuid, attributename;",relationshipid, limit, offset)
+    uuids
+  end
+
   def self.get_vocab(file,attributeid)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
