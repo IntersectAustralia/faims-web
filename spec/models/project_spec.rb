@@ -50,11 +50,14 @@ describe Project do
 
   describe "Should order by name" do
     it do
-      p1 = FactoryGirl.create(:project, :name => "B Project")
-      p2 = FactoryGirl.create(:project, :name => "A Project")
-      p3 = FactoryGirl.create(:project, :name => "C Project")
+      p1 = FactoryGirl.create(:project, :name => "b Project")
+      p2 = FactoryGirl.create(:project, :name => "a Project")
+      p3 = FactoryGirl.create(:project, :name => "c Project")
+      p4 = FactoryGirl.create(:project, :name => "B Project")
+      p5 = FactoryGirl.create(:project, :name => "A Project")
+      p6 = FactoryGirl.create(:project, :name => "C Project")
       projects = Project.all
-      projects.should == [p2, p1, p3]
+      projects.should == [p2, p5, p1, p4, p3, p6]
     end
   end
 

@@ -11,7 +11,7 @@ class Project < ActiveRecord::Base
 
   validates :key, :presence => true, :uniqueness => true
 
-  default_scope order(:name)
+  default_scope order: 'name COLLATE NOCASE'
 
   def name=(value)
     write_attribute(:name, value.strip.squish) if value
