@@ -17,9 +17,9 @@ begin
     desc "Package all projects"
     task :package, [:key] => :environment do |t, args|
       if args[:key]
-        Project.find_by_key(args[:key]).package_project_for
+        Project.package_project_for(args[:key])
       else
-        Project.all.each { |p| p.package_project_for }
+        Project.all.each { |p| Project.package_project_for(p.key) }
       end
     end
     namespace :test do

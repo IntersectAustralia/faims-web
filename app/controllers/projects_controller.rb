@@ -131,6 +131,8 @@ class ProjectsController < ApplicationController
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
     Database.update_arch_entity_attribute(@project.key, @project.db_path,uuid,vocab_id,attribute_id, measure, freetext, certainty)
+    @project.update_archives
+
     @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
     @vocab_name = {}
     for attribute in @attributes
@@ -147,6 +149,8 @@ class ProjectsController < ApplicationController
     end
     uuid = params[:uuid]
     Database.delete_arch_entity(@project.key, @project.db_path,uuid)
+    @project.update_archives
+
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
     else
@@ -239,6 +243,8 @@ class ProjectsController < ApplicationController
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
     Database.update_rel_attribute(@project.key, @project.db_path,relationshipid,vocab_id,attribute_id, freetext, certainty)
+    @project.update_archives
+
     @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
     @vocab_name = {}
     for attribute in @attributes
@@ -255,6 +261,7 @@ class ProjectsController < ApplicationController
     end
     relationshipid = params[:relationshipid]
     Database.delete_relationship(@project.key, @project.db_path,relationshipid)
+    @project.update_archives
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
     else
