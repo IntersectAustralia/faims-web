@@ -241,6 +241,11 @@ Feature: Andorid
       | file1.tar.gz                |
       | file2.sqlite3               |
 
+  Scenario: Cannot download server files no new files to download
+    Given I have project "Project 1"
+    And I am on the android server files download link for Project 1
+    Then I should see bad request page
+
   Scenario: Cannot download server files if project doesn't exist
     Given I have project "Project 1"
     And I am on the android server files download link for Project 2
@@ -268,6 +273,11 @@ Feature: Andorid
       | file                        |
       | file1.tar.gz                |
       | file2.sqlite3               |
+
+  Scenario: Cannot download app files no new files to download
+    Given I have project "Project 1"
+    And I am on the android app files download link for Project 1
+    Then I should see bad request page
 
   Scenario: Cannot download app files if project doesn't exist
     Given I have project "Project 1"

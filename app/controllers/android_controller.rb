@@ -81,6 +81,8 @@ class AndroidController < ApplicationController
     project = Project.find_by_key(params[:key])
     files = params[:files]
 
+    return render :json => {message: "no files to download" }.to_json, :status => 400 if project.server_file_list.size == 0
+
     info = project.server_file_archive_info(files)
     render :json => info.to_json
   end
@@ -113,6 +115,8 @@ class AndroidController < ApplicationController
   def app_file_archive
     project = Project.find_by_key(params[:key])
     files = params[:files]
+
+    return render :json => {message: "no files to download" }.to_json, :status => 400 if project.app_file_list.size == 0
 
     info = project.app_file_archive_info(files)
     render :json => info.to_json
