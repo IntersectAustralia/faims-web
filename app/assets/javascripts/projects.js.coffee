@@ -85,6 +85,7 @@ check_archive = ->
         setTimeout (->check_archive()),5000
         return
   return
+
 input_checked_handler = ->
   $(":checkbox").change(
     ->
@@ -99,6 +100,48 @@ input_checked_handler = ->
         $.post $('#remove_entity').val(),
           value: value
       return
+  )
+  return
+
+delete_arch_ent_members = ->
+  $('input#remove_member').each(
+    -> $(this).click(
+      ->
+        $.post $(this).attr('src')
+        $(this).parent().remove()
+        return
+    )
+  )
+  return
+
+search_arch_ent_members = ->
+  $('#search_member').click(
+    ->
+      window.location = $(this).attr('src')
+      return
+  )
+  return
+
+add_arch_ent_member = ->
+  $('#add_arch_ent').click(
+    ->
+      selected = $('input[type="radio"]:checked')
+      verb = $('#verb').val()
+      if selected.length == 0
+        alert('No Archaeological Entity is selected to be added')
+        return false
+      else
+        $.ajax $(this).attr('src'),
+          type: 'POST'
+          data: {relationshipid: $('#relationshipid').val(), uuid: selected.val(), verb: verb}
+          dataType: 'json'
+          success: (data, textStatus, jqXHR) ->
+            if data.result == "success"
+              window.location = data.url
+              return
+            else
+              return false
+        return
   )
   return
 
@@ -123,4 +166,8 @@ $(document).ready(
     show_archive_modal_dialog()
     compare_records()
     input_checked_handler()
+    search_arch_ent_members()
+    add_arch_ent_member()
+    delete_arch_ent_members()
+    return
 )

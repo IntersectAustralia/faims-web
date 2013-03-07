@@ -305,6 +305,70 @@ class Database
     uuids
   end
 
+  def self.get_non_member_arch_ent(file, relationshipid, query, limit, offset)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    uuids = db.execute("
+        SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS response, vocabid, attributeid, max(tstamp, astamp)
+             FROM aenttype
+             JOIN archentity USING (aenttypeid)
+             JOIN aentvalue USING (UUID)
+             JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+             JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+             JOIN attributekey USING (attributeid)
+             LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+              WHERE uuid in (SELECT uuid
+                             FROM (SELECT uuid, aenttypeid, max(aenttimestamp) as aenttimestamp
+                                     FROM archentity
+                                 GROUP BY uuid, aenttypeid
+                                   HAVING max(aenttimestamp)
+                                      AND deleted IS null)
+                             JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
+                                     FROM aentvalue LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+                                 GROUP BY uuid, attributeid
+                                   HAVING max(valuetimestamp)
+                                   AND deleted IS null
+                                   AND ( vocabname LIKE '%'||?||'%'
+                                       OR freetext LIKE '%'||?||'%'
+                                       OR measure LIKE '%'||?||'%')) USING (uuid)
+                             WHERE uuid not in (
+                                   SELECT uuid
+                                     FROM aentreln
+                                    WHERE Relationshipid = ?
+                                   GROUP BY uuid, relationshipid
+                                    having max(aentrelntimestamp)
+                                        and deleted is null
+                              )
+                         ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                            LIMIT ?
+                           OFFSET ?)
+         GROUP BY uuid, attributeid
+           HAVING max(valuetimestamp)
+              AND max(aenttimestamp)
+         ORDER BY max(tstamp,astamp) desc, uuid, attributename;",query,query,query,relationshipid, limit, offset)
+    uuids
+  end
+
+  def self.add_arch_ent_member(file,relationshipid,uuid,verb)
+    p uuid
+    p relationshipid
+    p verb
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("
+        insert into aentreln (UUID, RelationshipID, ParticipatesVerb) values(?, ?, ?);",uuid, relationshipid, verb)
+  end
+
+  def self.delete_arch_ent_member(file,relationshipid,uuid)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    db.execute("
+        insert into aentreln (UUID, RelationshipID, Deleted) values(?, ?, 'true');",uuid, relationshipid)
+  end
+
   def self.get_vocab(file,attributeid)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
