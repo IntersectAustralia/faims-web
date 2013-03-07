@@ -85,6 +85,19 @@ Feature: Manage projects
     | Arch16n     | faims_error.properties     | invalid file name       |
     | Arch16n     | faims_Project_2.properties | invalid properties file |
 
+  @javascript
+  Scenario: Upload Project
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "project.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I have project files for "Project 1"
+
   Scenario Outline: Edit static data
     Given I am on the home page
     And I have project "Project 1"
@@ -108,6 +121,16 @@ Feature: Manage projects
       | Project 3 |
     And I am on the android projects page
     Then I should see json for projects
+
+  Scenario: Download package
+    Given I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 1"
+    And I follow "Download Project"
+    Then I automatically archive project package "Project 1"
+    Then I automatically download project package "Project 1"
+    Then I should download project package file for "Project 1"
 
   Scenario: See archive info for project
     Given I have project "Project 1"

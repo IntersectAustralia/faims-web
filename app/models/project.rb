@@ -11,7 +11,7 @@ class Project < ActiveRecord::Base
 
   validates :key, :presence => true, :uniqueness => true
 
-  default_scope order(:name)
+  default_scope order: 'name COLLATE NOCASE'
 
   def name=(value)
     write_attribute(:name, value.strip.squish) if value
@@ -95,6 +95,10 @@ class Project < ActiveRecord::Base
     dir_path + '/' + Project.filename
   end
 
+  def package_path
+    dir_path + '/' + Project.package_name(key)
+  end
+
   def db_file_path
     dir_path + '/' + Project.db_file_name
   end
@@ -153,8 +157,17 @@ class Project < ActiveRecord::Base
     temp_db_dir_path + '/' + Project.db_version_file_name(version, latest_version)
   end
 
+  def temp_project_file_path
+    dir_path + '/' + Project.package_name(key)
+  end
+
   def temp_db_dir_path
     dir_path + '/tmp'
+  end
+
+  def is_locked
+    return true if File.exist?(dir_path + '/lock')
+    false
   end
 
   def archive_info
@@ -217,6 +230,33 @@ class Project < ActiveRecord::Base
       # create default faims properties
       File.open(dir_path + "/faims.properties", 'w') do |file|
         file.write("")
+      end
+
+      # generate archive
+      update_archives
+    rescue Exception => e
+      puts "Error creating project"
+      FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
+      raise e
+    end
+  end
+
+  def create_project_from_compressed_file(tmp_dir)
+
+    begin
+      Dir.mkdir(Project.projects_path) unless File.directory? Project.projects_path # make sure projects directory exists
+
+      FileUtils.rm_rf dir_path if File.directory? dir_path # overwrite current project directory
+      Dir.mkdir(dir_path)
+
+      # copy files from temp directory to projects directory
+      Dir.entries(tmp_dir).each do |f|
+        next if f == '.' or f == '..' or f == 'hash_sum'
+        if File.directory? tmp_dir + '/' + f
+          FileUtils.cp_r(tmp_dir + '/' + f, dir_path + '/')
+        else
+          FileUtils.cp(tmp_dir + '/' + f, dir_path + '/')
+        end
       end
 
       # generate archive
@@ -318,14 +358,18 @@ class Project < ActiveRecord::Base
     return version.to_i <= v
   end
 
-  def server_file_list
+  def server_file_list(exclude_files = nil)
     return [] unless File.directory? server_files_dir_path
-    get_file_list(server_files_dir_path)
+    file_list = get_file_list(server_files_dir_path)
+    return file_list unless exclude_files
+    file_list.select { |f| !exclude_files.include? f }
   end
 
-  def app_file_list
-    return [] unless File.directory? app_files_dir_path
-    get_file_list(app_files_dir_path)
+  def app_file_list(exclude_files = nil)
+    return [] unless File.directory? server_files_dir_path
+    file_list = get_file_list(app_files_dir_path)
+    return file_list unless exclude_files
+    file_list.select { |f| !exclude_files.include? f }
   end
 
   def get_file_list(dir, base = '')
@@ -359,27 +403,25 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_archive_info(exclude_files = nil)
-    file_archive_info(server_files_dir_path, exclude_files)
+    file_archive_info(server_files_dir_path, server_file_list(exclude_files))
   end
 
   def app_file_archive_info(exclude_files = nil)
-    file_archive_info(app_files_dir_path, exclude_files)
+    file_archive_info(app_files_dir_path, app_file_list(exclude_files))
   end
 
-  def file_archive_info(dir, exclude_files)
-    temp_file = Tempfile.new('archive')
-
-    exclude_files ||= []
-    files = get_file_list(dir).select {|f| !exclude_files.include?(f) }
+  def file_archive_info(dir, files)
+    tmp_dir = Dir.mktmpdir
+    temp_file = tmp_dir + '/archive.tar.gz'
 
     files_str = files.map { |f| "#{f} " }.join
 
-    `tar zcf #{temp_file.path} -C #{dir} #{files_str}`
+    `tar zcf #{temp_file} -C #{dir} #{files_str}`
 
     {
-        :file => temp_file.path,
-        :size => File.size(temp_file.path),
-        :md5 => Digest::MD5.hexdigest(File.read(temp_file.path))
+        :file => temp_file,
+        :size => File.size(temp_file),
+        :md5 => Digest::MD5.hexdigest(File.read(temp_file))
     }
   end
 
@@ -387,6 +429,11 @@ class Project < ActiveRecord::Base
 
   def self.filename
     'project.tar.gz'
+  end
+
+  def self.package_name(projectkey)
+    settings = JSON.parse(File.read(Project.projects_path + '/' + projectkey + '/' + Project.project_settings_name))
+    settings['name'].gsub(/\s+/, '_') + '.tar.bz2'
   end
 
   def self.db_file_name
@@ -478,6 +525,57 @@ class Project < ActiveRecord::Base
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
     end
+  end
+
+  def self.package_project_for(project_key)
+    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
+    dir_path = projects_path + '/' + project_key + '/'
+    filepath = dir_path + '/' + Project.package_name(project_key)
+
+    begin
+      tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
+
+      # create project directory to archive
+      project_dir = tmp_dir + 'project/'
+      Dir.mkdir(project_dir)
+
+      hash_sum = {}
+      `touch #{dir_path + '/lock'}`
+
+      FileUtils.cp_r(Dir[dir_path + '*'],project_dir)
+
+      Dir.glob(dir_path + '**/*') do |file|
+        next if File.basename(file) == '.' or File.basename(file) == '..'
+        next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
+        hash_sum[File.basename(file)] = Digest::MD5.hexdigest(File.read(file)) if !File.directory?(file) and File.exists? file
+      end
+
+      File.open(project_dir + '/hash_sum', 'w') do |file|
+        file.write(hash_sum.to_json)
+      end
+
+      `tar jcf #{filepath} -C #{tmp_dir} #{File.basename(project_dir)} --exclude='lock' --exclude='#{Project.package_name(project_key)}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
+    rescue Exception => e
+      puts "Error packaging project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    end
+  end
+
+  def self.checksum_uploaded_file(dir)
+    hash_sum = JSON.parse(File.read(dir + '/hash_sum').as_json)
+    settings = JSON.parse(File.read(dir + '/' + Project.project_settings_name))
+    Dir.glob(dir + "**/*") do |file|
+      next if File.basename(file) == '.' or File.basename(file) == '..' or File.basename(file) == 'hash_sum'
+      if !File.directory?(file)
+        if !hash_sum[File.basename(file)].eql?(Digest::MD5.hexdigest(File.read(file)))
+          return false
+        end
+      end
+    end
+    true
   end
 
   def self.archive_database_for(project_key)

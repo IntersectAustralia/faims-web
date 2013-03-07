@@ -223,14 +223,14 @@ Then /^I archive and download server files for "([^"]*)"$/ do |name|
   check_archive_download_files(name, info)
 end
 
-Then /^I archive and download server files for "Project 1" given I already have files$/ do |name, table|
+Then /^I archive and download server files for "([^"]*)" given I already have files$/ do |name, table|
   files = []
   table.hashes.each do |row|
     files.push(row)
   end
   project = Project.find_by_name(name)
   info = project.server_file_archive_info(files)
-  check_archive_download_files(name, info)
+  check_archive_download_files(name, info, files)
 end
 
 Then /^I archive and download app files for "([^"]*)"$/ do |name|
@@ -239,22 +239,39 @@ Then /^I archive and download app files for "([^"]*)"$/ do |name|
   check_archive_download_files(name, info)
 end
 
-Then /^I archive and download app files for "Project 1" given I already have files$/ do |name, table|
+Then /^I archive and download app files for "([^"]*)" given I already have files$/ do |name, table|
   files = []
   table.hashes.each do |row|
     files.push(row)
   end
   project = Project.find_by_name(name)
   info = project.app_file_archive_info(files)
-  check_archive_download_files(name, info)
+  check_archive_download_files(name, info, files)
 end
 
-def check_archive_download_files(name, info)
-  File.exists?(info[:file]).should be_true
-
+def check_archive_download_files(name, info, files = nil)
   visit path_to("the android server files download link for #{name}") + "?file=#{info[:file]}"
 
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
   file = File.open(info[:file], 'r')
   page.source == file.read
+
+  # check if files all exist
+end
+
+Then /^I should download project package file for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.package_name(project.key) + "\""
+  file = File.open(project.package_path, 'r')
+  page.source == file.read
+end
+
+Then /^I automatically archive project package "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  Project.package_project_for(project.key)
+end
+
+Then /^I automatically download project package "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  visit ("/projects/" + project.id.to_s + "/download_project")
 end

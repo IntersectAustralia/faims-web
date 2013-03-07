@@ -1,6 +1,10 @@
 %h1= @project.name + " - Relationship"
 = link_to "Delete", delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
-= link_to "Back", list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset], :class => 'btn'
+- if session[:type]
+  = link_to "Back", list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset], :class => 'btn'
+- else
+  = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset], :class => 'btn'
+= link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0", :class => 'btn'
 .container
   - for attribute in @attributes
     = simple_form_for @project, :url => update_rel_records_path, :method => "post" do|f|
@@ -11,7 +15,7 @@
             = f.hidden_field :attribute_id, :value => attribute[2]
             %table
               %tr
-                %td=attribute[4]
+                %td=attribute[3]
               %tr
               - if !@vocab_name[attribute[2]].empty?
                 %td
@@ -24,11 +28,11 @@
               %td
                 = f.label :freetext, "Freetext:"
               %td
-                = f.text_field :freetext, :value => attribute[6]
+                = f.text_field :freetext, :value => attribute[4]
               %td
                 = f.label :certainty, "Certainty:"
               %td
-                = f.text_field :certainty, :value => attribute[7]
+                = f.text_field :certainty, :value => attribute[5]
             .form-actions
               = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
               = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'

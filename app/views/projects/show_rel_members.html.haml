@@ -1,0 +1,36 @@
+%h1= @project.name + " - Relationship Archaeological Entity Members"
+.content
+  - if !@uuid.nil? and !@uuid.empty?
+    = link_to "Back", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+    - prev_uuid = @uuid[0][0]
+    - uuid_array = []
+    - array = []
+    - for uuid in @uuid
+      - if prev_uuid != uuid[0]
+        - uuid_array << array
+        - array = []
+        - prev_uuid = uuid[0]
+      - array << uuid
+    - uuid_array << array
+    .records
+      - for uuid_group in uuid_array
+        %ul.inner
+          %input{:type => 'button',:id=> 'remove_member', :class => 'remove_member', :src=> remove_arch_ent_member_path(@project)+'?relationsipid='+session[:relationshipid].to_s+'&uuid='+uuid_group[0][0].to_s}
+          - for uuids in uuid_group
+            %li
+              %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+                =uuids[2].to_s + ": " + uuids[3].to_s
+  -else
+    %p No Members Found
+    = link_to "Back", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+-if !@uuid.nil? and !@uuid.empty?
+  .footer.search
+    - if (session[:prev_offset] >= 0)
+      %form{:action => show_rel_members_path, :method => "get"}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
+        %input{:type => 'submit', :value => "Previous"}
+    %form{:action => show_rel_members_path, :method => "get"}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
+      %input{:type => 'submit', :value => "Next"}

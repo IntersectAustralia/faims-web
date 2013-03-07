@@ -50,11 +50,14 @@ describe Project do
 
   describe "Should order by name" do
     it do
-      p1 = FactoryGirl.create(:project, :name => "B Project")
-      p2 = FactoryGirl.create(:project, :name => "A Project")
-      p3 = FactoryGirl.create(:project, :name => "C Project")
+      p1 = FactoryGirl.create(:project, :name => "b Project")
+      p2 = FactoryGirl.create(:project, :name => "a Project")
+      p3 = FactoryGirl.create(:project, :name => "c Project")
+      p4 = FactoryGirl.create(:project, :name => "B Project")
+      p5 = FactoryGirl.create(:project, :name => "A Project")
+      p6 = FactoryGirl.create(:project, :name => "C Project")
       projects = Project.all
-      projects.should == [p2, p1, p3]
+      projects.should == [p2, p5, p1, p4, p3, p6]
     end
   end
 
@@ -69,6 +72,27 @@ describe Project do
       entries.include?(Project.ui_logic_name).should be_true
       entries.include?(Project.project_settings_name).should be_true
       entries.include?(Project.faims_properties_name).should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
+
+  end
+
+  it "Packaging project" do
+    begin
+      project = make_project("Project 1")
+      Project.package_project_for(project.key)
+      tmp_dir = Dir.mktmpdir(project.dir_path)
+      `tar jxf #{project.package_path} -C #{tmp_dir}`
+      entries = Dir.entries(tmp_dir+'/project')
+      entries.include?(Project.db_name).should be_true
+      entries.include?(Project.ui_schema_name).should be_true
+      entries.include?(Project.ui_logic_name).should be_true
+      entries.include?(Project.project_settings_name).should be_true
+      entries.include?(Project.faims_properties_name).should be_true
+      entries.include?('hash_sum').should be_true
     rescue Exception => e
       raise e
     ensure

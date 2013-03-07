@@ -67,24 +67,27 @@
   width: 375px;
 }
 
-.arch_ent_record_content > input {
-
-}
-
-ul.inner
-  {
+ul.compare,
+ul.inner {
   list-style-type:none;
   margin:0;
   padding:0;
   overflow:hidden;
 }
 ul.inner input,
-ul.inner li
-  {
+ul.inner li {
   float:left;
 }
-ul.inner li a
-  {
+
+ul.compare li {
+  float:left;
+  margin-left: 20px;
+}
+ul.compare li:first-child {
+  border-right: 1px solid ;
+}
+
+ul.inner li a {
   display:block;
   width:200px;
   background-color:#eeeeee;
@@ -92,11 +95,32 @@ ul.inner li a
   border:1px solid black;
 }
 
+.footer.search {
+  float: right;
+  padding-right: 0px;
+}
+
 .footer {
   float: right;
   padding-right: 535px;
 }
 
-.footer form{
+.footer form {
   display: inline-block;
+}
+
+.records {
+  width: 100%;
+  overflow: auto;
+}
+
+.records > .inner {
+  width: 120em;
+}
+
+.remove_member {
+  background:url(/assets/remove.jpg) no-repeat;
+  width: 200px;
+  height: 100px;
+  border: none;
 }

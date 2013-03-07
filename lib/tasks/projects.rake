@@ -14,6 +14,14 @@ begin
         Project.all.each { |p| p.update_archives }
       end
     end
+    desc "Package all projects"
+    task :package, [:key] => :environment do |t, args|
+      if args[:key]
+        Project.package_project_for(args[:key])
+      else
+        Project.all.each { |p| Project.package_project_for(p.key) }
+      end
+    end
     namespace :test do
       desc "Generate test projects"
       task :create, [:size] => :environment do |t, args|

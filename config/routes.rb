@@ -20,25 +20,47 @@ FaimsWeb::Application.routes.draw do
     end
   end
 
+  devise_scope :project do
+    get "projects/upload_project", :to => "projects#upload_project", :as => "upload_project"
+    post "projects/upload_new_project", :to => "projects#upload_new_project", :as => "upload_new_project"
+  end
+
   resources :projects
 
   get "projects/:id/edit_project_setting", :to => "projects#edit_project_setting", :as => "edit_project_setting"
   post "projects/:id/edit_project_setting", :to => "projects#update_project_setting", :as => "update_project_setting"
 
+  get "projects/:id/archive_project", :to => "projects#archive_project", :as => "archive_project"
+  get "projects/:id/download_project", :to => "projects#download_project", :as => "download_project"
+  get "projects/:id/check_archive_status", :to => "projects#check_archive_status", :as => "check_archive_status"
+
+  get "projects/:id/search_arch_ent_records/", :to => "projects#search_arch_ent_records", :as => "search_arch_ent_records"
+  get "projects/:id/show_arch_ent_records/", :to => "projects#show_arch_ent_records", :as => "show_arch_ent_records"
   get "projects/:id/list_arch_ent_records/", :to => "projects#list_arch_ent_records", :as => "list_arch_ent_records"
   get "projects/:id/list_typed_arch_ent_records/", :to => "projects#list_typed_arch_ent_records", :as => "list_typed_arch_ent_records"
   get "projects/:id/delete_arch_ent_records/:uuid", :to => "projects#delete_arch_ent_records", :as => "delete_arch_ent_records"
   get "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#edit_arch_ent_records", :as => "edit_arch_ent_records"
   post "projects/:id/edit_arch_ent_records/:uuid", :to => "projects#update_arch_ent_records", :as => "update_arch_ent_records"
 
+  get "projects/:id/search_rel_records/", :to => "projects#search_rel_records", :as => "search_rel_records"
+  get "projects/:id/show_rel_records/", :to => "projects#show_rel_records", :as => "show_rel_records"
   get "projects/:id/list_rel_records/", :to => "projects#list_rel_records", :as => "list_rel_records"
   get "projects/:id/list_typed_rel_records/", :to => "projects#list_typed_rel_records", :as => "list_typed_rel_records"
   get "projects/:id/delete_rel_records/:relationshipid", :to => "projects#delete_rel_records", :as => "delete_rel_records"
   get "projects/:id/edit_rel_records/:relationshipid", :to => "projects#edit_rel_records", :as => "edit_rel_records"
   post "projects/:id/edit_rel_records/:relationshipid", :to => "projects#update_rel_records", :as => "update_rel_records"
 
+  get "projects/:id/show_rel_members/:relationshipid", :to => "projects#show_rel_members", :as => "show_rel_members"
+  post "projects/:id/remove_arch_ent_member/", :to => "projects#remove_arch_ent_member", :as => "remove_arch_ent_member"
+
+  post "projects/:id/add_entity_to_compare/", :to => "projects#add_entity_to_compare", :as => "add_entity_to_compare"
+  post "projects/:id/remove_entity_to_compare/", :to => "projects#remove_entity_to_compare", :as => "remove_entity_to_compare"
+
   post "projects/:id/compare_arch_ents", :to => "projects#compare_arch_ents", :as => "compare_arch_ents"
   post "projects/:id/select_arch_ents", :to => "projects#select_arch_ents", :as => "select_arch_ents"
+
+  post "projects/:id/compare_rel", :to => "projects#compare_rel", :as => "compare_rel"
+  post "projects/:id/select_rel", :to => "projects#select_rel", :as => "select_rel"
 
   get "android/projects", :to => "android#projects", :as => "android_projects"
   
