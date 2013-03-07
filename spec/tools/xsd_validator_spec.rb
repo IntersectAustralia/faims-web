@@ -15,6 +15,8 @@ describe XSDValidator do
     it { validate_data_schema('data_schema.xml').should be_empty }
     # adding description to property of arch entity
     it { validate_data_schema('data_schema_2.xml').should be_empty }
+    # empty data
+    it { validate_data_schema('data_schema_3.xml').should be_empty }
   end
 
   describe "Validate UI Schemas" do
