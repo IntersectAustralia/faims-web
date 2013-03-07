@@ -52,6 +52,8 @@ FaimsWeb::Application.routes.draw do
 
   get "projects/:id/show_rel_members/:relationshipid", :to => "projects#show_rel_members", :as => "show_rel_members"
   post "projects/:id/remove_arch_ent_member/", :to => "projects#remove_arch_ent_member", :as => "remove_arch_ent_member"
+  get "projects/:id/search_arch_ent_member/:relationshipid", :to => "projects#search_arch_ent_member", :as => "search_arch_ent_member"
+  post "projects/:id/add_arch_ent_member/", :to => "projects#add_arch_ent_member", :as => "add_arch_ent_member"
 
   post "projects/:id/add_entity_to_compare/", :to => "projects#add_entity_to_compare", :as => "add_entity_to_compare"
   post "projects/:id/remove_entity_to_compare/", :to => "projects#remove_entity_to_compare", :as => "remove_entity_to_compare"

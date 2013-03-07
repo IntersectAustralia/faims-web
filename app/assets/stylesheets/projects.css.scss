@@ -54,6 +54,7 @@
   display: inline-block;
   vertical-align: top;
 }
+
 .tabs {
   list-style: none;
   width: 100%;
@@ -87,7 +88,8 @@ ul.compare li:first-child {
   border-right: 1px solid ;
 }
 
-ul.inner li a {
+ul.inner li a,
+ul.inner li span {
   display:block;
   width:200px;
   background-color:#eeeeee;
@@ -119,8 +121,38 @@ ul.inner li a {
 }
 
 .remove_member {
-  background:url(/assets/remove.jpg) no-repeat;
-  width: 200px;
-  height: 100px;
+  margin-top: 6px;
   border: none;
+  width: 16px !important;
+}
+
+.add_member {
+  float: left;
+}
+
+.search-arch-member ul li {
+  display: inline-block;
+  vertical-align: top;
+}
+
+.tabs {
+  list-style: none;
+  width: 100%;
+}
+
+.tabs li.settings .step-container .step-body {
+  width: 315px;
+}
+
+.tabs li.upload .step-container > .step-body {
+  width: 375px;
+}
+
+.tabs li.search {
+  width: 70%;
+}
+
+.tabs li.verb {
+  width: 25%;
+  margin-left: 10px;
 }

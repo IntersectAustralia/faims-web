@@ -69,6 +69,7 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:action] = 'list_typed_arch_ent_records'
     @uuid = Database.load_arch_entity(@project.db_path,type,limit,offset)
   end
 
@@ -99,6 +100,7 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:action] = 'show_arch_ent_records'
     @uuid = Database.search_arch_entity(@project.db_path,limit,offset,query)
   end
 
@@ -182,6 +184,7 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:action] = 'list_typed_rel_records'
     @relationshipid = Database.load_rel(@project.db_path,type,limit,offset)
   end
 
@@ -208,10 +211,13 @@ class ProjectsController < ApplicationController
     limit = 25
     query = params[:query]
     offset = params[:offset]
+    relationshipid = params[:relationshipid]
+    session[:relationshipid] = relationshipid
     session[:query] = query
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:action] = 'show_rel_records'
     @relationshipid = Database.search_rel(@project.db_path,limit,offset,query)
   end
 
@@ -272,13 +278,52 @@ class ProjectsController < ApplicationController
   def show_rel_members
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
-    session[[:relationshipid]] = relationshipid
+    session[:relationshipid] = relationshipid
     limit = 25
     offset = params[:offset]
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:show] = 'show_rel_members'
     @uuid = Database.get_rel_arch_ent_members(@project.db_path,relationshipid, limit, offset)
+  end
+
+  def remove_arch_ent_member
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    uuid = params[:uuid]
+    Database.delete_arch_ent_member(@project.db_path,relationshipid,uuid)
+    render :nothing => true
+  end
+
+  def search_arch_ent_member
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    session[:relationshipid] = relationshipid
+    query = params[:query]
+    if query.nil?
+      @uuid = nil
+      session.delete(:query)
+    else
+      limit = 25
+      offset = params[:offset]
+      session[:query] = query
+      session[:cur_offset] = offset
+      session[:prev_offset] = Integer(offset) - Integer(limit)
+      session[:next_offset] = Integer(offset) + Integer(limit)
+      @uuid = Database.get_non_member_arch_ent(@project.db_path,relationshipid,query,limit,offset)
+    end
+  end
+
+  def add_arch_ent_member
+    @project = Project.find(params[:id])
+    relationshipid = params[:relationshipid]
+    uuid = params[:uuid]
+    verb = params[:verb]
+    Database.add_arch_ent_member(@project.db_path,relationshipid,uuid,verb)
+    respond_to do |format|
+      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,relationshipid)+'?offset=0'} }
+    end
   end
 
   def add_entity_to_compare

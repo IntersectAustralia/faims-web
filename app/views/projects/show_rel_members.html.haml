@@ -15,11 +15,12 @@
     .records
       - for uuid_group in uuid_array
         %ul.inner
-          %input{:type => 'button',:id=> 'remove_member', :class => 'remove_member', :src=> remove_arch_ent_member_path(@project)+'?relationsipid='+session[:relationshipid].to_s+'&uuid='+uuid_group[0][0].to_s}
+          %input{:type => 'button',:id=> 'remove_member', :class => 'remove_member ui-icon ui-icon-circle-minus', :src=> remove_arch_ent_member_path(@project)+'?relationshipid='+session[:relationshipid].to_s+'&uuid='+uuid_group[0][0].to_s}
           - for uuids in uuid_group
             %li
               %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
                 =uuids[2].to_s + ": " + uuids[3].to_s
+    %input{:type => 'button',:id=> 'search_member', :value=> 'Add Member', :class => 'add_member', :src=> search_arch_ent_member_path(@project,session[:relationshipid])}
   -else
     %p No Members Found
     = link_to "Back", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'

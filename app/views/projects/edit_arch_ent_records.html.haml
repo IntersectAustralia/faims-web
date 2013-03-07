@@ -1,9 +1,12 @@
 %h1= @project.name + " - Archaeological Entity"
 = link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
-- if session[:type]
-  = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset], :class => 'btn'
-- else
-  = link_to "Back", show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset], :class => 'btn'
+- if session[:show].eql?('show_rel_members')
+  = link_to "Back", show_rel_members_path(@project,session[:relationshipid])+"?offset=0", :class => 'btn'
+-else
+  - if session[:action].eql?('list_typed_arch_ent_records')
+    = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset], :class => 'btn'
+  - elsif session[:action].eql?('show_arch_ent_records')
+    = link_to "Back", show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset], :class => 'btn'
 .container
   - for attribute in @attributes
     = simple_form_for @project, :url => update_arch_ent_records_path, :method => "post" do|f|
