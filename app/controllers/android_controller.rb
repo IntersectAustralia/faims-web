@@ -94,6 +94,15 @@ class AndroidController < ApplicationController
     send_file file
   end
 
+  def server_file_upload
+    file = params[:file]
+
+    return render :json => {message: "bad request"}.to_json, :status => 400 if file == nil
+
+    project = Project.find_by_key(params[:key])
+    project.server_file_upload(file)
+  end
+
   def app_file_list
     project = Project.find_by_key(params[:key])
 
@@ -116,6 +125,15 @@ class AndroidController < ApplicationController
     return render :json => {message: "file does not exist"}.to_json, :status => 400 unless File.exists? file
 
     send_file file
+  end
+
+  def app_file_upload
+    file = params[:file]
+
+    return render :json => {message: "bad request"}.to_json, :status => 400 if file == nil
+
+    project = Project.find_by_key(params[:key])
+    project.app_file_upload(file)
   end
 
 end

@@ -260,20 +260,30 @@ def check_archive_download_files(name, info, project_files, exclude_files = nil)
   project = Project.find_by_name(name)
   tmp_dir = project.dir_path + '/' + SecureRandom.uuid
 
-  Dir.mkdir(tmp_dir)
-
-  `tar xfz #{file.path} -C #{tmp_dir}`
+  download_list = get_archive_list(tmp_dir, file)
 
   exclude_files ||= []
 
   # check if file is part of directory list
-  Project.get_file_list(tmp_dir).select{ |f| !project_files.include? f }.size.should == 0
+  download_list.select{ |f| !project_files.include? f }.size.should == 0
 
   # check if file is not in exclude list
-  Project.get_file_list(tmp_dir).select{ |f| exclude_files.include? f }.size.should == 0
+  download_list.select{ |f| exclude_files.include? f }.size.should == 0
 
   FileUtils.rm_rf tmp_dir
 
+end
+
+def get_archive_list(dir, archive)
+  Dir.mkdir(dir)
+
+  `tar xfz #{archive.path} -C #{dir}`
+
+  file_list = Project.get_file_list(dir)
+
+  FileUtils.rm_rf dir
+
+  file_list
 end
 
 Then /^I should download project package file for "([^"]*)"$/ do |name|
@@ -291,4 +301,56 @@ end
 Then /^I automatically download project package "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   visit ("/projects/" + project.id.to_s + "/download_project")
+end
+
+And /^I upload server files "([^"]*)" to (.*) succeeds$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+  project.server_file_upload(upload_file)
+end
+
+And /^I upload app files "([^"]*)" to (.*) succeeds$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+  project.app_file_upload(upload_file)
+end
+
+Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+
+  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  upload_list = get_archive_list(tmp_dir, upload_file)
+
+  # check if uploaded files exist on server file list
+  server_list = project.server_file_list
+  upload_list.select { |f| !server_list.include? f }.size.should == 0
+end
+
+Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+
+  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  upload_list = get_archive_list(tmp_dir, upload_file)
+
+  # check if uploaded files exist on app file list
+  app_list = project.app_file_list
+  upload_list.select { |f| !app_list.include? f }.size.should == 0
+end
+
+And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
+  visit path_to("the android server upload file link for #{name}")
+end
+
+And /^I upload app files "([^"]*)" to (.*) fails$/ do |file, name|
+  visit path_to("the android app upload file link for #{name}")
 end

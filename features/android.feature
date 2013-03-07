@@ -273,3 +273,23 @@ Feature: Andorid
     Given I have project "Project 1"
     And I am on the android app files download link for Project 2
     Then I should see bad request page
+
+  Scenario: Upload server files
+    Given I have project "Project 1"
+    And I upload server files "test_files.tar.gz" to Project 1 succeeds
+    Then I should have stored server files "test_files.tar.gz" for Project 1
+
+  Scenario: Upload app files
+    Given I have project "Project 1"
+    And I upload app files "test_files.tar.gz" to Project 1 succeeds
+    Then I should have stored app files "test_files.tar.gz" for Project 1
+
+  Scenario: Cannot upload server files if project doesn't exist
+    Given I have project "Project 1"
+    And I upload server files "test_files.tar.gz" to Project 2 fails
+    Then I should see bad request page
+
+  Scenario: Cannot upload app files if project doesn't exist
+    Given I have project "Project 1"
+    And I upload app files "test_files.tar.gz" to Project 2 fails
+    Then I should see bad request page

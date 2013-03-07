@@ -425,6 +425,20 @@ class Project < ActiveRecord::Base
     }
   end
 
+  def server_file_upload(file)
+    # make sure dir exists
+    FileUtils.mkdir_p server_files_dir_path unless File.directory? server_files_dir_path
+
+    `tar xfz #{file.path} -C #{server_files_dir_path}`
+  end
+
+  def app_file_upload(file)
+    # make sure dir exists
+    FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
+
+    `tar xfz #{file.path} -C #{app_files_dir_path}`
+  end
+
   # static
 
   def self.filename
