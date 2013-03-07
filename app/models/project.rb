@@ -360,24 +360,24 @@ class Project < ActiveRecord::Base
 
   def server_file_list(exclude_files = nil)
     return [] unless File.directory? server_files_dir_path
-    file_list = get_file_list(server_files_dir_path)
+    file_list = Project.get_file_list(server_files_dir_path)
     return file_list unless exclude_files
     file_list.select { |f| !exclude_files.include? f }
   end
 
   def app_file_list(exclude_files = nil)
-    return [] unless File.directory? server_files_dir_path
-    file_list = get_file_list(app_files_dir_path)
+    return [] unless File.directory? app_files_dir_path
+    file_list = Project.get_file_list(app_files_dir_path)
     return file_list unless exclude_files
     file_list.select { |f| !exclude_files.include? f }
   end
 
-  def get_file_list(dir, base = '')
+  def self.get_file_list(dir, base = '')
     list = []
     Dir.entries(dir).each do |file|
       next if file == '.' or file == '..'
       if File.directory? dir + '/' + file
-        list = list.concat(get_file_list(dir + '/' + file, base + file + '/'))
+        list = list.concat(Project.get_file_list(dir + '/' + file, base + file + '/'))
       else
         list.push(base + file)
       end

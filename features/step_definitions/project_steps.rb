@@ -220,7 +220,7 @@ end
 Then /^I archive and download server files for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   info = project.server_file_archive_info
-  check_archive_download_files(name, info)
+  check_archive_download_files(name, info, project.server_file_list)
 end
 
 Then /^I archive and download server files for "([^"]*)" given I already have files$/ do |name, table|
@@ -230,13 +230,13 @@ Then /^I archive and download server files for "([^"]*)" given I already have fi
   end
   project = Project.find_by_name(name)
   info = project.server_file_archive_info(files)
-  check_archive_download_files(name, info, files)
+  check_archive_download_files(name, info, project.server_file_list, files)
 end
 
 Then /^I archive and download app files for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   info = project.app_file_archive_info
-  check_archive_download_files(name, info)
+  check_archive_download_files(name, info, project.app_file_list)
 end
 
 Then /^I archive and download app files for "([^"]*)" given I already have files$/ do |name, table|
@@ -246,10 +246,10 @@ Then /^I archive and download app files for "([^"]*)" given I already have files
   end
   project = Project.find_by_name(name)
   info = project.app_file_archive_info(files)
-  check_archive_download_files(name, info, files)
+  check_archive_download_files(name, info, project.app_file_list, files)
 end
 
-def check_archive_download_files(name, info, files = nil)
+def check_archive_download_files(name, info, project_files, exclude_files = nil)
   visit path_to("the android server files download link for #{name}") + "?file=#{info[:file]}"
 
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
@@ -257,6 +257,23 @@ def check_archive_download_files(name, info, files = nil)
   page.source == file.read
 
   # check if files all exist
+  project = Project.find_by_name(name)
+  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+
+  Dir.mkdir(tmp_dir)
+
+  `tar xfz #{file.path} -C #{tmp_dir}`
+
+  exclude_files ||= []
+
+  # check if file is part of directory list
+  Project.get_file_list(tmp_dir).select{ |f| !project_files.include? f }.size.should == 0
+
+  # check if file is not in exclude list
+  Project.get_file_list(tmp_dir).select{ |f| exclude_files.include? f }.size.should == 0
+
+  FileUtils.rm_rf tmp_dir
+
 end
 
 Then /^I should download project package file for "([^"]*)"$/ do |name|
