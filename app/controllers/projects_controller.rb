@@ -51,8 +51,8 @@ class ProjectsController < ApplicationController
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
-    session.delete[:action]
-    session.delete[:show]
+    session.delete(:action)
+    session.delete(:show)
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
@@ -175,8 +175,8 @@ class ProjectsController < ApplicationController
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
-    session.delete[:action]
-    session.delete[:show]
+    session.delete(:action)
+    session.delete(:show)
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
@@ -319,6 +319,7 @@ class ProjectsController < ApplicationController
     session[:relntypeid] = relntypeid
     if search_query.nil?
       @uuid = nil
+      @status = 'init'
       session.delete(:search_query)
     else
       limit = 25
