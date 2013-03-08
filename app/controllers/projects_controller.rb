@@ -319,6 +319,7 @@ class ProjectsController < ApplicationController
     session[:relntypeid] = relntypeid
     if search_query.nil?
       @uuid = nil
+      @status = 'init'
       session.delete(:search_query)
     else
       limit = 25
