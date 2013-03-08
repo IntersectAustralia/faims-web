@@ -217,6 +217,75 @@ And /^I am request (.+) with files$/ do |name, table|
   visit page_name + "?#{files_list}"
 end
 
+Then /^I archive and download server files for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.server_file_archive_info
+  check_archive_download_files(name, info, project.server_file_list)
+end
+
+Then /^I archive and download server files for "([^"]*)" given I already have files$/ do |name, table|
+  files = []
+  table.hashes.each do |row|
+    files.push(row)
+  end
+  project = Project.find_by_name(name)
+  info = project.server_file_archive_info(files)
+  check_archive_download_files(name, info, project.server_file_list, files)
+end
+
+Then /^I archive and download app files for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.app_file_archive_info
+  check_archive_download_files(name, info, project.app_file_list)
+end
+
+Then /^I archive and download app files for "([^"]*)" given I already have files$/ do |name, table|
+  files = []
+  table.hashes.each do |row|
+    files.push(row)
+  end
+  project = Project.find_by_name(name)
+  info = project.app_file_archive_info(files)
+  check_archive_download_files(name, info, project.app_file_list, files)
+end
+
+def check_archive_download_files(name, info, project_files, exclude_files = nil)
+  visit path_to("the android server files download link for #{name}") + "?file=#{info[:file]}"
+
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
+  file = File.open(info[:file], 'r')
+  page.source == file.read
+
+  # check if files all exist
+  project = Project.find_by_name(name)
+  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+
+  download_list = get_archive_list(tmp_dir, file)
+
+  exclude_files ||= []
+
+  # check if file is part of directory list
+  download_list.select{ |f| !project_files.include? f }.size.should == 0
+
+  # check if file is not in exclude list
+  download_list.select{ |f| exclude_files.include? f }.size.should == 0
+
+  FileUtils.rm_rf tmp_dir
+
+end
+
+def get_archive_list(dir, archive)
+  Dir.mkdir(dir)
+
+  `tar xfz #{archive.path} -C #{dir}`
+
+  file_list = Project.get_file_list(dir)
+
+  FileUtils.rm_rf dir
+
+  file_list
+end
+
 Then /^I should download project package file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.package_name(project.key) + "\""
@@ -232,4 +301,56 @@ end
 Then /^I automatically download project package "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   visit ("/projects/" + project.id.to_s + "/download_project")
+end
+
+And /^I upload server files "([^"]*)" to (.*) succeeds$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+  project.server_file_upload(upload_file)
+end
+
+And /^I upload app files "([^"]*)" to (.*) succeeds$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+  project.app_file_upload(upload_file)
+end
+
+Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+
+  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  upload_list = get_archive_list(tmp_dir, upload_file)
+
+  # check if uploaded files exist on server file list
+  server_list = project.server_file_list
+  upload_list.select { |f| !server_list.include? f }.size.should == 0
+end
+
+Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
+  filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+
+  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  upload_list = get_archive_list(tmp_dir, upload_file)
+
+  # check if uploaded files exist on app file list
+  app_list = project.app_file_list
+  upload_list.select { |f| !app_list.include? f }.size.should == 0
+end
+
+And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
+  Project.find_by_name(name).should be_nil
+end
+
+And /^I upload app files "([^"]*)" to (.*) fails$/ do |file, name|
+  Project.find_by_name(name).should be_nil
 end

@@ -93,6 +93,22 @@ module NavigationHelpers
         project = Project.find_by_name($1)
         app_file_archive_path(project ? project.key : "na")
 
+      when /the android server files download link for (.*)$/
+        project = Project.find_by_name($1)
+        server_file_download_path(project ? project.key : "na")
+
+      when /the android app files download link for (.*)$/
+        project = Project.find_by_name($1)
+        app_file_download_path(project ? project.key : "na")
+
+      when /the android server upload file link for (.*)$/
+        project = Project.find_by_name($1)
+        server_file_upload_path(project ? project.key : "na")
+
+      when /the android app upload file link for (.*)$/
+        project = Project.find_by_name($1)
+        app_file_upload_path(project ? project.key : "na")
+
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:
 #
