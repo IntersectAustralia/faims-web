@@ -268,8 +268,8 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def check_sum(db_file,md5)
-    current_md5 = Digest::MD5.hexdigest(db_file.read)
+  def check_sum(file, md5)
+    current_md5 = Digest::MD5.hexdigest(file.read)
     return true if current_md5 == md5
     return false
   end
@@ -358,22 +358,26 @@ class Project < ActiveRecord::Base
     return version.to_i <= v
   end
 
-  def server_file_list
+  def server_file_list(exclude_files = nil)
     return [] unless File.directory? server_files_dir_path
-    get_file_list(server_files_dir_path)
+    file_list = Project.get_file_list(server_files_dir_path)
+    return file_list unless exclude_files
+    file_list.select { |f| !exclude_files.include? f }
   end
 
-  def app_file_list
+  def app_file_list(exclude_files = nil)
     return [] unless File.directory? app_files_dir_path
-    get_file_list(app_files_dir_path)
+    file_list = Project.get_file_list(app_files_dir_path)
+    return file_list unless exclude_files
+    file_list.select { |f| !exclude_files.include? f }
   end
 
-  def get_file_list(dir, base = '')
+  def self.get_file_list(dir, base = '')
     list = []
     Dir.entries(dir).each do |file|
       next if file == '.' or file == '..'
       if File.directory? dir + '/' + file
-        list = list.concat(get_file_list(dir + '/' + file, base + file + '/'))
+        list = list.concat(Project.get_file_list(dir + '/' + file, base + file + '/'))
       else
         list.push(base + file)
       end
@@ -399,28 +403,40 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_archive_info(exclude_files = nil)
-    file_archive_info(server_files_dir_path, exclude_files)
+    file_archive_info(server_files_dir_path, server_file_list(exclude_files))
   end
 
   def app_file_archive_info(exclude_files = nil)
-    file_archive_info(app_files_dir_path, exclude_files)
+    file_archive_info(app_files_dir_path, app_file_list(exclude_files))
   end
 
-  def file_archive_info(dir, exclude_files)
-    temp_file = Tempfile.new('archive')
-
-    exclude_files ||= []
-    files = get_file_list(dir).select {|f| !exclude_files.include?(f) }
+  def file_archive_info(dir, files)
+    tmp_dir = Dir.mktmpdir
+    temp_file = tmp_dir + '/archive.tar.gz'
 
     files_str = files.map { |f| "#{f} " }.join
 
-    `tar zcf #{temp_file.path} -C #{dir} #{files_str}`
+    `tar zcf #{temp_file} -C #{dir} #{files_str}`
 
     {
-        :file => File.basename(temp_file.path),
-        :size => File.size(temp_file.path),
-        :md5 => Digest::MD5.hexdigest(File.read(temp_file.path))
+        :file => temp_file,
+        :size => File.size(temp_file),
+        :md5 => Digest::MD5.hexdigest(File.read(temp_file))
     }
+  end
+
+  def server_file_upload(file)
+    # make sure dir exists
+    FileUtils.mkdir_p server_files_dir_path unless File.directory? server_files_dir_path
+
+    `tar xfz #{file.path} -C #{server_files_dir_path}`
+  end
+
+  def app_file_upload(file)
+    # make sure dir exists
+    FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
+
+    `tar xfz #{file.path} -C #{app_files_dir_path}`
   end
 
   # static

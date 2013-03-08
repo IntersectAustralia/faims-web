@@ -80,6 +80,12 @@ FaimsWeb::Application.routes.draw do
   get "android/project/:key/server_file_archive", :to => "android#server_file_archive", :as => "server_file_archive"
   get "android/project/:key/app_file_archive", :to => "android#app_file_archive", :as => "app_file_archive"
 
+  get "android/project/:key/server_file_download", :to => "android#server_file_download", :as => "server_file_download"
+  get "android/project/:key/app_file_download", :to => "android#app_file_download", :as => "app_file_download"
+
+  post "android/project/:key/server_file_upload", :to => "android#server_file_upload", :as => "server_file_upload"
+  post "android/project/:key/app_file_upload", :to => "android#app_file_upload", :as => "app_file_upload"
+
   root :to => "pages#home"
 
   get "pages/home"
