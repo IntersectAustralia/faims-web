@@ -345,6 +345,9 @@ Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
   # check if uploaded files exist on app file list
   app_list = project.app_file_list
   upload_list.select { |f| !app_list.include? f }.size.should == 0
+
+  # check if project archive updated
+  check_project_archive_updated(project).should == true
 end
 
 And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
@@ -353,4 +356,33 @@ end
 
 And /^I upload app files "([^"]*)" to (.*) fails$/ do |file, name|
   Project.find_by_name(name).should be_nil
+end
+
+
+def check_project_archive_updated(project)
+  begin
+    tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
+
+    `tar xfz #{project.filepath} -C #{tmp_dir}`
+
+    tmp_project_dir = tmp_dir + '/' + project.key
+
+    compare_dir(project.dir_path + '/' + Project.app_files_dir_name, tmp_project_dir + '/' + Project.app_files_dir_name)
+  rescue Exception => e
+    raise e
+  ensure
+    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+  end
+end
+
+def compare_dir(dir1, dir2)
+  return false unless File.directory? dir1
+  return false unless File.directory? dir2
+  file_list1 = Project.get_file_list(dir1)
+  file_list2 = Project.get_file_list(dir2)
+  return false unless file_list1.size == file_list2.size
+  for i in (1..file_list1.size) do
+    md5(dir1 + '/' + file_list1.shift).should == md5(dir2 + '/' + file_list2.shift)
+  end
+  return true
 end
