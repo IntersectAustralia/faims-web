@@ -248,10 +248,10 @@ class Database
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     attributes = db.execute("
-      SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname
-        from relnvalue join attributekey using(attributeid)
+      SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid
+        from relnvalue r join attributekey using(attributeid) join relationship using(relationshipid)
         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-        where relationshipid = ? and deleted is null
+        where r.relationshipid = ? and r.deleted is null
       GROUP BY relationshipid, attributeid
         HAVING max(relnvaluetimestamp) order by relationshipid, attributename asc;",relationshipid)
     attributes
@@ -350,10 +350,17 @@ class Database
     uuids
   end
 
-  def self.add_arch_ent_member(file,relationshipid,uuid,verb)
-    p uuid
-    p relationshipid
-    p verb
+  def self.get_verbs_for_relation(file, relntypeid)
+    db = SQLite3::Database.new(file)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{spatialite_library}')")
+    verbs = db.execute("
+        select parent from relntype where relntypeid = ? union select child from relntype where relntypeid = ?;" ,relntypeid, relntypeid)
+    verbs
+  end
+
+  def self.add_arch_ent_member(project_key,file,relationshipid,uuid,verb)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
@@ -361,7 +368,8 @@ class Database
         insert into aentreln (UUID, RelationshipID, ParticipatesVerb) values(?, ?, ?);",uuid, relationshipid, verb)
   end
 
-  def self.delete_arch_ent_member(file,relationshipid,uuid)
+  def self.delete_arch_ent_member(project_key,file,relationshipid,uuid)
+    sleep_if_locked(project_key)
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")

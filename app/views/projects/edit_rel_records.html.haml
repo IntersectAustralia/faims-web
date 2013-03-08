@@ -4,7 +4,7 @@
   = link_to "Back", list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
 - elsif session[:action].eql?('show_rel_records')
   = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
-= link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0", :class => 'btn'
+= link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0&relntypeid=" + @attributes[0][7].to_s, :class => 'btn'
 .container
   - for attribute in @attributes
     = simple_form_for @project, :url => update_rel_records_path, :method => "post" do|f|

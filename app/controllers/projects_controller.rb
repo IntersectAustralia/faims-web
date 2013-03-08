@@ -281,6 +281,7 @@ class ProjectsController < ApplicationController
     session[:relationshipid] = relationshipid
     limit = 25
     offset = params[:offset]
+    session[:relntypeid] = params[:relntypeid]
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
@@ -292,7 +293,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
-    Database.delete_arch_ent_member(@project.db_path,relationshipid,uuid)
+    Database.delete_arch_ent_member(@project.key,@project.db_path,relationshipid,uuid)
     render :nothing => true
   end
 
@@ -301,6 +302,8 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
     query = params[:query]
+    relntypeid = params[:relntypeid]
+    session[:relntypeid] = relntypeid
     if query.nil?
       @uuid = nil
       session.delete(:query)
@@ -313,6 +316,7 @@ class ProjectsController < ApplicationController
       session[:next_offset] = Integer(offset) + Integer(limit)
       @uuid = Database.get_non_member_arch_ent(@project.db_path,relationshipid,query,limit,offset)
     end
+    @verb = Database.get_verbs_for_relation(@project.db_path, relntypeid)
   end
 
   def add_arch_ent_member
@@ -320,7 +324,7 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
     verb = params[:verb]
-    Database.add_arch_ent_member(@project.db_path,relationshipid,uuid,verb)
+    Database.add_arch_ent_member(@project.key,@project.db_path,relationshipid,uuid,verb)
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,relationshipid)+'?offset=0'} }
     end
