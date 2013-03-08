@@ -2,7 +2,7 @@
 .content
   %h2 Search Relationship
   %form{:action => show_rel_records_path, :method => "get"}
-    %p Searching for empty search will display all relationships
+    %p An empty search will list all relationships
     %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
     %input{:type => 'hidden', :value => 0, :name => 'offset'}
     %input{:type => 'text', :name => 'query'}
