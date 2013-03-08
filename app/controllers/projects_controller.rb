@@ -51,6 +51,8 @@ class ProjectsController < ApplicationController
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
+    session.delete[:action]
+    session.delete[:show]
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
@@ -170,7 +172,14 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     @type = Database.get_rel_types(@project.db_path)
-    session[:values] = []
+    session.delete(:values)
+    session.delete(:type)
+    session.delete(:query)
+    session.delete[:action]
+    session.delete[:show]
+    session.delete(:cur_offset)
+    session.delete(:prev_offset)
+    session.delete(:next_offset)
   end
 
   def list_typed_rel_records
