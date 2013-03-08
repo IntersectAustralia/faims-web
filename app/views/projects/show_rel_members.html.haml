@@ -20,10 +20,11 @@
             %li
               %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
                 =uuids[2].to_s + ": " + uuids[3].to_s
-    %input{:type => 'button',:id=> 'search_member', :value=> 'Add Member', :class => 'add_member', :src=> search_arch_ent_member_path(@project,session[:relationshipid])}
+    %input{:type => 'button',:id=> 'search_member', :value=> 'Add Member', :class => 'add_member', :src=> search_arch_ent_member_path(@project,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
   -else
-    %p No Members Found
     = link_to "Back", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+    %p No Members Found
+    %input{:type => 'button',:id=> 'search_member', :value=> 'Add Member', :class => 'add_member', :src=> search_arch_ent_member_path(@project,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
 -if !@uuid.nil? and !@uuid.empty?
   .footer.search
     - if (session[:prev_offset] >= 0)
