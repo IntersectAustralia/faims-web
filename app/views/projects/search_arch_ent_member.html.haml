@@ -11,9 +11,9 @@
           %input{:type => 'hidden', :value => 0, :name => 'offset'}
           %input{:type => 'hidden', :value => session[:relntypeid], :name => 'relntypeid'}
           - if session[:query]
-            %input{:type => 'text', :name => 'query', :value=> session[:query]}
+            %input{:type => 'text', :name => 'search_query', :value=> session[:search_query]}
           -else
-            %input{:type => 'text', :name => 'query'}
+            %input{:type => 'text', :name => 'search_query'}
           %input{:type => 'submit', :value => "Search"}
         - if !@uuid.nil? and !@uuid.empty?
           - prev_uuid = @uuid[0][0]
@@ -41,19 +41,19 @@
                 %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
                 %input{:type => 'hidden', :value => session[:relntypeid], :name => 'relntypeid'}
                 %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
-                %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+                %input{:type => 'hidden', :value => session[:search_query], :name => 'search_query'}
                 %input{:type => 'submit', :value => "Previous"}
             %form{:action => search_arch_ent_member_path, :method => "get"}
               %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
               %input{:type => 'hidden', :value => session[:relntypeid], :name => 'relntypeid'}
               %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
-              %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+              %input{:type => 'hidden', :value => session[:search_query], :name => 'search_query'}
               %input{:type => 'submit', :value => "Next"}
         -else
-          %p No Members Found
+          %p Please enter text to search for particular entity or leave it empty to show all entities
       %li.verb
         %h4 Archaeological Entity Verb
-        %label Verb
+        %label Verb (if required)
         %select{:id => 'verb'}
           - for verb in @verb
             %option{:value => verb[0].to_s.strip}

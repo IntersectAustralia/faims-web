@@ -2,6 +2,7 @@
 .content
   %h2 Search Archaeological Entity
   %form{:action => show_arch_ent_records_path, :method => "get"}
+    %p Searching for empty search will display all entities
     %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
     %input{:type => 'hidden', :value => 0, :name => 'offset'}
     %input{:type => 'text', :name => 'query'}

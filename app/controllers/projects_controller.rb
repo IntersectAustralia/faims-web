@@ -301,20 +301,20 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
-    query = params[:query]
+    search_query = params[:search_query]
     relntypeid = params[:relntypeid]
     session[:relntypeid] = relntypeid
-    if query.nil?
+    if search_query.nil?
       @uuid = nil
-      session.delete(:query)
+      session.delete(:search_query)
     else
       limit = 25
       offset = params[:offset]
-      session[:query] = query
+      session[:search_query] = search_query
       session[:cur_offset] = offset
       session[:prev_offset] = Integer(offset) - Integer(limit)
       session[:next_offset] = Integer(offset) + Integer(limit)
-      @uuid = Database.get_non_member_arch_ent(@project.db_path,relationshipid,query,limit,offset)
+      @uuid = Database.get_non_member_arch_ent(@project.db_path,relationshipid,search_query,limit,offset)
     end
     @verb = Database.get_verbs_for_relation(@project.db_path, relntypeid)
   end
