@@ -437,6 +437,8 @@ class Project < ActiveRecord::Base
     FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
 
     `tar xfz #{file.path} -C #{app_files_dir_path}`
+
+    update_archives
   end
 
   # static
@@ -492,6 +494,10 @@ class Project < ActiveRecord::Base
     Rails.application.config.server_uploads_directory
   end
 
+  def self.sync_files_dir_name
+    'files'
+  end
+
   def self.server_files_dir_name
     'files/server'
   end
@@ -529,6 +535,10 @@ class Project < ActiveRecord::Base
       files.each do |file|
         FileUtils.cp(dir_path + file, project_dir + file) if File.exists? dir_path + file
       end
+
+      # copy server/app files to tmp directory
+      FileUtils.mkdir_p project_dir + Project.sync_files_dir_name
+      FileUtils.cp_r(dir_path + Project.app_files_dir_name, project_dir + Project.app_files_dir_name) if File.directory? dir_path + Project.app_files_dir_name
 
       # TODO currently minitar doesn't have directory change option
       `tar zcf #{filepath} -C #{tmp_dir} #{File.basename(dir_path)}`

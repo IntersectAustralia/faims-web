@@ -32,7 +32,7 @@ def archived_file_match(archived_file, file)
 
     unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
 
-    md5(unarchived_file) == md5(file)
+    md5(unarchived_file).should == md5(file)
   rescue Exception => e
     raise e
   ensure
