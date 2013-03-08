@@ -98,11 +98,21 @@ class AndroidController < ApplicationController
 
   def server_file_upload
     file = params[:file]
+    md5 = params[:md5]
 
     return render :json => {message: "bad request"}.to_json, :status => 400 if file == nil
 
     project = Project.find_by_key(params[:key])
-    project.server_file_upload(file)
+
+    if project.check_sum(file, md5)
+
+      project.server_file_upload(file)
+
+      render :json => {message: "successfully upload file"}.to_json, :status => 200
+    else
+      render :json => {message: "upload file is corrupted"}.to_json, :status => 400
+    end
+
   end
 
   def app_file_list
@@ -133,11 +143,20 @@ class AndroidController < ApplicationController
 
   def app_file_upload
     file = params[:file]
+    md5 = params[:md5]
 
     return render :json => {message: "bad request"}.to_json, :status => 400 if file == nil
 
     project = Project.find_by_key(params[:key])
-    project.app_file_upload(file)
+
+    if project.check_sum(file, md5)
+
+      project.app_file_upload(file)
+
+      render :json => {message: "successfully upload file"}.to_json, :status => 200
+    else
+      render :json => {message: "upload file is corrupted"}.to_json, :status => 400
+    end
   end
 
 end

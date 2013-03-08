@@ -297,9 +297,7 @@ Feature: Andorid
   Scenario: Cannot upload server files if project doesn't exist
     Given I have project "Project 1"
     And I upload server files "test_files.tar.gz" to Project 2 fails
-    Then I should see bad request page
 
   Scenario: Cannot upload app files if project doesn't exist
     Given I have project "Project 1"
     And I upload app files "test_files.tar.gz" to Project 2 fails
-    Then I should see bad request page

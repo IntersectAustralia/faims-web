@@ -268,8 +268,8 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def check_sum(db_file,md5)
-    current_md5 = Digest::MD5.hexdigest(db_file.read)
+  def check_sum(file, md5)
+    current_md5 = Digest::MD5.hexdigest(file.read)
     return true if current_md5 == md5
     return false
   end

@@ -348,9 +348,9 @@ Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
 end
 
 And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
-  visit path_to("the android server upload file link for #{name}")
+  Project.find_by_name(name).should be_nil
 end
 
 And /^I upload app files "([^"]*)" to (.*) fails$/ do |file, name|
-  visit path_to("the android app upload file link for #{name}")
+  Project.find_by_name(name).should be_nil
 end
