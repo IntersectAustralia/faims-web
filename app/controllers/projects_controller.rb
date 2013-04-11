@@ -489,35 +489,41 @@ class ProjectsController < ApplicationController
 
   def upload_new_project
     if params[:project]
-      tar_file = params[:project][:project_file]
-      if !(tar_file.content_type.eql?('application/x-bzip') || tar_file.content_type.eql?('application/x-bzip2'))
-        @project = Project.new
-        flash.now[:error] = 'Unsupported format of file, please upload the correct file'
-        render 'upload_project'
-      else
-        tmp_dir = Dir.mktmpdir(Project.projects_path + "/") + "/";
-        `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
-        project_settings = JSON.parse(File.read(tmp_dir + 'project/' + Project.project_settings_name).as_json)
-        if !Project.find_by_key(project_settings['key']).blank?
-          FileUtils.rm_rf tmp_dir
+      begin
+        tar_file = params[:project][:project_file]
+        if !(tar_file.content_type.eql?('application/x-bzip') || tar_file.content_type.eql?('application/x-bzip2'))
           @project = Project.new
-          flash.now[:error] = 'This project already exists in the system'
-          render 'upload_project'
-        elsif !Project.checksum_uploaded_file(tmp_dir + 'project/')
-          FileUtils.rm_rf tmp_dir
-          @project = Project.new
-          flash.now[:error] = 'Wrong hash sum for the project'
+          flash.now[:error] = 'Unsupported format of file, please upload the correct file'
           render 'upload_project'
         else
-          @project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
-          @project.transaction do
-            @project.save
-            @project.create_project_from_compressed_file(tmp_dir + 'project')
+          tmp_dir = Dir.mktmpdir(Project.projects_path + "/") + "/";
+          `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
+          project_settings = JSON.parse(File.read(tmp_dir + 'project/' + Project.project_settings_name).as_json)
+          if !Project.checksum_uploaded_file(tmp_dir + 'project/')
+            FileUtils.rm_rf tmp_dir
+            @project = Project.new
+            flash.now[:error] = 'Wrong hash sum for the project'
+            render 'upload_project'
+          elsif !Project.find_by_key(project_settings['key']).blank?
+            FileUtils.rm_rf tmp_dir
+            @project = Project.new
+            flash.now[:error] = 'This project already exists in the system'
+            render 'upload_project'
+          else
+            @project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
+            @project.transaction do
+              @project.save
+              @project.create_project_from_compressed_file(tmp_dir + 'project')
+            end
+            FileUtils.rm_rf tmp_dir
+            flash[:notice] = 'Project has been successfully uploaded'
+            redirect_to :projects
           end
-          FileUtils.rm_rf tmp_dir
-          flash[:notice] = 'Project has been successfully uploaded'
-          redirect_to :projects
         end
+      rescue Exception
+        @project = Project.new
+        flash.now[:error] = 'Uploaded project file is corrupted'
+        render 'upload_project'
       end
     else
       @project = Project.new
