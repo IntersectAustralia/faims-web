@@ -135,6 +135,17 @@ Feature: Manage projects
     And I press "Upload"
     Then I should see "Uploaded project file is corrupted"
 
+  @javascript
+  Scenario: Upload Project with wrong file should fail
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "project.tar" for "Project File"
+    And I press "Upload"
+    Then I should see "Unsupported format of file, please upload the correct file"
+
   Scenario Outline: Edit static data
     Given I am on the home page
     And I have project "Project 1"
