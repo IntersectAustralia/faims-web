@@ -73,7 +73,7 @@ end
 And /^I upload database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
   project = Project.find_by_name(name)
   upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-  md5 = Digest::MD5.hexdigest(File.read(upload_db_file))
+  md5 = MD5Checksum.compute_checksum(upload_db_file)
   project.check_sum(upload_db_file,md5).should be_true
 end
 
@@ -102,7 +102,7 @@ end
 And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
   project = Project.find_by_name(name)
   upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
-  md5 = Digest::MD5.hexdigest(File.read(upload_db_file)) + '55'
+  md5 = MD5Checksum.compute_checksum(upload_db_file) + '55'
   project.check_sum(upload_db_file,md5).should be_false
 end
 

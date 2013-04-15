@@ -3,6 +3,7 @@ load Rails.root.to_s + "/app/projects/models/database.rb"
 class Project < ActiveRecord::Base
   include XSDValidator
   include Archive::Tar
+  include MD5Checksum
 
   attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type
 
@@ -174,7 +175,7 @@ class Project < ActiveRecord::Base
     info = {
         :file => Project.filename,
         :size => File.size(filepath),
-        :md5 => Digest::MD5.hexdigest(File.read(filepath))
+        :md5 => MD5Checksum.compute_checksum(filepath)
     }
     v = latest_version.to_i
     info = info.merge({ :version => v }) if v > 0
@@ -185,7 +186,7 @@ class Project < ActiveRecord::Base
     info = {
         :file => Project.db_file_name,
         :size => File.size(db_file_path),
-        :md5 => Digest::MD5.hexdigest(File.read(db_file_path))
+        :md5 => MD5Checksum.compute_checksum(db_file_path)
     }
     v = latest_version.to_i
     info = info.merge({ :version => v }) if v > 0
@@ -202,7 +203,7 @@ class Project < ActiveRecord::Base
       info = {
         :file => Project.db_version_file_name(version_num, latest_version),
         :size => File.size(temp_path),
-        :md5 => Digest::MD5.hexdigest(File.read(temp_path))
+        :md5 => MD5Checksum.compute_checksum(temp_path)
       }
       v = latest_version.to_i
       info = info.merge({ :version => v }) if v > 0
@@ -269,7 +270,7 @@ class Project < ActiveRecord::Base
   end
 
   def check_sum(file, md5)
-    current_md5 = Digest::MD5.hexdigest(file.read)
+    current_md5 = MD5Checksum.compute_checksum(file.path)
     return true if current_md5 == md5
     return false
   end
@@ -421,7 +422,7 @@ class Project < ActiveRecord::Base
     {
         :file => temp_file,
         :size => File.size(temp_file),
-        :md5 => Digest::MD5.hexdigest(File.read(temp_file))
+        :md5 => MD5Checksum.compute_checksum(temp_file)
     }
   end
 
@@ -571,7 +572,7 @@ class Project < ActiveRecord::Base
       Dir.glob(dir_path + '**/*') do |file|
         next if File.basename(file) == '.' or File.basename(file) == '..'
         next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
-        hash_sum[File.basename(file)] = Digest::MD5.hexdigest(File.read(file)) if !File.directory?(file) and File.exists? file
+        hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
       end
 
       File.open(project_dir + '/hash_sum', 'w') do |file|
@@ -594,7 +595,7 @@ class Project < ActiveRecord::Base
     Dir.glob(dir + "**/*") do |file|
       next if File.basename(file) == '.' or File.basename(file) == '..' or File.basename(file) == 'hash_sum'
       if !File.directory?(file)
-        if !hash_sum[File.basename(file)].eql?(Digest::MD5.hexdigest(File.read(file)))
+        if !hash_sum[File.basename(file)].eql?(MD5Checksum.compute_checksum(file))
           return false
         end
       end

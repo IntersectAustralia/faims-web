@@ -21,7 +21,7 @@ def is_valid_settings_file(filename)
 end
 
 def md5(file)
-  Digest::MD5.hexdigest(File.read(file))
+  MD5Checksum.compute_checksum(file)
 end
 
 def archived_file_match(archived_file, file)
