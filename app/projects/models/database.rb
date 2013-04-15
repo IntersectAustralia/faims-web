@@ -128,8 +128,8 @@ class Database
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
-    db.execute("insert into AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, '#{current_timestamp}', 0, 1 from version;")
+    db.execute("insert into AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, '#{current_timestamp}'
               , (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));",uuid, vocab_id, attribute_id, measure, freetext, certainty)
   end
 
@@ -138,9 +138,9 @@ class Database
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, '#{current_timestamp}', 0, 1 from version;")
     db.execute("insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, deleted, versionnum)
-              select uuid, userid,AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, CURRENT_TIMESTAMP,'true',
+              select uuid, userid,AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, '#{current_timestamp}','true',
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from archentity where uuid = ?",uuid)
   end
 
@@ -262,8 +262,8 @@ class Database
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
-    db.execute("insert into RelnValue (RelationshipID, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, CURRENT_TIMESTAMP,
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, '#{current_timestamp}', 0, 1 from version;")
+    db.execute("insert into RelnValue (RelationshipID, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, '#{current_timestamp}',
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));",relationshipid, attribute_id, vocab_id, freetext, certainty)
   end
 
@@ -272,9 +272,9 @@ class Database
     db = SQLite3::Database.new(file)
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
-    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, 0, 1 from version;")
+    db.execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, '#{current_timestamp}', 0, 1 from version;")
     db.execute("insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, deleted, versionnum)
-              select RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, CURRENT_TIMESTAMP,'true',
+              select RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, '#{current_timestamp}','true',
               (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) from relationship where RelationshipID = ?;",relationshipid)
   end
 
@@ -433,7 +433,7 @@ class Database
     db.enable_load_extension(true)
     db.execute("select load_extension('#{spatialite_library}')")
     content = <<EOF
-    insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, CURRENT_TIMESTAMP, #{userid}, 0 from version;
+    insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, '#{current_timestamp}', #{userid}, 0 from version;
 EOF
     content = content.gsub("\n", "")
     db.execute_batch(content)
@@ -518,6 +518,10 @@ EOF
     content = content.gsub("\n", "")
     content = content.gsub("?", toDB)
     db.execute_batch(content)
+  end
+
+  def self.current_timestamp
+    Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
   end
 
   def self.sleep_if_locked(project_key)
