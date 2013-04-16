@@ -41,8 +41,8 @@ def create_full_database(version = nil, filename = nil, index = nil)
         "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
-      Database.execute_query(file.path, "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, RelnValueTimestamp, VersionNum) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', CURRENT_TIMESTAMP, #{version} " +
+      Database.execute_query(file.path, "INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, VersionNum) " +
+          "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
@@ -93,8 +93,8 @@ def is_version_database_same(db1, db2, version)
       Database.execute_query(db2.path, "select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from aentvalue;")
   return false if Database.execute_query(db1.path, "select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn from relationship where versionnum = #{version};") !=
       Database.execute_query(db2.path, "select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn from relationship;")
-  return false if Database.execute_query(db1.path, "select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext from relnvalue where versionnum = #{version};") !=
-      Database.execute_query(db2.path, "select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext from relnvalue;")
+  return false if Database.execute_query(db1.path, "select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty from relnvalue where versionnum = #{version};") !=
+      Database.execute_query(db2.path, "select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty from relnvalue;")
   return false if Database.execute_query(db1.path, "select uuid, relationshipid, participatesverb, aentrelntimestamp from aentreln where versionnum = #{version};") !=
       Database.execute_query(db2.path, "select uuid, relationshipid, participatesverb, aentrelntimestamp from aentreln;")
   return true
