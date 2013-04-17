@@ -1,5 +1,5 @@
 %h1= @project.name + " - Relationship"
-= link_to "Delete", delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+= link_to "Delete", delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn', :id => 'delete_record'
 - if session[:action].eql?('list_typed_rel_records')
   = link_to "Back", list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
 - elsif session[:action].eql?('show_rel_records')
