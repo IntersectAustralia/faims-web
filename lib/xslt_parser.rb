@@ -6,6 +6,9 @@ module XSLTParser
     xslt = Nokogiri::XSLT(File.read(File.expand_path("../assets/data_schema.xsl", __FILE__)))
     doc = Nokogiri::XML(File.read(file))
 
+    # replace single quotes with double single quotes
+    doc.xpath("//description").each { |d| d.content = d.content.gsub(/([^'])?'([^'])?/, "\\1''\\2") }
+
     result = xslt.transform(doc).text
 
     result

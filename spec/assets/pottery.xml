@@ -1,0 +1,412 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="TRAPPottery" preparer="Brian Ballsun-Stanton">
+
+
+	<RelationshipElement name="Object" type="container">
+		<description>
+			What stratigraphic 'unit' this was found in?
+		</description>
+		<property type="Identifier" name="ObjectID" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<description>A unique numerical identifier representing the object.</description>
+		</property>
+	</RelationshipElement>
+
+
+	<RelationshipElement name="Measurement" type="bidirectional">
+		<description>
+			What will be a container for located measurements for an artefact.
+		</description>
+	</RelationshipElement>
+
+	<RelationshipElement name="SurfaceTypology" type="bidirectional">
+		<description>
+			What will be a container for standard topologies. It is now a container for recorded observations.
+		</description>
+	</RelationshipElement>
+	<RelationshipElement name="DecorationTypology" type="bidirectional">
+		<description>
+			What will be a container for standard topologies. It is now a container for recorded observations.
+		</description>
+	</RelationshipElement>
+
+	<RelationshipElement name="Similiar" type="bidirectional">
+		<description>
+			What will be a container for similiar artefacts.
+		</description>
+	</RelationshipElement>
+
+	<RelationshipElement name="Interpretation" type="container">
+		<description>
+			Archaeological interpretation of a set of one or more shards
+		</description>
+		<property type="Date" name="DateStart" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<description>An Estimated starting bound for the artefact's creation</description>
+		</property>
+		<property type="Date" name="DateEnd" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<description>An Estimated ending bound for the artefact's creation</description>
+		</property>
+		<property type="Lookup" name="Type" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<description>An Estimated type of the artefact from the set of: TS/RS/GW/BS/imitation of BS</description>
+			<lookup>
+				<term>TS</term>
+				<term>RS</term>
+				<term>GW</term>
+				<term>BS</term>
+				<term>imitation of BS</term>
+				<term annotationRequired="true" >Other</term>
+			</lookup>
+		</property>
+		<property type="Text" name="Origin" minCardinality="1" maxCardinality="n" >
+			<description>An Estimated Origin for the artefact(s)</description>
+		</property>
+		<property type="Lookup" name="Function" minCardinality="1" maxCardinality="n" >
+			<description>An Estimated function of the artefact from the set of: tableware / transport / storage / cooking / votive / other/ non-id
+			</description>
+			<lookup>
+				<term>tableware</term>
+				<term>transport</term>
+				<term>storage</term>
+				<term>cooking</term>
+				<term>votive</term>
+				<term annotationRequired="true" >Other</term>
+				<term annotationRequired="true" >Non-id</term>
+			</lookup>
+		</property>
+	</RelationshipElement>
+
+
+<!--
+	TRAPPotteryArtefact
+	Inventory#
+	CreationDate
+	InventoryDate
+	PDF
+	PDF PAge
+	Drawn
+	Plate
+	FragmentPart
+
+	Measure
+		(Vocab (height/width/length/thick/diam) + measure) + location
+
+	Open/Closed
+	Shape
+	Size
+	Tech
+	Hard
+	FeelInt
+	FeelExt
+	Cleave
+	Fire
+
+	InclusionFreq
+	InclusionSize
+		(Multiselect VF-F-M-C-VC)
+	InclusionSort
+	InclusionType
+		(concat colour-type)
+
+	Fabric Colour Surface (Int)
+	Fabric Colour Surface (ext)
+	Fabric Colour Margin (int)
+	Fabric Colour Margin (ext)
+	Fabric Colour Core
+
+	Surface Treatment
+		Type
+		Int/Ext/B
+		Thick
+		Cover
+		Colour
+		Desc
+
+	Wear
+
+	Decoration
+		Yes/No
+		Int/Ext/B
+		Type
+		Colour
+		Desc
+	-->
+
+	<ArchaeologicalElement type="PotteryArtefact">
+
+		<description>
+			A pottery artefact is one that has been recovered from the soil during a TRAP survey.
+		</description>
+
+		<property type="Identifier" name="Inventory#" minCardinality="1" maxCardinality="n" isIdentifier="true">
+		</property>
+		<property type="Date" name="CreationDate" minCardinality="1" maxCardinality="n">
+		</property>
+		<property type="Date" name="InventoryDate" minCardinality="1" maxCardinality="n">
+		</property>
+		<property type="Text" name="PDF" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Yes</term>
+				<term>No</term>
+			</lookup>
+		</property>
+		<property type="Text" name="PDF Page" minCardinality="1" maxCardinality="n">
+
+		</property>
+		<property type="Lookup" name="Drawn" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Yes</term>
+				<term>No</term>
+			</lookup>
+		</property>
+
+		<property type="Lookup" name="FragmentPart" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Rim</term>
+				<term>neck</term>
+				<term>shoulder</term>
+				<term>handle</term>
+				<term>handle attachment</term>
+				<term>body</term>
+				<term>base</term>
+				<term>foot</term>
+			</lookup>
+		</property>
+
+
+		<property type="Measure" name="Measure" minCardinality="1" maxCardinality="n">
+			<!-- note that this is a lookup table for type of measurement. This answer will have both a vocabid and a measure -->
+			<lookup>
+				<term>Height</term>
+				<term>Width</term>
+				<term>Width - Rim</term>
+				<term>Length</term>
+				<term>Thick</term>
+				<term>Thick - Base</term>
+				<term>Thick - Body</term>
+				<term>Diam</term>
+				<term>Diam - Base</term>
+			</lookup>
+		</property>
+
+		<property type="Lookup" name="OpenClosed" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Open</term>
+				<term>Closed</term>
+				<term>Not Determined</term>
+
+			</lookup>
+		</property>
+
+
+		<property type="Lookup" name="Shape" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Plate</term>
+				<term>bowl</term>
+				<term>cup</term>
+				<term>pot</term>
+				<term>jug</term>
+				<term>amphora</term>
+				<term>pithos</term>
+				<term>lid</term>
+			</lookup>
+		</property>
+
+
+		<property type="Lookup" name="Size" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Large</term>
+				<term>Medium</term>
+				<term>Small</term>
+			</lookup>
+		</property>
+
+		<property type="Lookup" name="Technology" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Handmade</term>
+				<term>Wheelmade</term>
+				<term>Not Determined</term>
+
+			</lookup>
+		</property>
+		<property type="Lookup" name="Hardness" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Very Hard</term>
+				<term>Hard</term>
+				<term>Medium Hard</term>
+				<term>Medium Soft</term>
+				<term>Soft</term>
+				<term>Very Soft</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Feel" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>soapy </term>
+				<term>smooth</term>
+				<term>chalky</term>
+				<term>sandy</term>
+				<term>rough</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Cleavage" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Smooth </term>
+				<term>Gritty</term>
+				<term>Irregular</term>
+				<term>hackly-laminated</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Firing" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Even </term>
+				<term>Uneven</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Frequency" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>1 - 0% </term>
+				<term>2 - 5%</term>
+				<term>3 - 10%</term>
+				<term>4 - 20%</term>
+				<term>5 - 30%</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Size Range Start" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Very fine (&lt;0.25mm)  </term>
+				<term>Fine (0.25-0.5mm) </term>
+				<term>Medium (0.5-1mm) </term>
+				<term>Coarse (1-2mm)</term>
+				<term>Very Coarse (&gt;2mm)</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Size Range End" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Very fine (&lt;0.25mm)  </term>
+				<term>Fine (0.25-0.5mm) </term>
+				<term>Medium (0.5-1mm) </term>
+				<term>Coarse (1-2mm)</term>
+				<term>Very Coarse (&gt;2mm)</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Sorting" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>1 Very Poor </term>
+				<term>2 Poor </term>
+				<term>3 OK </term>
+				<term>4 Good</term>
+				<term>5 Very Good</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Type" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>mica
+				</term>
+				<term>calcite </term>
+				<term>Sand</term>
+				<term>White Stone</term>
+				<term>Black Stone</term>
+				<term>Red Stone</term>
+				<term>Organics/chaff</term>
+				<term>Ground pottery</term>
+			</lookup>
+		</property>
+		<property type="Measure" name="Fabric Colour" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>Surface (Int)</term>
+				<term>Surface (Ext)</term>
+				<term>Margin (Int)</term>
+				<term>Margin (Ext)</term>
+				<term>Core</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Wear" minCardinality="1" maxCardinality="n">
+			<lookup>
+				<term>1 - None</term>
+				<term>2 - Little</term>
+				<term>3 - Some</term>
+				<term>4 - Much</term>
+				<term>5 - Severe</term>
+			</lookup>
+		</property>
+
+	</ArchaeologicalElement>
+
+	<ArchaeologicalElement type="SurfaceTreatment">
+		<description>An element holding the surface treatment typology descriptions</description>
+		<property type="Lookup" name="Type" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>Wheel marks</term>
+				<term>Smoothed</term>
+				<term>Burnished</term>
+				<term>Slip</term>
+				<term>Gloss</term>
+				<term>Glaze</term>
+
+			</lookup>
+		</property>
+		<property type="Lookup" name="IntExt" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>Interior
+				</term>
+				<term>Exterior</term>
+				<term>Both</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Thick" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>Thick
+				</term>
+				<term>Medium</term>
+				<term>Thin</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Cover" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>Continuous
+				</term>
+				<term>Sparse</term>
+				<term>Even</term>
+				<term>Uneven</term>
+
+			</lookup>
+		</property>
+		<property type="Text" name="Colour" minCardinality="1" maxCardinality="n">
+		</property>
+		<property type="Text" name="Description" minCardinality="1" maxCardinality="n">
+		</property>
+
+
+	</ArchaeologicalElement>
+
+	<ArchaeologicalElement type="Decoration">
+		<description>An element holding decoration description elements</description>
+		<property type="Lookup" name="Presence" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>Yes</term>
+				<term>No</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="IntExt" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>Interior</term>
+				<term>Exterior</term>
+				<term>Both</term>
+			</lookup>
+		</property>
+		<property type="Lookup" name="Type" minCardinality="1" maxCardinality="n" isIdentifier="true">
+			<lookup>
+				<term>painted</term>
+				<term>incised</term>
+				<term>plastic</term>
+				<term>glaze</term>
+			</lookup>
+		</property>
+		<property type="Text" name="Colour" minCardinality="1" maxCardinality="n">
+		</property>
+		<property type="Text" name="Description" minCardinality="1" maxCardinality="n">
+		</property>
+
+
+	</ArchaeologicalElement>
+
+</dataSchema>

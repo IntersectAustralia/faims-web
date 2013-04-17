@@ -20,6 +20,12 @@ describe Database do
     tempfile.unlink
   end
 
+  it "Generates and Parses data_schema.xml with single qoutes" do
+    tempfile = Tempfile.new('db.sqlite3')
+    Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'pottery.xml').to_s)
+    tempfile.unlink
+  end
+
   describe "Merging databases" do
     it "Empty database and Empty database" do
       db1 = create_empty_database()
