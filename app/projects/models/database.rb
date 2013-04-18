@@ -1,5 +1,6 @@
 class Database
   require Rails.root.join('lib/spatialite_db')
+  require Rails.root.join('app/projects/models/web_query')
 
   def initialize(project)
     @project = project

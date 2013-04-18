@@ -222,7 +222,7 @@ class Project < ActiveRecord::Base
       Dir.mkdir(dir_path)
 
       # copy files from temp directory to projects directory
-      TarHelper.copy_dir(tmp_dir, dir_path)
+      TarHelper.copy_dir(tmp_dir, dir_path, ['hash_sum'])
 
       # generate archive
       dirty

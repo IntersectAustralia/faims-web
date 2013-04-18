@@ -493,12 +493,10 @@ class ProjectsController < ApplicationController
           `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
           project_settings = JSON.parse(File.read(tmp_dir + 'project/' + Project.project_settings_name).as_json)
           if !Project.checksum_uploaded_file(tmp_dir + 'project/')
-            FileUtils.rm_rf tmp_dir
             @project = Project.new
             flash.now[:error] = 'Wrong hash sum for the project'
             render 'upload_project'
           elsif !Project.find_by_key(project_settings['key']).blank?
-            FileUtils.rm_rf tmp_dir
             @project = Project.new
             flash.now[:error] = 'This project already exists in the system'
             render 'upload_project'
@@ -508,7 +506,6 @@ class ProjectsController < ApplicationController
               @project.save
               @project.create_project_from_compressed_file(tmp_dir + 'project')
             end
-            FileUtils.rm_rf tmp_dir
             flash[:notice] = 'Project has been successfully uploaded'
             redirect_to :projects
           end
@@ -517,6 +514,8 @@ class ProjectsController < ApplicationController
         @project = Project.new
         flash.now[:error] = 'Uploaded project file is corrupted'
         render 'upload_project'
+      ensure
+        FileUtils.rm_rf tmp_dir if tmp_dir
       end
     else
       @project = Project.new
