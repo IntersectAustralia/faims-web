@@ -449,7 +449,6 @@ class ProjectsController < ApplicationController
         session[:job] = Project.delay.package_project_for(@project.key)
       rescue Exception => e
         puts "Error archiving project"
-        FileUtils.rm (@project.dir_path + '/lock') if File.exists?(@project.dir_path + '/lock')
         raise e
       end
     end
