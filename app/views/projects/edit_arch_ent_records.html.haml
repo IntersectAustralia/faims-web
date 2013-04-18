@@ -1,5 +1,5 @@
 %h1= @project.name + " - Archaeological Entity"
-= link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
+= link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn', :id => 'delete_record'
 - if session[:show].eql?('show_rel_members')
   = link_to "Back", show_rel_members_path(@project,session[:relationshipid])+"?offset=0", :class => 'btn'
 -else

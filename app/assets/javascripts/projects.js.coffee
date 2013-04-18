@@ -159,6 +159,17 @@ compare_records = ->
   )
   return
 
+delete_records = ->
+  $('#delete_record').one("click",
+    ->
+      $(this).click(
+        =>
+          return false
+      )
+      return
+  )
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -169,5 +180,6 @@ $(document).ready(
     search_arch_ent_members()
     add_arch_ent_member()
     delete_arch_ent_members()
+    delete_records()
     return
 )
