@@ -94,14 +94,8 @@ class Project < ActiveRecord::Base
     File.read(dir_path + '/' + Project.project_settings_name).as_json
   end
 
-  def latest_version
-    v = db.current_version
-    v = '0' unless v
-    v.to_s
-  end
-
   def temp_db_version_file_path(version)
-    temp_db_dir_path + '/' + Project.db_version_file_name(version, latest_version)
+    temp_db_dir_path + '/' + Project.db_version_file_name(version, db.current_version)
   end
 
   def temp_project_file_path
@@ -121,9 +115,9 @@ class Project < ActiveRecord::Base
   end
 
   def with_lock
-    Project.try_lock_project(key)
     begin
-      yield
+      Project.try_lock_project(key)
+      return yield
     rescue Exception => e
       raise e
     ensure
@@ -147,7 +141,7 @@ class Project < ActiveRecord::Base
         :size => File.size(filepath),
         :md5 => MD5Checksum.compute_checksum(filepath)
     }
-    v = latest_version.to_i
+    v = db.current_version.to_i
     info = info.merge({ :version => v }) if v > 0
     info
   end
@@ -160,7 +154,7 @@ class Project < ActiveRecord::Base
         :size => File.size(db_file_path),
         :md5 => MD5Checksum.compute_checksum(db_file_path)
     }
-    v = latest_version.to_i
+    v = db.current_version.to_i
     info = info.merge({ :version => v }) if v > 0
     info
   end
@@ -173,11 +167,11 @@ class Project < ActiveRecord::Base
       temp_path = temp_db_version_file_path(version_num)
       Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
       info = {
-        :file => Project.db_version_file_name(version_num, latest_version),
+        :file => Project.db_version_file_name(version_num, db.current_version),
         :size => File.size(temp_path),
         :md5 => MD5Checksum.compute_checksum(temp_path)
       }
-      v = latest_version.to_i
+      v = db.current_version.to_i
       info = info.merge({ :version => v }) if v > 0
       info
   end
@@ -318,7 +312,7 @@ class Project < ActiveRecord::Base
   def validate_version(version)
     return false unless version
     return false if version.to_i < 1
-    v = latest_version.to_i
+    v = db.current_version.to_i
     return false unless v > 0
     return version.to_i <= v
   end

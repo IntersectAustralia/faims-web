@@ -46,6 +46,10 @@ Feature: Andorid
   Given I have project "Project 1"
   And I upload corrupted database "db" to Project 1 fails
 
+  Scenario: Cannot upload project if project doesn't exist
+    Given I have project "Project 1"
+    And I upload database "db" to Project 2 fails
+
   Scenario: See archive info for database
   Given I have project "Project 1"
   And I am on the android archive db page for Project 1
@@ -87,12 +91,29 @@ Feature: Andorid
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
   And I am on the android archive db page for "Project 1" with request version <version>
+  # this returns the full database
   Then I should see json for "Project 1" archived db file with version 20
   Examples:
   | version |
   | 0       |
   | -1      |
   | 21      |
+
+  Scenario Outline: Can download database with version
+    Given I have project "Project 1"
+    And I have synced 20 times for "Project 1"
+    And I am on the android download db link for "Project 1" with request version <version>
+    Then I should download db file for "Project 1" from version <version>
+  Examples:
+    | version |
+    | 1       |
+    | 10      |
+    | 20      |
+
+  Scenario: Can upload sync database
+    Given I have project "Project 1"
+    And I upload sync database "db" to Project 1 succeeds
+    Then I should have stored sync "db" into Project 1
 
   Scenario: Cannot see archive info for database with version if project doesn't exist
   Given I have project "Project 1"

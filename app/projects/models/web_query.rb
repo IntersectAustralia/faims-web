@@ -386,6 +386,13 @@ EOF
     )
   end
 
+  def self.get_latest_version
+    cleanup_query(<<EOF
+select versionnum from version order by versionnum desc
+EOF
+    )
+  end
+
   def self.insert_user_version
     cleanup_query(<<EOF
 insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, ?, 0 from version;

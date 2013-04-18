@@ -77,12 +77,44 @@ And /^I upload database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
   project.check_sum(upload_db_file,md5).should be_true
 end
 
+And /^I upload sync database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
+  project = Project.find_by_name(name)
+  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
+  md5 = MD5Checksum.compute_checksum(upload_db_file)
+  project.check_sum(upload_db_file,md5).should be_true
+end
+
+And /^I upload database "([^"]*)" to (.*) fails/ do |db_file, name|
+  lambda {
+    project = Project.find_by_name(name)
+    upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
+    md5 = MD5Checksum.compute_checksum(upload_db_file)
+    project.check_sum(upload_db_file,md5).should be_true
+  }.should raise_error
+end
+
 Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
+  project = Project.find_by_name(name)
+  uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
+  project.store_database(uploaded_file, 0)
+  stored_file = Project.uploads_path + '/' + Dir.entries(Project.uploads_path).select { |f| f unless File.directory? f }.first
+
+  # check stored file format (TODO why can't i use merge daemon)
+  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
+
+  # check if uploaded_file unarchived matches stored_file
+  archived_file_match(uploaded_file.path, stored_file).should be_true
+end
+
+Then /^I should have stored sync "([^"]*)" into (.*)$/ do |db_file, name|
   project = Project.find_by_name(name)
   uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
   project.store_database(uploaded_file, 0)
 
   stored_file = Project.uploads_path + '/' + Dir.entries(Project.uploads_path).select { |f| f unless File.directory? f }.first
+
+  # check stored file format (TODO why can't i use merge daemon)
+  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
 
   # check if uploaded_file unarchived matches stored_file
   archived_file_match(uploaded_file.path, stored_file).should be_true
@@ -114,6 +146,14 @@ Then /^I should download db file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.db_file_name + "\""
   file = File.open(project.db_file_path, 'r')
+  page.source == file.read
+end
+
+Then /^I should download db file for "([^"]*)" from version (.*)$/ do |name, version|
+  project = Project.find_by_name(name)
+  info = project.archive_db_version_info(version)
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + info[:file] + "\""
+  file = File.open(project.temp_db_version_file_path(version), 'r')
   page.source == file.read
 end
 

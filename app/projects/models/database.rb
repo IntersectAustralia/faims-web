@@ -116,17 +116,22 @@ class Database
   end
 
   def current_version
-    version = @db.execute(WebQuery.get_current_version).first
-    return version.first if version
-    version
+    version = @db.execute(WebQuery.get_current_version)
+    return version.first.first.to_s if version and version.first
+    '0'
+  end
+
+  def latest_version
+    version = @db.execute(WebQuery.get_latest_version)
+    return version.first.first.to_s if version and version.first
+    '0'
   end
 
   def add_version(userid)
     @project.with_lock do
       @db.execute(WebQuery.insert_user_version, current_timestamp, userid)
-      version = @db.execute(WebQuery.get_current_version).first
       @project.dirty
-      return version.first if version
+      latest_version
     end
   end
 
