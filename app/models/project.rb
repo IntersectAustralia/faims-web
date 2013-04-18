@@ -113,26 +113,30 @@ class Project < ActiveRecord::Base
   end
 
   def is_locked
-    Project.is_locked(project_key)
+    Project.is_locked(key)
   end
 
   def is_dirty
-    Project.is_dirty(project_key)
+    Project.is_dirty(key)
   end
 
   def with_lock
     Project.try_lock_project(key)
-    result = yield
-    Project.unlock_project(key)
-    result
+    begin
+      yield
+    rescue Exception => e
+      raise e
+    ensure
+      Project.unlock_project(key)
+    end
   end
 
   def dirty
-    Project.dirty(project_key)
+    Project.dirty(key)
   end
 
   def clean
-    Project.clean(project_key)
+    Project.clean(key)
   end
 
   def archive_info
@@ -178,8 +182,8 @@ class Project < ActiveRecord::Base
       info
   end
 
-  def update_archives(force = false)
-    Project.update_archives_for(key, force)
+  def update_archives
+    Project.update_archives_for(key)
   end
 
   def create_project_from(tmp_dir)
@@ -200,7 +204,8 @@ class Project < ActiveRecord::Base
       TarHelper.touch_file(dir_path + '/' + Project.faims_properties_name)
 
       # generate archive
-      update_archives(true)
+      dirty
+      update_archives
     rescue Exception => e
       puts "Error creating project"
       FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
@@ -220,7 +225,8 @@ class Project < ActiveRecord::Base
       TarHelper.copy_dir(tmp_dir, dir_path)
 
       # generate archive
-      update_archives(true)
+      dirty
+      update_archives
     rescue Exception => e
       puts "Error creating project"
       FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
@@ -474,7 +480,7 @@ class Project < ActiveRecord::Base
   end
 
   def self.is_locked(project_key)
-    File.exist?(lock_file(project_key))
+    File.exist?(lock_file(project_key)) if project_key
   end
 
   def self.lock_file(project_key)
@@ -495,7 +501,7 @@ class Project < ActiveRecord::Base
   end
 
   def self.is_dirty(project_key)
-    File.exist?(dirty_file(project_key))
+    File.exist?(dirty_file(project_key)) if project_key
   end
 
   def self.dirty_file(project_key)
@@ -563,13 +569,17 @@ class Project < ActiveRecord::Base
     true
   end
 
-  def self.update_archives_for(project_key, force)
-    if force or Project.is_dirty(project_key)
-
-      archive_project_for(project_key)
-      archive_database_for(project_key)
-
-      Project.clean(project_key)
+  def self.update_archives_for(project_key)
+    if Project.is_dirty(project_key)
+      begin
+        archive_project_for(project_key)
+        archive_database_for(project_key)
+      rescue Exception => e
+        puts 'Failed to archive project'
+        raise e
+      ensure
+        Project.clean(project_key)
+      end
     end
   end
 
