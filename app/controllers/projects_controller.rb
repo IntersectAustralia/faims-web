@@ -1,6 +1,6 @@
 class ProjectsController < ApplicationController
 
-  require File.expand_path("../../projects/models/database",__FILE__)
+  require File.expand_path('../../projects/models/database',__FILE__)
   before_filter :authenticate_user!
   load_and_authorize_resource
 
@@ -47,7 +47,7 @@ class ProjectsController < ApplicationController
       flash.now[:error] = 'Project is locked because archiving process is in progress'
       render 'show'
     end
-    @type = Database.get_arch_ent_types(@project.db_path)
+    @type = @project.db.get_arch_ent_types
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
@@ -72,7 +72,7 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_arch_ent_records'
-    @uuid = Database.load_arch_entity(@project.db_path,type,limit,offset)
+    @uuid = @project.db.load_arch_entity(type,limit,offset)
   end
 
   def search_arch_ent_records
@@ -105,7 +105,7 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_arch_ent_records'
-    @uuid = Database.search_arch_entity(@project.db_path,limit,offset,query)
+    @uuid = @project.db.search_arch_entity(limit,offset,query)
   end
 
   def edit_arch_ent_records
@@ -116,10 +116,10 @@ class ProjectsController < ApplicationController
     end
     uuid = params[:uuid]
     session[:uuid] = uuid
-    @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
+    @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
     for attribute in @attributes
-      @vocab_name[attribute[1]] = Database.get_vocab(@project.db_path,attribute[1])
+      @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
     end
   end
 
@@ -136,13 +136,12 @@ class ProjectsController < ApplicationController
     freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
-    Database.update_arch_entity_attribute(@project.key, @project.db_path,uuid,vocab_id,attribute_id, measure, freetext, certainty)
-    @project.update_archives
+    @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
 
-    @attributes = Database.get_arch_entity_attributes(@project.db_path,uuid)
+    @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
     for attribute in @attributes
-      @vocab_name[attribute[1]] = Database.get_vocab(@project.db_path,attribute[1])
+      @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
     end
     render 'edit_arch_ent_records'
   end
@@ -154,8 +153,7 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     uuid = params[:uuid]
-    Database.delete_arch_entity(@project.key, @project.db_path,uuid)
-    @project.update_archives
+    @project.db.delete_arch_entity(uuid)
 
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
@@ -171,7 +169,7 @@ class ProjectsController < ApplicationController
       flash.now[:error] = 'Project is locked because archiving process is in progress'
       render 'show'
     end
-    @type = Database.get_rel_types(@project.db_path)
+    @type = @project.db.get_rel_types
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
@@ -196,7 +194,7 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_rel_records'
-    @relationshipid = Database.load_rel(@project.db_path,type,limit,offset)
+    @relationshipid = @project.db.load_rel(type,limit,offset)
   end
 
   def search_rel_records
@@ -231,7 +229,7 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_rel_records'
-    @relationshipid = Database.search_rel(@project.db_path,limit,offset,query)
+    @relationshipid = @project.db.search_rel(limit,offset,query)
   end
 
   def edit_rel_records
@@ -242,10 +240,10 @@ class ProjectsController < ApplicationController
     end
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
-    @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
+    @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
     for attribute in @attributes
-      @vocab_name[attribute[2]] = Database.get_vocab(@project.db_path,attribute[2])
+      @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
     end
   end
 
@@ -261,13 +259,12 @@ class ProjectsController < ApplicationController
     freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
-    Database.update_rel_attribute(@project.key, @project.db_path,relationshipid,vocab_id,attribute_id, freetext, certainty)
-    @project.update_archives
+    @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
 
-    @attributes = Database.get_rel_attributes(@project.db_path,relationshipid)
+    @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
     for attribute in @attributes
-      @vocab_name[attribute[2]] = Database.get_vocab(@project.db_path,attribute[2])
+      @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
     end
     render 'edit_rel_records'
   end
@@ -279,8 +276,7 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     relationshipid = params[:relationshipid]
-    Database.delete_relationship(@project.key, @project.db_path,relationshipid)
-    @project.update_archives
+    @project.db.delete_relationship(relationshipid)
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
     else
@@ -299,14 +295,14 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:show] = 'show_rel_members'
-    @uuid = Database.get_rel_arch_ent_members(@project.db_path,relationshipid, limit, offset)
+    @uuid = @project.db.get_rel_arch_ent_members(relationshipid, limit, offset)
   end
 
   def remove_arch_ent_member
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
-    Database.delete_arch_ent_member(@project.key,@project.db_path,relationshipid,uuid)
+    @project.db.delete_arch_ent_member(relationshipid,uuid)
     render :nothing => true
   end
 
@@ -328,9 +324,9 @@ class ProjectsController < ApplicationController
       session[:cur_offset] = offset
       session[:prev_offset] = Integer(offset) - Integer(limit)
       session[:next_offset] = Integer(offset) + Integer(limit)
-      @uuid = Database.get_non_member_arch_ent(@project.db_path,relationshipid,search_query,limit,offset)
+      @uuid = @project.db.get_non_member_arch_ent(relationshipid,search_query,limit,offset)
     end
-    @verb = Database.get_verbs_for_relation(@project.db_path, relntypeid)
+    @verb = @project.db.get_verbs_for_relation(relntypeid)
   end
 
   def add_arch_ent_member
@@ -338,7 +334,7 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
     verb = params[:verb]
-    Database.add_arch_ent_member(@project.key,@project.db_path,relationshipid,uuid,verb)
+    @project.db.add_arch_ent_member(relationshipid,uuid,verb)
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,relationshipid)+'?offset=0'} }
     end
@@ -370,8 +366,8 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     ids = params[:ids]
-    @first_arch_ent = Database.get_arch_entity_attributes(@project.db_path, ids[0])
-    @second_arch_ent = Database.get_arch_entity_attributes(@project.db_path, ids[1])
+    @first_arch_ent = @project.db.get_arch_entity_attributes(ids[0])
+    @second_arch_ent = @project.db.get_arch_entity_attributes(ids[1])
   end
 
   def select_arch_ents
@@ -381,7 +377,7 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     deleted_id = params[:deleted_id]
-    Database.delete_arch_entity(@project.key, @project.db_path, deleted_id)
+    @project.db.delete_arch_entity(deleted_id)
     redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
@@ -393,8 +389,8 @@ class ProjectsController < ApplicationController
     end
     ids = params[:ids]
     session[:values] = []
-    @first_rel = Database.get_rel_attributes(@project.db_path, ids[0])
-    @second_rel = Database.get_rel_attributes(@project.db_path, ids[1])
+    @first_rel = @project.db.get_rel_attributes(ids[0])
+    @second_rel = @project.db.get_rel_attributes(ids[1])
   end
 
   def select_rel
@@ -404,7 +400,7 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     deleted_id = params[:deleted_id]
-    Database.delete_relationship(@project.key, @project.db_path, deleted_id)
+    @project.db.delete_relationship(deleted_id)
     redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
   end
 
@@ -433,7 +429,6 @@ class ProjectsController < ApplicationController
                     :participant => params[:project][:participant]
                    }.to_json)
       end
-      @project.update_archives
       session[:name] = ""
       flash[:notice] = "Static data updated"
       redirect_to :project
@@ -468,7 +463,6 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     jobid = session[:job].id
     if !Delayed::Job.exists?(jobid)
-      FileUtils.rm (@project.dir_path + '/lock') if File.exists?(@project.dir_path + '/lock')
       session[:job] = nil
     end
     respond_to do |format|

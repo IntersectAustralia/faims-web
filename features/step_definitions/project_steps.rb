@@ -120,7 +120,7 @@ end
 And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   project = Project.find_by_name(name)
   (1..num.to_i).each do |i|
-    Database.execute_query(project.db_path, "insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
+    SpatialiteDB.new(project.db_path).execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
   end
 end
 
