@@ -345,9 +345,6 @@ Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
   # check if uploaded files exist on app file list
   app_list = project.app_file_list
   upload_list.select { |f| !app_list.include? f }.size.should == 0
-
-  # check if project archive updated
-  check_project_archive_updated(project).should == true
 end
 
 And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
