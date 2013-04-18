@@ -137,7 +137,6 @@ class ProjectsController < ApplicationController
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
     @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
-    @project.update_archives
 
     @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
@@ -155,7 +154,6 @@ class ProjectsController < ApplicationController
     end
     uuid = params[:uuid]
     @project.db.delete_arch_entity(uuid)
-    @project.update_archives
 
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
@@ -262,7 +260,6 @@ class ProjectsController < ApplicationController
     certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
 
     @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
-    @project.update_archives
 
     @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
@@ -280,7 +277,6 @@ class ProjectsController < ApplicationController
     end
     relationshipid = params[:relationshipid]
     @project.db.delete_relationship(relationshipid)
-    @project.update_archives
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
     else
@@ -433,7 +429,6 @@ class ProjectsController < ApplicationController
                     :participant => params[:project][:participant]
                    }.to_json)
       end
-      @project.update_archives
       session[:name] = ""
       flash[:notice] = "Static data updated"
       redirect_to :project

@@ -113,8 +113,11 @@ class Project < ActiveRecord::Base
   end
 
   def is_locked
-    return true if File.exist?(dir_path + '/' + Project.lock_file_name)
-    false
+    Project.is_locked(project_key)
+  end
+
+  def is_dirty
+    Project.is_dirty(project_key)
   end
 
   def with_lock
@@ -124,7 +127,17 @@ class Project < ActiveRecord::Base
     result
   end
 
+  def dirty
+    Project.dirty(project_key)
+  end
+
+  def clean
+    Project.clean(project_key)
+  end
+
   def archive_info
+    update_archives
+
     info = {
         :file => Project.filename,
         :size => File.size(filepath),
@@ -136,6 +149,8 @@ class Project < ActiveRecord::Base
   end
 
   def archive_db_info
+    update_archives
+
     info = {
         :file => Project.db_file_name,
         :size => File.size(db_file_path),
@@ -163,8 +178,8 @@ class Project < ActiveRecord::Base
       info
   end
 
-  def update_archives
-    Project.update_archives_for(key)
+  def update_archives(force = false)
+    Project.update_archives_for(key, force)
   end
 
   def create_project_from(tmp_dir)
@@ -185,7 +200,7 @@ class Project < ActiveRecord::Base
       TarHelper.touch_file(dir_path + '/' + Project.faims_properties_name)
 
       # generate archive
-      update_archives
+      update_archives(true)
     rescue Exception => e
       puts "Error creating project"
       FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
@@ -205,7 +220,7 @@ class Project < ActiveRecord::Base
       TarHelper.copy_dir(tmp_dir, dir_path)
 
       # generate archive
-      update_archives
+      update_archives(true)
     rescue Exception => e
       puts "Error creating project"
       FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
@@ -382,7 +397,7 @@ class Project < ActiveRecord::Base
 
     TarHelper.untar('xfz', file.path, app_files_dir_path)
 
-    update_archives
+    dirty
   end
 
   # static
@@ -454,6 +469,14 @@ class Project < ActiveRecord::Base
     '.lock'
   end
 
+  def self.dirty_file_name
+    '.dirty'
+  end
+
+  def self.is_locked(project_key)
+    File.exist?(lock_file(project_key))
+  end
+
   def self.lock_file(project_key)
     Project.projects_path + '/' + project_key + '/' + lock_file_name if project_key
   end
@@ -469,6 +492,22 @@ class Project < ActiveRecord::Base
 
   def self.unlock_project(project_key)
     FileUtils.rm lock_file(project_key) if project_key
+  end
+
+  def self.is_dirty(project_key)
+    File.exist?(dirty_file(project_key))
+  end
+
+  def self.dirty_file(project_key)
+    Project.projects_path + '/' + project_key + '/' + dirty_file_name if project_key
+  end
+
+  def self.dirty(project_key)
+    TarHelper.touch_file(dirty_file(project_key)) if project_key
+  end
+
+  def self.clean(project_key)
+    FileUtils.rm dirty_file(project_key) if project_key
   end
 
   def self.package_project_for(project_key)
@@ -499,7 +538,7 @@ class Project < ActiveRecord::Base
 
       try_lock_project(project_key)
 
-      TarHelper.tar('jcf', filepath, File.basename(project_dir), tmp_dir, [Project.package_name(project_key), Project.filename, Project.db_file_name])
+      TarHelper.tar('jcf', filepath, File.basename(project_dir), tmp_dir, [Project.package_name(project_key), Project.filename, Project.db_file_name].select { |f| File.exists? project_dir + f })
     rescue Exception => e
       puts "Error packaging project"
       raise e
@@ -524,9 +563,14 @@ class Project < ActiveRecord::Base
     true
   end
 
-  def self.update_archives_for(project_key)
-    archive_project_for(project_key)
-    archive_database_for(project_key)
+  def self.update_archives_for(project_key, force)
+    if force or Project.is_dirty(project_key)
+
+      archive_project_for(project_key)
+      archive_database_for(project_key)
+
+      Project.clean(project_key)
+    end
   end
 
   def self.archive_project_for(project_key)

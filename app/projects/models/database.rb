@@ -26,6 +26,7 @@ class Database
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id, attribute_id, measure, freetext, certainty, current_timestamp)
+      @project.dirty
     end
   end
 
@@ -33,6 +34,7 @@ class Database
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.delete_arch_entity, current_timestamp, uuid)
+      @project.dirty
     end
   end
 
@@ -56,6 +58,7 @@ class Database
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id, freetext, certainty, current_timestamp)
+      @project.dirty
     end
   end
 
@@ -63,6 +66,7 @@ class Database
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.delete_relationship, current_timestamp, relationshipid)
+      @project.dirty
     end
   end
 
@@ -84,12 +88,14 @@ class Database
   def add_arch_ent_member(relationshipid, uuid, verb)
     @project.with_lock do
       @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, verb)
+      @project.dirty
     end
   end
 
   def delete_arch_ent_member(relationshipid, uuid)
     @project.with_lock do
       @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid)
+      @project.dirty
     end
   end
 
@@ -118,6 +124,7 @@ class Database
     @project.with_lock do
       @db.execute(WebQuery.insert_user_version, current_timestamp, userid)
       version = @db.execute(WebQuery.get_current_version).first
+      @project.dirty
       return version.first if version
     end
   end
@@ -136,6 +143,8 @@ class Database
 
     db = SpatialiteDB.new(toDB)
     db.execute_batch(WebQuery.merge_database(fromDB, version))
+
+    Project.dirty(project_key)
 
     Project.unlock_project(project_key)
   end
