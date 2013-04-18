@@ -1,9 +1,11 @@
-load Rails.root.to_s + "/app/projects/models/database.rb"
+require Rails.root.join('app/projects/models/database')
 
 class Project < ActiveRecord::Base
   include XSDValidator
   include Archive::Tar
   include MD5Checksum
+
+  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant
 
   attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type
 
@@ -18,70 +20,14 @@ class Project < ActiveRecord::Base
     write_attribute(:name, value.strip.squish) if value
   end
 
-  def data_schema
-  end
-
-  def data_schema=(value)
-  end
-
-  def ui_schema
-  end
-
   def vocab_id
   end
 
   def type
   end
 
-  def ui_schema=(value)
-  end
-
-  def season
-  end
-
-  def season=(value)
-  end
-
-  def description
-  end
-
-  def description=(value)
-  end
-
-  def permit_no
-  end
-
-  def permit_no=(value)
-  end
-
-  def permit_holder
-  end
-
-  def permit_holder=(value)
-  end
-
-  def contact_address
-  end
-
-  def contact_address=(value)
-  end
-
-  def participant
-  end
-
-  def participant=(value)
-  end
-
-  def ui_logic
-  end
-
-  def ui_logic=(value)
-  end
-
-  def arch16n
-  end
-
-  def arch16n=(value)
+  def db
+    Database.new(self)
   end
 
   def dir_name
@@ -149,9 +95,9 @@ class Project < ActiveRecord::Base
   end
 
   def latest_version
-    v = Database.current_version(db_path)
-    v = ['0'] unless v
-    v.first.to_s
+    v = db.current_version
+    v = '0' unless v
+    v.to_s
   end
 
   def temp_db_version_file_path(version)
@@ -167,8 +113,15 @@ class Project < ActiveRecord::Base
   end
 
   def is_locked
-    return true if File.exist?(dir_path + '/lock')
+    return true if File.exist?(dir_path + '/' + Project.lock_file_name)
     false
+  end
+
+  def with_lock
+    Project.try_lock_project(key)
+    result = yield
+    Project.unlock_project(key)
+    result
   end
 
   def archive_info
@@ -223,15 +176,13 @@ class Project < ActiveRecord::Base
       Dir.mkdir(dir_path)
 
       # copy files from temp directory to projects directory
-      Dir.entries(tmp_dir).each { |f| FileUtils.cp(tmp_dir + '/' + f, dir_path + '/') unless File.directory? f }
+      TarHelper.copy_dir(tmp_dir, dir_path)
 
       # generate database
-      Database.generate_database(dir_path + "/db.sqlite3", dir_path + "/data_schema.xml")
+      Database.generate_database(dir_path + '/' + Project.db_name, dir_path + '/' + Project.data_schema_name)
 
       # create default faims properties
-      File.open(dir_path + "/faims.properties", 'w') do |file|
-        file.write("")
-      end
+      TarHelper.touch_file(dir_path + '/' + Project.faims_properties_name)
 
       # generate archive
       update_archives
@@ -251,14 +202,7 @@ class Project < ActiveRecord::Base
       Dir.mkdir(dir_path)
 
       # copy files from temp directory to projects directory
-      Dir.entries(tmp_dir).each do |f|
-        next if f == '.' or f == '..' or f == 'hash_sum'
-        if File.directory? tmp_dir + '/' + f
-          FileUtils.cp_r(tmp_dir + '/' + f, dir_path + '/')
-        else
-          FileUtils.cp(tmp_dir + '/' + f, dir_path + '/')
-        end
-      end
+      TarHelper.copy_dir(tmp_dir, dir_path)
 
       # generate archive
       update_archives
@@ -279,11 +223,10 @@ class Project < ActiveRecord::Base
     begin
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
-      # TODO minitar doesn't have directory change option
-      `tar xfz #{file.path} -C #{tmp_dir}`
+      TarHelper.untar('xfz', file.path, tmp_dir)
 
       # add new version
-      version = Database.add_version(db_path, user)
+      version = db.add_version(user)
 
       unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
       stored_file = "#{Project.uploads_path}/#{key}_v#{version}"
@@ -417,7 +360,7 @@ class Project < ActiveRecord::Base
 
     files_str = files.map { |f| "#{f} " }.join
 
-    `tar zcf #{temp_file} -C #{dir} #{files_str}`
+    TarHelper.tar('zcf', temp_file, files, dir)
 
     {
         :file => temp_file,
@@ -430,14 +373,14 @@ class Project < ActiveRecord::Base
     # make sure dir exists
     FileUtils.mkdir_p server_files_dir_path unless File.directory? server_files_dir_path
 
-    `tar xfz #{file.path} -C #{server_files_dir_path}`
+    TarHelper.untar('xfz', file.path, server_files_dir_path)
   end
 
   def app_file_upload(file)
     # make sure dir exists
     FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
 
-    `tar xfz #{file.path} -C #{app_files_dir_path}`
+    TarHelper.untar('xfz', file.path, app_files_dir_path)
 
     update_archives
   end
@@ -507,6 +450,80 @@ class Project < ActiveRecord::Base
     'files/app'
   end
 
+  def self.lock_file_name
+    '.lock'
+  end
+
+  def self.lock_file(project_key)
+    Project.projects_path + '/' + project_key + '/' + lock_file_name if project_key
+  end
+
+  def self.try_lock_project(project_key)
+    return unless project_key
+    loop do
+      break unless File.exist?(lock_file(project_key))
+      sleep 1
+    end
+    TarHelper.touch_file(lock_file(project_key))
+  end
+
+  def self.unlock_project(project_key)
+    FileUtils.rm lock_file(project_key) if project_key
+  end
+
+  def self.package_project_for(project_key)
+    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
+    dir_path = projects_path + '/' + project_key + '/'
+    filepath = dir_path + '/' + Project.package_name(project_key)
+
+    begin
+      tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
+
+      # create project directory to archive
+      project_dir = tmp_dir + 'project/'
+      Dir.mkdir(project_dir)
+
+      hash_sum = {}
+
+      FileUtils.cp_r(Dir[dir_path + '*'],project_dir)
+
+      Dir.glob(dir_path + '**/*') do |file|
+        next if File.basename(file) == '.' or File.basename(file) == '..'
+        next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
+        hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
+      end
+
+      File.open(project_dir + '/hash_sum', 'w') do |file|
+        file.write(hash_sum.to_json)
+      end
+
+      try_lock_project(project_key)
+
+      TarHelper.tar('jcf', filepath, File.basename(project_dir), tmp_dir, [Project.package_name(project_key), Project.filename, Project.db_file_name])
+    rescue Exception => e
+      puts "Error packaging project"
+      raise e
+    ensure
+      # cleanup
+      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+      unlock_project(project_key)
+    end
+  end
+
+  def self.checksum_uploaded_file(dir)
+    hash_sum = JSON.parse(File.read(dir + '/hash_sum').as_json)
+    Dir.glob(dir + "**/*") do |file|
+      next if File.basename(file) == '.' or File.basename(file) == '..' or File.basename(file) == 'hash_sum'
+      if !File.directory?(file)
+        if !hash_sum[File.basename(file)].eql?(MD5Checksum.compute_checksum(file))
+          return false
+        end
+      end
+    end
+    true
+  end
+
   def self.update_archives_for(project_key)
     archive_project_for(project_key)
     archive_database_for(project_key)
@@ -527,7 +544,7 @@ class Project < ActiveRecord::Base
       Dir.mkdir(project_dir)
 
       # create app database
-      Database.create_app_database(dir_path + Project.db_name, project_dir + Project.db_name)
+      Database.create_app_database(project_key, dir_path + Project.db_name, project_dir + Project.db_name)
 
       files = [Project.ui_schema_name, Project.ui_logic_name, Project.project_settings_name,
                Project.faims_properties_name, 'faims_' + settings['name'].gsub(/\s+/, '_') + '.properties']
@@ -541,66 +558,18 @@ class Project < ActiveRecord::Base
       FileUtils.mkdir_p project_dir + Project.sync_files_dir_name
       FileUtils.cp_r(dir_path + Project.app_files_dir_name, project_dir + Project.app_files_dir_name) if File.directory? dir_path + Project.app_files_dir_name
 
-      # TODO currently minitar doesn't have directory change option
-      `tar zcf #{filepath} -C #{tmp_dir} #{File.basename(dir_path)}`
+      try_lock_project(project_key)
+
+      TarHelper.tar('zcf', filepath, File.basename(dir_path), tmp_dir)
     rescue Exception => e
       puts "Error archiving project"
       raise e
     ensure
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+      unlock_project(project_key)
     end
-  end
-
-  def self.package_project_for(project_key)
-    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
-    dir_path = projects_path + '/' + project_key + '/'
-    filepath = dir_path + '/' + Project.package_name(project_key)
-
-    begin
-      tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
-
-      # create project directory to archive
-      project_dir = tmp_dir + 'project/'
-      Dir.mkdir(project_dir)
-
-      hash_sum = {}
-      `touch #{dir_path + '/lock'}`
-
-      FileUtils.cp_r(Dir[dir_path + '*'],project_dir)
-
-      Dir.glob(dir_path + '**/*') do |file|
-        next if File.basename(file) == '.' or File.basename(file) == '..'
-        next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
-        hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
-      end
-
-      File.open(project_dir + '/hash_sum', 'w') do |file|
-        file.write(hash_sum.to_json)
-      end
-
-      `tar jcf #{filepath} -C #{tmp_dir} #{File.basename(project_dir)} --exclude='lock' --exclude='#{Project.package_name(project_key)}' --exclude='#{Project.filename}' --exclude='#{Project.db_file_name}'`
-    rescue Exception => e
-      puts "Error packaging project"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-    end
-  end
-
-  def self.checksum_uploaded_file(dir)
-    hash_sum = JSON.parse(File.read(dir + '/hash_sum').as_json)
-    settings = JSON.parse(File.read(dir + '/' + Project.project_settings_name))
-    Dir.glob(dir + "**/*") do |file|
-      next if File.basename(file) == '.' or File.basename(file) == '..' or File.basename(file) == 'hash_sum'
-      if !File.directory?(file)
-        if !hash_sum[File.basename(file)].eql?(MD5Checksum.compute_checksum(file))
-          return false
-        end
-      end
-    end
-    true
   end
 
   def self.archive_database_for(project_key)
@@ -612,16 +581,19 @@ class Project < ActiveRecord::Base
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # create app database
-      Database.create_app_database(dir_path + Project.db_name, tmp_dir + Project.db_name)
+      Database.create_app_database(project_key, dir_path + Project.db_name, tmp_dir + Project.db_name)
 
-      # TODO currently minitar doesn't have directory change option
-      `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`
+      try_lock_project(project_key)
+
+      TarHelper.tar('zcf', db_file_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
     rescue Exception => e
       puts "Error archiving database"
       raise e
     ensure
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+      unlock_project(project_key)
     end
   end
 
@@ -633,10 +605,11 @@ class Project < ActiveRecord::Base
       tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
       # create app database
-      Database.create_app_database_from_version(dir_path + Project.db_name, tmp_dir + Project.db_name, version)
+      Database.create_app_database_from_version(project_key, dir_path + Project.db_name, tmp_dir + Project.db_name, version)
 
-      # TODO currently minitar doesn't have directory change option
-      `tar zcf #{db_file_path} -C #{tmp_dir} #{File.basename(tmp_dir + Project.db_name)}`
+      try_lock_project(project_key)
+
+      TarHelper.tar('zcf', db_file_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
 
       return db_file_path
     rescue Exception => e
@@ -645,6 +618,8 @@ class Project < ActiveRecord::Base
     ensure
       # cleanup
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+      unlock_project(project_key)
     end
 
   end
