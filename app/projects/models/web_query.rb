@@ -3,7 +3,7 @@ module WebQuery
   # WEB
 
   def self.load_arch_entities
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS responce, vocabid, attributeid, max(tstamp, astamp)
 FROM idealaent
 JOIN aenttype USING (aenttypeid)
@@ -34,11 +34,11 @@ HAVING max(valuetimestamp)
 AND max(aenttimestamp)
 ORDER BY max(tstamp,astamp) desc, uuid, attributename;
 EOF
-    query.gsub("\n", " ").gsub("\t", "")
+    )
   end
 
   def self.load_all_arch_entities
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS responce, vocabid, attributeid, max(tstamp, astamp)
 FROM idealaent
 JOIN aenttype USING (aenttypeid)
@@ -68,11 +68,11 @@ HAVING max(valuetimestamp)
 AND max(aenttimestamp)
 ORDER BY max(tstamp,astamp) desc, uuid, attributename;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.search_arch_entity
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS response, vocabid, attributeid, max(tstamp, astamp)
 FROM aenttype
 JOIN archentity USING (aenttypeid)
@@ -103,11 +103,11 @@ HAVING max(valuetimestamp)
 AND max(aenttimestamp)
 ORDER BY max(tstamp,astamp) desc, uuid, attributename;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_arch_entity_attributes
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty
 from aentvalue join attributekey using(attributeid)
   LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -115,36 +115,36 @@ where uuid = ? and deleted is null
 GROUP BY uuid, attributeid
 HAVING max(ValueTimestamp) order by uuid, attributename asc;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.insert_version
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, 0, 1 from version;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.insert_arch_entity_attribute
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.delete_arch_entity
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, deleted, versionnum)
 select uuid, userid,AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, ?,'true',
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1)
 from archentity where uuid = ?
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.load_relationships
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT relationshipid, RelnTypeName, attributename, coalesce(vocabname, freetext) as responce, vocabid, attributeid, max(tstamp, astamp)
 FROM idealreln
 JOIN relntype using (relntypeid)
@@ -176,11 +176,11 @@ HAVING max(relntimestamp)
   AND max(relnvaluetimestamp)
 ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.load_all_relationships
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT relationshipid, RelnTypeName, attributename, coalesce(vocabname, freetext) as responce, vocabid, attributeid, max(tstamp, astamp)
 FROM idealreln
 JOIN relntype using (relntypeid)
@@ -211,11 +211,11 @@ HAVING max(relntimestamp)
   AND max(relnvaluetimestamp)
 ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.search_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT relationshipid, attributename, coalesce(vocabname, freetext) as response, vocabname
 FROM relnvalue
 JOIN attributekey using (attributeid)
@@ -236,11 +236,11 @@ GROUP BY relationshipid, attributeid
 HAVING max(relnvaluetimestamp)
 order by tstamp desc, relationshipid, attributename ;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_relationship_attributes
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid
 from relnvalue r join attributekey using(attributeid) join relationship using(relationshipid)
 LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -248,29 +248,29 @@ where r.relationshipid = ? and r.deleted is null
 GROUP BY relationshipid, attributeid
 HAVING max(relnvaluetimestamp) order by relationshipid, attributename asc;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.insert_relationship_attribute
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into RelnValue (RelationshipID, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.delete_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, deleted, versionnum)
 select RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, ?,'true',
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1)
 from relationship where RelationshipID = ?;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_arch_entities_in_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS response, vocabid, attributeid, max(tstamp, astamp)
 FROM aenttype
 JOIN archentity USING (aenttypeid)
@@ -291,11 +291,11 @@ HAVING max(valuetimestamp)
   AND max(aenttimestamp)
 ORDER BY max(tstamp,astamp) desc, uuid, attributename;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_arch_entities_not_in_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 SELECT uuid, aenttypename, attributename, coalesce(vocabname, measure, freetext) AS response, vocabid, attributeid, max(tstamp, astamp)
 FROM aenttype
 JOIN archentity USING (aenttypeid)
@@ -334,67 +334,67 @@ HAVING max(valuetimestamp)
   AND max(aenttimestamp)
 ORDER BY max(tstamp,astamp) desc, uuid, attributename;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_verbs_for_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 select parent from relntype where relntypeid = ? union select child from relntype where relntypeid = ?;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.insert_arch_entity_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into aentreln (UUID, RelationshipID, ParticipatesVerb) values(?, ?, ?);
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.delete_arch_entity_relationship
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into aentreln (UUID, RelationshipID, Deleted) values(?, ?, 'true');
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_vocab
-    query = <<EOF
+    cleanup_query(<<EOF
 select vocabname, vocabid from vocabulary where attributeid = ?
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_arch_entity_types
-    query = <<EOF
+    cleanup_query(<<EOF
 select aenttypename, aenttypeid from aenttype
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_relationship_types
-    query = <<EOF
+    cleanup_query(<<EOF
 select relntypename, relntypeid from relntype
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.get_current_version
-    query = <<EOF
+    cleanup_query(<<EOF
 select versionnum from version where ismerged = 1 order by versionnum desc
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.insert_user_version
-    query = <<EOF
+    cleanup_query(<<EOF
 insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, ?, 0 from version;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.merge_database(fromDB, version)
-    query = <<EOF
+    cleanup_query(<<EOF
 attach database "#{fromDB}" as import;
 insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, versionnum, geospatialcolumn, deleted) select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, '#{version}', geospatialcolumn, deleted from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
 insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, versionnum, deleted) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, '#{version}', deleted from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
@@ -405,11 +405,11 @@ detach database import;
 
 update version set ismerged = 1 where versionnum = '#{version}';
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.create_app_database(toDB)
-    query = <<EOF
+    cleanup_query(<<EOF
 attach database "#{toDB}" as export;
 create table export.user as select * from user;
 create table export.aenttype as select * from aenttype;
@@ -425,11 +425,11 @@ create table export.relnvalue as select relationshipid, attributeid, vocabid, re
 create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln;
 detach database export;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
   end
 
   def self.create_app_database_from_version(toDB, version)
-    query = <<EOF
+    cleanup_query(<<EOF
 attach database "#{toDB}" as export;
 create table export.archentity as select uuid, aenttimestamp, userid, doi, deleted, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum >= '#{version}';
 create table export.aentvalue as select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, deleted from aentvalue where versionnum >= #{version};
@@ -438,7 +438,13 @@ create table export.relnvalue as select relationshipid, attributeid, vocabid, re
 create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln where versionnum >= '#{version}';
 detach database export;
 EOF
-    query.gsub("\n", ' ').gsub("\t", "")
+    )
+  end
+
+  private
+
+  def self.cleanup_query(query)
+    query.gsub("\n", " ").gsub("\t", "")
   end
 
 end
