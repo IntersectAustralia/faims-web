@@ -142,7 +142,7 @@ class Project < ActiveRecord::Base
         :md5 => MD5Checksum.compute_checksum(filepath)
     }
     v = db.current_version.to_i
-    info = info.merge({ :version => v }) if v > 0
+    info = info.merge({ :version => v.to_s }) if v > 0
     info
   end
 
@@ -155,7 +155,7 @@ class Project < ActiveRecord::Base
         :md5 => MD5Checksum.compute_checksum(db_file_path)
     }
     v = db.current_version.to_i
-    info = info.merge({ :version => v }) if v > 0
+    info = info.merge({ :version => v.to_s }) if v > 0
     info
   end
 
@@ -172,7 +172,7 @@ class Project < ActiveRecord::Base
         :md5 => MD5Checksum.compute_checksum(temp_path)
       }
       v = db.current_version.to_i
-      info = info.merge({ :version => v }) if v > 0
+      info = info.merge({ :version => v.to_s }) if v > 0
       info
   end
 
