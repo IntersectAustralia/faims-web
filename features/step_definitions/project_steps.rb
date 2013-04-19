@@ -166,17 +166,17 @@ end
 
 Then /^I should see json for "([^"]*)" archived file with version (.*)$/ do |name, version|
   page.should have_content(Project.find_by_name(name).archive_info.to_json)
-  page.should have_content("\"version\":#{version}")
+  page.should have_content("\"version\":\"#{version}\"")
 end
 
 Then /^I should see json for "([^"]*)" archived db file with version (.*)$/ do |name, version|
   page.should have_content(Project.find_by_name(name).archive_db_info.to_json)
-  page.should have_content("\"version\":#{version}")
+  page.should have_content("\"version\":\"#{version}\"")
 end
 
 Then /^I should see json for "([^"]*)" archived version (.*) db file with version (.*)$/ do |name, requested_version, version|
   page.should have_content(Project.find_by_name(name).archive_db_version_info(requested_version).to_json)
-  page.should have_content("\"version\":#{version}")
+  page.should have_content("\"version\":\"#{version}\"")
 end
 
 When /^I click on "([^"]*)"$/ do |name|
