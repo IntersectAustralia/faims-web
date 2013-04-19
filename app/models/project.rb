@@ -538,8 +538,8 @@ class Project < ActiveRecord::Base
         [Project.package_name(project_key),
          Project.filename,
          Project.db_file_name,
-         Project.lock_file(project_key),
-         Project.dirty_file(project_key)].select { |f| File.exists? project_dir + f })
+         Project.lock_file_name,
+         Project.dirty_file_name].select { |f| File.exists? project_dir + f })
     rescue Exception => e
       puts "Error packaging project"
       raise e
