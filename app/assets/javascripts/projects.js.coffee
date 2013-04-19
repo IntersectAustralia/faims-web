@@ -66,7 +66,7 @@ show_archive_modal_dialog = ->
             return
           else
             $('#loading').dialog('close')
-            alert("Project is locked because archiving process is in progress")
+            alert("Could not process request as project is currently locked")
             return
       return false
   )

@@ -43,10 +43,6 @@ class ProjectsController < ApplicationController
 
   def list_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     @type = @project.db.get_arch_ent_types
     session.delete(:values)
     session.delete(:type)
@@ -60,10 +56,6 @@ class ProjectsController < ApplicationController
 
   def list_typed_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     limit = 25
     type = params[:type]
     offset = params[:offset]
@@ -77,10 +69,6 @@ class ProjectsController < ApplicationController
 
   def search_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
@@ -93,10 +81,6 @@ class ProjectsController < ApplicationController
 
   def show_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     limit = 25
     query = params[:query]
     offset = params[:offset]
@@ -110,10 +94,6 @@ class ProjectsController < ApplicationController
 
   def edit_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     uuid = params[:uuid]
     session[:uuid] = uuid
     @attributes = @project.db.get_arch_entity_attributes(uuid)
@@ -126,9 +106,10 @@ class ProjectsController < ApplicationController
   def update_arch_ent_records
     @project = Project.find(params[:id])
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
+
     uuid = params[:uuid]
     vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
     attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
@@ -149,7 +130,7 @@ class ProjectsController < ApplicationController
   def delete_arch_ent_records
     @project = Project.find(params[:id])
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
     uuid = params[:uuid]
@@ -165,10 +146,6 @@ class ProjectsController < ApplicationController
 
   def list_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     @type = @project.db.get_rel_types
     session.delete(:values)
     session.delete(:type)
@@ -182,10 +159,6 @@ class ProjectsController < ApplicationController
 
   def list_typed_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     limit = 25
     type=params[:type]
     offset = params[:offset]
@@ -199,10 +172,6 @@ class ProjectsController < ApplicationController
 
   def search_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
@@ -215,10 +184,6 @@ class ProjectsController < ApplicationController
 
   def show_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     limit = 25
     query = params[:query]
     offset = params[:offset]
@@ -234,10 +199,6 @@ class ProjectsController < ApplicationController
 
   def edit_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
     @attributes = @project.db.get_rel_attributes(relationshipid)
@@ -250,7 +211,7 @@ class ProjectsController < ApplicationController
   def update_rel_records
     @project = Project.find(params[:id])
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
     relationshipid = params[:relationshipid]
@@ -272,7 +233,7 @@ class ProjectsController < ApplicationController
   def delete_rel_records
     @project = Project.find(params[:id])
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
     relationshipid = params[:relationshipid]
@@ -361,10 +322,6 @@ class ProjectsController < ApplicationController
   def compare_arch_ents
     @project = Project.find(params[:id])
     session[:values] = []
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     ids = params[:ids]
     @first_arch_ent = @project.db.get_arch_entity_attributes(ids[0])
     @second_arch_ent = @project.db.get_arch_entity_attributes(ids[1])
@@ -373,7 +330,7 @@ class ProjectsController < ApplicationController
   def select_arch_ents
     @project = Project.find(params[:id])
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
     deleted_id = params[:deleted_id]
@@ -383,10 +340,6 @@ class ProjectsController < ApplicationController
 
   def compare_rel
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     ids = params[:ids]
     session[:values] = []
     @first_rel = @project.db.get_rel_attributes(ids[0])
@@ -396,7 +349,7 @@ class ProjectsController < ApplicationController
   def select_rel
     @project = Project.find(params[:id])
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
     deleted_id = params[:deleted_id]
@@ -406,16 +359,12 @@ class ProjectsController < ApplicationController
 
   def edit_project_setting
     @project = Project.find(params[:id])
-    if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
-      render 'show'
-    end
     @project_setting = JSON.parse(@project.project_setting)
   end
 
   def update_project_setting
     if @project.is_locked
-      flash.now[:error] = 'Project is locked because archiving process is in progress'
+      flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
     if @project.update_attributes(:name => params[:project][:name])
