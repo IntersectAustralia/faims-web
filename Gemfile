@@ -5,7 +5,7 @@ gem 'rails', '3.2.9'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'sqlite3'
+gem 'sqlite3', '~> 1.3.7'
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -19,9 +19,9 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'jquery-rails'
+gem 'jquery-rails', '~> 2.2.1'
 
-gem 'jquery-ui-rails'
+gem 'jquery-ui-rails', '~> 4.0.2'
 
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
@@ -38,36 +38,36 @@ gem 'jquery-ui-rails'
 # To use debugger
 # gem 'debugger'
 
-gem 'therubyracer' # TODO should this be in group :assets ?
+gem 'therubyracer', '~> 0.11.4' # TODO should this be in group :assets ?
 group :development, :test do
-  gem 'rspec-rails'
-  gem 'factory_girl_rails'
+  gem 'rspec-rails', '~> 2.13.0'
+  gem 'factory_girl_rails', '~> 4.2.1'
 
   # cucumber gems
-  gem 'cucumber'
+  gem 'cucumber', '~> 1.3.1'
   gem 'capybara', '~> 2.0.2'
-  gem 'database_cleaner'
+  gem 'database_cleaner', '~> 0.9.1'
   #gem 'spork'
-  gem 'launchy' # So you can do Then show me the page
+  gem 'launchy', '~> 2.3.0' # So you can do Then show me the page
 end
 
 group :test do
-  gem 'cucumber-rails', require: false
-  gem 'shoulda'
-  gem 'spork'
+  gem 'cucumber-rails', '~> 1.3.1', require: false
+  gem 'shoulda', '~> 3.4.0'
+  gem 'spork', '~> 0.9.2'
 end
 
-gem 'unicorn'
-gem 'delayed_job_active_record'
-gem 'haml'
-gem 'haml-rails'
-gem 'bootstrap-sass'
-gem 'simple_form'
-gem 'devise'
-gem 'email_spec', :group => :test
-gem 'cancan'
-gem 'nokogiri'
-gem 'daemons'
-gem 'webget_ruby_secure_random'
-gem 'archive-tar-minitar'
-gem 'foreman'
+gem 'unicorn', '~> 4.6.2'
+gem 'delayed_job_active_record', '~> 0.4.4'
+gem 'haml', '~> 4.0.2'
+gem 'haml-rails', '~> 0.4'
+gem 'bootstrap-sass', '~> 2.3.1'
+gem 'simple_form', '~> 2.1.0'
+gem 'devise', '~> 2.2.3'
+gem 'email_spec', '~> 1.4.0', :group => :test
+gem 'cancan', '~> 1.6.9'
+gem 'nokogiri', '~> 1.5.9'
+gem 'daemons', '~> 1.1.9'
+gem 'webget_ruby_secure_random', '~> 1.2.1'
+gem 'archive-tar-minitar', '~> 0.5.2'
+gem 'foreman', '~> 0.63.0'
