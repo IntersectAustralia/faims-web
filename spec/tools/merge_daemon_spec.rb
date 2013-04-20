@@ -28,13 +28,16 @@ describe MergeDaemon do
   end
 
   it "should merge file uploads directory" do
-    projects_dir = Rails.root.to_s + '/tmp/projects'
+    tmp_dir = Rails.root.to_s + '/tmp'
+	FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
+    
+	projects_dir = Rails.root.to_s + '/tmp/projects'
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
     # cleanup projects and uploads directory
     FileUtils.rm_rf projects_dir if File.directory? projects_dir
     FileUtils.rm_rf uploads_dir if File.directory? uploads_dir
-
+	
     FileUtils.mkdir projects_dir
     FileUtils.mkdir uploads_dir
 
@@ -59,6 +62,9 @@ describe MergeDaemon do
 
   it "should not merge file uploads directory for bad names" do
     projects_dir = Rails.root.to_s + '/tmp/projects'
+    tmp_dir = Rails.root.to_s + '/tmp'
+	
+	FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
     # cleanup projects and uploads directory

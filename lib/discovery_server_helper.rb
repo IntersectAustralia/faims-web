@@ -41,9 +41,6 @@ class DiscoveryServer
   end
 
   def self.init
-    # make sure pids dir exists
-    FileUtils.mkdir_p (Rails.root.join('tmp/pids').to_s) unless File.directory? Rails.root.join('tmp/pids').to_s
-
     puts "Server Started on port #{DISCOVERY_PORT}"
     @socket = UDPSocket.new
     @socket.bind('0.0.0.0', DISCOVERY_PORT)
