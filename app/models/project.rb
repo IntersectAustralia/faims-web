@@ -1,4 +1,4 @@
-require Rails.root.join('app/projects/models/database')
+require Rails.root.join('app/models/projects/database')
 
 class Project < ActiveRecord::Base
   include XSDValidator

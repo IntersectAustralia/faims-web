@@ -1,4 +1,4 @@
-require Rails.root.to_s + '/app/projects/models/database'
+require Rails.root.join('app/models/projects/database')
 
 class MergeDaemon
 
