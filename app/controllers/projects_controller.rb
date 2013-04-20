@@ -401,7 +401,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     if !@project.is_locked
       begin
-        session[:job] = Project.delay.package_project_for(@project.key)
+        session[:job] = @project.delay.package_project_for
       rescue Exception => e
         puts "Error archiving project"
         raise e

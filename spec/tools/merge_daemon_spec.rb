@@ -46,7 +46,8 @@ describe MergeDaemon do
 
     # create uploads database
     filename = uploads_dir + '/' + project.key + '_v1'
-    create_full_database(1, filename)
+    Database.generate_database(filename, Rails.root.join('spec/assets/data_schema.xml'))
+    fill_database(SpatialiteDB.new(filename), 1)
 
     # backup database
     FileUtils.cp filename, uploads_dir + '/temp.sqlite3'
@@ -57,14 +58,14 @@ describe MergeDaemon do
     File.exists?(filename).should be_false
 
     # check that database is merged into project
-    is_database_same(File.open(project.db_path), File.open(uploads_dir + '/temp.sqlite3')).should be_true
+    is_database_same(project.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_true
   end
 
   it "should not merge file uploads directory for bad names" do
-    projects_dir = Rails.root.to_s + '/tmp/projects'
     tmp_dir = Rails.root.to_s + '/tmp'
-	
-	FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
+    FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
+
+    projects_dir = Rails.root.to_s + '/tmp/projects'
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
     # cleanup projects and uploads directory
@@ -79,7 +80,8 @@ describe MergeDaemon do
 
     # create uploads database
     filename = uploads_dir + '/' + project.key
-    create_full_database(1, filename)
+    Database.generate_database(filename, Rails.root.join('spec/assets/data_schema.xml'))
+    fill_database(SpatialiteDB.new(filename), 1)
 
     # backup database
     FileUtils.cp filename, uploads_dir + '/temp.sqlite3'
@@ -90,7 +92,7 @@ describe MergeDaemon do
     File.exists?(filename).should be_true
 
     # check that database is merged into project
-    is_database_same(File.open(project.db_path), File.open(uploads_dir + '/temp.sqlite3')).should be_false
+    is_database_same(project.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_false
   end
 
 end

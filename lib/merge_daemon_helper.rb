@@ -1,3 +1,5 @@
+require Rails.root.join('config/environment')
+
 class MergeDaemon
 
   def self.match_file(file)
@@ -42,19 +44,15 @@ class MergeDaemon
         version = match[:version]
 
         # get projects directory
-        project_dir = key
-        raise Exception unless project_dir # key doesn't exist
+        project_key = key
+        raise Exception unless project_key # key doesn't exist
+
+        project = Project.find_by_key(project_key)
 
         puts "Merging #{db_file}"
 
-        project_database_file = projects_dir + '/' + project_dir + '/db.sqlite3'
-        merge_database_file = db_file_path
-
         # merge database
-        Database.merge_database(project_dir, project_database_file, merge_database_file, version)
-
-        # update project archives
-        Project.update_archives_for(key)
+        project.db.merge_database(db_file_path, version)
 
         puts 'Finished merging database'
       end

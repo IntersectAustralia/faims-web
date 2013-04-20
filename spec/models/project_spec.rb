@@ -64,7 +64,7 @@ describe Project do
   it "Archiving project" do
     begin
       project = make_project("Project 1")
-      tmp_dir = Dir.mktmpdir(project.dir_path)
+      tmp_dir = Dir.mktmpdir
       `tar zxf #{project.filepath} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir + '/' + project.dir_name)
       entries.include?(Project.db_name).should be_true
@@ -83,8 +83,8 @@ describe Project do
   it "Packaging project" do
     begin
       project = make_project("Project 1")
-      Project.package_project_for(project.key)
-      tmp_dir = Dir.mktmpdir(project.dir_path)
+      project.package_project_for
+      tmp_dir = Dir.mktmpdir
       `tar jxf #{project.package_path} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir+'/project')
       entries.include?(Project.db_name).should be_true
@@ -104,7 +104,7 @@ describe Project do
   it "Archiving database" do
     begin
       project = make_project("Project 1")
-      tmp_dir = Dir.mktmpdir(project.dir_path)
+      tmp_dir = Dir.mktmpdir
       `tar zxf #{project.db_file_path} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir)
       entries.include?(Project.db_name).should be_true

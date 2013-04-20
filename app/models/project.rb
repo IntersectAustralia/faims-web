@@ -52,7 +52,7 @@ class Project < ActiveRecord::Base
   end
 
   def package_path
-    dir_path + '/' + Project.package_name(key)
+    dir_path + '/' + package_name
   end
 
   def db_file_path
@@ -113,34 +113,22 @@ class Project < ActiveRecord::Base
   end
 
   def temp_project_file_path
-    dir_path + '/' + Project.package_name(key)
+    dir_path + '/' + package_name
   end
 
   def temp_db_dir_path
     dir_path + '/tmp'
   end
 
-  def is_locked
-    Project.is_locked(key)
-  end
-
-  def is_dirty
-    Project.is_dirty(key)
-  end
-
   def with_lock
     begin
-      Project.try_lock_project(key)
+      try_lock_project
       return yield
     rescue Exception => e
       raise e
     ensure
-      Project.unlock_project(key)
+      unlock_project
     end
-  end
-
-  def dirty
-    Project.dirty(key)
   end
 
   def archive_info
@@ -172,7 +160,7 @@ class Project < ActiveRecord::Base
   def db_version_archive_info(version_num)
       # create temporary archive of database
       temp_path = temp_db_version_file_path(version_num)
-      Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
+      archive_database_version_for(version_num, temp_path) unless File.exists? temp_path
       info = {
         :file => Project.db_version_file_name(version_num, db.current_version),
         :size => File.size(temp_path),
@@ -184,11 +172,11 @@ class Project < ActiveRecord::Base
   end
 
   def update_archives
-    Project.update_archives_for(key)
+    update_archives_for
   end
 
   def create_project_from(tmp_dir)
-    begin
+    begin      
       # copy files from temp directory to projects directory
       FileHelper.copy_dir(tmp_dir, dir_path)
 
@@ -377,8 +365,8 @@ class Project < ActiveRecord::Base
     'project.tar.gz'
   end
 
-  def self.package_name(projectkey)
-    settings = JSON.parse(File.read(Project.projects_path + '/' + projectkey + '/' + Project.project_settings_name))
+  def package_name
+    settings = JSON.parse(File.read(Project.projects_path + '/' + key + '/' + Project.project_settings_name))
     settings['name'].gsub(/\s+/, '_') + '.tar.bz2'
   end
 
@@ -437,92 +425,84 @@ class Project < ActiveRecord::Base
   end
 
   def self.lock_file_name
-    'lock'
+    '.lock'
   end
 
   def self.dirty_file_name
-    'dirty'
+    '.dirty'
   end
 
-  def self.is_locked(project_key)
-    File.exist?(lock_file(project_key)) if project_key
+  def is_locked
+    File.exist?(lock_file)
   end
 
-  def self.lock_file(project_key)
-    Project.projects_path + '/' + project_key + '/' + lock_file_name if project_key
+  def lock_file
+    dir_path + '/' + Project.lock_file_name
   end
 
-  def self.try_lock_project(project_key)
-    return unless project_key
+  def try_lock_project
     loop do
-      break unless File.exist?(lock_file(project_key))
+      break unless is_locked
       sleep 1
     end
-    FileHelper.touch_file(lock_file(project_key))
+    FileHelper.touch_file(lock_file)
   end
 
-  def self.unlock_project(project_key)
-    FileUtils.rm lock_file(project_key) if project_key and File.exists?(lock_file(project_key))
+  def unlock_project
+    FileUtils.rm lock_file if is_locked
   end
 
-  def self.is_dirty(project_key)
-    File.exist?(dirty_file(project_key)) if project_key
+  def is_dirty
+    File.exist?(dirty_file)
   end
 
-  def self.dirty_file(project_key)
-    Project.projects_path + '/' + project_key + '/' + dirty_file_name if project_key
+  def dirty_file
+    dir_path + '/' + Project.dirty_file_name
   end
 
-  def self.dirty(project_key)
-    FileHelper.touch_file(dirty_file(project_key)) if project_key
+  def dirty
+    FileHelper.touch_file(dirty_file)
   end
 
-  def self.clean(project_key)
-    FileUtils.rm dirty_file(project_key) if project_key and File.exists?(dirty_file(project_key))
+  def clean
+    FileUtils.rm dirty_file if is_dirty
   end
 
-  def self.package_project_for(project_key)
-    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
-    dir_path = projects_path + '/' + project_key + '/'
-    filepath = dir_path + '/' + Project.package_name(project_key)
+  def package_project_for
+    with_lock do
+      begin
+        tmp_dir = Dir.mktmpdir(Project.projects_path + '/') + '/'
 
-    begin
-      tmp_dir = Dir.mktmpdir(projects_path + '/') + '/'
+        # create project directory to archive
+        project_dir = tmp_dir + 'project/'
+        Dir.mkdir(project_dir)
 
-      # create project directory to archive
-      project_dir = tmp_dir + 'project/'
-      Dir.mkdir(project_dir)
+        hash_sum = {}
 
-      hash_sum = {}
+        FileUtils.cp_r(Dir[dir_path + '/*'],project_dir)
 
-      FileUtils.cp_r(Dir[dir_path + '*'],project_dir)
+        Dir.glob(dir_path + '/**/*') do |file|
+          next if File.basename(file) == '.' or File.basename(file) == '..'
+          next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
+          hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
+        end
 
-      Dir.glob(dir_path + '**/*') do |file|
-        next if File.basename(file) == '.' or File.basename(file) == '..'
-        next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
-        hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
+        File.open(project_dir + '/hash_sum', 'w') do |file|
+          file.write(hash_sum.to_json)
+        end
+
+        TarHelper.tar('jcf', package_path, File.basename(project_dir), tmp_dir,
+          [package_name,
+           Project.filename,
+           Project.db_file_name,
+           Project.lock_file_name,
+           Project.dirty_file_name].select { |f| File.exists? project_dir + f })
+      rescue Exception => e
+        raise e
+      ensure
+        # cleanup
+        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
       end
-
-      File.open(project_dir + '/hash_sum', 'w') do |file|
-        file.write(hash_sum.to_json)
-      end
-
-      try_lock_project(project_key)
-
-      TarHelper.tar('jcf', filepath, File.basename(project_dir), tmp_dir,
-        [Project.package_name(project_key),
-         Project.filename,
-         Project.db_file_name,
-         Project.lock_file_name,
-         Project.dirty_file_name].select { |f| File.exists? project_dir + f })
-    rescue Exception => e
-      puts "Error packaging project"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-
-      unlock_project(project_key)
     end
   end
 
@@ -539,114 +519,89 @@ class Project < ActiveRecord::Base
     true
   end
 
-  def self.update_archives_for(project_key)
-    if Project.is_dirty(project_key)
+  def update_archives_for
+    if is_dirty
       begin
-        archive_project_for(project_key)
-        archive_database_for(project_key)
+        archive_project_for
+        archive_database_for
       rescue Exception => e
-        puts 'Failed to archive project'
         raise e
       ensure
-        Project.clean(project_key)
+        clean
       end
     end
   end
 
-  def self.archive_project_for(project_key)
-    # archive includes database, ui_schema.xml, ui_logic.xml, project.settings and properties files
-    dir_path = projects_path + '/' + project_key + '/'
-    dir_name = File.basename(dir_path)
-    settings = JSON.parse(File.read(dir_path + Project.project_settings_name))
-    filepath = dir_path + Project.filename
+  def archive_project_for
+    with_lock do
+      begin
+        tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
-    begin
-      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+        # create project directory to archive
+        project_dir = tmp_dir + dir_name + '/'
+        Dir.mkdir(project_dir)
 
-      # create project directory to archive
-      project_dir = tmp_dir + dir_name + '/'
-      Dir.mkdir(project_dir)
+        # create app database
+        db.create_app_database(project_dir + Project.db_name)
 
-      # create app database
-      Database.create_app_database(project_key, dir_path + Project.db_name, project_dir + Project.db_name)
+        files = [Project.ui_schema_name, Project.ui_logic_name, Project.project_settings_name,
+                 Project.faims_properties_name, faims_project_properties_name]
 
-      files = [Project.ui_schema_name, Project.ui_logic_name, Project.project_settings_name,
-               Project.faims_properties_name, 'faims_' + settings['name'].gsub(/\s+/, '_') + '.properties']
+        # copy files to tmp directory
+        files.each do |file|
+          FileUtils.cp(dir_path + '/' + file, project_dir + file) if File.exists? dir_path + '/' + file
+        end
 
-      # copy files to tmp directory
-      files.each do |file|
-        FileUtils.cp(dir_path + file, project_dir + file) if File.exists? dir_path + file
+        # copy server/app files to tmp directory
+        FileUtils.mkdir_p project_dir + Project.sync_files_dir_name
+        FileUtils.cp_r(app_files_dir_path, project_dir + Project.app_files_dir_name) if File.directory? app_files_dir_path
+
+        TarHelper.tar('zcf', filepath, dir_name, tmp_dir)
+      rescue Exception => e
+        raise e
+      ensure
+        # cleanup
+        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
       end
-
-      # copy server/app files to tmp directory
-      FileUtils.mkdir_p project_dir + Project.sync_files_dir_name
-      FileUtils.cp_r(dir_path + Project.app_files_dir_name, project_dir + Project.app_files_dir_name) if File.directory? dir_path + Project.app_files_dir_name
-
-      try_lock_project(project_key)
-
-      TarHelper.tar('zcf', filepath, File.basename(dir_path), tmp_dir)
-    rescue Exception => e
-      puts "Error archiving project"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-
-      unlock_project(project_key)
-
     end
   end
 
-  def self.archive_database_for(project_key)
-    # archive includes database
-    dir_path = projects_path + '/' + project_key + '/'
-    db_file_path = dir_path + Project.db_file_name
+  def archive_database_for
+    with_lock do
+      begin
+        tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
-    begin
-      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+        # create app database
+        db.create_app_database(tmp_dir + Project.db_name)
 
-      # create app database
-      Database.create_app_database(project_key, dir_path + Project.db_name, tmp_dir + Project.db_name)
-
-      try_lock_project(project_key)
-
-      TarHelper.tar('zcf', db_file_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
-    rescue Exception => e
-      puts "Error archiving database"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-
-      unlock_project(project_key)
+        TarHelper.tar('zcf', db_file_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
+      rescue Exception => e
+        raise e
+      ensure
+        # cleanup
+        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      end
     end
   end
 
-  def self.archive_database_version_for(project_key, version, temp_path)
-     # archive includes database
-    dir_path = projects_path + '/' + project_key + '/'
-    db_file_path = temp_path
-    begin
-      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+  def archive_database_version_for(version, temp_path)
+    with_lock do
+      begin
+        tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
 
-      # create app database
-      Database.create_app_database_from_version(project_key, dir_path + Project.db_name, tmp_dir + Project.db_name, version)
+        # create app database
+        db.create_app_database_from_version(tmp_dir + Project.db_name, version)
 
-      try_lock_project(project_key)
+        TarHelper.tar('zcf', temp_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
 
-      TarHelper.tar('zcf', db_file_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
-
-      return db_file_path
-    rescue Exception => e
-      puts "Error archiving database"
-      raise e
-    ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
-
-      unlock_project(project_key)
+        db_file_path
+      rescue Exception => e
+        raise e
+      ensure
+        # cleanup
+        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      end
     end
-
   end
 
   private

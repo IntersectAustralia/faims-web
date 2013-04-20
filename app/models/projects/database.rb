@@ -134,6 +134,37 @@ class Database
     end
   end
 
+  def merge_database(fromDB, version)
+    @project.with_lock do
+      @db.execute_batch(WebQuery.merge_database(fromDB, version))
+
+      @project.dirty
+    end
+  end
+
+  def create_app_database(toDB)
+    #@project.with_lock do
+
+      db = SpatialiteDB.new(toDB)
+      db.execute('select initspatialmetadata()')
+
+      @db.execute_batch(WebQuery.create_app_database(toDB))
+
+    #end
+  end
+
+  def create_app_database_from_version(toDB, version)
+    #@project.with_lock do
+
+      db = SpatialiteDB.new(toDB)
+      db.execute('select initspatialmetadata()')
+
+      @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
+
+    #end
+  end
+
+  # static
   def self.generate_database(file, xml)
     db = SpatialiteDB.new(file)
     db.execute('select initspatialmetadata()')
@@ -143,39 +174,21 @@ class Database
     db.execute_batch(data_definition)
   end
 
-  def self.merge_database(project_key, toDB, fromDB, version)
-    Project.try_lock_project(project_key)
-
-    db = SpatialiteDB.new(toDB)
-    db.execute_batch(WebQuery.merge_database(fromDB, version))
-
-    Project.dirty(project_key)
-
-    Project.unlock_project(project_key)
+  # Testing
+  def spatialite_db
+    @db
   end
 
-  def self.create_app_database(project_key, fromDB, toDB)
-    Project.try_lock_project(project_key)
-
-    db = SpatialiteDB.new(toDB)
-    db.execute('select initspatialmetadata()')
-
-    db = SpatialiteDB.new(fromDB)
-    db.execute_batch(WebQuery.create_app_database(toDB))
-
-    Project.unlock_project(project_key)
+  def spatialite_db=(value)
+    @db = value
   end
 
-  def self.create_app_database_from_version(project_key, fromDB, toDB, version)
-    Project.try_lock_project(project_key)
+  def project
+    @project
+  end
 
-    db = SpatialiteDB.new(toDB)
-    db.execute('select initspatialmetadata()')
-
-    db = SpatialiteDB.new(fromDB)
-    db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
-
-    Project.unlock_project(project_key)
+  def path
+    @db.path
   end
 
   private

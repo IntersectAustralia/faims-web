@@ -1,28 +1,13 @@
-require 'tempfile'
+require Rails.root.join('features/support/projects')
 
-def create_empty_database(filename = nil)
-  if filename
-    file = File.new(filename, 'w+')
-  else
-    file = Tempfile.new('db')
-  end
-  Database.generate_database(file.path, "#{Rails.root}/spec/assets/data_schema.xml")
-  file.close
-  file
+def init_database(db)
+  
 end
 
-def create_full_database(version = nil, filename = nil, index = nil)
+def fill_database(db, version = nil, index = nil)
+  init_database(db)
+
   version ||= 1 # default version
-
-  if filename
-    file = File.new(filename, 'w+')
-  else
-    file = Tempfile.new('db')
-  end
-
-  Database.generate_database(file.path, "#{Rails.root}/spec/assets/data_schema.xml")
-
-  db = SpatialiteDB.new(file.path)
 
   s = index ? index : 0
   n = s + 5
@@ -54,19 +39,18 @@ def create_full_database(version = nil, filename = nil, index = nil)
     db.execute("INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
                                         "VALUES ('#{i}', '#{i}', '', CURRENT_TIMESTAMP, #{version});")
   end
-  file.close
-  file
+  
+  db
 end
 
 def backup_database(db)
   file = Tempfile.new('copy')
   FileUtils.copy_file(db.path, file.path)
-  file.close
-  file
+  
+  SpatialiteDB.new(file.path)
 end
 
 def is_database_empty(db)
-  db = SpatialiteDB.new(db.path)
   return false if db.execute("select * from archentity;") != []
   return false if db.execute("select * from aentvalue;") != []
   return false if db.execute("select * from relationship;") != []
@@ -76,8 +60,6 @@ def is_database_empty(db)
 end
 
 def is_database_same(db1, db2)
-  db1 = SpatialiteDB.new(db1.path)
-  db2 = SpatialiteDB.new(db2.path)
   return false if db1.execute("select * from archentity;") !=
       db2.execute("select * from archentity;")
   return false if db1.execute("select * from aentvalue;") !=
@@ -92,8 +74,6 @@ def is_database_same(db1, db2)
 end
 
 def is_version_database_same(db1, db2, version)
-  db1 = SpatialiteDB.new(db1.path)
-  db2 = SpatialiteDB.new(db2.path)
   return false if db1.execute("select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum = #{version};") !=
       db2.execute("select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity;")
   return false if db1.execute("select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from aentvalue where versionnum = #{version};") !=
@@ -117,10 +97,10 @@ def is_database_merged(db, db1, db2)
 end
 
 def is_table_merged(db, db1, db2, table)
-  expected_rows = SpatialiteDB.new(db.path).execute("select * from #{table};")
+  expected_rows = db.execute("select * from #{table};")
 
-  rows1 = SpatialiteDB.new(db1.path).execute("select * from #{table};")
-  rows2 = SpatialiteDB.new(db2.path).execute("select * from #{table};")
+  rows1 = db1.execute("select * from #{table};")
+  rows2 = db2.execute("select * from #{table};")
 
   return expected_rows == merge_rows(rows1, rows2)
 end

@@ -26,93 +26,90 @@ describe Database do
 
   describe "Merging databases" do
     it "Empty database and Empty database" do
-      db1 = create_empty_database()
-      db2 = create_empty_database()
+      p1 = make_project("Project 1")
+      p2 = make_project("Project 2")
 
-      Database.merge_database(nil, db1.path, db2.path,1)
+      init_database(p1.db.spatialite_db)
+      init_database(p2.db.spatialite_db)
 
-      is_database_empty(db1).should be_true
+      p1.db.merge_database(p2.db.path, 1)
 
-      db1.unlink
-      db2.unlink
+      is_database_empty(p1.db.spatialite_db).should be_true
     end
 
     it "Empty database and Full database" do
       version = 1
 
-      db1 = create_empty_database()
-      db2 = create_full_database(version)
+      p1 = make_project("Project 1")
+      p2 = make_project("Project 2")
 
-      Database.merge_database(nil, db1.path, db2.path, version)
+      init_database(p1.db.spatialite_db)
+      fill_database(p2.db.spatialite_db, version)
 
-      is_database_same(db1, db2).should be_true
+      p1.db.merge_database(p2.db.path, version)
 
-      db1.unlink
-      db2.unlink
+      is_database_same(p1.db.spatialite_db, p2.db.spatialite_db).should be_true
     end
 
     it "Full database and Empty database" do
       version = 1
 
-      db1 = create_full_database(version)
-      db2 = create_empty_database()
+      p1 = make_project("Project 1")
+      p2 = make_project("Project 2")
 
-      backup_db1 = backup_database(db1)
+      init_database(p1.db.spatialite_db)
+      fill_database(p1.db.spatialite_db, version)
 
-      Database.merge_database(nil, db1.path, db2.path, version)
+      backup_db1 = backup_database(p1.db.spatialite_db)
 
-      is_database_same(backup_db1, db1).should be_true
+      p1.db.merge_database(p2.db.path, version)
 
-      db1.unlink
-      db2.unlink
-      backup_db1.unlink
+      is_database_same(backup_db1, p1.db.spatialite_db).should be_true
     end
 
     it "Full database and Full database" do
       version = 1
 
-      db1 = create_full_database(version)
-      db2 = create_full_database() # version doesn't matter
+      p1 = make_project("Project 1")
+      p2 = make_project("Project 2")
 
-      backup_db1 = backup_database(db1)
+      fill_database(p1.db.spatialite_db, version)
+      fill_database(p2.db.spatialite_db)
 
-      Database.merge_database(nil, db1.path, db2.path, version)
+      backup_db1 = backup_database(p1.db.spatialite_db)
 
-      is_database_merged(db1, backup_db1, db2).should be_true
+      p1.db.merge_database(p2.db.path, version)
 
-      db1.unlink
-      db2.unlink
-      backup_db1.unlink
+      is_database_merged(p1.db.spatialite_db, backup_db1, p2.db.spatialite_db).should be_true
     end
 
     it "Does not insert duplicate records" do
       version = 1
-      db1 = create_full_database(version)
+      
+      p1 = make_project("Project 100")
+      fill_database(p1.db.spatialite_db, version)
+      
+      backup_db1 = backup_database(p1.db.spatialite_db)
 
-      backup_db1 = backup_database(db1)
+      p1.db.merge_database(backup_db1.path, version)
 
-      Database.merge_database(nil, db1.path, backup_db1.path, version)
-
-      is_database_same(backup_db1, db1).should be_true
-
-      db1.unlink
-      backup_db1.unlink
+      is_database_same(backup_db1, p1.db.spatialite_db).should be_true
     end
 
     it "Merge rows must have correct version number" do
-      db1 = create_empty_database()
-      db2 = create_full_database(nil, nil, 0) #version doesn't matter
-      db3 = create_full_database(nil, nil, 1000) #version doesn't matter
+      p1 = make_project("Project 1")
+      p2 = make_project("Project 2")
+      p3 = make_project("Project 3")
 
-      Database.merge_database(nil, db1.path, db2.path, 1)
-      Database.merge_database(nil, db1.path, db3.path, 2)
+      init_database(p1.db.spatialite_db)
+      fill_database(p2.db.spatialite_db, nil, 0)
+      fill_database(p3.db.spatialite_db, nil, 1000)
 
-      is_version_database_same(db1, db2, 1).should be_true
-      is_version_database_same(db1, db3, 2).should be_true
+      p1.db.merge_database(p2.db.path, 1)
+      p1.db.merge_database(p3.db.path, 2)
 
-      db1.unlink
-      db2.unlink
-      db3.unlink
+      is_version_database_same(p1.db.spatialite_db, p2.db.spatialite_db, 1).should be_true
+      is_version_database_same(p1.db.spatialite_db, p3.db.spatialite_db, 2).should be_true
     end
 
   end

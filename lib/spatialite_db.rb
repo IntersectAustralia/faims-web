@@ -3,6 +3,7 @@ require 'sqlite3'
 class SpatialiteDB
 
   def initialize(file)
+    @path = file
     @db = SQLite3::Database.new(file)
     @db.enable_load_extension(true)
     @db.execute("select load_extension('#{spatialite_library}')")
@@ -14,6 +15,10 @@ class SpatialiteDB
 
   def execute_batch(sql, *bind_vars)
     @db.execute_batch(sql, bind_vars)
+  end
+
+  def path
+    @path
   end
 
   private
