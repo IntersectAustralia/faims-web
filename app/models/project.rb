@@ -14,6 +14,17 @@ class Project < ActiveRecord::Base
 
   default_scope order: 'name COLLATE NOCASE'
 
+  after_create :init_project
+
+  def init_project
+    FileUtils.mkdir_p Project.projects_path unless File.directory? Project.projects_path
+    FileUtils.mkdir_p Project.uploads_path unless File.directory? Project.uploads_path
+    FileUtils.mkdir_p dir_path unless File.directory? dir_path
+    FileUtils.mkdir_p temp_db_dir_path unless File.directory? temp_db_dir_path
+    FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
+    FileUtils.mkdir_p server_files_dir_path unless File.directory? server_files_dir_path
+  end
+
   def name=(value)
     write_attribute(:name, value.strip.squish) if value
   end
@@ -159,9 +170,6 @@ class Project < ActiveRecord::Base
   end
 
   def db_version_archive_info(version_num)
-      # create db tmp dir
-      FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
-
       # create temporary archive of database
       temp_path = temp_db_version_file_path(version_num)
       Project.archive_database_version_for(key, version_num, temp_path) unless File.exists? temp_path
@@ -180,13 +188,7 @@ class Project < ActiveRecord::Base
   end
 
   def create_project_from(tmp_dir)
-
     begin
-      Dir.mkdir(Project.projects_path) unless File.directory? Project.projects_path # make sure projects directory exists
-
-      FileUtils.rm_rf dir_path if File.directory? dir_path # overwrite current project directory
-      Dir.mkdir(dir_path)
-
       # copy files from temp directory to projects directory
       FileHelper.copy_dir(tmp_dir, dir_path)
 
@@ -207,13 +209,7 @@ class Project < ActiveRecord::Base
   end
 
   def create_project_from_compressed_file(tmp_dir)
-
     begin
-      Dir.mkdir(Project.projects_path) unless File.directory? Project.projects_path # make sure projects directory exists
-
-      FileUtils.rm_rf dir_path if File.directory? dir_path # overwrite current project directory
-      Dir.mkdir(dir_path)
-
       # copy files from temp directory to projects directory
       FileHelper.copy_dir(tmp_dir, dir_path, ['hash_sum'])
 
@@ -245,9 +241,6 @@ class Project < ActiveRecord::Base
       unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
       stored_file = "#{Project.uploads_path}/#{key}_v#{version}"
 
-      # create upload directory if it doesn't exist
-      Dir.mkdir(Project.uploads_path) unless File.directory? Project.uploads_path
-
       # move file to upload directory
       FileUtils.mv(unarchived_file, stored_file)
 
@@ -270,7 +263,6 @@ class Project < ActiveRecord::Base
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
     rescue => e
-      logger.error "Exception validating data schema #{e}"
       result = nil
     end
     return "invalid xml" if result.nil? || !result.empty?
@@ -284,7 +276,6 @@ class Project < ActiveRecord::Base
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
     rescue => e
-      logger.error "Exception validating ui schema #{e}"
       result = nil
     end
     return "invalid xml" if result.nil? || !result.empty?
@@ -371,16 +362,10 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_upload(file)
-    # make sure dir exists
-    FileUtils.mkdir_p server_files_dir_path unless File.directory? server_files_dir_path
-
     TarHelper.untar('xfz', file.path, server_files_dir_path)
   end
 
   def app_file_upload(file)
-    # make sure dir exists
-    FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
-
     TarHelper.untar('xfz', file.path, app_files_dir_path)
 
     dirty

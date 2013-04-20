@@ -45,7 +45,7 @@ group :development, :test do
 
   # cucumber gems
   gem 'cucumber'
-  gem 'capybara'
+  gem 'capybara', '~> 2.0.2'
   gem 'database_cleaner'
   #gem 'spork'
   gem 'launchy' # So you can do Then show me the page

@@ -115,4 +115,12 @@ describe Project do
     end
   end
 
+  it "Creating project initialise directory" do
+    project = make_project("Project 1")
+    File.exists?(project.dir_path).should be_true
+    File.exists?(project.temp_db_dir_path).should be_true
+    File.exists?(project.app_files_dir_path).should be_true
+    File.exists?(project.server_files_dir_path).should be_true
+  end
+
 end
