@@ -1,5 +1,3 @@
-require Rails.root.join('app/models/projects/database')
-
 class Project < ActiveRecord::Base
   include XSDValidator
   include Archive::Tar

@@ -1,5 +1,3 @@
-require Rails.root.join('app/models/projects/database')
-
 class MergeDaemon
 
   def self.match_file(file)
