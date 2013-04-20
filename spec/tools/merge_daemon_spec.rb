@@ -1,7 +1,7 @@
 require 'spec_helper'
-require Rails.root.to_s + '/lib/merge_daemon_helper'
-require Rails.root.to_s + '/features/support/projects'
-require Rails.root.to_s + '/spec/tools/helpers/database_generator_spec_helper'
+require Rails.root.join('lib/merge_daemon_helper')
+require Rails.root.join('features/support/projects')
+require Rails.root.join('spec/tools/helpers/database_generator_spec_helper')
 
 describe MergeDaemon do
 

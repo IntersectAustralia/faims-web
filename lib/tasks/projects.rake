@@ -1,4 +1,4 @@
-require Rails.root.to_s + '/lib/tasks/test_project_creator.rb'
+require Rails.root.join('/lib/tasks/test_project_creator')
 
 begin
   namespace :projects do
