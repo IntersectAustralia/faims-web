@@ -1,0 +1,3 @@
+%h1= @project.name
+%input{:type => 'hidden', :id => 'file_root', :value => 'projects/' + @project_key.to_s + '/files'}
+#fileTree.browse_file

@@ -90,6 +90,11 @@ class Project < ActiveRecord::Base
     dir_path + '/' + Project.app_files_dir_name
   end
 
+  def has_attached_files
+    return false unless File.exist?(server_files_dir_path) or File.exist?(app_files_dir_path)
+    true
+  end
+
   def project_setting
     File.read(dir_path + '/' + Project.project_settings_name).as_json
   end

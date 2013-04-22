@@ -170,6 +170,14 @@ delete_records = ->
   )
   return
 
+browse_attached_file = ->
+  root = $('#file_root').val();
+  $('#file_root').remove()
+  if (root != undefined)
+    $('#fileTree').fileTree({ root: root , script: '/jqueryfiletree/content' }, ->
+      return false)
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -181,5 +189,6 @@ $(document).ready(
     add_arch_ent_member()
     delete_arch_ent_members()
     delete_records()
+    browse_attached_file()
     return
 )

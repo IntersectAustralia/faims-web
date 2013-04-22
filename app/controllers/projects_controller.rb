@@ -39,6 +39,12 @@ class ProjectsController < ApplicationController
 
   def show
     @project = Project.find(params[:id])
+    session[:has_attached_files] = @project.has_attached_files
+  end
+
+  def browse_attached_files
+    @project = Project.find(params[:id])
+    @project_key = @project.key
   end
 
   def list_arch_ent_records
