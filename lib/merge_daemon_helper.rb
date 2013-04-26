@@ -19,6 +19,11 @@ class MergeDaemon
     sorted_files
   end
 
+  def self.init
+    # make uploads directory
+    Dir.mkdir(Rails.application.config.server_uploads_directory) unless File.directory? Rails.application.config.server_uploads_directory
+  end
+
   def self.do_merge(uploads_dir = nil, projects_dir = nil)
     uploads_dir ||= Rails.application.config.server_uploads_directory
     projects_dir ||= Rails.application.config.server_projects_directory
@@ -53,7 +58,7 @@ class MergeDaemon
         # update project archives
         Project.update_archives_for(key)
 
-        puts "Finished merging database"
+        puts 'Finished merging database'
       end
     ensure
       FileUtils.rm_rf db_file_path if db_file_path

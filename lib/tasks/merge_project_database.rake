@@ -20,6 +20,9 @@ rescue LoadError
 end
 
 def merge_daemon(opts)
+  # make sure pids dir exists
+  FileUtils.mkdir_p (Rails.root.join('tmp/pids').to_s) unless File.directory? Rails.root.join('tmp/pids').to_s
+
   Daemons.run(Rails.root.join('lib', 'merge_daemon.rb'), opts)
 end
 

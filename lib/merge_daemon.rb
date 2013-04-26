@@ -1,9 +1,7 @@
 require 'merge_daemon_helper'
 
-# make uploads directory
-Dir.mkdir(Rails.application.config.server_uploads_directory) unless Rails.application.config.server_uploads_directory
+MergeDaemon.init
 
-# process uploads
 loop do
 
   begin
@@ -11,10 +9,10 @@ loop do
     MergeDaemon.do_merge
 
   rescue SystemExit, Interrupt
-    puts "Merge daemon killed"
+    puts 'Merge daemon killed'
     exit(0)
   rescue Exception => e
-    puts "Error merging database"
+    puts 'Error merging database'
     puts e
   end
 
