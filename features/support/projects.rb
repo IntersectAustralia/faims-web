@@ -1,5 +1,11 @@
+def setup
+  tmp_dir = Rails.root.join('tmp').to_s
+  FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
+end
+
 def make_project(name)
   begin
+    setup
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
     assets_dir = Rails.root.to_s + '/features/assets/'
     FileUtils.cp(assets_dir + 'data_schema.xml', tmp_dir + '/data_schema.xml' )
@@ -12,7 +18,7 @@ def make_project(name)
   rescue Exception => e
     raise e
   ensure
-    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 end
 

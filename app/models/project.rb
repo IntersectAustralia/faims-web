@@ -190,13 +190,13 @@ class Project < ActiveRecord::Base
       Dir.mkdir(dir_path)
 
       # copy files from temp directory to projects directory
-      TarHelper.copy_dir(tmp_dir, dir_path)
+      FileHelper.copy_dir(tmp_dir, dir_path)
 
       # generate database
       Database.generate_database(dir_path + '/' + Project.db_name, dir_path + '/' + Project.data_schema_name)
 
       # create default faims properties
-      TarHelper.touch_file(dir_path + '/' + Project.faims_properties_name)
+      FileHelper.touch_file(dir_path + '/' + Project.faims_properties_name)
 
       # generate archive
       dirty
@@ -217,7 +217,7 @@ class Project < ActiveRecord::Base
       Dir.mkdir(dir_path)
 
       # copy files from temp directory to projects directory
-      TarHelper.copy_dir(tmp_dir, dir_path, ['hash_sum'])
+      FileHelper.copy_dir(tmp_dir, dir_path, ['hash_sum'])
 
       # generate archive
       dirty
@@ -320,29 +320,16 @@ class Project < ActiveRecord::Base
 
   def server_file_list(exclude_files = nil)
     return [] unless File.directory? server_files_dir_path
-    file_list = Project.get_file_list(server_files_dir_path)
+    file_list = FileHelper.get_file_list(server_files_dir_path)
     return file_list unless exclude_files
     file_list.select { |f| !exclude_files.include? f }
   end
 
   def app_file_list(exclude_files = nil)
     return [] unless File.directory? app_files_dir_path
-    file_list = Project.get_file_list(app_files_dir_path)
+    file_list = FileHelper.get_file_list(app_files_dir_path)
     return file_list unless exclude_files
     file_list.select { |f| !exclude_files.include? f }
-  end
-
-  def self.get_file_list(dir, base = '')
-    list = []
-    Dir.entries(dir).each do |file|
-      next if file == '.' or file == '..'
-      if File.directory? dir + '/' + file
-        list = list.concat(Project.get_file_list(dir + '/' + file, base + file + '/'))
-      else
-        list.push(base + file)
-      end
-    end
-    list.sort
   end
 
   def add_server_file(file, path)
@@ -488,7 +475,7 @@ class Project < ActiveRecord::Base
       break unless File.exist?(lock_file(project_key))
       sleep 1
     end
-    TarHelper.touch_file(lock_file(project_key))
+    FileHelper.touch_file(lock_file(project_key))
   end
 
   def self.unlock_project(project_key)
@@ -504,7 +491,7 @@ class Project < ActiveRecord::Base
   end
 
   def self.dirty(project_key)
-    TarHelper.touch_file(dirty_file(project_key)) if project_key
+    FileHelper.touch_file(dirty_file(project_key)) if project_key
   end
 
   def self.clean(project_key)

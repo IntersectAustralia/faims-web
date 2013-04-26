@@ -32,8 +32,8 @@ describe MergeDaemon do
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
     # cleanup projects and uploads directory
-    FileUtils.rm_rf projects_dir
-    FileUtils.rm_rf uploads_dir
+    FileUtils.rm_rf projects_dir if File.directory? projects_dir
+    FileUtils.rm_rf uploads_dir if File.directory? uploads_dir
 
     FileUtils.mkdir projects_dir
     FileUtils.mkdir uploads_dir
@@ -62,8 +62,8 @@ describe MergeDaemon do
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
     # cleanup projects and uploads directory
-    FileUtils.rm_rf projects_dir
-    FileUtils.rm_rf uploads_dir
+    FileUtils.rm_rf projects_dir if File.directory? projects_dir
+    FileUtils.rm_rf uploads_dir if File.directory? uploads_dir
 
     FileUtils.mkdir projects_dir
     FileUtils.mkdir uploads_dir

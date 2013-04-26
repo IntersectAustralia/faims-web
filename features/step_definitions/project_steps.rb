@@ -319,7 +319,7 @@ def get_archive_list(dir, archive)
 
   `tar xfz #{archive.path} -C #{dir}`
 
-  file_list = Project.get_file_list(dir)
+  file_list = FileHelper.get_file_list(dir)
 
   FileUtils.rm_rf dir
 
@@ -415,8 +415,8 @@ end
 def compare_dir(dir1, dir2)
   return false unless File.directory? dir1
   return false unless File.directory? dir2
-  file_list1 = Project.get_file_list(dir1)
-  file_list2 = Project.get_file_list(dir2)
+  file_list1 = FileHelper.get_file_list(dir1)
+  file_list2 = FileHelper.get_file_list(dir2)
   return false unless file_list1.size == file_list2.size
   for i in (1..file_list1.size) do
     md5(dir1 + '/' + file_list1.shift).should == md5(dir2 + '/' + file_list2.shift)
