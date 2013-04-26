@@ -147,7 +147,7 @@ class Project < ActiveRecord::Base
     info
   end
 
-  def archive_db_info
+  def db_archive_info
     update_archives
 
     info = {
@@ -160,7 +160,7 @@ class Project < ActiveRecord::Base
     info
   end
 
-  def archive_db_version_info(version_num)
+  def db_version_archive_info(version_num)
       # create db tmp dir
       FileUtils.mkdir temp_db_dir_path unless File.directory? temp_db_dir_path
 

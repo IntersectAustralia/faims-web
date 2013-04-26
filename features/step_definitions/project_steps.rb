@@ -139,7 +139,7 @@ And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
 end
 
 Then /^I should see json for "([^"]*)" archived db file$/ do |name|
-  page.should have_content(Project.find_by_name(name).archive_db_info.to_json)
+  page.should have_content(Project.find_by_name(name).db_archive_info.to_json)
 end
 
 Then /^I should download db file for "([^"]*)"$/ do |name|
@@ -151,7 +151,7 @@ end
 
 Then /^I should download db file for "([^"]*)" from version (.*)$/ do |name, version|
   project = Project.find_by_name(name)
-  info = project.archive_db_version_info(version)
+  info = project.db_version_archive_info(version)
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + info[:file] + "\""
   file = File.open(project.temp_db_version_file_path(version), 'r')
   page.source == file.read
@@ -170,12 +170,12 @@ Then /^I should see json for "([^"]*)" archived file with version (.*)$/ do |nam
 end
 
 Then /^I should see json for "([^"]*)" archived db file with version (.*)$/ do |name, version|
-  page.should have_content(Project.find_by_name(name).archive_db_info.to_json)
+  page.should have_content(Project.find_by_name(name).db_archive_info.to_json)
   page.should have_content("\"version\":\"#{version}\"")
 end
 
 Then /^I should see json for "([^"]*)" archived version (.*) db file with version (.*)$/ do |name, requested_version, version|
-  page.should have_content(Project.find_by_name(name).archive_db_version_info(requested_version).to_json)
+  page.should have_content(Project.find_by_name(name).db_version_archive_info(requested_version).to_json)
   page.should have_content("\"version\":\"#{version}\"")
 end
 

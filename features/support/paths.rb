@@ -63,51 +63,51 @@ module NavigationHelpers
 
       when /the android archive db page for "([^"]*)" with request version (.*)$/
         project = Project.find_by_name($1)
-        "/android/project/#{project ? project.key : "na"}/archive_db?version=#{$2}"
+        "/android/project/#{project ? project.key : "na"}/db_archive?version=#{$2}"
 
       when /the android download db link for "([^"]*)" with request version (.*)$/
         project = Project.find_by_name($1)
-        "/android/project/#{project ? project.key : "na"}/download_db?version=#{$2}"
+        "/android/project/#{project ? project.key : "na"}/db_download?version=#{$2}"
 
       when /the android archive db page for (.*)$/
         project = Project.find_by_name($1)
-        android_project_archive_db_path(project ? project.key : "na")
+        android_project_db_archive_path(project ? project.key : "na")
 
       when /the android download db link for (.*)$/
         project = Project.find_by_name($1)
-        android_project_download_db_path(project ? project.key : "na")
+        android_project_db_download_path(project ? project.key : "na")
 
       when /the android server file list page for (.*)$/
         project = Project.find_by_name($1)
-        server_file_list_path(project ? project.key : "na")
+        android_server_file_list_path(project ? project.key : "na")
 
       when /the android app file list page for (.*)$/
         project = Project.find_by_name($1)
-        app_file_list_path(project ? project.key : "na")
+        android_app_file_list_path(project ? project.key : "na")
 
       when /the android server files archive page for (.*)$/
         project = Project.find_by_name($1)
-        server_file_archive_path(project ? project.key : "na")
+        android_server_file_archive_path(project ? project.key : "na")
 
       when /the android app files archive page for (.*)$/
         project = Project.find_by_name($1)
-        app_file_archive_path(project ? project.key : "na")
+        android_app_file_archive_path(project ? project.key : "na")
 
       when /the android server files download link for (.*)$/
         project = Project.find_by_name($1)
-        server_file_download_path(project ? project.key : "na")
+        android_server_file_download_path(project ? project.key : "na")
 
       when /the android app files download link for (.*)$/
         project = Project.find_by_name($1)
-        app_file_download_path(project ? project.key : "na")
+        android_app_file_download_path(project ? project.key : "na")
 
       when /the android server upload file link for (.*)$/
         project = Project.find_by_name($1)
-        server_file_upload_path(project ? project.key : "na")
+        android_server_file_upload_path(project ? project.key : "na")
 
       when /the android app upload file link for (.*)$/
         project = Project.find_by_name($1)
-        app_file_upload_path(project ? project.key : "na")
+        android_app_file_upload_path(project ? project.key : "na")
 
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:

@@ -74,22 +74,19 @@ FaimsWeb::Application.routes.draw do
   get 'android/project/:key/archive', :to => 'android#archive', :as => 'android_project_archive'
   get 'android/project/:key/download', :to => 'android#download', :as => 'android_project_download'
   
-  get 'android/project/:key/archive_db', :to => 'android#archive_db', :as => 'android_project_archive_db'
-  get 'android/project/:key/download_db', :to => 'android#download_db', :as => 'android_project_download_db'
+  get 'android/project/:key/db_archive', :to => 'android#db_archive', :as => 'android_project_db_archive'
+  get 'android/project/:key/db_download', :to => 'android#db_download', :as => 'android_project_db_download'
+  post 'android/project/:key/db_upload', :to => 'android#db_upload', :as => 'android_project_db_upload'
 
-  post 'android/project/:key/upload_db', :to => 'android#upload_db', :as => 'android_project_upload_db'
+  get 'android/project/:key/server_file_list', :to => 'android#server_file_list', :as => 'android_server_file_list'
+  get 'android/project/:key/server_file_archive', :to => 'android#server_file_archive', :as => 'android_server_file_archive'
+  get 'android/project/:key/server_file_download', :to => 'android#server_file_download', :as => 'android_server_file_download'
+  post 'android/project/:key/server_file_upload', :to => 'android#server_file_upload', :as => 'android_server_file_upload'
 
-  get 'android/project/:key/server_file_list', :to => 'android#server_file_list', :as => 'server_file_list'
-  get 'android/project/:key/app_file_list', :to => 'android#app_file_list', :as => 'app_file_list'
-
-  get 'android/project/:key/server_file_archive', :to => 'android#server_file_archive', :as => 'server_file_archive'
-  get 'android/project/:key/app_file_archive', :to => 'android#app_file_archive', :as => 'app_file_archive'
-
-  get 'android/project/:key/server_file_download', :to => 'android#server_file_download', :as => 'server_file_download'
-  get 'android/project/:key/app_file_download', :to => 'android#app_file_download', :as => 'app_file_download'
-
-  post 'android/project/:key/server_file_upload', :to => 'android#server_file_upload', :as => 'server_file_upload'
-  post 'android/project/:key/app_file_upload', :to => 'android#app_file_upload', :as => 'app_file_upload'
+  get 'android/project/:key/app_file_list', :to => 'android#app_file_list', :as => 'android_app_file_list'
+  get 'android/project/:key/app_file_archive', :to => 'android#app_file_archive', :as => 'android_app_file_archive'
+  get 'android/project/:key/app_file_download', :to => 'android#app_file_download', :as => 'android_app_file_download'
+  post 'android/project/:key/app_file_upload', :to => 'android#app_file_upload', :as => 'android_app_file_upload'
 
   root :to => 'pages#home'
 
