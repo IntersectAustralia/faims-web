@@ -1,4 +1,4 @@
-require Rails.root.join('/lib/tasks/test_project_creator')
+require Rails.root.join('lib/tasks/test_project_creator')
 
 begin
   namespace :projects do

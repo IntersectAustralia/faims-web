@@ -1,33 +1,31 @@
 require 'spec_helper'
-require 'tempfile'
-require 'sqlite3'
-load File.expand_path("#{Rails.root}/spec/tools/helpers/database_generator_spec_helper.rb", __FILE__)
+require Rails.root.join('spec/tools/helpers/database_generator_spec_helper')
 
 describe Database do
 
-  it "Generates and Parses database" do
+  it 'Generates and Parses database' do
     tempfile = Tempfile.new('db.sqlite3')
     Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'data_schema.xml').to_s)
     db = SpatialiteDB.new(tempfile.path)
     result = db.execute("select count(*) || 'ideal arch ent' from idealAEnt union select count(*) || 'ideal reln'  from idealreln union select count(*) || 'aent type' from aenttype union select count(*) || 'relntype' from relntype union select count(*) || 'attributekey'  from attributekey;")
-    result[0].should == ["2aent type"]
-    result[1].should == ["30attributekey"]
-    result[2].should == ["3ideal reln"]
-    result[3].should == ["3relntype"]
-    result[4].should == ["46ideal arch ent"]
+    result[0].should == ['2aent type']
+    result[1].should == ['30attributekey']
+    result[2].should == ['3ideal reln']
+    result[3].should == ['3relntype']
+    result[4].should == ['46ideal arch ent']
     tempfile.unlink
   end
 
-  it "Generates and Parses data_schema.xml with single qoutes" do
+  it 'Generates and Parses data_schema.xml with single qoutes' do
     tempfile = Tempfile.new('db.sqlite3')
     Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'pottery.xml').to_s)
     tempfile.unlink
   end
 
-  describe "Merging databases" do
-    it "Empty database and Empty database" do
-      p1 = make_project("Project 1")
-      p2 = make_project("Project 2")
+  describe 'Merging databases' do
+    it 'Empty database and Empty database' do
+      p1 = make_project('Project 1')
+      p2 = make_project('Project 2')
 
       init_database(p1.db.spatialite_db)
       init_database(p2.db.spatialite_db)
@@ -37,11 +35,11 @@ describe Database do
       is_database_empty(p1.db.spatialite_db).should be_true
     end
 
-    it "Empty database and Full database" do
+    it 'Empty database and Full database' do
       version = 1
 
-      p1 = make_project("Project 1")
-      p2 = make_project("Project 2")
+      p1 = make_project('Project 1')
+      p2 = make_project('Project 2')
 
       init_database(p1.db.spatialite_db)
       fill_database(p2.db.spatialite_db, version)
@@ -51,11 +49,11 @@ describe Database do
       is_database_same(p1.db.spatialite_db, p2.db.spatialite_db).should be_true
     end
 
-    it "Full database and Empty database" do
+    it 'Full database and Empty database' do
       version = 1
 
-      p1 = make_project("Project 1")
-      p2 = make_project("Project 2")
+      p1 = make_project('Project 1')
+      p2 = make_project('Project 2')
 
       init_database(p1.db.spatialite_db)
       fill_database(p1.db.spatialite_db, version)
@@ -67,11 +65,11 @@ describe Database do
       is_database_same(backup_db1, p1.db.spatialite_db).should be_true
     end
 
-    it "Full database and Full database" do
+    it 'Full database and Full database' do
       version = 1
 
-      p1 = make_project("Project 1")
-      p2 = make_project("Project 2")
+      p1 = make_project('Project 1')
+      p2 = make_project('Project 2')
 
       fill_database(p1.db.spatialite_db, version)
       fill_database(p2.db.spatialite_db)
@@ -83,10 +81,10 @@ describe Database do
       is_database_merged(p1.db.spatialite_db, backup_db1, p2.db.spatialite_db).should be_true
     end
 
-    it "Does not insert duplicate records" do
+    it 'Does not insert duplicate records' do
       version = 1
       
-      p1 = make_project("Project 100")
+      p1 = make_project('Project 100')
       fill_database(p1.db.spatialite_db, version)
       
       backup_db1 = backup_database(p1.db.spatialite_db)
@@ -96,10 +94,10 @@ describe Database do
       is_database_same(backup_db1, p1.db.spatialite_db).should be_true
     end
 
-    it "Merge rows must have correct version number" do
-      p1 = make_project("Project 1")
-      p2 = make_project("Project 2")
-      p3 = make_project("Project 3")
+    it 'Merge rows must have correct version number' do
+      p1 = make_project('Project 1')
+      p2 = make_project('Project 2')
+      p3 = make_project('Project 3')
 
       init_database(p1.db.spatialite_db)
       fill_database(p2.db.spatialite_db, nil, 0)

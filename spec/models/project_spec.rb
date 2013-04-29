@@ -65,13 +65,13 @@ describe Project do
     begin
       project = make_project("Project 1")
       tmp_dir = Dir.mktmpdir
-      `tar zxf #{project.filepath} -C #{tmp_dir}`
-      entries = Dir.entries(tmp_dir + '/' + project.dir_name)
-      entries.include?(Project.db_name).should be_true
-      entries.include?(Project.ui_schema_name).should be_true
-      entries.include?(Project.ui_logic_name).should be_true
-      entries.include?(Project.project_settings_name).should be_true
-      entries.include?(Project.faims_properties_name).should be_true
+      `tar zxf #{project.get_path(:project_archive)} -C #{tmp_dir}`
+      entries = Dir.entries(tmp_dir + '/' + project.get_name(:project_dir))
+      entries.include?(project.get_name(:db)).should be_true
+      entries.include?(project.get_name(:ui_schema)).should be_true
+      entries.include?(project.get_name(:ui_logic)).should be_true
+      entries.include?(project.get_name(:settings)).should be_true
+      entries.include?(project.get_name(:properties)).should be_true
     rescue Exception => e
       raise e
     ensure
@@ -85,13 +85,13 @@ describe Project do
       project = make_project("Project 1")
       project.package_project_for
       tmp_dir = Dir.mktmpdir
-      `tar jxf #{project.package_path} -C #{tmp_dir}`
+      `tar jxf #{project.get_path(:package_archive)} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir+'/project')
-      entries.include?(Project.db_name).should be_true
-      entries.include?(Project.ui_schema_name).should be_true
-      entries.include?(Project.ui_logic_name).should be_true
-      entries.include?(Project.project_settings_name).should be_true
-      entries.include?(Project.faims_properties_name).should be_true
+      entries.include?(project.get_name(:db)).should be_true
+      entries.include?(project.get_name(:ui_schema)).should be_true
+      entries.include?(project.get_name(:ui_logic)).should be_true
+      entries.include?(project.get_name(:settings)).should be_true
+      entries.include?(project.get_name(:properties)).should be_true
       entries.include?('hash_sum').should be_true
     rescue Exception => e
       raise e
@@ -105,9 +105,9 @@ describe Project do
     begin
       project = make_project("Project 1")
       tmp_dir = Dir.mktmpdir
-      `tar zxf #{project.db_file_path} -C #{tmp_dir}`
+      `tar zxf #{project.get_path(:db_archive)} -C #{tmp_dir}`
       entries = Dir.entries(tmp_dir)
-      entries.include?(Project.db_name).should be_true
+      entries.include?(project.get_name(:db)).should be_true
     rescue Exception => e
       raise e
     ensure
@@ -117,10 +117,10 @@ describe Project do
 
   it "Creating project initialise directory" do
     project = make_project("Project 1")
-    File.exists?(project.dir_path).should be_true
-    File.exists?(project.temp_db_dir_path).should be_true
-    File.exists?(project.app_files_dir_path).should be_true
-    File.exists?(project.server_files_dir_path).should be_true
+    File.exists?(project.get_path(:project_dir)).should be_true
+    File.exists?(project.get_path(:tmp_dir)).should be_true
+    File.exists?(project.get_path(:server_files_dir)).should be_true
+    File.exists?(project.get_path(:app_files_dir)).should be_true
   end
 
 end

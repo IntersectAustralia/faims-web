@@ -42,7 +42,7 @@ Then /^I should see projects$/ do |table|
 end
 
 Then /^I have project files for "([^"]*)"$/ do |name|
-  dir_name = Project.find_by_name(name).dir_name
+  dir_name = Project.find_by_name(name).get_name(:project_dir)
   File.directory?(Rails.root.join('tmp/projects', dir_name)).should be_true
   File.exists?(Rails.root.join('tmp/projects', dir_name, 'db.sqlite3')).should be_true
   File.exists?(Rails.root.join('tmp/projects', dir_name, 'ui_schema.xml')).should be_true
@@ -65,8 +65,8 @@ end
 
 Then /^I should download file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.filename + "\""
-  file = File.open(project.filepath, 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.get_name(:project_archive) + "\""
+  file = File.open(project.get_path(:project_archive), 'r')
   page.source == file.read
 end
 
@@ -144,8 +144,8 @@ end
 
 Then /^I should download db file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + Project.db_file_name + "\""
-  file = File.open(project.db_file_path, 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.get_name(:db_archive) + "\""
+  file = File.open(project.get_path(:db_archive), 'r')
   page.source == file.read
 end
 
@@ -160,7 +160,7 @@ end
 And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   project = Project.find_by_name(name)
   (1..num.to_i).each do |i|
-    SpatialiteDB.new(project.db_path).execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
+    SpatialiteDB.new(project.get_path(:db)).execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
   end
 end
 
@@ -298,7 +298,7 @@ def check_archive_download_files(name, info, project_files, exclude_files = nil)
 
   # check if files all exist
   project = Project.find_by_name(name)
-  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  tmp_dir = project.get_path(:project_dir) + '/' + SecureRandom.uuid
 
   download_list = get_archive_list(tmp_dir, file)
 
@@ -328,8 +328,8 @@ end
 
 Then /^I should download project package file for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.package_name + "\""
-  file = File.open(project.package_path, 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.get_name(:package_archive) + "\""
+  file = File.open(project.get_path(:package_archive), 'r')
   page.source == file.read
 end
 
@@ -365,7 +365,7 @@ Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
 
   upload_file = File.open(filepath, 'r')
 
-  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  tmp_dir = project.get_path(:project_dir) + '/' + SecureRandom.uuid
   upload_list = get_archive_list(tmp_dir, upload_file)
 
   # check if uploaded files exist on server file list
@@ -379,7 +379,7 @@ Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
 
   upload_file = File.open(filepath, 'r')
 
-  tmp_dir = project.dir_path + '/' + SecureRandom.uuid
+  tmp_dir = project.get_path(:project_dir) + '/' + SecureRandom.uuid
   upload_list = get_archive_list(tmp_dir, upload_file)
 
   # check if uploaded files exist on app file list
@@ -400,11 +400,11 @@ def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
 
-    `tar xfz #{project.filepath} -C #{tmp_dir}`
+    `tar xfz #{project.get_path(:project_archive)} -C #{tmp_dir}`
 
     tmp_project_dir = tmp_dir + '/' + project.key
 
-    compare_dir(project.dir_path + '/' + Project.app_files_dir_name, tmp_project_dir + '/' + Project.app_files_dir_name)
+    compare_dir(project.get_path(:app_files_dir), tmp_project_dir + '/' + project.get_name(:app_files_dir))
   rescue Exception => e
     raise e
   ensure

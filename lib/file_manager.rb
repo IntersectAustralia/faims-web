@@ -14,7 +14,7 @@ class FileManager
 
 	def add_file(full_file_path, relative_base_dir)
 		f = { file: full_file_path, dir:relative_base_dir }
-		@files.push() unless @files.include? f
+		@files.push(f) unless @files.include? f
 	end
 
 	def dirty?

@@ -1,3 +1,5 @@
+require Rails.root.join('app/models/projects/database')
+
 class Project < ActiveRecord::Base
   include XSDValidator
   include Archive::Tar
@@ -14,15 +16,47 @@ class Project < ActiveRecord::Base
 
   default_scope order: 'name COLLATE NOCASE'
 
+  after_initialize :init_file_map
+
   after_create :init_project
 
+  def init_file_map
+    projects_dir = Project.projects_path
+    uploads_dir = Project.uploads_path
+    project_dir = projects_dir + "/#{key}/"
+    @file_map = {
+        projects_dir: { name: 'projects', path: projects_dir },
+        uploads_dir: { name: 'uploads', path: uploads_dir },
+        project_dir: { name: key, path: project_dir },
+        data_schema: { name: 'data_schema.xml', path: project_dir + 'data_schema.xml' },
+        ui_schema: { name: 'ui_schema.xml', path: project_dir + 'ui_schema.xml' },
+        ui_logic: { name: 'ui_logic.bsh', path: project_dir + 'ui_logic.bsh' },
+        db: { name: 'db.sqlite3', path: project_dir + 'db.sqlite3' },
+        settings: { name: 'project.settings', path: project_dir + 'project.settings' },
+        properties: { name: 'faims.properties', path: project_dir + 'faims.properties' },
+        project_properties: { name: "faims_#{name}.properties", path: project_dir + "faims_#{name}.properties" },
+        files_dir: { name: 'files', path: project_dir + 'files/' },
+        server_files_dir: { name: 'server', path: project_dir + 'files/server/' },
+        app_files_dir: { name: 'app', path: project_dir + 'files/app/' },
+        tmp_dir: { name: 'tmp', path: project_dir + 'tmp/' },
+        package_archive: { name: "#{name}.tar.bz2", path: project_dir + "tmp/#{name}.tar.bz2" },
+        project_archive: { name: 'project.tar.gz', path: project_dir + 'tmp/project.tar.gz' },
+        db_archive: { name: 'db.tar.gz', path: project_dir + 'tmp/db.tar.gz' },
+    }
+  end
+
   def init_project
-    FileUtils.mkdir_p Project.projects_path unless File.directory? Project.projects_path
-    FileUtils.mkdir_p Project.uploads_path unless File.directory? Project.uploads_path
-    FileUtils.mkdir_p dir_path unless File.directory? dir_path
-    FileUtils.mkdir_p temp_db_dir_path unless File.directory? temp_db_dir_path
-    FileUtils.mkdir_p app_files_dir_path unless File.directory? app_files_dir_path
-    FileUtils.mkdir_p server_files_dir_path unless File.directory? server_files_dir_path
+    FileUtils.mkdir_p @file_map[:projects_dir][:path] unless File.directory? @file_map[:projects_dir][:path]
+    FileUtils.mkdir_p @file_map[:uploads_dir][:path] unless File.directory? @file_map[:uploads_dir][:path]
+    FileUtils.mkdir_p @file_map[:project_dir][:path] unless File.directory? @file_map[:project_dir][:path]
+    FileUtils.mkdir_p @file_map[:tmp_dir][:path] unless File.directory? @file_map[:tmp_dir][:path]
+    FileUtils.mkdir_p @file_map[:server_files_dir][:path] unless File.directory? @file_map[:server_files_dir][:path]
+    FileUtils.mkdir_p @file_map[:app_files_dir][:path] unless File.directory? @file_map[:app_files_dir][:path]
+  end
+
+  def name
+    n = read_attribute(:name)
+    n.gsub(/\s+/, '_') if n
   end
 
   def name=(value)
@@ -39,85 +73,16 @@ class Project < ActiveRecord::Base
     Database.new(self)
   end
 
-  def dir_name
-    key
+  def get_name(symbol)
+    @file_map[symbol][:name]
   end
 
-  def dir_path
-    Project.projects_path + '/' + dir_name
-  end
-
-  def filepath
-    dir_path + '/' + Project.filename
-  end
-
-  def package_path
-    dir_path + '/' + package_name
-  end
-
-  def db_file_path
-    dir_path + '/' + Project.db_file_name
-  end
-
-  def data_schema_path
-    dir_path + '/' + Project.data_schema_name
-  end
-
-  def ui_logic_path
-    dir_path + '/' + Project.ui_logic_name
-  end
-
-  def ui_schema_path
-    dir_path + '/' + Project.ui_schema_name
-  end
-
-  def db_path
-    dir_path + '/' + Project.db_name
-  end
-
-  def faims_properties_path
-    dir_path + '/' + Project.faims_properties_name
-  end
-
-  def faims_project_properties_name
-    'faims_' + name.gsub(/\s+/, '_') + '.properties'
-  end
-
-  def faims_project_properties_path
-    dir_path + '/' + faims_project_properties_name
-  end
-
-  def project_settings_path
-    dir_path + '/' + Project.project_settings_name
-  end
-
-  def server_files_dir_path
-    dir_path + '/' + Project.server_files_dir_name
-  end
-
-  def app_files_dir_path
-    dir_path + '/' + Project.app_files_dir_name
+  def get_path(symbol)
+    @file_map[symbol][:path].to_s
   end
 
   def has_attached_files
-    return false unless File.exist?(server_files_dir_path) or File.exist?(app_files_dir_path)
     true
-  end
-
-  def project_setting
-    File.read(dir_path + '/' + Project.project_settings_name).as_json
-  end
-
-  def temp_db_version_file_path(version)
-    temp_db_dir_path + '/' + Project.db_version_file_name(version, db.current_version)
-  end
-
-  def temp_project_file_path
-    dir_path + '/' + package_name
-  end
-
-  def temp_db_dir_path
-    dir_path + '/tmp'
   end
 
   def with_lock
@@ -135,9 +100,9 @@ class Project < ActiveRecord::Base
     update_archives
 
     info = {
-        :file => Project.filename,
-        :size => File.size(filepath),
-        :md5 => MD5Checksum.compute_checksum(filepath)
+        :file => get_name(:project_archive),
+        :size => File.size(get_path(:project_archive)),
+        :md5 => MD5Checksum.compute_checksum(get_path(:project_archive))
     }
     v = db.current_version.to_i
     info = info.merge({ :version => v.to_s }) if v > 0
@@ -148,21 +113,33 @@ class Project < ActiveRecord::Base
     update_archives
 
     info = {
-        :file => Project.db_file_name,
-        :size => File.size(db_file_path),
-        :md5 => MD5Checksum.compute_checksum(db_file_path)
+        :file => get_name(:db_archive),
+        :size => File.size(get_path(:db_archive)),
+        :md5 => MD5Checksum.compute_checksum(get_path(:db_archive))
     }
     v = db.current_version.to_i
     info = info.merge({ :version => v.to_s }) if v > 0
     info
   end
 
+  def temp_db_version_file_path(to_version)
+    db_version_file_path(to_version, db.current_version)
+  end
+
+  def db_version_file_name(from_version, to_version)
+    "db_v#{from_version}-#{to_version}.tar.gz"
+  end
+
+  def db_version_file_path(from_version, to_version)
+    get_path(:tmp_dir) + db_version_file_name(from_version, to_version)
+  end
+
   def db_version_archive_info(version_num)
       # create temporary archive of database
-      temp_path = temp_db_version_file_path(version_num)
+      temp_path = db_version_file_path(version_num, db.current_version)
       archive_database_version_for(version_num, temp_path) unless File.exists? temp_path
       info = {
-        :file => Project.db_version_file_name(version_num, db.current_version),
+        :file => db_version_file_name(version_num, db.current_version),
         :size => File.size(temp_path),
         :md5 => MD5Checksum.compute_checksum(temp_path)
       }
@@ -172,26 +149,48 @@ class Project < ActiveRecord::Base
   end
 
   def update_archives
-    update_archives_for
+    if is_dirty
+      begin
+        archive_project_for
+        archive_database_for
+      rescue Exception => e
+        raise e
+      ensure
+        clean
+      end
+    end
+  end
+
+  def update_settings(params)
+    File.open(get_path(:settings), 'w') do |file|
+      file.write({:name => params[:project][:name],
+                  :key => key,
+                  :season => params[:project][:season],
+                  :description => params[:project][:description],
+                  :permit_no => params[:project][:permit_no],
+                  :permit_holder => params[:project][:permit_holder],
+                  :contact_address => params[:project][:contact_address],
+                  :participant => params[:project][:participant]
+                 }.to_json)
+    end
   end
 
   def create_project_from(tmp_dir)
     begin      
       # copy files from temp directory to projects directory
-      FileHelper.copy_dir(tmp_dir, dir_path)
+      FileHelper.copy_dir(tmp_dir, get_path(:project_dir))
 
       # generate database
-      Database.generate_database(dir_path + '/' + Project.db_name, dir_path + '/' + Project.data_schema_name)
+      Database.generate_database(get_path(:db), get_path(:data_schema))
 
       # create default faims properties
-      FileHelper.touch_file(dir_path + '/' + Project.faims_properties_name)
+      FileHelper.touch_file(get_path(:properties))
 
       # generate archive
       dirty
       update_archives
     rescue Exception => e
-      puts "Error creating project"
-      FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
+      FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
       raise e
     end
   end
@@ -199,14 +198,13 @@ class Project < ActiveRecord::Base
   def create_project_from_compressed_file(tmp_dir)
     begin
       # copy files from temp directory to projects directory
-      FileHelper.copy_dir(tmp_dir, dir_path, ['hash_sum'])
+      FileHelper.copy_dir(tmp_dir, get_path(:project_dir), ['hash_sum'])
 
       # generate archive
       dirty
       update_archives
     rescue Exception => e
-      puts "Error creating project"
-      FileUtils.rm_rf dir_path if File.directory? dir_path # cleanup directory
+      FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
       raise e
     end
   end
@@ -219,7 +217,7 @@ class Project < ActiveRecord::Base
 
   def store_database(file, user)
     begin
-      tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+      tmp_dir = Dir.mktmpdir(get_path(:project_dir)) + '/'
 
       TarHelper.untar('xfz', file.path, tmp_dir)
 
@@ -233,7 +231,6 @@ class Project < ActiveRecord::Base
       FileUtils.mv(unarchived_file, stored_file)
 
     rescue Exception => e
-      puts "Error storing database"
       raise e
 
       # TODO remove added version in database if created
@@ -246,43 +243,48 @@ class Project < ActiveRecord::Base
 
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
-    return "must be xml file" if schema.content_type != "text/xml"
+    return 'must be xml file' if schema.content_type != 'text/xml'
     begin
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
     rescue => e
       result = nil
     end
-    return "invalid xml" if result.nil? || !result.empty?
+    return 'invalid xml' if result.nil? || !result.empty?
     return nil
   end
 
   def self.validate_ui_schema(schema)
     return "can't be blank" if schema.blank?
-    return "must be xml file" if schema.content_type != "text/xml"
+    return 'must be xml file' if schema.content_type != 'text/xml'
     begin
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
     rescue => e
       result = nil
     end
-    return "invalid xml" if result.nil? || !result.empty?
+    return 'invalid xml' if result.nil? || !result.empty?
     return nil
   end
 
-  def self.validate_arch16n(arch16n,projectname)
-    return "invalid file name" if !(arch16n.original_filename).eql?("faims_"+ projectname.gsub(/\s/, '_')+".properties")
+  def self.validate_ui_logic(schema)
+    return "can't be blank" if schema.blank?
+  end
+
+  def self.validate_arch16n(arch16n, project_name)
+    return nil if arch16n.blank?
+    return 'invalid file name' if !(arch16n.original_filename).eql?("faims_#{project_name.gsub(/\s+/, '_')}.properties")
     begin
       file = arch16n.tempfile
       File.open(file,'r').read.each_line do |line|
         line.strip!
-        return "invalid properties file" if line[0] == ?=
+        return 'invalid properties file' if line[0] == ?=
         i = line.index('=')
-        return "invalid properties file" if !i
-        return "invalid properties file" if line[i + 1..-1].strip.blank?
+        return 'invalid properties file' if !i
+        return 'invalid properties file' if line[i + 1..-1].strip.blank?
       end
     rescue
-      return "invalid properties file"
+      return 'invalid properties file'
     end
     return nil
   end
@@ -296,26 +298,26 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_list(exclude_files = nil)
-    return [] unless File.directory? server_files_dir_path
-    file_list = FileHelper.get_file_list(server_files_dir_path)
+    return [] unless File.directory? get_path(:server_files_dir)
+    file_list = FileHelper.get_file_list(get_path(:server_files_dir))
     return file_list unless exclude_files
     file_list.select { |f| !exclude_files.include? f }
   end
 
   def app_file_list(exclude_files = nil)
-    return [] unless File.directory? app_files_dir_path
-    file_list = FileHelper.get_file_list(app_files_dir_path)
+    return [] unless File.directory? get_path(:app_files_dir)
+    file_list = FileHelper.get_file_list(get_path(:app_files_dir))
     return file_list unless exclude_files
     file_list.select { |f| !exclude_files.include? f }
   end
 
   def add_server_file(file, path)
-    full_path = make_path(server_files_dir_path, path)
+    full_path = make_path(get_path(:server_files_dir), path)
     FileUtils.cp(file.path, full_path)
   end
 
   def add_app_file(file, path)
-    full_path = make_path(app_files_dir_path, path)
+    full_path = make_path(get_path(:app_files_dir), path)
     FileUtils.cp(file.path, full_path)
   end
 
@@ -327,18 +329,16 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_archive_info(exclude_files = nil)
-    file_archive_info(server_files_dir_path, server_file_list(exclude_files))
+    file_archive_info(get_path(:server_files_dir), server_file_list(exclude_files))
   end
 
   def app_file_archive_info(exclude_files = nil)
-    file_archive_info(app_files_dir_path, app_file_list(exclude_files))
+    file_archive_info(get_path(:app_files_dir), app_file_list(exclude_files))
   end
 
   def file_archive_info(dir, files)
     tmp_dir = Dir.mktmpdir
     temp_file = tmp_dir + '/archive.tar.gz'
-
-    files_str = files.map { |f| "#{f} " }.join
 
     TarHelper.tar('zcf', temp_file, files, dir)
 
@@ -350,57 +350,16 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_upload(file)
-    TarHelper.untar('xfz', file.path, server_files_dir_path)
+    TarHelper.untar('xfz', file.path, get_path(:server_files_dir))
   end
 
   def app_file_upload(file)
-    TarHelper.untar('xfz', file.path, app_files_dir_path)
+    TarHelper.untar('xfz', file.path, get_path(:app_files_dir))
 
     dirty
   end
 
   # static
-
-  def self.filename
-    'project.tar.gz'
-  end
-
-  def package_name
-    settings = JSON.parse(File.read(Project.projects_path + '/' + key + '/' + Project.project_settings_name))
-    settings['name'].gsub(/\s+/, '_') + '.tar.bz2'
-  end
-
-  def self.db_file_name
-    'db.tar.gz'
-  end
-
-  def self.data_schema_name
-    'data_schema.xml'
-  end
-
-  def self.db_name
-    'db.sqlite3'
-  end
-
-  def self.ui_schema_name
-    'ui_schema.xml'
-  end
-
-  def self.ui_logic_name
-    'ui_logic.bsh'
-  end
-
-  def self.faims_properties_name
-    'faims.properties'
-  end
-
-  def self.project_settings_name
-    'project.settings'
-  end
-
-  def self.db_version_file_name(fromVersion, toVersion)
-    'db_v' + fromVersion + '-' + toVersion + '.tar.gz'
-  end
 
   def self.projects_path
     return Rails.root.to_s + '/tmp/projects' if Rails.env == 'test'
@@ -410,18 +369,6 @@ class Project < ActiveRecord::Base
   def self.uploads_path
     return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
     Rails.application.config.server_uploads_directory
-  end
-
-  def self.sync_files_dir_name
-    'files'
-  end
-
-  def self.server_files_dir_name
-    'files/server'
-  end
-
-  def self.app_files_dir_name
-    'files/app'
   end
 
   def self.lock_file_name
@@ -437,7 +384,7 @@ class Project < ActiveRecord::Base
   end
 
   def lock_file
-    dir_path + '/' + Project.lock_file_name
+    get_path(:project_dir) + '/' + Project.lock_file_name
   end
 
   def try_lock_project
@@ -457,7 +404,7 @@ class Project < ActiveRecord::Base
   end
 
   def dirty_file
-    dir_path + '/' + Project.dirty_file_name
+    get_path(:project_dir) + '/' + Project.dirty_file_name
   end
 
   def dirty
@@ -479,11 +426,10 @@ class Project < ActiveRecord::Base
 
         hash_sum = {}
 
-        FileUtils.cp_r(Dir[dir_path + '/*'],project_dir)
+        FileUtils.cp_r(Dir[get_path(:project_dir) + '/*'],project_dir)
 
-        Dir.glob(dir_path + '/**/*') do |file|
+        Dir.glob(get_path(:project_dir) + '/**/*') do |file|
           next if File.basename(file) == '.' or File.basename(file) == '..'
-          next if File.basename(file) == Project.filename or File.basename(file) == Project.db_file_name
           hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
         end
 
@@ -491,11 +437,8 @@ class Project < ActiveRecord::Base
           file.write(hash_sum.to_json)
         end
 
-        TarHelper.tar('jcf', package_path, File.basename(project_dir), tmp_dir,
-          [package_name,
-           Project.filename,
-           Project.db_file_name,
-           Project.lock_file_name,
+        TarHelper.tar('jcf', get_path(:package_archive), File.basename(project_dir), tmp_dir,
+          [Project.lock_file_name,
            Project.dirty_file_name].select { |f| File.exists? project_dir + f })
       rescue Exception => e
         raise e
@@ -519,44 +462,30 @@ class Project < ActiveRecord::Base
     true
   end
 
-  def update_archives_for
-    if is_dirty
-      begin
-        archive_project_for
-        archive_database_for
-      rescue Exception => e
-        raise e
-      ensure
-        clean
-      end
-    end
-  end
-
   def archive_project_for
     with_lock do
       begin
-        tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+        tmp_dir = Dir.mktmpdir(get_path(:project_dir)) + '/'
 
         # create project directory to archive
-        project_dir = tmp_dir + dir_name + '/'
+        project_dir = tmp_dir + get_name(:project_dir) + '/'
         Dir.mkdir(project_dir)
 
         # create app database
-        db.create_app_database(project_dir + Project.db_name)
+        db.create_app_database(project_dir + get_name(:db))
 
-        files = [Project.ui_schema_name, Project.ui_logic_name, Project.project_settings_name,
-                 Project.faims_properties_name, faims_project_properties_name]
+        files = [get_name(:ui_schema), get_name(:ui_logic), get_name(:settings),
+                 get_name(:properties), get_name(:project_properties)]
 
         # copy files to tmp directory
         files.each do |file|
-          FileUtils.cp(dir_path + '/' + file, project_dir + file) if File.exists? dir_path + '/' + file
+          FileUtils.cp(get_path(:project_dir) + '/' + file, project_dir + file) if File.exists? get_path(:project_dir) + '/' + file
         end
 
         # copy server/app files to tmp directory
-        FileUtils.mkdir_p project_dir + Project.sync_files_dir_name
-        FileUtils.cp_r(app_files_dir_path, project_dir + Project.app_files_dir_name) if File.directory? app_files_dir_path
+        FileUtils.cp_r(get_path(:app_files_dir), project_dir + get_name(:app_files_dir)) if File.directory? get_path(:app_files_dir)
 
-        TarHelper.tar('zcf', filepath, dir_name, tmp_dir)
+        TarHelper.tar('zcf', get_path(:project_archive), get_name(:project_dir), tmp_dir)
       rescue Exception => e
         raise e
       ensure
@@ -569,12 +498,12 @@ class Project < ActiveRecord::Base
   def archive_database_for
     with_lock do
       begin
-        tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+        tmp_dir = Dir.mktmpdir(get_path(:project_dir)) + '/'
 
         # create app database
-        db.create_app_database(tmp_dir + Project.db_name)
+        db.create_app_database(tmp_dir + get_name(:db))
 
-        TarHelper.tar('zcf', db_file_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
+        TarHelper.tar('zcf', get_path(:db_archive), get_name(:db), tmp_dir)
       rescue Exception => e
         raise e
       ensure
@@ -587,14 +516,12 @@ class Project < ActiveRecord::Base
   def archive_database_version_for(version, temp_path)
     with_lock do
       begin
-        tmp_dir = Dir.mktmpdir(dir_path + '/') + '/'
+        tmp_dir = Dir.mktmpdir(get_path(:project_dir)) + '/'
 
         # create app database
-        db.create_app_database_from_version(tmp_dir + Project.db_name, version)
+        db.create_app_database_from_version(tmp_dir + get_name(:db), version)
 
-        TarHelper.tar('zcf', temp_path, File.basename(tmp_dir + Project.db_name), tmp_dir)
-
-        db_file_path
+        TarHelper.tar('zcf', temp_path, get_name(:db), tmp_dir)
       rescue Exception => e
         raise e
       ensure
@@ -603,7 +530,5 @@ class Project < ActiveRecord::Base
       end
     end
   end
-
-  private
 
 end

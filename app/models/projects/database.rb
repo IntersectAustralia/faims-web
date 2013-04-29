@@ -1,9 +1,11 @@
+require Rails.root.join('lib/spatialite_db')
+require Rails.root.join('app/models/projects/web_query')
+
 class Database
-  require Rails.root.join('lib/spatialite_db')
 
   def initialize(project)
     @project = project
-    @db = SpatialiteDB.new(@project.db_path)
+    @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
   def load_arch_entity(type, limit, offset)

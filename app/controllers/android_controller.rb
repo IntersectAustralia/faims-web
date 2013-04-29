@@ -21,7 +21,7 @@ class AndroidController < ApplicationController
 
   def download
     project = Project.find_by_key(params[:key])
-    send_file project.filepath
+    send_file project.get_path(:project_archive)
   end
 
   def db_archive
@@ -39,7 +39,7 @@ class AndroidController < ApplicationController
     project = Project.find_by_key(params[:key])
 
     unless project.validate_version(params[:version])
-      send_file project.db_file_path
+      send_file project.get_path(:db_archive)
     else
       project.db_version_archive_info(params[:version])
       temp_db_file = project.temp_db_version_file_path(params[:version])

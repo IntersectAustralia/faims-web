@@ -26,6 +26,8 @@ class ProjectsController < ApplicationController
         @project.save
 
         @project.create_project_from(session[:tmpdir])
+        @project.update_settings(params)
+
         FileUtils.remove_entry_secure session[:tmpdir]
       end
 
@@ -143,9 +145,9 @@ class ProjectsController < ApplicationController
     @project.db.delete_arch_entity(uuid)
 
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
-      redirect_to(show_arch_ent_records_path(@project) + "?query=" + session[:query] + "&offset=0")
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
     end
 
   end
@@ -245,9 +247,9 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     @project.db.delete_relationship(relationshipid)
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
-      redirect_to(show_rel_records_path(@project) + "?query=" + session[:query] + "&offset=0")
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
     end
   end
 
@@ -341,7 +343,7 @@ class ProjectsController < ApplicationController
     end
     deleted_id = params[:deleted_id]
     @project.db.delete_arch_entity(deleted_id)
-    redirect_to(list_typed_arch_ent_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+    redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
   end
 
   def compare_rel
@@ -360,12 +362,12 @@ class ProjectsController < ApplicationController
     end
     deleted_id = params[:deleted_id]
     @project.db.delete_relationship(deleted_id)
-    redirect_to(list_typed_rel_records_path(@project) + "?type=" + session[:type] + "&offset=0")
+    redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
   end
 
   def edit_project_setting
     @project = Project.find(params[:id])
-    @project_setting = JSON.parse(@project.project_setting)
+    @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
   end
 
   def update_project_setting
@@ -374,21 +376,12 @@ class ProjectsController < ApplicationController
       render 'show'
     end
     if @project.update_attributes(:name => params[:project][:name])
-        File.open(@project.dir_path + "/project.settings", 'w') do |file|
-        file.write({:name => params[:project][:name], key:@project.key,
-                    :season => params[:project][:season],
-                    :description => params[:project][:description],
-                    :permit_no => params[:project][:permit_no],
-                    :permit_holder => params[:project][:permit_holder],
-                    :contact_address => params[:project][:contact_address],
-                    :participant => params[:project][:participant]
-                   }.to_json)
-      end
-      session[:name] = ""
-      flash[:notice] = "Static data updated"
+      @project.update_settings(params)
+      session[:name] = ''
+      flash[:notice] = 'Static data updated'
       redirect_to :project
     else
-      @project_setting = JSON.parse(@project.project_setting)
+      @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
       render 'edit_project_setting'
     end
   end
@@ -401,9 +394,9 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     if !@project.is_locked
       begin
-        session[:job] = @project.delay.package_project_for
+        job = @project.delay.package_project_for
+        session[:job] = job.id
       rescue Exception => e
-        puts "Error archiving project"
         raise e
       end
     end
@@ -415,7 +408,7 @@ class ProjectsController < ApplicationController
 
   def check_archive_status
     @project = Project.find(params[:id])
-    jobid = session[:job].id
+    jobid = session[:job]
     if !Delayed::Job.exists?(jobid)
       session[:job] = nil
     end
@@ -428,7 +421,7 @@ class ProjectsController < ApplicationController
   def download_project
     @project = Project.find(params[:id])
 
-    send_file @project.temp_project_file_path, :type => "application/bzip2", :x_sendfile => true, :stream => false
+    send_file @project.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
   end
 
   def upload_project
@@ -444,9 +437,9 @@ class ProjectsController < ApplicationController
           flash.now[:error] = 'Unsupported format of file, please upload the correct file'
           render 'upload_project'
         else
-          tmp_dir = Dir.mktmpdir(Project.projects_path + "/") + "/";
+          tmp_dir = Dir.mktmpdir(Project.projects_path + '/') + '/'
           `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
-          project_settings = JSON.parse(File.read(tmp_dir + 'project/' + Project.project_settings_name).as_json)
+          project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
           if !Project.checksum_uploaded_file(tmp_dir + 'project/')
             @project = Project.new
             flash.now[:error] = 'Wrong hash sum for the project'
@@ -502,109 +495,81 @@ class ProjectsController < ApplicationController
     if params[:project]
       @project = Project.new(:name => params[:project][:name], :key => SecureRandom.uuid) if params[:project]
       valid = @project.valid?
-      tmpdir = session[:tmpdir]
-      File.open(tmpdir + "/project.settings", 'w') do |file|
-        file.write({:name => @project.name, key:@project.key,
-                    :season => params[:project][:season],
-                    :description => params[:project][:description],
-                    :permit_no => params[:project][:permit_no],
-                    :permit_holder => params[:project][:permit_holder],
-                    :contact_address => params[:project][:contact_address],
-                    :participant => params[:project][:participant]
-                   }.to_json)
-      end
     end
 
     # check if data schema is valid
     if !session[:data_schema]
-      error = if params[:project].nil?
-                "can't be blank."
-              else
-                Project.validate_data_schema(params[:project][:data_schema])
-              end
+      error = Project.validate_data_schema(params[:project][:data_schema])
       if error
         @project.errors.add(:data_schema, error)
         valid = false
       else
-        create_temp_file("data_schema.xml", params[:project][:data_schema])
+        create_temp_file(@project.get_name(:data_schema), params[:project][:data_schema])
         session[:data_schema] = true
       end
     end
 
     # check if ui schema is valid
     if !session[:ui_schema]
-      error = if params[:project].nil?
-                "can't be blank."
-              else
-                Project.validate_ui_schema(params[:project][:ui_schema])
-              end
+      error = Project.validate_ui_schema(params[:project][:ui_schema])
       if error
         @project.errors.add(:ui_schema, error)
         valid = false
       else
-        create_temp_file("ui_schema.xml", params[:project][:ui_schema])
+        create_temp_file(@project.get_name(:ui_schema), params[:project][:ui_schema])
         session[:ui_schema] = true
       end
     end
 
     # check if ui logic is valid
     if !session[:ui_logic]
-      error = nil
-      if params[:project].nil? ||
-          params[:project][:ui_logic].nil?
-        error = "can't be blank"
-      end
-
-      # TODO: what is the content type of the file? should it be checked?
-
+      error = Project.validate_ui_logic(params[:project][:ui_logic])
       if error
         @project.errors.add(:ui_logic, error)
         valid = false
       else
-        create_temp_file("ui_logic.bsh", params[:project][:ui_logic])
+        create_temp_file(@project.get_name(:ui_logic), params[:project][:ui_logic])
         session[:ui_logic] = true
       end
     end
 
     # check if arch16n is valid
     if !session[:arch16n]
-      error = if !params[:project][:arch16n].nil?
-                Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
-              end
-
+      error = Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
       if error
         @project.errors.add(:arch16n, error)
         valid = false
       else
         if !params[:project][:arch16n].nil?
-          create_temp_file("faims_"+params[:project][:name].gsub(/\s+/, '_')+".properties", params[:project][:arch16n])
+          create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
           session[:arch16n] = true
         end
       end
     end
-    if !valid
+
+    if valid
+      session[:season] = ''
+      session[:description] = ''
+      session[:permit_no] = ''
+      session[:permit_holder] = ''
+      session[:contact_address] = ''
+      session[:participant] = ''
+    else
       session[:season] = params[:project][:season]
       session[:description] = params[:project][:description]
       session[:permit_no] = params[:project][:permit_no]
       session[:permit_holder] = params[:project][:permit_holder]
       session[:contact_address] = params[:project][:contact_address]
       session[:participant] = params[:project][:participant]
-    else
-      session[:season] = ""
-      session[:description] = ""
-      session[:permit_no] = ""
-      session[:permit_holder] = ""
-      session[:contact_address] = ""
-      session[:participant] = ""
     end
+
     valid
   end
 
   def create_temp_file(filename, upload)
     tmpdir = session[:tmpdir]
-    #logger.debug tmpdir + "/" + filename
     File.open(upload.tempfile, 'r') do |upload_file|
-      File.open(tmpdir + "/" + filename, 'w') do |temp_file|
+      File.open(tmpdir + '/' + filename, 'w') do |temp_file|
         temp_file.write(upload_file.read)
       end
     end
