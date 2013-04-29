@@ -1,3 +1,4 @@
+- get_files(@attributes,8,6)
 %h1= @project.name + " - Archaeological Entity"
 = link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn', :id => 'delete_record'
 - if session[:show].eql?('show_rel_members')
@@ -43,3 +44,14 @@
             .form-actions
               = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
               = link_to "cancel", edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
+- if @files.length > 0
+  .attached-files
+    %h2 Attached Files
+    %ul
+      - @files.each do |path,name|
+        %li
+          %form{:method => 'GET', :action => download_attached_file_path(@project), :id => 'download_attached_file'}
+            %input{:type => 'hidden', :name => 'path', :value => path}
+            %input{:type => 'hidden', :name => 'name', :value => name}
+            %a{:href => '#'}
+              = name

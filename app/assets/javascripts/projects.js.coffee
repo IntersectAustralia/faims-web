@@ -170,12 +170,18 @@ delete_records = ->
   )
   return
 
-browse_attached_file = ->
-  root = $('#file_root').val();
-  $('#file_root').remove()
-  if (root != undefined)
-    $('#fileTree').fileTree({ root: root , script: '/jqueryfiletree/content' }, ->
-      return false)
+download_attached_file = ->
+  $('form[id*=download_attached_file]').each(
+    ->
+      self = this
+      $a_href = $(this).find('a')
+      $a_href.click(
+        ->
+          $(self).submit()
+          return false
+      )
+      return
+  )
   return
 
 $(document).ready(
@@ -189,6 +195,6 @@ $(document).ready(
     add_arch_ent_member()
     delete_arch_ent_members()
     delete_records()
-    browse_attached_file()
+    download_attached_file()
     return
 )
