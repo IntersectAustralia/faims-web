@@ -96,7 +96,7 @@ Feature: Manage projects
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I have project files for "Project 1"
+    And I have project files for "Simple Project"
 
   @javascript
   Scenario: Upload Project if project already exists should fail

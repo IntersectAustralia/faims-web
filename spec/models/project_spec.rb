@@ -61,13 +61,12 @@ describe Project do
     end
   end
 
-  it 'Archiving project' do
+  it 'Archiving settings' do
     begin
       project = make_project('Project 1')
       tmp_dir = Dir.mktmpdir
-      `tar zxf #{project.get_path(:project_archive)} -C #{tmp_dir}`
-      entries = Dir.entries(tmp_dir + '/' + project.get_name(:project_dir))
-      entries.include?(project.get_name(:db)).should be_true
+      `tar zxf #{project.get_path(:settings_archive)} -C #{tmp_dir}`
+      entries = FileHelper.get_file_list(tmp_dir)
       entries.include?(project.get_name(:ui_schema)).should be_true
       entries.include?(project.get_name(:ui_logic)).should be_true
       entries.include?(project.get_name(:settings)).should be_true
@@ -80,25 +79,67 @@ describe Project do
 
   end
 
-  it 'Packaging project' do
+  it 'Archiving settings with project properties' do
     begin
       project = make_project('Project 1')
-      project.package_project
+      FileHelper.touch_file(project.get_path(:project_properties))
+      project.generate_archives
       tmp_dir = Dir.mktmpdir
-      `tar jxf #{project.get_path(:package_archive)} -C #{tmp_dir}`
-      entries = Dir.entries(tmp_dir+'/project')
-      entries.include?(project.get_name(:db)).should be_true
+      `tar zxf #{project.get_path(:settings_archive)} -C #{tmp_dir}`
+      entries = FileHelper.get_file_list(tmp_dir)
       entries.include?(project.get_name(:ui_schema)).should be_true
       entries.include?(project.get_name(:ui_logic)).should be_true
       entries.include?(project.get_name(:settings)).should be_true
       entries.include?(project.get_name(:properties)).should be_true
-      entries.include?('hash_sum').should be_true
+      entries.include?(project.get_name(:project_properties)).should be_true
     rescue Exception => e
       raise e
     ensure
       FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
     end
 
+  end
+
+  it 'Archiving data directory' do
+    begin
+      project = make_project('Project 1')
+      FileHelper.touch_file(project.get_path(:data_files_dir) + 'test1')
+      FileHelper.touch_file(project.get_path(:data_files_dir) + 'test2')
+      FileUtils.mkdir_p project.get_path(:data_files_dir) + 'dir1/dir2'
+      FileHelper.touch_file(project.get_path(:data_files_dir) + 'dir1/dir2/test3')
+      project.generate_archives
+      tmp_dir = Dir.mktmpdir
+      `tar zxf #{project.get_path(:data_files_archive)} -C #{tmp_dir}`
+      entries = FileHelper.get_file_list(tmp_dir)
+      entries.include?('test1').should be_true
+      entries.include?('test2').should be_true
+      entries.include?('dir1/dir2/test3').should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
+  end
+
+  it 'Archiving data directory' do
+    begin
+      project = make_project('Project 1')
+      FileHelper.touch_file(project.get_path(:app_files_dir) + 'test1')
+      FileHelper.touch_file(project.get_path(:app_files_dir) + 'test2')
+      FileUtils.mkdir_p project.get_path(:app_files_dir) + 'dir1/dir2'
+      FileHelper.touch_file(project.get_path(:app_files_dir) + 'dir1/dir2/test3')
+      project.generate_archives
+      tmp_dir = Dir.mktmpdir
+      `tar zxf #{project.get_path(:app_files_archive)} -C #{tmp_dir}`
+      entries = FileHelper.get_file_list(tmp_dir)
+      entries.include?('test1').should be_true
+      entries.include?('test2').should be_true
+      entries.include?('dir1/dir2/test3').should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
   end
 
   it 'Archiving database' do
@@ -106,13 +147,47 @@ describe Project do
       project = make_project('Project 1')
       tmp_dir = Dir.mktmpdir
       `tar zxf #{project.get_path(:db_archive)} -C #{tmp_dir}`
-      entries = Dir.entries(tmp_dir)
+      entries = FileHelper.get_file_list(tmp_dir)
       entries.include?(project.get_name(:db)).should be_true
     rescue Exception => e
       raise e
     ensure
       FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
     end
+  end
+
+  it 'Packaging project' do
+    begin
+      project = make_project('Project 1')
+      FileHelper.touch_file(project.get_path(:project_dir) + 'test1')
+      FileHelper.touch_file(project.get_path(:project_dir) + 'test2')
+      FileUtils.mkdir_p project.get_path(:project_dir) + 'dir1/dir2'
+      FileHelper.touch_file(project.get_path(:project_dir) + 'dir1/dir2/test3')
+      FileHelper.touch_file(project.get_path(:project_dir) + '.lock')
+      FileHelper.touch_file(project.get_path(:project_dir) + '.dirt')
+      FileHelper.touch_file(project.get_path(:project_dir) + 'tmp')
+      project.generate_archives
+      tmp_dir = Dir.mktmpdir
+      `tar jxf #{project.get_path(:package_archive)} -C #{tmp_dir}`
+      entries = FileHelper.get_file_list(tmp_dir + '/project')
+      entries.include?(project.get_name(:db)).should be_true
+      entries.include?(project.get_name(:ui_schema)).should be_true
+      entries.include?(project.get_name(:ui_logic)).should be_true
+      entries.include?(project.get_name(:settings)).should be_true
+      entries.include?(project.get_name(:properties)).should be_true
+      entries.include?('test1').should be_true
+      entries.include?('test2').should be_true
+      entries.include?('dir1/dir2/test3').should be_true
+      entries.include?('.lock').should be_false # ignore dot files
+      entries.include?('.dirt').should be_false # ignore dot files
+      entries.include?('tmp').should be_false # ignore tmp dir
+      entries.include?('hash_sum').should be_true # hash file
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
+
   end
 
   it 'Creating project initialise directory' do

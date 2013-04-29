@@ -439,40 +439,15 @@ class ProjectsController < ApplicationController
 
   def upload_new_project
     if params[:project]
-      begin
-        tar_file = params[:project][:project_file]
-        if !(tar_file.content_type =~ /bzip/)
-          @project = Project.new
-          flash.now[:error] = 'Unsupported format of file, please upload the correct file'
-          render 'upload_project'
-        else
-          tmp_dir = Dir.mktmpdir + '/'
-          `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
-          project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
-          if !Project.checksum_uploaded_file(tmp_dir + 'project/')
-            @project = Project.new
-            flash.now[:error] = 'Wrong hash sum for the project'
-            render 'upload_project'
-          elsif !Project.find_by_key(project_settings['key']).blank?
-            @project = Project.new
-            flash.now[:error] = 'This project already exists in the system'
-            render 'upload_project'
-          else
-            @project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
-            @project.transaction do
-              @project.save
-              @project.create_project_from_compressed_file(tmp_dir + 'project')
-            end
-            flash[:notice] = 'Project has been successfully uploaded'
-            redirect_to :projects
-          end
-        end
-      rescue Exception
+      project_or_error = Project.upload_project(params)
+      if project_or_error.class == String
         @project = Project.new
-        flash.now[:error] = 'Uploaded project file is corrupted'
+        flash.now[:error] = project_or_error
         render 'upload_project'
-      ensure
-        FileUtils.rm_rf tmp_dir if tmp_dir
+      else
+        @project = project_or_error
+        flash[:notice] = 'Project has been successfully uploaded'
+        redirect_to :projects
       end
     else
       @project = Project.new

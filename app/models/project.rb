@@ -38,11 +38,13 @@ class Project < ActiveRecord::Base
         files_dir: { name: 'files', path: project_dir + 'files/' },
         server_files_dir: { name: 'server', path: project_dir + 'files/server/' },
         app_files_dir: { name: 'app', path: project_dir + 'files/app/' },
+        data_files_dir: { name: 'data', path: project_dir + 'files/data/' },
         tmp_dir: { name: 'tmp', path: project_dir + 'tmp/' },
         package_archive: { name: "#{name}.tar.bz2", path: project_dir + "tmp/#{name}.tar.bz2" },
         db_archive: { name: 'db.tar.gz', path: project_dir + 'tmp/db.tar.gz' },
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
+        data_files_archive: { name: 'data.tar.gz', path: project_dir + 'tmp/data.tar.gz' },
     }
   end
 
@@ -53,6 +55,7 @@ class Project < ActiveRecord::Base
     FileUtils.mkdir_p @file_map[:tmp_dir][:path] unless File.directory? @file_map[:tmp_dir][:path]
     FileUtils.mkdir_p @file_map[:server_files_dir][:path] unless File.directory? @file_map[:server_files_dir][:path]
     FileUtils.mkdir_p @file_map[:app_files_dir][:path] unless File.directory? @file_map[:app_files_dir][:path]
+    FileUtils.mkdir_p @file_map[:data_files_dir][:path] unless File.directory? @file_map[:data_files_dir][:path]
   end
 
   def name
@@ -102,8 +105,14 @@ class Project < ActiveRecord::Base
   end
 
   def app_mgr
-    mgr = FileManager.new('settings', get_path(:project_dir))
+    mgr = FileManager.new('app', get_path(:project_dir))
     mgr.add_dir(get_path(:app_files_dir))
+    mgr
+  end
+
+  def data_mgr
+    mgr = FileManager.new('data', get_path(:project_dir))
+    mgr.add_dir(get_path(:data_files_dir))
     mgr
   end
 
@@ -173,20 +182,22 @@ class Project < ActiveRecord::Base
     db_mgr.make_dirt
     settings_mgr.make_dirt
     app_mgr.make_dirt
+    data_mgr.make_dirt
     package_mgr.make_dirt
     update_archives
   end
 
   def update_archives
-    db_mgr.update_archive('zcf', get_path(:db_archive))
+    #db_mgr.update_archive('zcf', get_path(:db_archive))
     settings_mgr.update_archive('zcf', get_path(:settings_archive))
     app_mgr.update_archive('zcf', get_path(:app_files_archive))
-    package_mgr.update_archive('zcf', get_path(:package_archive))
+    data_mgr.update_archive('zcf', get_path(:data_files_archive))
+    #package_mgr.update_archive('zcf', get_path(:package_archive))
 
-    # archiving database uses special method
+    # TODO create db file manager for archiving database
     archive_database
 
-    # archiving package uses special method
+    # TODO create package file manager for archiving package
     package_project
   end
 
@@ -390,6 +401,48 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def data_file_list(exclude_files = nil)
+    data_mgr.with_lock do
+      return [] unless File.directory? get_path(:data_files_dir)
+      file_list = FileHelper.get_file_list(get_path(:data_files_dir))
+      return file_list unless exclude_files
+      file_list.select { |f| !exclude_files.include? f }
+    end
+  end
+
+  def add_data_file(file, path)
+    data_mgr.with_lock do
+      full_path = make_path(get_path(:data_files_dir), path)
+      FileUtils.cp(file.path, full_path)
+      data_mgr.make_dirt
+    end
+  end
+
+  def data_file_archive_info(exclude_files = nil)
+    if exclude_files
+      data_mgr.with_lock do
+       file_archive_info(get_path(:data_files_dir), data_file_list(exclude_files))
+      end
+    else
+      data_mgr.update_archive('zcf', get_path(:data_files_archive))
+
+      data_mgr.with_lock do
+        {
+            :file => get_path(:data_files_archive),
+            :size => File.size(get_path(:data_files_archive)),
+            :md5 => MD5Checksum.compute_checksum(get_path(:data_files_archive))
+        }
+      end
+    end
+  end
+
+  def data_file_upload(file)
+    data_mgr.with_lock do
+      TarHelper.untar('xfz', file.path, get_path(:data_files_dir))
+      data_mgr.make_dirt
+    end
+  end
+
   def make_path(dir, path)
     FileUtils.mkdir_p dir unless File.directory? dir
     full_path = dir + '/' + File.dirname(path)
@@ -433,13 +486,12 @@ class Project < ActiveRecord::Base
 
         hash_sum = {}
 
-        FileUtils.cp_r(Dir[get_path(:project_dir) + '/*'],project_dir)
-
-        Dir.glob(get_path(:project_dir) + '/**/*') do |file|
-          next if File.basename(file) == '.' or File.basename(file) == '..'
+        FileHelper.get_file_list(get_path(:project_dir)).each do |file|
           next if File.basename(file) =~ /^(\.)/ # ignore dot files
           next if File.dirname(file) =~ /^(#{get_name(:tmp_dir)})/ # ignore tmp directory
-          hash_sum[File.basename(file)] = MD5Checksum.compute_checksum(file) if !File.directory?(file) and File.exists? file
+          hash_sum[file] = MD5Checksum.compute_checksum(get_path(:project_dir) + file)
+          FileUtils.mkdir_p project_dir + File.dirname(file)
+          FileUtils.cp get_path(:project_dir) + file, project_dir + file
         end
 
         File.open(project_dir + '/hash_sum', 'w') do |file|
@@ -494,15 +546,41 @@ class Project < ActiveRecord::Base
 
   def self.checksum_uploaded_file(dir)
     hash_sum = JSON.parse(File.read(dir + '/hash_sum').as_json)
-    Dir.glob(dir + "**/*") do |file|
-      next if File.basename(file) == '.' or File.basename(file) == '..' or File.basename(file) == 'hash_sum'
-      if !File.directory?(file)
-        if !hash_sum[File.basename(file)].eql?(MD5Checksum.compute_checksum(file))
-          return false
-        end
-      end
+    FileHelper.get_file_list(dir).each do |file|
+      next if file == 'hash_sum'
+      return false unless hash_sum[file].eql?(MD5Checksum.compute_checksum(dir + '/'+ file))
     end
     true
+  end
+
+  def self.upload_project(params)
+    tmp_dir = nil
+    begin
+      tar_file = params[:project][:project_file]
+      if !(tar_file.content_type =~ /bzip/)
+        return 'Unsupported format of file, please upload the correct file'
+      else
+        tmp_dir = Dir.mktmpdir + '/'
+        `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
+        project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
+        if !Project.checksum_uploaded_file(tmp_dir + 'project/')
+          return 'Wrong hash sum for the project'  
+        elsif !Project.find_by_key(project_settings['key']).blank?
+          return 'This project already exists in the system'
+        else
+          project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
+          project.transaction do
+            project.save
+            project.create_project_from_compressed_file(tmp_dir + 'project')
+          end
+          return project
+        end
+      end
+    rescue Exception
+      return 'Uploaded project file is corrupted'
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir
+    end
   end
 
 end
