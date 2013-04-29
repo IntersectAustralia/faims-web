@@ -40,7 +40,6 @@ class Project < ActiveRecord::Base
         app_files_dir: { name: 'app', path: project_dir + 'files/app/' },
         tmp_dir: { name: 'tmp', path: project_dir + 'tmp/' },
         package_archive: { name: "#{name}.tar.bz2", path: project_dir + "tmp/#{name}.tar.bz2" },
-        project_archive: { name: 'project.tar.gz', path: project_dir + 'tmp/project.tar.gz' },
         db_archive: { name: 'db.tar.gz', path: project_dir + 'tmp/db.tar.gz' },
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
@@ -118,13 +117,13 @@ class Project < ActiveRecord::Base
         FileHelper.get_file_list(get_path(:app_files_dir)).size > 0
   end
 
-  def archive_info
-    update_archives
+  def settings_archive_info
+    settings_mgr.update_archive('zcf', get_path(:server_archive))
 
     info = {
-        :file => get_path(:project_archive),
-        :size => File.size(get_path(:project_archive)),
-        :md5 => MD5Checksum.compute_checksum(get_path(:project_archive))
+        :file => get_path(:server_archive),
+        :size => File.size(get_path(:server_archive)),
+        :md5 => MD5Checksum.compute_checksum(get_path(:server_archive))
     }
     v = db.current_version.to_i
     info = info.merge({ :version => v.to_s }) if v > 0
@@ -132,7 +131,7 @@ class Project < ActiveRecord::Base
   end
 
   def db_archive_info
-    update_archives
+    db.update_archive('zcf', get_path(:db_archive))
 
     info = {
         :file => get_path(:db_archive),

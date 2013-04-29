@@ -1,4 +1,4 @@
-Feature: Andorid
+Feature: Android
   In order provide android interactions
   As a user
   I want to have an api for android to access
@@ -11,20 +11,20 @@ Feature: Andorid
     And I should see "Logged in successfully."
     And I have a projects dir
 
-  Scenario: See archive info for project
+  Scenario: See archive info for project settings
   Given I have project "Project 1"
-  And I am on the android archive page for Project 1
-  Then I should see json for "Project 1" archived file
+  And I requested the android archive settings info for Project 1
+  Then I should see json for "Project 1" settings
 
-  Scenario: See archive info for project after syncing
+  Scenario: See archive info for project settings after syncing
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I am on the android archive page for Project 1
-  Then I should see json for "Project 1" archived file with version 20
+  And I requested the android archive settings info for Project 1
+  Then I should see json for "Project 1" settings with version 20
 
   Scenario: Cannot see archive info if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android archive page for Project 2
+  And I requested the android archive info for Project 2
   Then I should see bad request page
 
   Scenario: Can download project
@@ -52,18 +52,18 @@ Feature: Andorid
 
   Scenario: See archive info for database
   Given I have project "Project 1"
-  And I am on the android archive db page for Project 1
-  Then I should see json for "Project 1" archived db file
+  And I requested the android archive db info for Project 1
+  Then I should see json for "Project 1" db
 
   Scenario: See archive info for database after syncing
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I am on the android archive db page for Project 1
-  Then I should see json for "Project 1" archived db file with version 20
+  And I requested the android archive db info for Project 1
+  Then I should see json for "Project 1" db with 20
 
   Scenario: Cannot see archive info for database if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android archive db page for Project 2
+  And I requested the android archive db info for Project 2
   Then I should see bad request page
 
   Scenario: Can download project database
@@ -79,8 +79,8 @@ Feature: Andorid
   Scenario Outline: See archive info for database with version
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I am on the android archive db page for "Project 1" with request version <version>
-  Then I should see json for "Project 1" archived version <version> db file with version 20
+  And I requested the android archive db info for Project 1 with version <version>
+  Then I should see json for "Project 1" version <version> db with version 20
   Examples:
   | version |
   | 1       |
@@ -90,9 +90,9 @@ Feature: Andorid
   Scenario Outline: Cannot see archive info for database with invalid version
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I am on the android archive db page for "Project 1" with request version <version>
+  And I requested the android archive db info for Project 1 with version <version>
   # this returns the full database
-  Then I should see json for "Project 1" archived db file with version 20
+  Then I should see json for "Project 1" db with version 20
   Examples:
   | version |
   | 0       |
@@ -102,7 +102,7 @@ Feature: Andorid
   Scenario Outline: Can download database with version
     Given I have project "Project 1"
     And I have synced 20 times for "Project 1"
-    And I am on the android download db link for "Project 1" with request version <version>
+    And I am on the android download db link for Project 1 with request version <version>
     Then I should download db file for "Project 1" from version <version>
   Examples:
     | version |
@@ -118,7 +118,7 @@ Feature: Andorid
   Scenario: Cannot see archive info for database with version if project doesn't exist
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I am on the android archive db page for Project 2 with request version 10
+  And I requested the android archive db info for Project 2 with request version 10
   Then I should see bad request page
 
   Scenario: Show empty server file list

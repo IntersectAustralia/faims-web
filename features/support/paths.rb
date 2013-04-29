@@ -53,23 +53,23 @@ module NavigationHelpers
       when /the android projects page/
         android_projects_path
 
-      when /the android archive page for (.*)$/
+      when /the android archive settings info for (.*)$/
         project = Project.find_by_name($1)
         android_project_archive_path(project ? project.key : "na")
 
-      when /the android download link for (.*)$/
+      when /the android settings download link for (.*)$/
         project = Project.find_by_name($1)
         android_project_download_path(project ? project.key : "na")
 
-      when /the android archive db page for "([^"]*)" with request version (.*)$/
+      when /the android archive db info for "([^"]*)" with request version (.*)$/
         project = Project.find_by_name($1)
         "/android/project/#{project ? project.key : "na"}/db_archive?version=#{$2}"
 
-      when /the android download db link for "([^"]*)" with request version (.*)$/
+      when /the android download db info for "([^"]*)" with request version (.*)$/
         project = Project.find_by_name($1)
         "/android/project/#{project ? project.key : "na"}/db_download?version=#{$2}"
 
-      when /the android archive db page for (.*)$/
+      when /the android archive db info for (.*)$/
         project = Project.find_by_name($1)
         android_project_db_archive_path(project ? project.key : "na")
 
@@ -77,19 +77,19 @@ module NavigationHelpers
         project = Project.find_by_name($1)
         android_project_db_download_path(project ? project.key : "na")
 
-      when /the android server file list page for (.*)$/
+      when /the android server file list for (.*)$/
         project = Project.find_by_name($1)
         android_server_file_list_path(project ? project.key : "na")
 
-      when /the android app file list page for (.*)$/
+      when /the android app file list for (.*)$/
         project = Project.find_by_name($1)
         android_app_file_list_path(project ? project.key : "na")
 
-      when /the android server files archive page for (.*)$/
+      when /the android server files archive info for (.*)$/
         project = Project.find_by_name($1)
         android_server_file_archive_path(project ? project.key : "na")
 
-      when /the android app files archive page for (.*)$/
+      when /the android app files archive info for (.*)$/
         project = Project.find_by_name($1)
         android_app_file_archive_path(project ? project.key : "na")
 

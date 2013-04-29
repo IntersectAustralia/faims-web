@@ -71,9 +71,9 @@ FaimsWeb::Application.routes.draw do
 
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
   
-  get 'android/project/:key/archive', :to => 'android#archive', :as => 'android_project_archive'
-  get 'android/project/:key/download', :to => 'android#download', :as => 'android_project_download'
-  
+  get 'android/project/:key/settings_archive', :to => 'android#settings_archive', :as => 'android_settings_archive'
+  get 'android/project/:key/settings_download', :to => 'android#settings_download', :as => 'android_settings_download'
+
   get 'android/project/:key/db_archive', :to => 'android#db_archive', :as => 'android_project_db_archive'
   get 'android/project/:key/db_download', :to => 'android#db_download', :as => 'android_project_db_download'
   post 'android/project/:key/db_upload', :to => 'android#db_upload', :as => 'android_project_db_upload'

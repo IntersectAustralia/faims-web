@@ -13,15 +13,15 @@ class AndroidController < ApplicationController
     render :json => projects.to_json
   end
 
-  def archive
+  def settings_archive
     project = Project.find_by_key(params[:key])
-    info = project.archive_info
+    info = project.settings_archive_info
     render :json => info.to_json
   end
 
-  def download
+  def settings_download
     project = Project.find_by_key(params[:key])
-    send_file project.get_path(:project_archive)
+    send_file project.get_path(:settings_archive)
   end
 
   def db_archive

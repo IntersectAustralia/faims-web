@@ -59,8 +59,8 @@ Then /^I should see json for projects$/ do
   page.should have_content(projects.to_json)
 end
 
-Then /^I should see json for "([^"]*)" archived file$/ do |name|
-  page.should have_content(Project.find_by_name(name).archive_info.to_json)
+Then /^I should see json for "([^"]*)" settings$/ do |name|
+  page.should have_content(Project.find_by_name(name).settings_archive_info.to_json)
 end
 
 Then /^I should download file for "([^"]*)"$/ do |name|
@@ -138,7 +138,7 @@ And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
   project.check_sum(upload_db_file,md5).should be_false
 end
 
-Then /^I should see json for "([^"]*)" archived db file$/ do |name|
+Then /^I should see json for "([^"]*)" db/ do |name|
   page.should have_content(Project.find_by_name(name).db_archive_info.to_json)
 end
 
@@ -164,17 +164,17 @@ And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   end
 end
 
-Then /^I should see json for "([^"]*)" archived file with version (.*)$/ do |name, version|
-  page.should have_content(Project.find_by_name(name).archive_info.to_json)
+Then /^I should see json for "([^"]*)" settings with version (.*)$/ do |name, version|
+  page.should have_content(Project.find_by_name(name).settings_archive_info.to_json)
   page.should have_content("\"version\":\"#{version}\"")
 end
 
-Then /^I should see json for "([^"]*)" archived db file with version (.*)$/ do |name, version|
+Then /^I should see json for "([^"]*)" db with version (.*)$/ do |name, version|
   page.should have_content(Project.find_by_name(name).db_archive_info.to_json)
   page.should have_content("\"version\":\"#{version}\"")
 end
 
-Then /^I should see json for "([^"]*)" archived version (.*) db file with version (.*)$/ do |name, requested_version, version|
+Then /^I should see json for "([^"]*)" version (.*) db with version (.*)$/ do |name, requested_version, version|
   page.should have_content(Project.find_by_name(name).db_version_archive_info(requested_version).to_json)
   page.should have_content("\"version\":\"#{version}\"")
 end
