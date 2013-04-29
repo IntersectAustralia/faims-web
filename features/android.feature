@@ -236,7 +236,7 @@ Feature: Android
 
   Scenario: Cannot see app files archive info if project doesn't exist
   Given I have project "Project 1"
-  And I requested the android app files archive page for Project 2
+  And I requested the android app files archive info for Project 2
   Then I should see bad request page
 
   Scenario: Download server files

@@ -361,11 +361,15 @@ class Project < ActiveRecord::Base
 
   def app_file_list(exclude_files = nil)
     app_mgr.with_lock do
-      return [] unless File.directory? get_path(:app_files_dir)
-      file_list = FileHelper.get_file_list(get_path(:app_files_dir))
-      return file_list unless exclude_files
-      file_list.select { |f| !exclude_files.include? f }
+      non_locking_app_file_list(exclude_files)
     end
+  end
+
+  def non_locking_app_file_list(exclude_files = nil)
+    return [] unless File.directory? get_path(:app_files_dir)
+    file_list = FileHelper.get_file_list(get_path(:app_files_dir))
+    return file_list unless exclude_files
+    file_list.select { |f| !exclude_files.include? f }
   end
 
   def add_app_file(file, path)
@@ -379,7 +383,7 @@ class Project < ActiveRecord::Base
   def app_file_archive_info(exclude_files = nil)
     if exclude_files
       app_mgr.with_lock do
-       file_archive_info(get_path(:app_files_dir), app_file_list(exclude_files))
+       file_archive_info(get_path(:app_files_dir), non_locking_app_file_list(exclude_files))
       end
     else
       app_mgr.update_archive('zcf', get_path(:app_files_archive))
@@ -403,11 +407,15 @@ class Project < ActiveRecord::Base
 
   def data_file_list(exclude_files = nil)
     data_mgr.with_lock do
-      return [] unless File.directory? get_path(:data_files_dir)
-      file_list = FileHelper.get_file_list(get_path(:data_files_dir))
-      return file_list unless exclude_files
-      file_list.select { |f| !exclude_files.include? f }
+      non_locking_data_file_list(exclude_files)
     end
+  end
+
+  def non_locking_data_file_list(exclude_files = nil)
+    return [] unless File.directory? get_path(:data_files_dir)
+    file_list = FileHelper.get_file_list(get_path(:data_files_dir))
+    return file_list unless exclude_files
+    file_list.select { |f| !exclude_files.include? f }
   end
 
   def add_data_file(file, path)
@@ -421,7 +429,7 @@ class Project < ActiveRecord::Base
   def data_file_archive_info(exclude_files = nil)
     if exclude_files
       data_mgr.with_lock do
-       file_archive_info(get_path(:data_files_dir), data_file_list(exclude_files))
+        file_archive_info(get_path(:data_files_dir), non_locking_data_file_list(exclude_files))
       end
     else
       data_mgr.update_archive('zcf', get_path(:data_files_archive))

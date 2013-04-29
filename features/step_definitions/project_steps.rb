@@ -152,7 +152,7 @@ end
 Then /^I should download db file for "([^"]*)" from version (.*)$/ do |name, version|
   project = Project.find_by_name(name)
   info = project.db_version_archive_info(version)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + info[:file] + "\""
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
   file = File.open(project.temp_db_version_file_path(version), 'r')
   page.source == file.read
 end
