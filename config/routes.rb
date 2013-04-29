@@ -78,6 +78,11 @@ FaimsWeb::Application.routes.draw do
   get 'android/project/:key/db_download', :to => 'android#db_download', :as => 'android_project_db_download'
   post 'android/project/:key/db_upload', :to => 'android#db_upload', :as => 'android_project_db_upload'
 
+  get 'android/project/:key/data_file_list', :to => 'android#data_file_list', :as => 'android_data_file_list'
+  get 'android/project/:key/data_file_archive', :to => 'android#data_file_archive', :as => 'android_data_file_archive'
+  get 'android/project/:key/data_file_download', :to => 'android#data_file_download', :as => 'android_data_file_download'
+  post 'android/project/:key/data_file_upload', :to => 'android#data_file_upload', :as => 'android_data_file_upload'
+
   get 'android/project/:key/server_file_list', :to => 'android#server_file_list', :as => 'android_server_file_list'
   get 'android/project/:key/server_file_archive', :to => 'android#server_file_archive', :as => 'android_server_file_archive'
   get 'android/project/:key/server_file_download', :to => 'android#server_file_download', :as => 'android_server_file_download'
