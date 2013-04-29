@@ -362,22 +362,25 @@ class Project < ActiveRecord::Base
     app_mgr.with_lock do
       full_path = make_path(get_path(:app_files_dir), path)
       FileUtils.cp(file.path, full_path)
+      app_mgr.make_dirt
     end
   end
 
   def app_file_archive_info(exclude_files = nil)
-    return app_mgr.with_lock do
-      file_archive_info(get_path(:app_files_dir), app_file_list(exclude_files))
-    end unless exclude_files
+    if exclude_files
+      app_mgr.with_lock do
+       file_archive_info(get_path(:app_files_dir), app_file_list(exclude_files))
+      end
+    else
+      app_mgr.update_archive('zcf', get_path(:app_files_archive))
 
-    app_mgr.update_archive('zcf', get_path(:app_files_archive))
-
-    app_mgr.with_lock do
-      {
-          :file => get_path(:app_files_archive),
-          :size => File.size(get_path(:app_files_archive)),
-          :md5 => MD5Checksum.compute_checksum(get_path(:app_files_archive))
-      }
+      app_mgr.with_lock do
+        {
+            :file => get_path(:app_files_archive),
+            :size => File.size(get_path(:app_files_archive)),
+            :md5 => MD5Checksum.compute_checksum(get_path(:app_files_archive))
+        }
+      end
     end
   end
 

@@ -11,7 +11,7 @@ class FileManager
 	def add_dir(full_dir_path)
     fs = FileHelper.get_file_list(full_dir_path)
     fs.each do |file|
-      add_file(full_dir_path + '/' + file, File.dirname(file))
+      add_file(FileHelper.join(full_dir_path, file), File.dirname(file))
     end
     file_list
 	end
@@ -76,9 +76,9 @@ class FileManager
       @files.each do |f|
         next unless File.exists? f[:file]
         dir = f[:dir] ? f[:dir] + '/' : '/'
-        FileUtils.mkdir_p dir if f[:dir]
+        FileUtils.mkdir_p(tmp_dir + '/' + dir) if f[:dir]
         file = tmp_dir + '/' + dir + File.basename(f[:file])
-        FileUtils.cp(f[:file], file)
+        FileUtils.cp_r(f[:file], file)
       end
       files = FileHelper.get_file_list(tmp_dir)
       TarHelper.tar(args, path, files, tmp_dir)

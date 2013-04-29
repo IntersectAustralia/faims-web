@@ -1,4 +1,10 @@
 module FileHelper
+
+  def self.join(dir, file)
+    dir = dir + '/' unless dir == '' or dir =~ /\/$/
+    dir + file
+  end
+
   def self.get_file_list(dir, base = '')
     base = base + '/' unless base == '' or base =~ /\/$/
     list = []
