@@ -39,7 +39,7 @@ class AndroidController < ApplicationController
     project = Project.find_by_key(params[:key])
 
     unless project.validate_version(params[:version])
-      project.db_mgr.with_lock
+      project.db_mgr.with_lock do
         send_file project.get_path(:db_archive)
       end
     else
