@@ -206,6 +206,13 @@ And /^I have app files for "([^"]*)"$/ do |name, table|
   end
 end
 
+And /^I have data files for "([^"]*)"$/ do |name, table|
+  project = Project.find_by_name(name)
+  table.hashes.each do |row|
+    project.add_data_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
+  end
+end
+
 Then /^I should see files$/ do |table|
   files = []
   table.hashes.each do |row|
@@ -227,6 +234,12 @@ Then /^I should see json for "([^"]*)" app files archive$/ do |name|
   page.should have_content("\"size\":#{info[:size]}")
 end
 
+Then /^I should see json for "([^"]*)" data files archive$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.data_file_archive_info
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
 Then /^I should see json for "([^"]*)" server files archive given I already have files$/ do |name, table|
   project = Project.find_by_name(name)
   files = []
@@ -244,6 +257,16 @@ Then /^I should see json for "([^"]*)" app files archive given I already have fi
     files.push(row[:file])
   end
   info = project.app_file_archive_info(files)
+  page.should have_content("\"size\":#{info[:size]}")
+end
+
+Then /^I should see json for "([^"]*)" data files archive given I already have files$/ do |name, table|
+  project = Project.find_by_name(name)
+  files = []
+  table.hashes.each do |row|
+    files.push(row[:file])
+  end
+  info = project.data_file_archive_info(files)
   page.should have_content("\"size\":#{info[:size]}")
 end
 
@@ -287,6 +310,22 @@ Then /^I archive and download app files for "([^"]*)" given I already have files
   project = Project.find_by_name(name)
   info = project.app_file_archive_info(files)
   check_archive_download_files(name, info, project.app_file_list, files)
+end
+
+Then /^I archive and download data files for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  info = project.data_file_archive_info
+  check_archive_download_files(name, info, project.data_file_list)
+end
+
+Then /^I archive and download data files for "([^"]*)" given I already have files$/ do |name, table|
+  files = []
+  table.hashes.each do |row|
+    files.push(row)
+  end
+  project = Project.find_by_name(name)
+  info = project.data_file_archive_info(files)
+  check_archive_download_files(name, info, project.data_file_list, files)
 end
 
 def check_archive_download_files(name, info, project_files, exclude_files = nil)
@@ -359,8 +398,16 @@ And /^I upload app files "([^"]*)" to (.*) succeeds$/ do |file, name|
   project.app_file_upload(upload_file)
 end
 
-Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
+And /^I upload data files "([^"]*)" to (.*) succeeds$/ do |file, name|
   filepath = Rails.root.to_s + "/features/assets/" + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+  project.data_file_upload(upload_file)
+end
+
+Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
+  filepath = Rails.root.to_s + '/features/assets/' + file
   project = Project.find_by_name(name)
 
   upload_file = File.open(filepath, 'r')
@@ -374,7 +421,7 @@ Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
 end
 
 Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
-  filepath = Rails.root.to_s + "/features/assets/" + file
+  filepath = Rails.root.to_s + '/features/assets/' + file
   project = Project.find_by_name(name)
 
   upload_file = File.open(filepath, 'r')
@@ -387,6 +434,20 @@ Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
   upload_list.select { |f| !app_list.include? f }.size.should == 0
 end
 
+Then /^I should have stored data files "([^"]*)" for (.*)$/ do |file, name|
+  filepath = Rails.root.to_s + '/features/assets/' + file
+  project = Project.find_by_name(name)
+
+  upload_file = File.open(filepath, 'r')
+
+  tmp_dir = project.get_path(:project_dir) + '/' + SecureRandom.uuid
+  upload_list = get_archive_list(tmp_dir, upload_file)
+
+  # check if uploaded files exist on data file list
+  data_list = project.data_file_list
+  upload_list.select { |f| !data_list.include? f }.size.should == 0
+end
+
 And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
   Project.find_by_name(name).should be_nil
 end
@@ -395,6 +456,9 @@ And /^I upload app files "([^"]*)" to (.*) fails$/ do |file, name|
   Project.find_by_name(name).should be_nil
 end
 
+And /^I upload data files "([^"]*)" to (.*) fails$/ do |file, name|
+  Project.find_by_name(name).should be_nil
+end
 
 def check_project_archive_updated(project)
   begin

@@ -147,32 +147,6 @@ Feature: Android
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
 
-  Scenario: Show empty app file list
-  Given I have project "Project 1"
-  And I requested the android app file list for Project 1
-  Then I should see empty file list
-
-  Scenario: Cannot see app file list if project doesn't exist
-  Given I have project "Project 1"
-  And I requested the android app file list for Project 2
-  Then I should see bad request page
-
-  Scenario: Show full app file list
-  Given I have project "Project 1"
-  And I have app files for "Project 1"
-  | file                        |
-  | file1.tar.gz                |
-  | file2.sqlite3               |
-  | file3.txt                   |
-  | dir1/dir2/dir3/file4.tar.gz |
-  And I requested the android app file list for Project 1
-  Then I should see files
-  | file                        |
-  | file1.tar.gz                |
-  | file2.sqlite3               |
-  | file3.txt                   |
-  | dir1/dir2/dir3/file4.tar.gz |
-
   Scenario: See server files archive info for project
   Given I have project "Project 1"
   And I have server only files for "Project 1"
@@ -204,39 +178,6 @@ Feature: Android
   Scenario: Cannot see server files archive info if project doesn't exist
   Given I have project "Project 1"
   And I requested the android server files archive info for Project 2
-  Then I should see bad request page
-
-  Scenario: See app files archive info for project
-  Given I have project "Project 1"
-  And I have app files for "Project 1"
-  | file                        |
-  | file1.tar.gz                |
-  | file2.sqlite3               |
-  | file3.txt                   |
-  | dir1/dir2/dir3/file4.tar.gz |
-  And I requested the android app files archive info for Project 1
-  Then I should see json for "Project 1" app files archive
-
-  Scenario: See new app files archive info for project
-  Given I have project "Project 1"
-  And I have app files for "Project 1"
-  | file                        |
-  | file1.tar.gz                |
-  | file2.sqlite3               |
-  | file3.txt                   |
-  | dir1/dir2/dir3/file4.tar.gz |
-  And I request for the android app files archive info for Project 1 with files
-  | file                        |
-  | file1.tar.gz                |
-  | file2.sqlite3               |
-  Then I should see json for "Project 1" app files archive given I already have files
-  | file                        |
-  | file1.tar.gz                |
-  | file2.sqlite3               |
-
-  Scenario: Cannot see app files archive info if project doesn't exist
-  Given I have project "Project 1"
-  And I requested the android app files archive info for Project 2
   Then I should see bad request page
 
   Scenario: Download server files
@@ -272,6 +213,74 @@ Feature: Android
     And I am on the android server files download link for Project 2
     Then I should see bad request page
 
+  Scenario: Upload server files
+    Given I have project "Project 1"
+    And I upload server files "test_files.tar.gz" to Project 1 succeeds
+    Then I should have stored server files "test_files.tar.gz" for Project 1
+
+  Scenario: Cannot upload server files if project doesn't exist
+    Given I have project "Project 1"
+    And I upload server files "test_files.tar.gz" to Project 2 fails
+
+  Scenario: Show empty app file list
+    Given I have project "Project 1"
+    And I requested the android app file list for Project 1
+    Then I should see empty file list
+
+  Scenario: Cannot see app file list if project doesn't exist
+    Given I have project "Project 1"
+    And I requested the android app file list for Project 2
+    Then I should see bad request page
+
+  Scenario: Show full app file list
+    Given I have project "Project 1"
+    And I have app files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I requested the android app file list for Project 1
+    Then I should see files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+
+  Scenario: See app files archive info for project
+  Given I have project "Project 1"
+  And I have app files for "Project 1"
+  | file                        |
+  | file1.tar.gz                |
+  | file2.sqlite3               |
+  | file3.txt                   |
+  | dir1/dir2/dir3/file4.tar.gz |
+  And I requested the android app files archive info for Project 1
+  Then I should see json for "Project 1" app files archive
+
+  Scenario: See new app files archive info for project
+  Given I have project "Project 1"
+  And I have app files for "Project 1"
+  | file                        |
+  | file1.tar.gz                |
+  | file2.sqlite3               |
+  | file3.txt                   |
+  | dir1/dir2/dir3/file4.tar.gz |
+  And I request for the android app files archive info for Project 1 with files
+  | file                        |
+  | file1.tar.gz                |
+  | file2.sqlite3               |
+  Then I should see json for "Project 1" app files archive given I already have files
+  | file                        |
+  | file1.tar.gz                |
+  | file2.sqlite3               |
+
+  Scenario: Cannot see app files archive info if project doesn't exist
+  Given I have project "Project 1"
+  And I requested the android app files archive info for Project 2
+  Then I should see bad request page
+
   Scenario: Download app files
     Given I have project "Project 1"
     And I have app files for "Project 1"
@@ -305,20 +314,112 @@ Feature: Android
     And I am on the android app files download link for Project 2
     Then I should see bad request page
 
-  Scenario: Upload server files
-    Given I have project "Project 1"
-    And I upload server files "test_files.tar.gz" to Project 1 succeeds
-    Then I should have stored server files "test_files.tar.gz" for Project 1
-
   Scenario: Upload app files
     Given I have project "Project 1"
     And I upload app files "test_files.tar.gz" to Project 1 succeeds
     Then I should have stored app files "test_files.tar.gz" for Project 1
 
-  Scenario: Cannot upload server files if project doesn't exist
-    Given I have project "Project 1"
-    And I upload server files "test_files.tar.gz" to Project 2 fails
-
   Scenario: Cannot upload app files if project doesn't exist
+    Given I have project "Project 1"
+    And I upload app files "test_files.tar.gz" to Project 2 fails
+
+  Scenario: Show empty data file list
+    Given I have project "Project 1"
+    And I requested the android data file list for Project 1
+    Then I should see empty file list
+
+  Scenario: Cannot see data file list if project doesn't exist
+    Given I have project "Project 1"
+    And I requested the android data file list for Project 2
+    Then I should see bad request page
+
+  Scenario: Show full data file list
+    Given I have project "Project 1"
+    And I have data files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I requested the android data file list for Project 1
+    Then I should see files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+
+  Scenario: See data files archive info for project
+    Given I have project "Project 1"
+    And I have data files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I requested the android data files archive info for Project 1
+    Then I should see json for "Project 1" data files archive
+
+  Scenario: See new data files archive info for project
+    Given I have project "Project 1"
+    And I have data files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I request for the android data files archive info for Project 1 with files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+    Then I should see json for "Project 1" data files archive given I already have files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+
+  Scenario: Cannot see data files archive info if project doesn't exist
+    Given I have project "Project 1"
+    And I requested the android data files archive info for Project 2
+    Then I should see bad request page
+
+  Scenario: Download data files
+    Given I have project "Project 1"
+    And I have data files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    Then I archive and download data files for "Project 1"
+
+  Scenario: Download new data files
+    Given I have project "Project 1"
+    And I have data files for "Project 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    Then I archive and download data files for "Project 1" given I already have files
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+
+  Scenario: Cannot download data files no new files to download
+    Given I have project "Project 1"
+    And I am on the android data files download link for Project 1
+    Then I should see bad request page
+
+  Scenario: Cannot download data files if project doesn't exist
+    Given I have project "Project 1"
+    And I am on the android data files download link for Project 2
+    Then I should see bad request page
+
+  Scenario: Upload data files
+    Given I have project "Project 1"
+    And I upload data files "test_files.tar.gz" to Project 1 succeeds
+    Then I should have stored data files "test_files.tar.gz" for Project 1
+
+  Scenario: Cannot upload data files if project doesn't exist
     Given I have project "Project 1"
     And I upload app files "test_files.tar.gz" to Project 2 fails
