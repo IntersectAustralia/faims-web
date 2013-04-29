@@ -25,18 +25,18 @@ class Database
   end
 
   def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id, attribute_id, measure, freetext, certainty, current_timestamp)
-      @project.dirty
+      @project.db_mgr.make_dirt
     end
   end
 
   def delete_arch_entity(uuid)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.delete_arch_entity, current_timestamp, uuid)
-      @project.dirty
+      @project.db_mgr.make_dirt
     end
   end
 
@@ -57,10 +57,10 @@ class Database
   end
 
   def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id, freetext, certainty, current_timestamp)
-      @project.dirty
+      @project.db_mgr.make_dirt
     end
   end
 
@@ -68,7 +68,7 @@ class Database
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.delete_relationship, current_timestamp, relationshipid)
-      @project.dirty
+      @project.db_mgr.make_dirt
     end
   end
 
@@ -88,16 +88,16 @@ class Database
   end
 
   def add_arch_ent_member(relationshipid, uuid, verb)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, verb)
-      @project.dirty
+      @project.db_mgr.make_dirt
     end
   end
 
   def delete_arch_ent_member(relationshipid, uuid)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid)
-      @project.dirty
+      @project.make_dirt
     end
   end
 
@@ -129,18 +129,18 @@ class Database
   end
 
   def add_version(userid)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_user_version, current_timestamp, userid)
-      @project.dirty
+      @project.db_mgr.make_dirt
       latest_version
     end
   end
 
   def merge_database(fromDB, version)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute_batch(WebQuery.merge_database(fromDB, version))
 
-      @project.dirty
+      @project.db_mgr.make_dirt
     end
   end
 

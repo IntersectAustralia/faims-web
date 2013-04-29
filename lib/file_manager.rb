@@ -1,11 +1,10 @@
 class FileManager
 
-	def initialize(name, base_dir, archive_dir)
+	def initialize(name, base_dir)
 		@name = name.gsub(/\s+/, '_')
 		@base_dir = base_dir
-		@archive_dir = archive_dir
-		@dirty_file = @base_dir + '/.dirty_' + @name
-		@lock_file = @base_dir + '/.lock_' + @name
+		@dirty_file = @base_dir + '.dirty_' + @name
+		@lock_file = @base_dir + '.lock_' + @name
 		@files = []
 	end
 
@@ -17,7 +16,7 @@ class FileManager
     file_list
 	end
 
-	def add_file(full_file_path, relative_base_dir)
+	def add_file(full_file_path, relative_base_dir = nil)
 		f = { file: full_file_path, dir:relative_base_dir }
 		@files.push(f) unless @files.include? f
 	end
@@ -51,13 +50,13 @@ class FileManager
 		loop do
 			break unless locked?
 			sleep 1
-		end
-		FileHelper.touch_file @locked_file
+    end
+		FileHelper.touch_file @lock_file
 		locked?
 	end
 
 	def clear_lock
-		FileUtils.rm @locked_file if locked?
+		FileUtils.rm @lock_file if locked?
 		!locked?
 	end
 
@@ -69,17 +68,24 @@ class FileManager
 		@files.map { |f| f[:dir] + '/' + File.basename(f[:file]) }
 	end
 
-	def update_archive
+	def update_archive(args, path)
 		return true if @files.empty?
 		return true unless dirty?
-		tmp_dir = Dir.mktmpdir
-		@files.each do |f|
-			next unless File.exists? f[:file]
-			FileUtils.cp(f[:file], @archive_dir + '/' + f[:dir] + '/' + File.basename(f[:file]))
-		end
-		clean_dirt
+    tmp_dir = Dir.mktmpdir
+    with_lock do
+      @files.each do |f|
+        next unless File.exists? f[:file]
+        dir = f[:dir] ? f[:dir] + '/' : '/'
+        FileUtils.mkdir_p dir if f[:dir]
+        file = tmp_dir + '/' + dir + File.basename(f[:file])
+        FileUtils.cp(f[:file], file)
+      end
+      files = FileHelper.get_file_list(tmp_dir)
+      TarHelper.tar(args, path, files, tmp_dir)
+      clean_dirt
+    end
 	ensure
-		FileUtils.rm tmp_dir if File.directory? tmp_dir
+		FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
 	end
 
 end

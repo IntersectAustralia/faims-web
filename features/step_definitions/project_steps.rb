@@ -335,7 +335,7 @@ end
 
 Then /^I automatically archive project package "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  project.package_project_for
+  project.package_project
 end
 
 Then /^I automatically download project package "([^"]*)"$/ do |name|

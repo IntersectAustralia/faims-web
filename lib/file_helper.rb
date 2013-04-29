@@ -26,6 +26,7 @@ module FileHelper
   end
 
   def self.touch_file(file)
+    raise ArgumentError unless file
     `touch #{file}`
   end
 

@@ -2,28 +2,28 @@ require Rails.root.join('lib/tasks/test_project_creator')
 
 begin
   namespace :projects do
-    desc "Cleanup all projects"
+    desc 'Cleanup all projects'
     task :clean => :environment do
       clean_projects
     end
-    desc "Archive all projects"
+    desc 'Archive all projects'
     task :archive, [:key] => :environment do |t, args|
       if args[:key]
-        Project.find_by_key(args[:key]).update_archives
+        Project.find_by_key(args[:key]).generate_archives
       else
-        Project.all.each { |p| p.update_archives }
+        Project.all.each { |p| p.generate_archives }
       end
     end
-    desc "Package all projects"
+    desc 'Package all projects'
     task :package, [:key] => :environment do |t, args|
       if args[:key]
-        Project.package_project_for(args[:key])
+        Project.package_project(args[:key])
       else
-        Project.all.each { |p| Project.package_project_for(p.key) }
+        Project.all.each { |p| Project.package_project(p.key) }
       end
     end
     namespace :test do
-      desc "Generate test projects"
+      desc 'Generate test projects'
       task :create, [:size] => :environment do |t, args|
         size = args[:size] || 50
         create_projects(size.to_i)
@@ -31,7 +31,7 @@ begin
     end
   end
 rescue LoadError
-  puts "It looks like some Gems are missing: please run bundle install"
+  puts 'It looks like some Gems are missing: please run bundle install'
 end
 
 def clean_projects

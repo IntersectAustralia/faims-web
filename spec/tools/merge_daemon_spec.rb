@@ -5,7 +5,7 @@ require Rails.root.join('spec/tools/helpers/database_generator_spec_helper')
 
 describe MergeDaemon do
 
-  describe "match file name" do
+  describe 'match file name' do
     it { MergeDaemon.match_file(SecureRandom.uuid + '_v0').should_not be_nil }
     it { MergeDaemon.match_file(SecureRandom.uuid + '_v1234').should_not be_nil }
 
@@ -15,7 +15,7 @@ describe MergeDaemon do
     it { MergeDaemon.match_file(SecureRandom.uuid).should_not nil }
   end
 
-  it "sort files by version" do
+  it 'sort files by version' do
     a = SecureRandom.uuid
     b = SecureRandom.uuid
     if a > b
@@ -27,7 +27,7 @@ describe MergeDaemon do
     MergeDaemon.sort_files_by_version(files).should == [b + '_v1', a + '_v2', b + '_v3', a + '_v4']
   end
 
-  it "should merge file uploads directory" do
+  it 'should merge file uploads directory' do
     tmp_dir = Rails.root.to_s + '/tmp'
 	FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
     
@@ -42,7 +42,7 @@ describe MergeDaemon do
     FileUtils.mkdir uploads_dir
 
     # create project
-    project = make_project "Project"
+    project = make_project 'Project'
 
     # create uploads database
     filename = uploads_dir + '/' + project.key + '_v1'
@@ -61,7 +61,7 @@ describe MergeDaemon do
     is_database_same(project.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_true
   end
 
-  it "should not merge file uploads directory for bad names" do
+  it 'should not merge file uploads directory for bad names' do
     tmp_dir = Rails.root.to_s + '/tmp'
     FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
 
@@ -76,7 +76,7 @@ describe MergeDaemon do
     FileUtils.mkdir uploads_dir
 
     # create project
-    project = make_project "Project"
+    project = make_project 'Project'
 
     # create uploads database
     filename = uploads_dir + '/' + project.key

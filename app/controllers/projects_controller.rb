@@ -113,7 +113,7 @@ class ProjectsController < ApplicationController
 
   def update_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
+    if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
@@ -137,10 +137,11 @@ class ProjectsController < ApplicationController
 
   def delete_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.is_locked
+    if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
+
     uuid = params[:uuid]
     @project.db.delete_arch_entity(uuid)
 
@@ -218,10 +219,11 @@ class ProjectsController < ApplicationController
 
   def update_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
+    if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
+
     relationshipid = params[:relationshipid]
     vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
     attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
@@ -240,10 +242,11 @@ class ProjectsController < ApplicationController
 
   def delete_rel_records
     @project = Project.find(params[:id])
-    if @project.is_locked
+    if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
+
     relationshipid = params[:relationshipid]
     @project.db.delete_relationship(relationshipid)
     if session[:type]
@@ -337,7 +340,7 @@ class ProjectsController < ApplicationController
 
   def select_arch_ents
     @project = Project.find(params[:id])
-    if @project.is_locked
+    if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
@@ -356,7 +359,7 @@ class ProjectsController < ApplicationController
 
   def select_rel
     @project = Project.find(params[:id])
-    if @project.is_locked
+    if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
@@ -371,7 +374,7 @@ class ProjectsController < ApplicationController
   end
 
   def update_project_setting
-    if @project.is_locked
+    if @project.settings_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
@@ -392,17 +395,17 @@ class ProjectsController < ApplicationController
 
   def archive_project
     @project = Project.find(params[:id])
-    if !@project.is_locked
+    if !@project.package_mgr.locked?
       begin
-        job = @project.delay.package_project_for
+        job = @project.delay.package_project
         session[:job] = job.id
       rescue Exception => e
         raise e
       end
     end
     respond_to do |format|
-      format.json { render :json => {:archive => 'false'} } if @project.is_locked
-      format.json { render :json => {:archive => 'true'} } if !@project.is_locked
+      format.json { render :json => {:archive => 'false'} } if @project.package_mgr.locked?
+      format.json { render :json => {:archive => 'true'} } if !@project.package_mgr.locked?
     end
   end
 
@@ -420,8 +423,14 @@ class ProjectsController < ApplicationController
 
   def download_project
     @project = Project.find(params[:id])
+    if @project.package_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+    end
 
-    send_file @project.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
+    @project.package_mgr.with_lock do
+      send_file @project.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
+    end
   end
 
   def upload_project
@@ -437,7 +446,7 @@ class ProjectsController < ApplicationController
           flash.now[:error] = 'Unsupported format of file, please upload the correct file'
           render 'upload_project'
         else
-          tmp_dir = Dir.mktmpdir(Project.projects_path + '/') + '/'
+          tmp_dir = Dir.mktmpdir + '/'
           `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
           project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
           if !Project.checksum_uploaded_file(tmp_dir + 'project/')
