@@ -1,5 +1,6 @@
 module FileHelper
   def self.get_file_list(dir, base = '')
+    base = base + '/' unless base == '' or base =~ /\/$/
     list = []
     Dir.entries(dir).each do |file|
       next if file == '.' or file == '..'

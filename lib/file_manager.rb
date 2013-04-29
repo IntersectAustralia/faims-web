@@ -9,7 +9,12 @@ class FileManager
 		@files = []
 	end
 
-	def add_dir(dir)
+	def add_dir(full_dir_path)
+    fs = FileHelper.get_file_list(full_dir_path)
+    fs.each do |file|
+      add_file(full_dir_path + '/' + file, File.dirname(file))
+    end
+    file_list
 	end
 
 	def add_file(full_file_path, relative_base_dir)
@@ -43,7 +48,7 @@ class FileManager
 	end
 
 	def wait_for_lock
-		loop
+		loop do
 			break unless locked?
 			sleep 1
 		end
@@ -70,7 +75,7 @@ class FileManager
 		tmp_dir = Dir.mktmpdir
 		@files.each do |f|
 			next unless File.exists? f[:file]
-			FileUtils.cp(f[:file], f[:dir] + '/' + File.basename(f[:file]))
+			FileUtils.cp(f[:file], @archive_dir + '/' + f[:dir] + '/' + File.basename(f[:file]))
 		end
 		clean_dirt
 	ensure
