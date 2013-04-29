@@ -63,10 +63,10 @@ Then /^I should see json for "([^"]*)" settings$/ do |name|
   page.should have_content(Project.find_by_name(name).settings_archive_info.to_json)
 end
 
-Then /^I should download file for "([^"]*)"$/ do |name|
+Then /^I should download settings for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.get_name(:project_archive) + "\""
-  file = File.open(project.get_path(:project_archive), 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project.get_name(:settings_archive) + "\""
+  file = File.open(project.get_path(:settings_archive), 'r')
   page.source == file.read
 end
 
@@ -169,7 +169,7 @@ Then /^I should see json for "([^"]*)" settings with version (.*)$/ do |name, ve
   page.should have_content("\"version\":\"#{version}\"")
 end
 
-Then /^I should see json for "([^"]*)" db with version (.*)$/ do |name, version|
+Then /^I should see json for "([^"]*)" database with version (.*)$/ do |name, version|
   page.should have_content(Project.find_by_name(name).db_archive_info.to_json)
   page.should have_content("\"version\":\"#{version}\"")
 end
@@ -247,7 +247,7 @@ Then /^I should see json for "([^"]*)" app files archive given I already have fi
   page.should have_content("\"size\":#{info[:size]}")
 end
 
-And /^I am request (.+) with files$/ do |name, table|
+And /^I request for (.+) with files$/ do |name, table|
   page_name = path_to(name)
   files = []
   table.hashes.each do |row|

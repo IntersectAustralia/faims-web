@@ -127,12 +127,12 @@ class Project < ActiveRecord::Base
   end
 
   def settings_archive_info
-    settings_mgr.update_archive('zcf', get_path(:server_archive))
+    settings_mgr.update_archive('zcf', get_path(:settings_archive))
 
     info = {
-        :file => get_path(:server_archive),
-        :size => File.size(get_path(:server_archive)),
-        :md5 => MD5Checksum.compute_checksum(get_path(:server_archive))
+        :file => get_path(:settings_archive),
+        :size => File.size(get_path(:settings_archive)),
+        :md5 => MD5Checksum.compute_checksum(get_path(:settings_archive))
     }
     v = db.current_version.to_i
     info = info.merge({ :version => v.to_s }) if v > 0
@@ -140,7 +140,7 @@ class Project < ActiveRecord::Base
   end
 
   def db_archive_info
-    db.update_archive('zcf', get_path(:db_archive))
+    db_mgr.update_archive('zcf', get_path(:db_archive))
 
     info = {
         :file => get_path(:db_archive),

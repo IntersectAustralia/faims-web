@@ -22,19 +22,19 @@ Feature: Android
   And I requested the android archive settings info for Project 1
   Then I should see json for "Project 1" settings with version 20
 
-  Scenario: Cannot see archive info if project doesn't exist
+  Scenario: Cannot see archive settings info if project doesn't exist
   Given I have project "Project 1"
-  And I requested the android archive info for Project 2
+  And I requested the android archive settings info for Project 2
   Then I should see bad request page
 
-  Scenario: Can download project
+  Scenario: Can download project settings
   Given I have project "Project 1"
-  And I am on the android download link for Project 1
-  Then I should download file for "Project 1"
+  And I am on the android settings download link for Project 1
+  Then I should download settings for "Project 1"
 
-  Scenario: Cannot download project if project doesn't exist
+  Scenario: Cannot download project settings if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android download link for Project 2
+  And I am on the android settings download link for Project 2
   Then I should see bad request page
 
   Scenario: Can upload project database
@@ -79,7 +79,7 @@ Feature: Android
   Scenario Outline: See archive info for database with version
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I requested the android archive db info for Project 1 with version <version>
+  And I requested the android archive db info for Project 1 with request version <version>
   Then I should see json for "Project 1" version <version> db with version 20
   Examples:
   | version |
@@ -90,9 +90,9 @@ Feature: Android
   Scenario Outline: Cannot see archive info for database with invalid version
   Given I have project "Project 1"
   And I have synced 20 times for "Project 1"
-  And I requested the android archive db info for Project 1 with version <version>
+  And I requested the android archive db info for Project 1 with request version <version>
   # this returns the full database
-  Then I should see json for "Project 1" db with version 20
+  Then I should see json for "Project 1" database with version 20
   Examples:
   | version |
   | 0       |
@@ -123,12 +123,12 @@ Feature: Android
 
   Scenario: Show empty server file list
   Given I have project "Project 1"
-  And I am on the android server file list page for Project 1
+  And I requested the android server file list for Project 1
   Then I should see empty file list
 
   Scenario: Cannot see server file list if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android server file list page for Project 2
+  And I requested the android server file list for Project 2
   Then I should see bad request page
 
   Scenario: Show full server file list
@@ -139,7 +139,7 @@ Feature: Android
   | file2.sqlite3               |
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
-  And I am on the android server file list page for Project 1
+  And I requested the android server file list for Project 1
   Then I should see files
   | file                        |
   | file1.tar.gz                |
@@ -149,12 +149,12 @@ Feature: Android
 
   Scenario: Show empty app file list
   Given I have project "Project 1"
-  And I am on the android app file list page for Project 1
+  And I requested the android app file list for Project 1
   Then I should see empty file list
 
   Scenario: Cannot see app file list if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android app file list page for Project 2
+  And I requested the android app file list for Project 2
   Then I should see bad request page
 
   Scenario: Show full app file list
@@ -165,7 +165,7 @@ Feature: Android
   | file2.sqlite3               |
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
-  And I am on the android app file list page for Project 1
+  And I requested the android app file list for Project 1
   Then I should see files
   | file                        |
   | file1.tar.gz                |
@@ -181,7 +181,7 @@ Feature: Android
   | file2.sqlite3               |
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
-  And I am on the android server files archive page for Project 1
+  And I requested the android server files archive info for Project 1
   Then I should see json for "Project 1" server files archive
 
   Scenario: See new server files archive info for project
@@ -192,7 +192,7 @@ Feature: Android
   | file2.sqlite3               |
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
-  And I am request the android server files archive page for Project 1 with files
+  And I request for the android server files archive info for Project 1 with files
   | file                        |
   | file1.tar.gz                |
   | file2.sqlite3               |
@@ -203,7 +203,7 @@ Feature: Android
 
   Scenario: Cannot see server files archive info if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android server files archive page for Project 2
+  And I requested the android server files archive info for Project 2
   Then I should see bad request page
 
   Scenario: See app files archive info for project
@@ -214,7 +214,7 @@ Feature: Android
   | file2.sqlite3               |
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
-  And I am on the android app files archive page for Project 1
+  And I requested the android app files archive info for Project 1
   Then I should see json for "Project 1" app files archive
 
   Scenario: See new app files archive info for project
@@ -225,7 +225,7 @@ Feature: Android
   | file2.sqlite3               |
   | file3.txt                   |
   | dir1/dir2/dir3/file4.tar.gz |
-  And I am request the android app files archive page for Project 1 with files
+  And I request for the android app files archive info for Project 1 with files
   | file                        |
   | file1.tar.gz                |
   | file2.sqlite3               |
@@ -236,7 +236,7 @@ Feature: Android
 
   Scenario: Cannot see app files archive info if project doesn't exist
   Given I have project "Project 1"
-  And I am on the android app files archive page for Project 2
+  And I requested the android app files archive page for Project 2
   Then I should see bad request page
 
   Scenario: Download server files

@@ -55,17 +55,17 @@ module NavigationHelpers
 
       when /the android archive settings info for (.*)$/
         project = Project.find_by_name($1)
-        android_project_archive_path(project ? project.key : "na")
+        android_settings_archive_path(project ? project.key : "na")
 
       when /the android settings download link for (.*)$/
         project = Project.find_by_name($1)
-        android_project_download_path(project ? project.key : "na")
+        android_settings_download_path(project ? project.key : "na")
 
-      when /the android archive db info for "([^"]*)" with request version (.*)$/
+      when /the android archive db info for (.*) with request version (.*)$/
         project = Project.find_by_name($1)
         "/android/project/#{project ? project.key : "na"}/db_archive?version=#{$2}"
 
-      when /the android download db info for "([^"]*)" with request version (.*)$/
+      when /the android download db link for (.*) with request version (.*)$/
         project = Project.find_by_name($1)
         "/android/project/#{project ? project.key : "na"}/db_download?version=#{$2}"
 
