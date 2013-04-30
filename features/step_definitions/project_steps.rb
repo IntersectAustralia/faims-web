@@ -478,7 +478,7 @@ Then /^I should see attached files/ do |table|
 end
 
 Then(/^I click file with name "([^"]*)"$/) do |name|
-  click_link name
+  pending
 end
 
 When(/^I should download attached file with name "([^"]*)"$/) do |name|
