@@ -283,7 +283,7 @@ end
 Then /^I archive and download server files for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   info = project.server_file_archive_info
-  check_archive_download_files(name, info, project.server_file_list)
+  check_archive_download_files('server', name, info, project.server_file_list)
 end
 
 Then /^I archive and download server files for "([^"]*)" given I already have files$/ do |name, table|
@@ -293,13 +293,13 @@ Then /^I archive and download server files for "([^"]*)" given I already have fi
   end
   project = Project.find_by_name(name)
   info = project.server_file_archive_info(files)
-  check_archive_download_files(name, info, project.server_file_list, files)
+  check_archive_download_files('server', name, info, project.server_file_list, files)
 end
 
 Then /^I archive and download app files for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   info = project.app_file_archive_info
-  check_archive_download_files(name, info, project.app_file_list)
+  check_archive_download_files('app', name, info, project.app_file_list)
 end
 
 Then /^I archive and download app files for "([^"]*)" given I already have files$/ do |name, table|
@@ -309,13 +309,13 @@ Then /^I archive and download app files for "([^"]*)" given I already have files
   end
   project = Project.find_by_name(name)
   info = project.app_file_archive_info(files)
-  check_archive_download_files(name, info, project.app_file_list, files)
+  check_archive_download_files('app', name, info, project.app_file_list, files)
 end
 
 Then /^I archive and download data files for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   info = project.data_file_archive_info
-  check_archive_download_files(name, info, project.data_file_list)
+  check_archive_download_files('data', name, info, project.data_file_list)
 end
 
 Then /^I archive and download data files for "([^"]*)" given I already have files$/ do |name, table|
@@ -325,11 +325,11 @@ Then /^I archive and download data files for "([^"]*)" given I already have file
   end
   project = Project.find_by_name(name)
   info = project.data_file_archive_info(files)
-  check_archive_download_files(name, info, project.data_file_list, files)
+  check_archive_download_files('data', name, info, project.data_file_list, files)
 end
 
-def check_archive_download_files(name, info, project_files, exclude_files = nil)
-  visit path_to("the android server files download link for #{name}") + "?file=#{info[:file]}"
+def check_archive_download_files(type, name, info, project_files, exclude_files = nil)
+  visit path_to("the android #{type} files download link for #{name}") + "?file=#{info[:file]}"
 
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
   file = File.open(info[:file], 'r')

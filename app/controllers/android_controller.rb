@@ -135,12 +135,12 @@ class AndroidController < ApplicationController
   end
 
   def app_file_download
-    project = Project.find_by_key(params[:key])
     file = params[:file]
 
     return render :json => {message: 'bad request'}.to_json, :status => 400 if file.nil?
     return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
 
+    project = Project.find_by_key(params[:key])
     if file == project.get_path(:app_files_archive)
       project.app_mgr.with_lock do
         send_file file
@@ -157,7 +157,6 @@ class AndroidController < ApplicationController
     return render :json => {message: 'bad request'}.to_json, :status => 400 if file == nil
 
     project = Project.find_by_key(params[:key])
-
     if project.check_sum(file, md5)
 
       project.app_file_upload(file)
@@ -191,6 +190,7 @@ class AndroidController < ApplicationController
     return render :json => {message: 'bad request'}.to_json, :status => 400 if file.nil?
     return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
 
+    project = Project.find_by_key(params[:key])
     if file == project.get_path(:data_files_archive)
       project.data_mgr.with_lock do
         send_file file

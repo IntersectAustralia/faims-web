@@ -49,7 +49,6 @@ class MergeDaemon
         puts "Merging #{db_file}"
 
         # merge database
-        p db_file_path, version
 
         project.db.merge_database(db_file_path, version)
 
