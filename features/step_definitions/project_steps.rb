@@ -460,6 +460,31 @@ And /^I upload data files "([^"]*)" to (.*) fails$/ do |file, name|
   Project.find_by_name(name).should be_nil
 end
 
+And(/^I enter "([^"]*)" and submit the form$/) do |keywords|
+  page.fill_in 'query', :with => keywords
+  page.click_button 'Search'
+end
+
+And(/^I select the first record$/) do
+  first('.inner > li > a').click
+end
+
+Then /^I should see attached files/ do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_content(value)
+    end
+  end
+end
+
+Then(/^I click file with name "([^"]*)"$/) do |name|
+  click_link name
+end
+
+When(/^I should download attached file with name "([^"]*)"$/) do |name|
+  pending
+end
+
 def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')

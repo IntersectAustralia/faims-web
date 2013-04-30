@@ -179,3 +179,79 @@ Feature: Manage projects
     Then I automatically archive project package "Project 1"
     Then I automatically download project package "Project 1"
     Then I should download project package file for "Project 1"
+
+  @javascript
+  Scenario: See attached files for arch ent
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Test.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Test"
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    Then I should see attached files
+      | name                                  |
+      | Screenshot_2013-04-09-10-32-04.png    |
+      | Screenshot_2013-04-09-10-32-04(1).png |
+
+  @javascript
+  Scenario: Download attached file for arch ent
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Test.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Test"
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    Then I click file with name "Screenshot_2013-04-09-10-32-04(1).png"
+    And I should download attached file with name "Screenshot_2013-04-09-10-32-04(1).png"
+
+  @javascript
+  Scenario: See attached files for relationship
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Test.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Test"
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    And I select the first record
+    Then I should see attached files
+      | name                                  |
+      | Screenshot_2013-04-29-16-38-51.png    |
+      | Screenshot_2013-04-29-16-38-51(1).png |
+
+  @javascript
+  Scenario: Download attached file for relationship
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Test.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Test"
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    And I select the first record
+    Then I click file with name "Screenshot_2013-04-29-16-38-51(1).png"
+    And I should download attached file with name "Screenshot_2013-04-29-16-38-51(1).png"
