@@ -42,11 +42,6 @@ class ProjectsController < ApplicationController
     session[:has_attached_files] = @project.has_attached_files
   end
 
-  def browse_attached_files
-    @project = Project.find(params[:id])
-    @project_key = @project.key
-  end
-
   def list_arch_ent_records
     @project = Project.find(params[:id])
     @type = @project.db.get_arch_ent_types
@@ -391,6 +386,12 @@ class ProjectsController < ApplicationController
       @project_setting = JSON.parse(@project.project_setting)
       render 'edit_project_setting'
     end
+  end
+
+  def download_attached_file
+    project = Project.find(params[:id])
+    path = params[:path]
+    send_file Rails.root.join("projects/#{project.key}/#{path}"), :filename => params[:name]
   end
 
   def update

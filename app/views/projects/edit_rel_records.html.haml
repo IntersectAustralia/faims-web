@@ -1,3 +1,4 @@
+- get_files(@attributes,8,4)
 %h1= @project.name + " - Relationship"
 = link_to "Delete", delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn', :id => 'delete_record'
 - if session[:action].eql?('list_typed_rel_records')
@@ -36,3 +37,14 @@
             .form-actions
               = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
               = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+- if @files.length > 0
+  .attached-files
+    %h2 Attached Files
+    %ul
+      - @files.each do |path,name|
+        %li
+          %form{:method => 'GET', :action => download_attached_file_path(@project), :id => 'download_attached_file'}
+            %input{:type => 'hidden', :name => 'path', :value => path}
+            %input{:type => 'hidden', :name => 'name', :value => name}
+            %a{:href => '#'}
+              = name

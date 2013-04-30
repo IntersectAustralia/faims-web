@@ -108,7 +108,7 @@ EOF
 
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype
 from aentvalue join attributekey using(attributeid)
   LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
 where uuid = ? and deleted is null
@@ -241,7 +241,7 @@ EOF
 
   def self.get_relationship_attributes
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype
 from relnvalue r join attributekey using(attributeid) join relationship using(relationshipid)
 LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
 where r.relationshipid = ? and r.deleted is null
