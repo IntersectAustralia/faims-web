@@ -341,7 +341,12 @@ class ProjectsController < ApplicationController
     end
     deleted_id = params[:deleted_id]
     @project.db.delete_arch_entity(deleted_id)
-    redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+
+    if session[:type]
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+    else
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+    end
   end
 
   def compare_rel
@@ -360,7 +365,11 @@ class ProjectsController < ApplicationController
     end
     deleted_id = params[:deleted_id]
     @project.db.delete_relationship(deleted_id)
-    redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+    if session[:type]
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+    else
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+    end
   end
 
   def edit_project_setting

@@ -213,6 +213,7 @@ class Project < ActiveRecord::Base
                     :contact_address => params[:project][:contact_address],
                     :participant => params[:project][:participant]
                    }.to_json)
+        settings_mgr.make_dirt
       end
     end
   end

@@ -78,7 +78,7 @@ class Database
   end
 
   def get_non_member_arch_ent(relationshipid, query, limit, offset)
-    uuids = @db.execute(WebQuery.get_arch_entites_not_in_relationship, query, query, query, relationshipid, limit, offset)
+    uuids = @db.execute(WebQuery.get_arch_entities_not_in_relationship, query, query, query, relationshipid, limit, offset)
     uuids
   end
 
