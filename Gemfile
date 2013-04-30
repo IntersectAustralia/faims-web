@@ -66,7 +66,7 @@ gem 'simple_form', '~> 2.1.0'
 gem 'devise', '~> 2.2.3'
 gem 'email_spec', '~> 1.4.0', :group => :test
 gem 'cancan', '~> 1.6.9'
-gem 'nokogiri', '~> 1.5.9'
+gem 'nokogiri', '= 1.5.5'
 gem 'daemons', '~> 1.1.9'
 gem 'webget_ruby_secure_random', '~> 1.2.1'
 gem 'archive-tar-minitar', '~> 0.5.2'
