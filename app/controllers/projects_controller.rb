@@ -25,8 +25,8 @@ class ProjectsController < ApplicationController
       @project.transaction do
         @project.save
 
-        @project.create_project_from(session[:tmpdir])
         @project.update_settings(params)
+        @project.create_project_from(session[:tmpdir])
 
         FileUtils.remove_entry_secure session[:tmpdir]
       end

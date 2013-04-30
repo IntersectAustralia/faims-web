@@ -52,7 +52,7 @@ describe MergeDaemon do
     # backup database
     FileUtils.cp filename, uploads_dir + '/temp.sqlite3'
 
-    MergeDaemon.do_merge(uploads_dir, projects_dir)
+    MergeDaemon.do_merge(uploads_dir)
 
     # check that upload is removed
     File.exists?(filename).should be_false
@@ -86,7 +86,7 @@ describe MergeDaemon do
     # backup database
     FileUtils.cp filename, uploads_dir + '/temp.sqlite3'
 
-    MergeDaemon.do_merge(uploads_dir, projects_dir)
+    MergeDaemon.do_merge(uploads_dir)
 
     # check that upload is removed
     File.exists?(filename).should be_true

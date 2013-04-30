@@ -24,15 +24,15 @@ class MergeDaemon
     Dir.mkdir(Rails.application.config.server_uploads_directory) unless File.directory? Rails.application.config.server_uploads_directory
   end
 
-  def self.do_merge(uploads_dir = nil, projects_dir = nil)
+  def self.do_merge(uploads_dir = nil)
     uploads_dir ||= Rails.application.config.server_uploads_directory
-    projects_dir ||= Rails.application.config.server_projects_directory
 
     begin
       db_file_path = nil
       directory_files = Dir.entries(uploads_dir).select { |f| not File.directory? f }
       project_files = directory_files.select { |f| match_file(f) }
       sorted_files = sort_files_by_version(project_files)
+
       sorted_files.each do |db_file|
         db_file_path = uploads_dir + '/' + db_file
 
@@ -43,15 +43,14 @@ class MergeDaemon
         key = match[:key]
         version = match[:version]
 
-        # get projects directory
-        project_key = key
-        raise Exception unless project_key # key doesn't exist
-
-        project = Project.find_by_key(project_key)
+        project = Project.find_by_key(key)
+        raise Exception unless project
 
         puts "Merging #{db_file}"
 
         # merge database
+        p db_file_path, version
+
         project.db.merge_database(db_file_path, version)
 
         puts 'Finished merging database'
