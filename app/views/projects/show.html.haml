@@ -2,8 +2,6 @@
 %input{:type => 'hidden', :value => check_archive_status_path(@project), :id=> 'check-archive'}
 %input{:type => 'hidden', :value => download_project_path(@project), :id=> 'download-project'}
 = link_to "Download Project", archive_project_path(@project), :class => 'btn', :id => 'archive-project-btn'
-- if session[:has_attached_files]
-  = link_to "Browse Attached Files", browse_attached_files_path(@project), :class => 'btn'
 = link_to "Edit Project Setting", edit_project_setting_path(@project), :class => 'btn'
 = link_to "Search Archaeological Entity Records", search_arch_ent_records_path(@project), :class => 'btn'
 = link_to "Search Relationship Records", search_rel_records_path(@project), :class => 'btn'
