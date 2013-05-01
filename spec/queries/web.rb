@@ -228,4 +228,43 @@ describe 'Web Database Queries' do
       end
     }.should_not raise_error
   end
+
+  it 'Get multi-valued arch ent attributes' do
+    expected = [[1000011365058823906, "34768", 37392, "location", "Loc C", nil, "foo", 0.46, "dropdown"],
+                [1000011365058823906, "34768", 37776, "location", "Loc D", nil, "foo", 0.46, "dropdown"],
+                [1000011365058823906, "17136", nil, "name", nil, nil, "Brian", nil, "string"],
+                [1000011365058823906, "38416", 40272, "picture", "cugl69808.jpg", nil, "", 1.0, "dropdown"],
+                [1000011365058823906, "53296", nil, "supervisor", nil, nil, "superc", 1.0, "radiogroup"],
+                [1000011365058823906, "29344", nil, "timestamp", nil, nil, "2013-04-04 17:59:58", nil, "timestamp"],
+                [1000011365058823906, "31072", 33744, "type", "Type C", nil, "", 1.0, "checklist"]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.get_arch_entity_attributes, '1000011365058823906')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Get multi-valued arch ent attributes' do
+    expected = [[1000011365058823908, 37392, "34768", "location", nil, 1.0, "Loc C", 21904, "dropdown"],
+                [1000011365058823908, 37776, "34768", "location", nil, 1.0, "Loc D", 21904, "dropdown"],
+                [1000011365058823908, nil, "17136", "name", "Bar!", 1.0, nil, 21904, "string"],
+                [1000011365058823908, nil, "29344", "timestamp", "2013-4-30", 1.0, nil, 21904, "timestamp"]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.get_relationship_attributes, '1000011365058823908')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
 end

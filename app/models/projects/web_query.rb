@@ -109,11 +109,19 @@ EOF
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
 SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype
-from aentvalue join attributekey using(attributeid)
-  LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-where uuid = ? and deleted is null
-GROUP BY uuid, attributeid
-HAVING max(ValueTimestamp) order by uuid, attributename asc;
+    FROM aentvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+    JOIN (SELECT uuid, attributeid, valuetimestamp
+            FROM aentvalue
+            JOIN archentity USING (uuid)
+           WHERE archentity.deleted is NULL
+           AND uuid = ?
+        GROUP BY uuid, attributeid
+          HAVING MAX(ValueTimestamp)
+             AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
+    WHERE deleted is NULl
+ ORDER BY uuid, attributename ASC;
 EOF
     )
   end
@@ -242,11 +250,20 @@ EOF
   def self.get_relationship_attributes
     cleanup_query(<<EOF
 SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype
-from relnvalue r join attributekey using(attributeid) join relationship using(relationshipid)
-LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-where r.relationshipid = ? and r.deleted is null
-GROUP BY relationshipid, attributeid
-HAVING max(relnvaluetimestamp) order by relationshipid, attributename asc;
+    FROM relnvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid
+             FROM relnvalue
+             JOIN relationship USING (relationshipid)
+            WHERE relationship.deleted is NULL
+            and relationshipid = ?
+         GROUP BY relationshipid, attributeid
+           HAVING MAX(relnvaluetimestamp)
+              AND MAX(relntimestamp)
+      ) USING (relationshipid, attributeid, relnvaluetimestamp)
+   WHERE relnvalue.deleted is NULL
+ORDER BY relationshipid, attributename asc;
 EOF
     )
   end
@@ -408,9 +425,8 @@ insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, mea
 insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, versionnum, geospatialcolumn, deleted) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, '#{version}', geospatialcolumn, deleted from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
 insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, versionnum, certainty, deleted) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, '#{version}', certainty, deleted from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
 insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, versionnum, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, '#{version}', deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
-detach database import;
-
 update version set ismerged = 1 where versionnum = '#{version}';
+detach database import;
 EOF
     )
   end
@@ -439,7 +455,7 @@ EOF
     cleanup_query(<<EOF
 attach database "#{toDB}" as export;
 create table export.archentity as select uuid, aenttimestamp, userid, doi, deleted, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum >= '#{version}';
-create table export.aentvalue as select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, deleted from aentvalue where versionnum >= #{version};
+create table export.aentvalue as select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, deleted from aentvalue where versionnum >= '#{version}';
 create table export.relationship as select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from relationship where versionnum >= '#{version}';
 create table export.relnvalue as select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty, deleted from relnvalue where versionnum >= '#{version}';
 create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln where versionnum >= '#{version}';
