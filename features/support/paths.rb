@@ -125,6 +125,9 @@ module NavigationHelpers
         project = Project.find_by_name($1)
         android_data_file_upload_path(project ? project.key : "na")
 
+      when /upload data files page$/
+        project_file_list_path
+
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:
 #

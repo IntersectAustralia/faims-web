@@ -12,51 +12,73 @@ Feature: Project file manager
     And I have a projects dir
 
   Scenario: Add project files
-    Given I am on the home page
+    Given I am on upload data files page
+    Given I upload data files
+      | files |
+      | test1 |
+      | test2 |
+      | test3 |
+    Then I should see data files
+      | files |
+      | test1 |
+      | test2 |
+      | test3 |
 
   Scenario: Add project directories
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Add project files within directories
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Delete project files
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Delete project directories
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Cannot add project file if project doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Cannot add project file if file doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
+
+  Scenario: Cannot add project file if file already exists
+    Given I am on upload data files page
 
   Scenario: Cannot add directory if project doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Cannot add directory if directory not specified
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario Outline: Cannot add directory if directory is not valid
-    Given I am on the home page
+    Given I am on upload data files page
   Examples:
     | directories |
 
   Scenario: Cannot add file within directory if directory doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
+
+  Scenario: Cannot add file within directory if directory already exists
+    Given I am on upload data files page
 
   Scenario: Cannot delete file if project doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Cannot delete file if file doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Cannot delete dir if project doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
 
   Scenario: Cannot delete dir if dir doesn't exist
-    Given I am on the home page
+    Given I am on upload data files page
+
+  Scenario: Cannot delete dir if dir files in directory
+    Given I am on upload data files page
+
+  Scenario: Cannot delete root directory
+    Given I am on upload data files page
 
 
 
