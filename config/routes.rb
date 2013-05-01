@@ -20,15 +20,18 @@ FaimsWeb::Application.routes.draw do
     end
   end
 
-  resources :jqueryfiletree
-  post 'jqueryfiletree/content', :to => 'jqueryfiletree#content', :as => 'content'
-
   devise_scope :project do
     get 'projects/upload_project', :to => 'projects#upload_project', :as => 'upload_project'
     post 'projects/upload_new_project', :to => 'projects#upload_new_project', :as => 'upload_new_project'
   end
 
   resources :projects
+
+  get 'projects/:id/file_list', :to => 'file_manager#file_list', :as => 'project_file_list'
+  get 'projects/:id/download_file', :to => 'file_manager#download_file', :as => 'download_project_file'
+  post 'projects/:id/upload_file', :to => 'file_manager#upload_file', :as => 'upload_project_file'
+  post 'projects/:id/create_dir', :to => 'file_manager#create_dir', :as => 'project_create_dir'
+  match 'projects/:id/delete_file', :to => 'file_manager#delete_file', :as => 'delete_project_file'
 
   get 'projects/:id/edit_project_setting', :to => 'projects#edit_project_setting', :as => 'edit_project_setting'
   post 'projects/:id/edit_project_setting', :to => 'projects#update_project_setting', :as => 'update_project_setting'
@@ -70,7 +73,7 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/select_rel', :to => 'projects#select_rel', :as => 'select_rel'
 
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
-  
+
   get 'android/project/:key/settings_archive', :to => 'android#settings_archive', :as => 'android_settings_archive'
   get 'android/project/:key/settings_download', :to => 'android#settings_download', :as => 'android_settings_download'
 

@@ -1,6 +1,7 @@
+require Rails.root.join('app/models/projects/database')
+
 class ProjectsController < ApplicationController
 
-  require File.expand_path('../../projects/models/database',__FILE__)
   before_filter :authenticate_user!
   load_and_authorize_resource
 

@@ -1,0 +1,9 @@
+- title 'Project files'
+- if @dir.nil? or @dir.empty?
+  ='No files found'
+- else
+  .file-manager= render :partial => 'dir_list', :locals => { dir: @dir }
+#loading.hidden.indicator
+  = image_tag 'loading.gif'
+  %p
+    %span Uploading file

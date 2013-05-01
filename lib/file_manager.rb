@@ -11,7 +11,7 @@ class FileManager
 	def add_dir(full_dir_path)
     fs = FileHelper.get_file_list(full_dir_path)
     fs.each do |file|
-      add_file(FileHelper.join(full_dir_path, file), File.dirname(file))
+      add_file(File.join(full_dir_path, file), File.dirname(file))
     end
     file_list
 	end

@@ -332,6 +332,13 @@ class Project < ActiveRecord::Base
     return nil
   end
 
+  def self.validate_directory(dir)
+    return false unless dir
+    return false if dir.blank?
+    return false unless dir =~ /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i
+    true
+  end
+
   def validate_version(version)
     return false unless version
     return false if version.to_i < 1
@@ -419,12 +426,17 @@ class Project < ActiveRecord::Base
     file_list.select { |f| !exclude_files.include? f }
   end
 
+  # NOTE this function behaves differently to add_app_file
   def add_data_file(file, path)
+    file_path = File.join(get_path(:data_files_dir), path)
+    return 'File already exists' if File.exists? file_path
     data_mgr.with_lock do
-      full_path = make_path(get_path(:data_files_dir), path)
-      FileUtils.cp(file.path, full_path)
+      dir = (File.directory? file_path) ? file_path : File.dirname(file_path)
+      FileUtils.mkdir_p dir
+      FileUtils.cp(file.path, file_path)
       data_mgr.make_dirt
     end
+    nil
   end
 
   def data_file_archive_info(exclude_files = nil)
@@ -450,6 +462,13 @@ class Project < ActiveRecord::Base
       TarHelper.untar('xfz', file.path, get_path(:data_files_dir))
       data_mgr.make_dirt
     end
+  end
+
+  def create_data_dir(dir)
+    full_dir = File.join(get_path(:data_files_dir), dir)
+    return 'Directory already exists' if File.directory? full_dir
+    FileUtils.mkdir_p full_dir
+    nil
   end
 
   def make_path(dir, path)
@@ -590,6 +609,19 @@ class Project < ActiveRecord::Base
     ensure
       FileUtils.rm_rf tmp_dir if tmp_dir
     end
+  end
+
+  def create_temp_dir_archive(dir)
+    tmp_dir = Dir.mktmpdir
+    files = FileHelper.get_file_list(dir).each do |file|
+      FileUtils.mkdir_p File.join(tmp_dir, File.dirname(file))
+      FileUtils.cp File.join(dir, file), File.join(tmp_dir, file)
+    end
+    tmp_file = Tempfile.new(['data_', '.tar.gz'])
+    TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
+    tmp_file.path
+  ensure
+    FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 
 end
