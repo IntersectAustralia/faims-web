@@ -69,8 +69,12 @@ class FileManager
 	end
 
 	def update_archive(args, path)
-		return true if @files.empty?
+    if @files.empty?
+      clean_dirt
+      return true
+    end
 		return true unless dirty?
+    FileUtils.rm path
     tmp_dir = Dir.mktmpdir
     with_lock do
       @files.each do |f|

@@ -179,6 +179,17 @@ class Project < ActiveRecord::Base
       info
   end
 
+  def android_archives_dirty?
+    settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty?
+  end
+
+  def update_android_archives
+    settings_mgr.update_archive('zcf', get_path(:settings_archive))
+    app_mgr.update_archive('zcf', get_path(:app_files_archive))
+    data_mgr.update_archive('zcf', get_path(:data_files_archive))
+    archive_database
+  end
+
   def generate_archives
     db_mgr.make_dirt
     settings_mgr.make_dirt
