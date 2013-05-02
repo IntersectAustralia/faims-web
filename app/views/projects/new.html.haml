@@ -1,32 +1,32 @@
 .container
-  = simple_form_for @project, :url => projects_path, :method => "post", :multipart => true do |f|
+  = simple_form_for @project, :url => projects_path, :method => 'post', :multipart => true do |f|
     %ul.tabs
       %li.settings
         .step-container
           .number-circle 1
           .step-body
             %h4 Static Data
-            = f.label :name, "Project Name:"
+            = f.label :name, 'Project Name:'
             = f.text_field :name
             = f.error :name
             %p
-            = f.label :season, "Project Season:"
+            = f.label :season, 'Project Season:'
             = f.text_field :season, :value => session[:season]
             %p
-            = f.label :description, "Project Description:"
-            = f.text_area :description, :size => "40x5", :class => 'project-textarea', :value => session[:description]
+            = f.label :description, 'Project Description:'
+            = f.text_area :description, :size => '40x5', :class => 'project-textarea', :value => session[:description]
             %p
-            = f.label :permit_no, "Permit No:"
+            = f.label :permit_no, 'Permit No:'
             = f.text_field :permit_no, :value => session[:permit_no]
             %p
-            = f.label :permit_holder, "Permit Holder:"
-            = f.text_area :permit_holder, :size => "40x5", :class => 'project-textarea', :value => session[:permit_holder]
+            = f.label :permit_holder, 'Permit Holder:'
+            = f.text_area :permit_holder, :size => '40x5', :class => 'project-textarea', :value => session[:permit_holder]
             %p
-            = f.label :contact_address, "Contact and Address:"
-            = f.text_area :contact_address, :size => "40x5", :class => 'project-textarea', :value => session[:contact_address]
+            = f.label :contact_address, 'Contact and Address:'
+            = f.text_area :contact_address, :size => '40x5', :class => 'project-textarea', :value => session[:contact_address]
             %p
-            = f.label :participant, "Participants:"
-            = f.text_area :participant, :size => "40x5", :class => 'project-textarea', :value => session[:participant]
+            = f.label :participant, 'Participants:'
+            = f.text_area :participant, :size => '40x5', :class => 'project-textarea', :value => session[:participant]
       %li.upload
         .step-container
           .number-circle 2
@@ -36,7 +36,7 @@
               - if session[:data_schema]
                 %span.uploaded-inline Data Schema Uploaded!
               - else
-                = f.label :data_schema, "Data Schema:"
+                = f.label :data_schema, 'Data Schema:'
                 = f.file_field :data_schema
                 = f.error :data_schema
             .step-body
@@ -44,7 +44,7 @@
               - if session[:ui_schema]
                 %span.uploaded-inline UI Schema Uploaded!
               - else
-                = f.label :ui_schema, "UI Schema:"
+                = f.label :ui_schema, 'UI Schema:'
                 = f.file_field :ui_schema
                 = f.error :ui_schema
             .step-body
@@ -52,7 +52,7 @@
               - if session[:ui_logic]
                 %span.uploaded-inline UI Logic Uploaded!
               - else
-                = f.label :ui_logic, "UI Logic:"
+                = f.label :ui_logic, 'UI Logic:'
                 = f.file_field :ui_logic
                 = f.error :ui_logic
             .step-body
@@ -60,14 +60,14 @@
               - if session[:arch16n]
                 %span.uploaded-inline Arch16n Uploaded!
               - else
-                = f.label :arch16n, "Arch16n:"
+                = f.label :arch16n, 'Arch16n:'
                 = f.file_field :arch16n
                 = f.error :arch16n
           .form-actions
-            = f.submit "Submit", :class => "btn btn-primary", :id => "submit-project-btn"
-            = link_to "Clear", new_project_path, :class => "btn"
+            = f.submit 'Submit', :class => 'btn btn-primary', :id => 'submit-project-btn'
+            = link_to 'Clear', new_project_path, :class => 'btn'
 
 #loading.hidden.indicator
-  = image_tag "loading.gif"
+  = image_tag 'loading.gif'
   %p
     %span Creating Project

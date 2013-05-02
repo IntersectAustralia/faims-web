@@ -2,15 +2,15 @@ def create_roles_and_users
   Role.delete_all
   User.delete_all
 
-  superuser = "superuser"
+  superuser = 'superuser'
   Role.create!(:name => superuser)
 
-  create_user(first_name: "Faims",
-              last_name: "Admin",
-              email: "faimsadmin@intersect.org.au",
-              password: "Pass.123",
-              password: "Pass.123")
-  set_role("faimsadmin@intersect.org.au", "superuser")
+  create_user(first_name: 'Faims',
+              last_name: 'Admin',
+              email: 'faimsadmin@intersect.org.au',
+              password: 'Pass.123',
+              password: 'Pass.123')
+  set_role('faimsadmin@intersect.org.au', 'superuser')
 
 end
 

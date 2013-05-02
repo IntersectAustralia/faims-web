@@ -24,6 +24,8 @@ class Project < ActiveRecord::Base
     projects_dir = Project.projects_path
     uploads_dir = Project.uploads_path
     project_dir = projects_dir + "/#{key}/"
+    n = name.gsub(/\s+/, '_') if name
+    n ||= ''
     @file_map = {
         projects_dir: { name: 'projects', path: projects_dir },
         uploads_dir: { name: 'uploads', path: uploads_dir },
@@ -34,13 +36,13 @@ class Project < ActiveRecord::Base
         db: { name: 'db.sqlite3', path: project_dir + 'db.sqlite3' },
         settings: { name: 'project.settings', path: project_dir + 'project.settings' },
         properties: { name: 'faims.properties', path: project_dir + 'faims.properties' },
-        project_properties: { name: "faims_#{name}.properties", path: project_dir + "faims_#{name}.properties" },
+        project_properties: { name: "faims_#{n}.properties", path: project_dir + "faims_#{n}.properties" },
         files_dir: { name: 'files', path: project_dir + 'files/' },
         server_files_dir: { name: 'server', path: project_dir + 'files/server/' },
         app_files_dir: { name: 'app', path: project_dir + 'files/app/' },
         data_files_dir: { name: 'data', path: project_dir + 'files/data/' },
         tmp_dir: { name: 'tmp', path: project_dir + 'tmp/' },
-        package_archive: { name: "#{name}.tar.bz2", path: project_dir + "tmp/#{name}.tar.bz2" },
+        package_archive: { name: "#{n}.tar.bz2", path: project_dir + "tmp/#{n}.tar.bz2" },
         db_archive: { name: 'db.tar.gz', path: project_dir + 'tmp/db.tar.gz' },
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
@@ -59,8 +61,7 @@ class Project < ActiveRecord::Base
   end
 
   def name
-    n = read_attribute(:name)
-    n.gsub(/\s+/, '_') if n
+    read_attribute(:name)
   end
 
   def name=(value)
@@ -176,6 +177,17 @@ class Project < ActiveRecord::Base
       v = db.current_version.to_i
       info = info.merge({ :version => v.to_s }) if v > 0
       info
+  end
+
+  def android_archives_dirty?
+    settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty?
+  end
+
+  def update_android_archives
+    settings_mgr.update_archive('zcf', get_path(:settings_archive))
+    app_mgr.update_archive('zcf', get_path(:app_files_archive))
+    data_mgr.update_archive('zcf', get_path(:data_files_archive))
+    archive_database
   end
 
   def generate_archives
@@ -332,6 +344,13 @@ class Project < ActiveRecord::Base
     return nil
   end
 
+  def self.validate_directory(dir)
+    return false unless dir
+    return false if dir.blank?
+    return false unless dir =~ /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i
+    true
+  end
+
   def validate_version(version)
     return false unless version
     return false if version.to_i < 1
@@ -419,12 +438,17 @@ class Project < ActiveRecord::Base
     file_list.select { |f| !exclude_files.include? f }
   end
 
+  # NOTE this function behaves differently to add_app_file
   def add_data_file(file, path)
+    file_path = File.join(get_path(:data_files_dir), path)
+    return 'File already exists' if File.exists? file_path
     data_mgr.with_lock do
-      full_path = make_path(get_path(:data_files_dir), path)
-      FileUtils.cp(file.path, full_path)
+      dir = (File.directory? file_path) ? file_path : File.dirname(file_path)
+      FileUtils.mkdir_p dir
+      FileUtils.cp(file.path, file_path)
       data_mgr.make_dirt
     end
+    nil
   end
 
   def data_file_archive_info(exclude_files = nil)
@@ -450,6 +474,13 @@ class Project < ActiveRecord::Base
       TarHelper.untar('xfz', file.path, get_path(:data_files_dir))
       data_mgr.make_dirt
     end
+  end
+
+  def create_data_dir(dir)
+    full_dir = File.join(get_path(:data_files_dir), dir)
+    return 'Directory already exists' if File.directory? full_dir
+    FileUtils.mkdir_p full_dir
+    nil
   end
 
   def make_path(dir, path)
@@ -531,6 +562,8 @@ class Project < ActiveRecord::Base
       ensure
         # cleanup
         FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+        db_mgr.clean_dirt
       end
     end
   end
@@ -590,6 +623,19 @@ class Project < ActiveRecord::Base
     ensure
       FileUtils.rm_rf tmp_dir if tmp_dir
     end
+  end
+
+  def create_temp_dir_archive(dir)
+    tmp_dir = Dir.mktmpdir
+    files = FileHelper.get_file_list(dir).each do |file|
+      FileUtils.mkdir_p File.join(tmp_dir, File.dirname(file))
+      FileUtils.cp File.join(dir, file), File.join(tmp_dir, file)
+    end
+    tmp_file = Tempfile.new(['data_', '.tar.gz'])
+    TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
+    tmp_file.path
+  ensure
+    FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 
 end

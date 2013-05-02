@@ -1,0 +1,34 @@
+.dir
+  - dir.each do |name, files|
+    .dir-header
+      - if name == '.'
+        %h4.inline= link_to('data', download_project_file_path({path: File.join(name)}))
+      - else
+        %h4.inline= link_to(File.basename(name), download_project_file_path({path: File.join(name)}))
+        = link_to(raw('<i class="inline icon-remove-sign"></i>'), delete_project_file_path({path: File.join(name)}))
+        .clear
+    %ul.dir-body
+      - files.each do |file|
+        - if file.class == Hash
+          = render :partial => 'dir_list', :locals => {dir:file}
+        - else
+          %li.inline= link_to(File.basename(file), download_project_file_path({path: File.join(name, file)}))
+          = link_to(raw('<i class="delete-icon icon-remove-sign"></i>'), delete_project_file_path({path: File.join(name, file)}))
+          .clear
+      .upload-container
+        =link_to('upload file', '', :class => 'btn btn-mini upload-btn')
+        .file-upload-form
+          = simple_form_for :file_manager, :url => upload_project_file_path({path:name}), :method => 'post', :multipart => true do |f|
+            = f.file_field 'file'
+            .clear
+            = f.submit 'Submit', :class => 'btn btn-mini upload-submit-btn'
+            .inline= link_to 'Cancel', '', :class => 'btn btn-mini upload-cancel-btn'
+      .create-container
+        = link_to('create directory', '', :class => 'btn btn-mini create-btn')
+        .create-dir-form
+          = simple_form_for :file_manager, :url => project_create_dir_path({path:name}), :method => 'post', :multipart => true do |f|
+            = f.label 'Directory:'
+            .inline= f.text_field 'dir'
+            .clear
+            = f.submit 'Submit', :class => 'btn btn-mini create-submit-btn'
+            .inline= link_to 'Cancel', '', :class => 'btn btn-mini create-cancel-btn'

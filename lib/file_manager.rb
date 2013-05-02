@@ -11,7 +11,7 @@ class FileManager
 	def add_dir(full_dir_path)
     fs = FileHelper.get_file_list(full_dir_path)
     fs.each do |file|
-      add_file(FileHelper.join(full_dir_path, file), File.dirname(file))
+      add_file(File.join(full_dir_path, file), File.dirname(file))
     end
     file_list
 	end
@@ -69,8 +69,12 @@ class FileManager
 	end
 
 	def update_archive(args, path)
-		return true if @files.empty?
+    if @files.empty?
+      clean_dirt
+      return true
+    end
 		return true unless dirty?
+    FileUtils.rm path if File.exists? path
     tmp_dir = Dir.mktmpdir
     with_lock do
       @files.each do |f|

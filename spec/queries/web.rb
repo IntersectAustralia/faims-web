@@ -267,4 +267,5 @@ describe 'Web Database Queries' do
     end
     results.should =~ expected
   end
+
 end

@@ -156,6 +156,27 @@ describe Project do
     end
   end
 
+  it 'Create temp data archive for directory' do
+    begin
+      project = make_project('Project 1')
+      FileHelper.touch_file(project.get_path(:data_files_dir) + 'test1')
+      FileHelper.touch_file(project.get_path(:data_files_dir) + 'test2')
+      FileUtils.mkdir_p project.get_path(:data_files_dir) + 'dir1/dir2'
+      FileHelper.touch_file(project.get_path(:data_files_dir) + 'dir1/dir2/test3')
+      archive = project.create_temp_dir_archive(project.get_path(:data_files_dir))
+      tmp_dir = Dir.mktmpdir
+      `tar zxf #{archive} -C #{tmp_dir}`
+      entries = FileHelper.get_file_list(tmp_dir)
+      entries.include?('test1').should be_true
+      entries.include?('test2').should be_true
+      entries.include?('dir1/dir2/test3').should be_true
+    rescue Exception => e
+      raise e
+    ensure
+      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    end
+  end
+
   it 'Packaging project' do
     begin
       project = make_project('Project 1')
