@@ -12,73 +12,82 @@ Feature: Project file manager
     And I have a projects dir
 
   Scenario: Add project files
-    Given I am on upload data files page
-    Given I upload data files
-      | files |
-      | test1 |
-      | test2 |
-      | test3 |
-    Then I should see data files
-      | files |
-      | test1 |
-      | test2 |
-      | test3 |
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Add project directories
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Add project files within directories
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Delete project files
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Delete project directories
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot add project file if project doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot add project file if file doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot add project file if file already exists
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot add directory if project doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot add directory if directory not specified
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario Outline: Cannot add directory if directory is not valid
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
   Examples:
     | directories |
 
   Scenario: Cannot add file within directory if directory doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot add file within directory if directory already exists
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot delete file if project doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot delete file if file doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot delete dir if project doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot delete dir if dir doesn't exist
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot delete dir if dir files in directory
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
   Scenario: Cannot delete root directory
-    Given I am on upload data files page
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
 
 
 

@@ -204,6 +204,7 @@ And /^I have app files for "([^"]*)"$/ do |name, table|
   table.hashes.each do |row|
     project.add_app_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
   end
+  project.update_archives
 end
 
 And /^I have data files for "([^"]*)"$/ do |name, table|
@@ -211,6 +212,7 @@ And /^I have data files for "([^"]*)"$/ do |name, table|
   table.hashes.each do |row|
     project.add_data_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
   end
+  project.update_archives
 end
 
 Then /^I should see files$/ do |table|

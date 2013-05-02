@@ -24,6 +24,8 @@ class Project < ActiveRecord::Base
     projects_dir = Project.projects_path
     uploads_dir = Project.uploads_path
     project_dir = projects_dir + "/#{key}/"
+    n = name.gsub(/\s+/, '_') if name
+    n ||= ''
     @file_map = {
         projects_dir: { name: 'projects', path: projects_dir },
         uploads_dir: { name: 'uploads', path: uploads_dir },
@@ -34,13 +36,13 @@ class Project < ActiveRecord::Base
         db: { name: 'db.sqlite3', path: project_dir + 'db.sqlite3' },
         settings: { name: 'project.settings', path: project_dir + 'project.settings' },
         properties: { name: 'faims.properties', path: project_dir + 'faims.properties' },
-        project_properties: { name: "faims_#{name}.properties", path: project_dir + "faims_#{name}.properties" },
+        project_properties: { name: "faims_#{n}.properties", path: project_dir + "faims_#{n}.properties" },
         files_dir: { name: 'files', path: project_dir + 'files/' },
         server_files_dir: { name: 'server', path: project_dir + 'files/server/' },
         app_files_dir: { name: 'app', path: project_dir + 'files/app/' },
         data_files_dir: { name: 'data', path: project_dir + 'files/data/' },
         tmp_dir: { name: 'tmp', path: project_dir + 'tmp/' },
-        package_archive: { name: "#{name}.tar.bz2", path: project_dir + "tmp/#{name}.tar.bz2" },
+        package_archive: { name: "#{n}.tar.bz2", path: project_dir + "tmp/#{n}.tar.bz2" },
         db_archive: { name: 'db.tar.gz', path: project_dir + 'tmp/db.tar.gz' },
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
@@ -59,8 +61,7 @@ class Project < ActiveRecord::Base
   end
 
   def name
-    n = read_attribute(:name)
-    n.gsub(/\s+/, '_') if n
+    read_attribute(:name)
   end
 
   def name=(value)
@@ -176,6 +177,17 @@ class Project < ActiveRecord::Base
       v = db.current_version.to_i
       info = info.merge({ :version => v.to_s }) if v > 0
       info
+  end
+
+  def android_archives_dirty?
+    settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty?
+  end
+
+  def update_android_archives
+    settings_mgr.update_archive('zcf', get_path(:settings_archive))
+    app_mgr.update_archive('zcf', get_path(:app_files_archive))
+    data_mgr.update_archive('zcf', get_path(:data_files_archive))
+    archive_database
   end
 
   def generate_archives
@@ -550,6 +562,8 @@ class Project < ActiveRecord::Base
       ensure
         # cleanup
         FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+        db_mgr.clean_dirt
       end
     end
   end
