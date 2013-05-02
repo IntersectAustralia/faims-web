@@ -562,6 +562,8 @@ class Project < ActiveRecord::Base
       ensure
         # cleanup
         FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+
+        db_mgr.clean_dirt
       end
     end
   end

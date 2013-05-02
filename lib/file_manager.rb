@@ -74,7 +74,7 @@ class FileManager
       return true
     end
 		return true unless dirty?
-    FileUtils.rm path
+    FileUtils.rm path if File.exists? path
     tmp_dir = Dir.mktmpdir
     with_lock do
       @files.each do |f|
