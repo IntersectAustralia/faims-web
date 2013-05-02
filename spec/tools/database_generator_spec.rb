@@ -8,11 +8,11 @@ describe Database do
     Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'data_schema.xml').to_s)
     db = SpatialiteDB.new(tempfile.path)
     result = db.execute("select count(*) || 'ideal arch ent' from idealAEnt union select count(*) || 'ideal reln'  from idealreln union select count(*) || 'aent type' from aenttype union select count(*) || 'relntype' from relntype union select count(*) || 'attributekey'  from attributekey;")
-    result[0].should == ['2aent type']
-    result[1].should == ['30attributekey']
+    result[0].should == ['37attributekey']
+    result[1].should == ['3aent type']
     result[2].should == ['3ideal reln']
     result[3].should == ['3relntype']
-    result[4].should == ['46ideal arch ent']
+    result[4].should == ['53ideal arch ent']
     tempfile.unlink
   end
 

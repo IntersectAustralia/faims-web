@@ -4,17 +4,17 @@
     <html>
       <body>
         <ul>
-          <li>
-delete from IdealAEnt;</li>
-          <li>
-delete from IdealReln;</li>
-          <li>
-delete from AEntType;</li>
-          <li>
-delete from RelnType;</li>
-          <li>
-delete from Attributekey;
-          </li>
+          <!--<li>-->
+<!--delete from IdealAEnt;</li>-->
+          <!--<li>-->
+<!--delete from IdealReln;</li>-->
+          <!--<li>-->
+<!--delete from AEntType;</li>-->
+          <!--<li>-->
+<!--delete from RelnType;</li>-->
+          <!--<li>-->
+<!--delete from Attributekey;-->
+          <!--</li>-->
           <xsl:for-each select="//property[count(. | key('properties', @name)[1]) = 1]">
             <li>
 INSERT INTO AttributeKey(AttributeID, AttributeType, AttributeName, AttributeDescription)

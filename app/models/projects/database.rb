@@ -174,6 +174,8 @@ class Database
     db.execute_batch(content)
     data_definition = XSLTParser.parse_data_schema(xml)
     db.execute_batch(data_definition)
+    gps_definition = XSLTParser.parse_data_schema(Rails.root.join('lib/assets/gps_schema.xml'))
+    db.execute_batch(gps_definition)
   end
 
   # Testing
