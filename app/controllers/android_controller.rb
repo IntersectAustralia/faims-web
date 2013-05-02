@@ -120,8 +120,12 @@ class AndroidController < ApplicationController
   def app_file_list
     project = Project.find_by_key(params[:key])
 
-    files = project.app_file_list
-    render :json => {files:files}.to_json
+    if project.app_mgr.dirty?
+      render :json => {message: 'archiving files' }.to_json, :status => 503
+    else
+      files = project.app_file_list
+      render :json => {files:files}.to_json
+    end
   end
 
   def app_file_archive
@@ -131,8 +135,8 @@ class AndroidController < ApplicationController
     return render :json => {message: 'no files to download' }.to_json, :status => 400 if project.app_file_list.size == 0
 
     if project.app_mgr.dirty?
-      project.app_file_archive_info(files)
-      return render :json => {message: 'archiving files' }.to_json, :status => 503
+      project.delay.app_file_archive_info(files)
+      render :json => {message: 'archiving files' }.to_json, :status => 503
     else
       info = project.app_file_archive_info(files)
       render :json => info.to_json
@@ -175,8 +179,12 @@ class AndroidController < ApplicationController
   def data_file_list
     project = Project.find_by_key(params[:key])
 
-    files = project.data_file_list
-    render :json => {files:files}.to_json
+    if project.data_mgr.dirty?
+      render :json => {message: 'archiving files' }.to_json, :status => 503
+    else
+      files = project.data_file_list
+      render :json => {files:files}.to_json
+    end
   end
 
   def data_file_archive
@@ -184,8 +192,8 @@ class AndroidController < ApplicationController
     files = params[:files]
 
     if project.data_mgr.dirty?
-      project.data_file_archive_info(files)
-      return render :json => {message: 'archiving files' }.to_json, :status => 503
+      project.delay.data_file_archive_info(files)
+      render :json => {message: 'archiving files' }.to_json, :status => 503
     else
       info = project.data_file_archive_info(files)
       render :json => info.to_json
