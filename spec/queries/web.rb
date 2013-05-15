@@ -230,13 +230,33 @@ describe 'Web Database Queries' do
   end
 
   it 'Get multi-valued arch ent attributes' do
-    expected = [[1000011365058823906, "34768", 37392, "location", "Loc C", nil, "foo", 0.46, "dropdown"],
-                [1000011365058823906, "34768", 37776, "location", "Loc D", nil, "foo", 0.46, "dropdown"],
-                [1000011365058823906, "17136", nil, "name", nil, nil, "Brian", nil, "string"],
-                [1000011365058823906, "38416", 40272, "picture", "cugl69808.jpg", nil, "", 1.0, "dropdown"],
-                [1000011365058823906, "53296", nil, "supervisor", nil, nil, "superc", 1.0, "radiogroup"],
-                [1000011365058823906, "29344", nil, "timestamp", nil, nil, "2013-04-04 17:59:58", nil, "timestamp"],
-                [1000011365058823906, "31072", 33744, "type", "Type C", nil, "", 1.0, "checklist"]]
+    expected = [[1000011365058823906,"34768",37008,"location","Loc B",nil,nil,0.37,"dropdown"],
+                [1000011365058823906,"34768",37392,"location","Loc C",nil,nil,0.28,"dropdown"],
+                [1000011365058823906,"17136",nil,"name",nil,nil,"Indigo",0.72,"string"],
+                [1000011365058823906,"38416",40272,"picture","cugl69808.jpg",nil,"",0.83,"dropdown"],
+                [1000011365058823906,"53296",nil,"supervisor",nil,nil,"superc",0.55,"radiogroup"],
+                [1000011365058823906,"29344",nil,"timestamp",nil,nil,"2013-04-04 17:59:58",0.99,"timestamp"],
+                [1000011365058823906,"31072",33744,"type","Type C",nil,"",0.72,"checklist"],
+                [1000011365058823906,"27616",nil,"value",nil,17597,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,26099,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,151826,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,170587,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,200269,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,324373,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,339043,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,345945,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,399373,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,401755,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,459104,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,476048,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,612170,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,690870,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,756435,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,794183,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,814526,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,854547,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,893327,nil,1.0,"integer"],
+                [1000011365058823906,"27616",nil,"value",nil,969578,nil,1.0,"integer"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -251,10 +271,11 @@ describe 'Web Database Queries' do
   end
 
   it 'Get multi-valued arch ent attributes' do
-    expected = [[1000011365058823908, 37392, "34768", "location", nil, 1.0, "Loc C", 21904, "dropdown"],
-                [1000011365058823908, 37776, "34768", "location", nil, 1.0, "Loc D", 21904, "dropdown"],
-                [1000011365058823908, nil, "17136", "name", "Bar!", 1.0, nil, 21904, "string"],
-                [1000011365058823908, nil, "29344", "timestamp", "2013-4-30", 1.0, nil, 21904, "timestamp"]]
+    expected = [[1000011365058823908,37008,"34768","location",nil,1.0,"Loc B",21904,"dropdown"],
+                [1000011365058823908,37392,"34768","location",nil,1.0,"Loc C",21904,"dropdown"],
+                [1000011365058823908,37776,"34768","location",nil,1.0,"Loc D",21904,"dropdown"],
+                [1000011365058823908,nil,"17136","name","Jellyfish",1.0,nil,21904,"string"],
+                [1000011365058823908,nil,"29344","timestamp","2013-04-30 02:31:46",1.0,nil,21904,"timestamp"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -268,4 +289,148 @@ describe 'Web Database Queries' do
     results.should =~ expected
   end
 
+  it 'Load all arch entities with multi-value attributes' do
+    expected = [[1000011365058835006,"Simple","location","Loc A, Loc B, Loc C",37392,"34768","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","name","Ballsun-Stanton, Brian",nil,"17136","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","value","743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398",nil,"27616","2013-05-09 02:39:18",nil]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.load_all_arch_entities, '1', '0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Load all relationships with multi-value attributes' do
+    expected = [[1000011365058823908,"Similar","location","Loc B, Loc C, Loc D",37776,"34768","2013-05-06 07:26:20"],
+                [1000011365058823908,"Similar","name","Jellyfish",nil,"17136","2013-05-06 07:26:20"],
+                [1000011365058823908,"Similar","timestamp","2013-04-30 02:31:46",nil,"29344","2013-05-06 07:26:20"]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.load_all_relationships, '1', '0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Load typed arch entitites with multi-value attributes' do
+    expected = [[1000011365058835006,"Simple","location","Loc A, Loc B, Loc C",37392,"34768","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","name","Ballsun-Stanton, Brian",nil,"17136","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","value","743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398",nil,"27616","2013-05-09 02:39:18",nil]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.load_arch_entities, '24960', '1', '0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Load typed relationships with multi-value attributes' do
+    expected = [[1000011365058823908,"Similar","location","Loc B, Loc C, Loc D",37776,"34768","2013-05-06 07:26:20"],
+                [1000011365058823908,"Similar","name","Jellyfish",nil,"17136","2013-05-06 07:26:20"],
+                [1000011365058823908,"Similar","timestamp","2013-04-30 02:31:46",nil,"29344","2013-05-06 07:26:20"]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.load_relationships, '21904', '1', '0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Search arch entities with multi-value attributes' do
+    expected = [[1000011365058835006,"Simple","location","Loc A, Loc B, Loc C",37392,"34768","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","name","Ballsun-Stanton, Brian",nil,"17136","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","value","743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398",nil,"27616","2013-05-09 02:39:18",nil]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.search_arch_entity, 'all','all','all','1','0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Search relationships with multi-value attributes' do
+    expected = [[1000011365058823908,"location","Loc B, Loc C, Loc D","Loc D"],
+                [1000011365058823908,"name","Jellyfish",nil],
+                [1000011365058823908,"timestamp","2013-04-30 02:31:46",nil]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.search_relationship, 'jelly','jelly','1','0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Search arch entities in relationship with multi-value attributes' do
+    expected = [[1000011365058824906,"Simple","location","Loc B",37008,"34768","2013-05-06 04:12:15",nil],
+                [1000011365058824906,"Simple","name","George",nil,"17136","2013-05-06 04:12:15",nil],
+                [1000011365058824906,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-06 04:12:15",nil],
+                [1000011365058824906,"Simple","value","192085, 299389, 459881, 870754, 552986, 51695, 36604, 797887, 895371, 989115, 122847, 879369, 407630, 917785, 84160, 868460, 852297, 953002, 908303, 376222",nil,"27616","2013-05-06 04:12:15",nil],
+                [1000011365058825006,"Simple","location","Loc B, Loc D",37776,"34768","2013-05-06 04:12:15",nil],
+                [1000011365058825006,"Simple","name","Charles",nil,"17136","2013-05-06 04:12:15",nil],
+                [1000011365058825006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-06 04:12:15",nil],
+                [1000011365058825006,"Simple","value","78730, 751081, 348180, 288063, 911309, 799634, 796203, 241568, 464467, 985003, 164923, 331021, 828669, 752685, 586776, 906705, 182690, 136131, 573983, 855194",nil,"27616","2013-05-06 04:12:15",nil]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.get_arch_entities_in_relationship, '1000011365058824909','2','0')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
+
+  it 'Search arch entities not in relationship with multi-value attributes' do
+    expected = [[1000011365058835006,"Simple","location","Loc A, Loc B, Loc C",37392,"34768","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","name","Ballsun-Stanton, Brian",nil,"17136","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-09 02:39:18",nil],
+                [1000011365058835006,"Simple","value","743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398",nil,"27616","2013-05-09 02:39:18",nil]]
+    begin
+      temp_file = Tempfile.new('db')
+      FileUtils.cp(test_multivalued_db, temp_file.path)
+      db = SpatialiteDB.new(temp_file.path)
+      results = db.execute(WebQuery.get_arch_entities_not_in_relationship, 'all','all','all','1','0','1000011365058824909')
+    rescue Exception => e
+      raise e
+    ensure
+      temp_file.unlink if temp_file
+    end
+    results.should =~ expected
+  end
 end
