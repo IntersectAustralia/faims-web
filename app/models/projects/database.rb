@@ -26,8 +26,15 @@ class Database
 
   def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id, attribute_id, measure, freetext, certainty, current_timestamp)
+      currenttime = current_timestamp
+      @db.execute(WebQuery.insert_version, currenttime)
+      measure.length.times do |i|
+        if vocab_id.blank?
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+        else
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+        end
+      end
       @project.db_mgr.make_dirt
     end
   end
@@ -58,8 +65,16 @@ class Database
 
   def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id, freetext, certainty, current_timestamp)
+      currenttime = current_timestamp
+      @db.execute(WebQuery.insert_version, currenttime)
+      freetext.length.times do |i|
+        if vocab_id.blank?
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime)
+        else
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
+        end
+
+      end
       @project.db_mgr.make_dirt
     end
   end

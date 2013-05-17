@@ -282,12 +282,13 @@ SELECT relationshipid, attributename, coalesce(group_concat(vocabname, ', '), gr
                                               FROM relationship
                                           GROUP BY relationshipid
                                             HAVING max(relntimestamp))
-                                      JOIN (SELECT relationshipid, attributeid, vocabid, freetext, max(relnvaluetimestamp) as relnvaluetimestamp
+                                      JOIN (SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
                                               FROM relnvalue
                                              WHERE deleted is null
-                                          GROUP BY relationshipid, attributeid
+                                          GROUP BY relationshipid, attributeid, vocabid
                                             HAVING max(relnvaluetimestamp)
                                         ) USING (relationshipid)
+                                      JOIN relnvalue using (relationshipid, attributeid, relnvaluetimestamp)
                                       LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
                                      WHERE relnDeleted is null
                                        AND (freetext LIKE '%'||?||'%'
@@ -309,7 +310,7 @@ SELECT relationshipid, attributename, coalesce(group_concat(vocabname, ', '), gr
    JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)
   WHERE relnvalue.deleted is NULL
 GROUP BY relationshipid, attributeid, relnvaluetimestamp
-ORDER BY max(tstamp,astamp) desc, relationshipid, attributename
+ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;
 EOF
     )
   end

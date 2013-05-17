@@ -7,33 +7,36 @@
   = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
 = link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0&relntypeid=" + @attributes[0][7].to_s, :class => 'btn'
 .container
-  - for attribute in @attributes
-    = simple_form_for @project, :url => update_rel_records_path, :method => "post" do|f|
+  - attributeGroup = @attributes.group_by{|a|a[3]}
+  - attributeGroup.each do |key,val|
+    = simple_form_for :attr, :url => update_rel_records_path, :method => "post" do|f|
       .step-container
         .step-body{:style => "width: 700px;"}
           .arch_ent_record_content
-            = f.hidden_field :relationshipid, :value => attribute[0]
-            = f.hidden_field :attribute_id, :value => attribute[2]
+            = f.hidden_field :relationshipid, :value => val[0][0]
+            = f.hidden_field :attribute_id, :value => val[0][2]
             %table
               %tr
-                %td=attribute[3]
-              %tr
-              - if !@vocab_name[attribute[2]].empty?
                 %td
-                  = f.label :vocab_id, "Vocab:"
+                  %h5=key
+              - for attribute in val
+                %tr
+                - if !@vocab_name[attribute[2]].empty?
+                  %td
+                    = f.label :vocab_id, "Vocab:"
+                  %td
+                    - if attribute[1].blank?
+                      = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, input_html: {name: 'attr[vocab_id][]'}
+                    - else
+                      = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
                 %td
-                  - if attribute[1].blank?
-                    = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false
-                  - else
-                    = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1]
-              %td
-                = f.label :freetext, "Freetext:"
-              %td
-                = f.text_field :freetext, :value => attribute[4]
-              %td
-                = f.label :certainty, "Certainty:"
-              %td
-                = f.text_field :certainty, :value => attribute[5]
+                  = f.label :freetext, "Freetext:"
+                %td
+                  = f.text_field :freetext, :value => attribute[4], name: 'attr[freetext][]'
+                %td
+                  = f.label :certainty, "Certainty:"
+                %td
+                  = f.text_field :certainty, :value => attribute[5], name: 'attr[certainty][]'
             .form-actions
               = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
               = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'

@@ -115,11 +115,11 @@ class ProjectsController < ApplicationController
     end
 
     uuid = params[:uuid]
-    vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
-    attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
-    measure = !params[:project][:measure].blank? ? params[:project][:measure] : nil
-    freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
-    certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
+    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
+    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+    measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
+    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
+    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
     @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
 
@@ -221,10 +221,10 @@ class ProjectsController < ApplicationController
     end
 
     relationshipid = params[:relationshipid]
-    vocab_id = !params[:project][:vocab_id].blank? ? params[:project][:vocab_id] : nil
-    attribute_id = !params[:project][:attribute_id].blank? ? params[:project][:attribute_id] : nil
-    freetext = !params[:project][:freetext].blank? ? params[:project][:freetext] : nil
-    certainty = !params[:project][:certainty].blank? ? params[:project][:certainty] : nil
+    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
+    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
+    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
     @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
 
