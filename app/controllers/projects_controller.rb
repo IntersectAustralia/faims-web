@@ -112,23 +112,24 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+    else
+      uuid = params[:uuid]
+      vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
+      attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+      measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
+      freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
+      certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
+
+      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
+
+      @attributes = @project.db.get_arch_entity_attributes(uuid)
+      @vocab_name = {}
+      for attribute in @attributes
+        @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
+      end
+      render 'edit_arch_ent_records'
     end
 
-    uuid = params[:uuid]
-    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
-    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
-    measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
-    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
-    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
-
-    @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
-
-    @attributes = @project.db.get_arch_entity_attributes(uuid)
-    @vocab_name = {}
-    for attribute in @attributes
-      @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
-    end
-    render 'edit_arch_ent_records'
   end
 
   def delete_arch_ent_records
@@ -218,22 +219,23 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+    else
+      relationshipid = params[:relationshipid]
+      vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
+      attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+      freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
+      certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
+
+      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
+
+      @attributes = @project.db.get_rel_attributes(relationshipid)
+      @vocab_name = {}
+      for attribute in @attributes
+        @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
+      end
+      render 'edit_rel_records'
     end
 
-    relationshipid = params[:relationshipid]
-    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
-    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
-    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
-    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
-
-    @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
-
-    @attributes = @project.db.get_rel_attributes(relationshipid)
-    @vocab_name = {}
-    for attribute in @attributes
-      @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
-    end
-    render 'edit_rel_records'
   end
 
   def delete_rel_records
