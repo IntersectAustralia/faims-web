@@ -4,7 +4,7 @@ module WebQuery
 
   def self.load_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -50,7 +50,7 @@ EOF
 
   def self.load_all_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -93,7 +93,7 @@ EOF
 
   def self.search_arch_entity
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
