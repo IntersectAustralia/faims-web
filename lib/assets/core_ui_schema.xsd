@@ -139,6 +139,7 @@
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="FAIMS.Attrs">
+    <xsd:attribute name="faims_style" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_attribute_name" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_attribute_type" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_certainty" type="xsd:boolean" use="optional"/>
@@ -152,6 +153,7 @@
   </xsd:attributeGroup>
 
   <xsd:attributeGroup name="FAIMS.Optional">
+    <xsd:attribute name="faims_style" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_hidden" type="xsd:boolean" use="optional"/>
     <xsd:attribute name="faims_scrollable" type="xsd:boolean" use="optional"/>
   </xsd:attributeGroup>
@@ -403,6 +405,7 @@
           </xsd:restriction>
         </xsd:simpleType>
       </xsd:attribute>
+      <xsd:attribute name="type" type="xsd:string" use="optional"/>
       <xsd:attribute name="incremental" type="xsd:boolean" use="optional" default="true"/>
     </xsd:complexType>
   </xsd:element>
@@ -430,6 +433,7 @@
       <xsd:attributeGroup ref="xforms:Common.Attributes"/>
       <xsd:attributeGroup ref="xforms:Single.Node.Binding.Attributes"/>
       <xsd:attributeGroup ref="xforms:UI.Common.Attrs"/>
+      <xsd:attributeGroup ref="xforms:FAIMS.Attrs"/>
     </xsd:complexType>
   </xsd:element>
   <xsd:element name="output">
