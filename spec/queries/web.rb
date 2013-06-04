@@ -53,7 +53,7 @@ describe 'Web Database Queries' do
 
   it 'Delete Arch Entity' do
     lambda {
-      result = run_query(WebQuery.delete_arch_entity, timestamp, random_uuid)
+      result = run_query(WebQuery.delete_arch_entity, userid, random_uuid)
       result
     }.should_not raise_error
   end
@@ -94,9 +94,9 @@ describe 'Web Database Queries' do
     }.should_not raise_error
   end
 
-  it 'Delete Relationship Attribute' do
+  it 'Delete Relationship' do
     lambda {
-      result = run_query(WebQuery.delete_relationship, timestamp, random_relationship_id)
+      result = run_query(WebQuery.delete_relationship, userid, random_relationship_id)
       result
     }.should_not raise_error
   end

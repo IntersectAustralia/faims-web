@@ -42,7 +42,7 @@ class Database
   def delete_arch_entity(uuid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_arch_entity, current_timestamp, uuid)
+      @db.execute(WebQuery.delete_arch_entity, userid, uuid)
       @project.db_mgr.make_dirt
     end
   end
@@ -82,7 +82,7 @@ class Database
   def delete_relationship(relationshipid)
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_relationship, current_timestamp, relationshipid)
+      @db.execute(WebQuery.delete_relationship, userid, relationshipid)
       @project.db_mgr.make_dirt
     end
   end
@@ -214,6 +214,10 @@ class Database
 
   def current_timestamp
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
+  end
+
+  def userid
+    0
   end
 
 end

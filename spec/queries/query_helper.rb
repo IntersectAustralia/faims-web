@@ -104,6 +104,10 @@ def random_attribute_id_with_vocab
   0 # TODO
 end
 
+def userid
+  0
+end
+
 def timestamp
   Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
 end

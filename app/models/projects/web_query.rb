@@ -176,10 +176,18 @@ EOF
 
   def self.delete_arch_entity
     cleanup_query(<<EOF
-insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, deleted, versionnum)
-select uuid, userid,AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, ?,'true',
-  (select versionnum from version where ismerged = 1 order by versionnum desc limit 1)
-from archentity where uuid = ?
+insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
+                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum
+                  from (select uuid, max(aenttimestamp) as aenttimestamp
+                        from archentity
+                       where uuid = ?
+                       group by uuid)
+                  JOIN archentity using (uuid, aenttimestamp),  (select versionnum
+                           from version
+                          where ismerged = 1
+                       order by versionnum desc
+                       limit 1) v
+;
 EOF
     )
   end
@@ -346,10 +354,13 @@ EOF
 
   def self.delete_relationship
     cleanup_query(<<EOF
-insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, deleted, versionnum)
-select RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, ?,'true',
-  (select versionnum from version where ismerged = 1 order by versionnum desc limit 1)
-from relationship where RelationshipID = ?;
+insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
+  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum
+    from (select relationshipid, max(relntimestamp) as RelnTimestamp
+            from relationship
+          where relationshipID = ?
+          group by relationshipid
+          ) JOIN relationship using (relationshipid, relntimestamp), (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) v;
 EOF
     )
   end
