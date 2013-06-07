@@ -67,10 +67,10 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/remove_entity_to_compare/', :to => 'projects#remove_entity_to_compare', :as => 'remove_entity_to_compare'
 
   post 'projects/:id/compare_arch_ents', :to => 'projects#compare_arch_ents', :as => 'compare_arch_ents'
-  post 'projects/:id/select_arch_ents', :to => 'projects#select_arch_ents', :as => 'select_arch_ents'
+  post 'projects/:id/merge_arch_ents', :to => 'projects#merge_arch_ents', :as => 'merge_arch_ents'
 
   post 'projects/:id/compare_rel', :to => 'projects#compare_rel', :as => 'compare_rel'
-  post 'projects/:id/select_rel', :to => 'projects#select_rel', :as => 'select_rel'
+  post 'projects/:id/merge_rel', :to => 'projects#merge_rel', :as => 'merge_rel'
 
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
 

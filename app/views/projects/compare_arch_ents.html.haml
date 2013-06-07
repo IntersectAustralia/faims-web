@@ -1,3 +1,4 @@
+-compare_arch_entities(@first_uuid, @second_uuid, @timestamps[0],@timestamps[1], @project)
 %h1= @project.name + " - Compare Archaelogical Entity Records"
 - if session[:type]
   = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
@@ -5,72 +6,44 @@
   = link_to "Back", show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset=0", :class => 'btn'
 %p
 .content
-  %ul.compare
-    %li
-      %form{:method => 'post', :action => select_arch_ents_path(@project)}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'submit', :value => 'Select'}
-        %input{:type => 'hidden', :value => @second_arch_ent[0][0], :name => 'deleted_id'}
-        - for attribute in @first_arch_ent
-          .step-container
-            .step-body{:style => "width: 315px;"}
-              .arch_ent_record_content
-                %table
-                  %tr
-                    %td
-                      %h5=attribute[3]
-                  %tr
-                    - if !attribute[4].blank?
-                      %td
-                        %label Vocab:
-                      %td
-                        %input{:value => attribute[4], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Measure:
-                    %td
-                      %input{:value => attribute[5], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Freetext:
-                    %td
-                      %input{:value => attribute[6], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Certainty:
-                    %td
-                      %input{:value => attribute[7], :disabled => 'disabled'}
-    %li
-      %form{:method => 'post', :action => select_arch_ents_path(@project)}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'submit', :value => 'Select'}
-        %input{:type => 'hidden', :value => @first_arch_ent[0][0], :name => 'deleted_id'}
-        - for attribute in @second_arch_ent
-          .step-container
-            .step-body{:style => "width: 315px;"}
-              .arch_ent_record_content
-                %table
-                  %tr
-                    %td
-                      %h5=attribute[3]
-                  %tr
-                    - if !attribute[4].blank?
-                      %td
-                        %label Vocab:
-                      %td
-                        %input{:value => attribute[4], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Measure:
-                    %td
-                      %input{:value => attribute[5], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Freetext:
-                    %td
-                      %input{:value => attribute[6], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Certainty:
-                    %td
-                      %input{:value => attribute[7], :disabled => 'disabled'}
+  %form{:id => 'select-form'}
+    %table{:class => 'select-table'}
+      %tr
+        %tr
+          %td
+            %input{:type=> 'button', :id => 'select-first', :value => 'Select All', :class => 'btn'}
+          %td
+            %input{:type=> 'button', :id => 'select-second', :value => 'Select All', :class => 'btn'}
+        %td
+          %div.record-info
+            %h3 Entity
+            %span
+              = @firstInfo
+        %td
+          %div.record-info
+            %h3 Entity
+            %span
+              = @secondInfo
+      %tr
+        %td.first
+          %input{:type => 'checkbox', :name => 'uuid', :value => @first_uuid, :checked => 'checked'}
+          %input{:type => 'hidden', :name => 'deleted_id', :value => @second_uuid}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          = @identifiers[0]
+        %td.second
+          %input{:type => 'checkbox', :name => 'uuid', :value => @second_uuid}
+          %input{:type => 'hidden', :name => 'deleted_id', :value => @first_uuid}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          = @identifiers[1]
+      %tr
+        %td
+          %h3 Attributes
+        %td
+          %h3 Attributes
+      - @attributeKeys.each do |key,val|
+        %tr
+          %td.first
+            = render :partial => 'compare_arch_ent_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos }
+          %td.second
+            = render :partial => 'compare_arch_ent_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos }
+    = link_to "Merge", merge_arch_ents_path(@project), :id => 'merge-record', :class => 'btn'

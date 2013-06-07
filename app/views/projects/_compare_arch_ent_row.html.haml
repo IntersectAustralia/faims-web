@@ -1,0 +1,31 @@
+- if !group[key].blank?
+  %ul.inline
+    %li
+      - if (checked)
+        %input{:type => 'checkbox', :checked => 'checked'}
+      - else
+        %input{:type => 'checkbox'}
+    %li
+      .step-container
+        - if (val)
+          - if (checked)
+            .step-body.selected{:style => "width: 315px;"}
+              = render :partial => 'compare_arch_ent_row_content', :locals => { group: group, key: key }
+              %span.attribute-info
+                = attributeInfo[key]
+          - else
+            .step-body{:style => "width: 315px;"}
+              = render :partial => 'compare_arch_ent_row_content', :locals => { group: group, key: key }
+              %span.attribute-info
+                = attributeInfo[key]
+        - else
+          - if (checked)
+            .step-body.error.selected{:style => "width: 315px;"}
+              = render :partial => 'compare_arch_ent_row_content', :locals => { group: group, key: key }
+              %span.attribute-info
+                = attributeInfo[key]
+          - else
+            .step-body.error{:style => "width: 315px;"}
+              = render :partial => 'compare_arch_ent_row_content', :locals => { group: group, key: key }
+              %span.attribute-info
+                = attributeInfo[key]

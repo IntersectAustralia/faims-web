@@ -14,7 +14,7 @@
             %input{:type => 'text', :name => 'search_query', :value=> session[:search_query]}
           -else
             %input{:type => 'text', :name => 'search_query'}
-          %input{:type => 'submit', :value => "Search"}
+          %input{:type => 'submit', :value => "Search", :class => 'btn'}
         - if !@uuid.nil? and !@uuid.empty?
           - prev_uuid = @uuid[0][0]
           - uuid_array = []
@@ -42,13 +42,13 @@
                 %input{:type => 'hidden', :value => session[:relntypeid], :name => 'relntypeid'}
                 %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
                 %input{:type => 'hidden', :value => session[:search_query], :name => 'search_query'}
-                %input{:type => 'submit', :value => "Previous"}
+                %input{:type => 'submit', :value => "Previous", :class => 'btn'}
             %form{:action => search_arch_ent_member_path, :method => "get"}
               %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
               %input{:type => 'hidden', :value => session[:relntypeid], :name => 'relntypeid'}
               %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
               %input{:type => 'hidden', :value => session[:search_query], :name => 'search_query'}
-              %input{:type => 'submit', :value => "Next"}
+              %input{:type => 'submit', :value => "Next", :class => 'btn'}
         -else
           - if @status.eql?('init')
             %p Please enter keywords to search for a particular entity or leave the search empty to show all entities
@@ -62,4 +62,4 @@
             %option{:value => verb[0].to_s.strip}
               =verb[0].to_s.strip
         %input{:type => 'hidden', :id => 'relationshipid',:value => session[:relationshipid]}
-        %input{:type => 'button', :value=> 'Add Member', :id => 'add_arch_ent', :src => add_arch_ent_member_path(@project)}
+        %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-sent', :src => add_arch_ent_member_path(@project), :class => 'btn'}

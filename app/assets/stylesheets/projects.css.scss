@@ -68,7 +68,7 @@
   width: 375px;
 }
 
-ul.compare,
+ul.inline,
 ul.inner {
   list-style-type:none;
   margin:0;
@@ -80,12 +80,13 @@ ul.inner li {
   float:left;
 }
 
-ul.compare li {
+ul.inline{
+  vertical-align: text-top;
+}
+
+ul.inline li {
   float:left;
   margin-left: 20px;
-}
-ul.compare li:first-child {
-  border-right: 1px solid ;
 }
 
 ul.inner li a,
@@ -120,13 +121,13 @@ ul.inner li span {
   width: 120em;
 }
 
-.remove_member {
+.remove-member {
   margin-top: 6px;
   border: none;
   width: 16px !important;
 }
 
-.add_member {
+.add-member {
   float: left;
 }
 
@@ -157,13 +158,28 @@ ul.inner li span {
   margin-left: 10px;
 }
 
-.browse_file {
-  background-color:#FFFFFF;
-  border-color:#BBBBBB #BBBBBB #BBBBBB #BBBBBB;
-  border-style:solid;
-  border-width:1px;
-  height:400px;
-  overflow:scroll;
-  padding:5px;
-  width:500px;
+table.select-table td{
+  vertical-align: top;
+}
+
+.step-body.error{
+  border-color: #FF0000;
+}
+
+.selected {
+  background: #D3D3D3;
+}
+
+.record-info,
+.record-info h3,
+.record-info span{
+  display: inline;
+}
+
+.record-info span {
+  font-size: 75%
+}
+
+.attribute-info {
+  font-size: 75%;
 }

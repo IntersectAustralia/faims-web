@@ -24,6 +24,16 @@ class Database
     attributes
   end
 
+  def get_arch_ent_info(uuid,aenttimestamp)
+    info = @db.execute(WebQuery.get_arch_ent_info, uuid, aenttimestamp)
+    info
+  end
+
+  def get_arch_ent_attribute_info(uuid,valuetimestamp,attribute_id)
+    info = @db.execute(WebQuery.get_arch_ent_attribute_info, uuid, valuetimestamp,attribute_id)
+    info
+  end
+
   def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
@@ -34,6 +44,18 @@ class Database
         else
           @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
+      end
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def insert_updated_arch_entity(uuid, vocab_id, attribute_id, measure, freetext, certainty)
+    @project.db_mgr.with_lock do
+      currenttime = current_timestamp
+      @db.execute(WebQuery.insert_version, currenttime)
+      @db.execute(WebQuery.insert_arch_entity, userid, uuid)
+      vocab_id.length.times do |i|
+        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
       @project.db_mgr.make_dirt
     end
@@ -73,7 +95,18 @@ class Database
         else
           @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
         end
+      end
+      @project.db_mgr.make_dirt
+    end
+  end
 
+  def insert_updated_rel(relationshipid, vocab_id, attribute_id, freetext, certainty)
+    @project.db_mgr.with_lock do
+      currenttime = current_timestamp
+      @db.execute(WebQuery.insert_version, currenttime)
+      @db.execute(WebQuery.insert_relationship, userid, relationshipid)
+      vocab_id.length.times do |i|
+        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
       end
       @project.db_mgr.make_dirt
     end
@@ -85,6 +118,16 @@ class Database
       @db.execute(WebQuery.delete_relationship, userid, relationshipid)
       @project.db_mgr.make_dirt
     end
+  end
+
+  def get_rel_info(relid,relntimestamp)
+    info = @db.execute(WebQuery.get_rel_info, relid, relntimestamp)
+    info
+  end
+
+  def get_rel_attribute_info(relid,valuetimestamp,attribute_id)
+    info = @db.execute(WebQuery.get_rel_attribute_info, relid, valuetimestamp,attribute_id)
+    info
   end
 
   def get_rel_arch_ent_members(relationshipid, limit, offset)

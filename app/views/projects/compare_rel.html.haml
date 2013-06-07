@@ -1,3 +1,4 @@
+-compare_relationships(@first_rel_id, @second_rel_id, @timestamps[0],@timestamps[1], @project)
 %h1= @project.name + " - Compare Relationship Records"
 - if session[:type]
   = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
@@ -5,62 +6,44 @@
   = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset=0", :class => 'btn'
 %p
 .content
-  %ul.compare
-    %li
-      %form{:method => 'post', :action => select_rel_path(@project)}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'submit', :value => 'Select'}
-        %input{:type => 'hidden', :value => @second_rel[0][0], :name => 'deleted_id'}
-        - for attribute in @first_rel
-          .step-container
-            .step-body{:style => "width: 315px;"}
-              .arch_ent_record_content
-                %table
-                  %tr
-                    %td
-                      %h5=attribute[3]
-                  %tr
-                    - if !attribute[6].blank?
-                      %td
-                        %label Vocab:
-                      %td
-                        %input{:value => attribute[6], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Freetext:
-                    %td
-                      %input{:value => attribute[4], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Certainty:
-                    %td
-                      %input{:value => attribute[5], :disabled => 'disabled'}
-    %li
-      %form{:method => 'post', :action => select_rel_path(@project)}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'submit', :value => 'Select'}
-        %input{:type => 'hidden', :value => @first_rel[0][0], :name => 'deleted_id'}
-        - for attribute in @second_rel
-          .step-container
-            .step-body{:style => "width: 315px;"}
-              .arch_ent_record_content
-                %table
-                  %tr
-                    %td
-                      %h5=attribute[3]
-                  %tr
-                    - if !attribute[6].blank?
-                      %td
-                        %label Vocab:
-                      %td
-                        %input{:value => attribute[6], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Freetext:
-                    %td
-                      %input{:value => attribute[4], :disabled => 'disabled'}
-                  %tr
-                    %td
-                      %label Certainty:
-                    %td
-                      %input{:value => attribute[5], :disabled => 'disabled'}
+  %form{:id => 'select-form'}
+    %table{:class => 'select-table'}
+      %tr
+        %tr
+          %td
+            %input{:type=> 'button', :id => 'select-first', :value => 'Select All', :class => 'btn'}
+          %td
+            %input{:type=> 'button', :id => 'select-second', :value => 'Select All', :class => 'btn'}
+        %td
+          %div.record-info
+            %h3 Entity
+            %span
+              = @firstInfo
+        %td
+          %div.record-info
+            %h3 Entity
+            %span
+              = @secondInfo
+      %tr
+        %td.first
+          %input{:type => 'checkbox', :name => 'rel_id', :value => @first_rel_id, :checked => 'checked'}
+          %input{:type => 'hidden', :name => 'deleted_id', :value => @second_rel_id}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          = @identifiers[0]
+        %td.second
+          %input{:type => 'checkbox', :name => 'rel_id', :value => @second_rel_id}
+          %input{:type => 'hidden', :name => 'deleted_id', :value => @first_rel_id}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          = @identifiers[1]
+      %tr
+        %td
+          %h3 Attributes
+        %td
+          %h3 Attributes
+      - @attributeKeys.each do |key,val|
+        %tr
+          %td.first
+            = render :partial => 'compare_reln_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos }
+          %td.second
+            = render :partial => 'compare_reln_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos }
+    = link_to "Merge", merge_rel_path(@project), :id => 'merge_record', :class => 'btn'

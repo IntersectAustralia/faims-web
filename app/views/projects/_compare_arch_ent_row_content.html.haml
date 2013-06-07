@@ -1,0 +1,31 @@
+.arch_ent_record_content
+  %table
+    %tr
+      %td
+        %h5=key
+    - for attribute in group[key]
+      %input{:type => 'hidden', :name => 'attribute_id[]', :value => attribute[1]}
+      %tr
+        - if !attribute[4].blank?
+          %td
+            %label Vocab:
+          %td
+            %input{:value => attribute[4], :readonly => 'readonly'}
+            %input{:value => attribute[2], :name => 'vocab_id[]', :type => 'hidden'}
+        -else
+          %input{:value => nil, :name => 'vocab_id[]', :type => 'hidden'}
+        %tr
+          %td
+            %label Measure:
+          %td
+            %input{:value => attribute[5], :name => 'measure[]', :readonly => 'readonly'}
+        %tr
+          %td
+            %label Freetext
+          %td
+            %input{:value => attribute[6], :name => 'freetext[]', :readonly => 'readonly'}
+        %tr
+          %td
+            %label Certainty
+          %td
+            %input{:value => attribute[7], :name => 'certainty[]', :readonly => 'readonly'}

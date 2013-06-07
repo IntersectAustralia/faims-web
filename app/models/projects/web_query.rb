@@ -4,7 +4,7 @@ module WebQuery
 
   def self.load_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, tstamp, aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -50,7 +50,7 @@ EOF
 
   def self.load_all_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, tstamp, aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -93,7 +93,7 @@ EOF
 
   def self.search_arch_entity
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, tstamp, aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -141,7 +141,7 @@ EOF
 
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp
     FROM aentvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -162,6 +162,24 @@ EOF
   def self.insert_version
     cleanup_query(<<EOF
 insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, 0, 1 from version;
+EOF
+    )
+  end
+
+  def self.insert_arch_entity
+    cleanup_query(<<EOF
+insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
+                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, v.versionnum
+                  from (select uuid, max(aenttimestamp) as aenttimestamp
+                        from archentity
+                       where uuid = ?
+                       group by uuid)
+                  JOIN archentity using (uuid, aenttimestamp),  (select versionnum
+                           from version
+                          where ismerged = 1
+                       order by versionnum desc
+                       limit 1) v
+;
 EOF
     )
   end
@@ -192,9 +210,30 @@ EOF
     )
   end
 
+  def self.get_arch_ent_info
+    cleanup_query(<<EOF
+select 'Last Edit by: Dummy User at '|| aenttimestamp
+from archentity
+where uuid = ?
+  and aenttimestamp = ?;
+EOF
+    )
+  end
+
+  def self.get_arch_ent_attribute_info
+    cleanup_query(<<EOF
+select 'Last Edit by: Dummy User at '|| valuetimestamp
+from aentvalue
+where uuid = ?
+  and valuetimestamp = ?
+  and attributeid = ?;
+EOF
+    )
+  end
+
   def self.load_relationships
     cleanup_query(<<EOF
-SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, max(tstamp, astamp)
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, tstamp
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
             FROM relationship
             JOIN relnvalue USING (relationshipid)
@@ -237,7 +276,7 @@ EOF
 
   def self.load_all_relationships
     cleanup_query(<<EOF
-SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, max(tstamp, astamp)
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,tstamp
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
             FROM relationship
             JOIN relnvalue USING (relationshipid)
@@ -279,7 +318,7 @@ EOF
 
   def self.search_relationship
     cleanup_query(<<EOF
-SELECT relationshipid, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabname
+SELECT relationshipid,RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,tstamp
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
             FROM relationship
             JOIN relnvalue USING (relationshipid)
@@ -325,7 +364,7 @@ EOF
 
   def self.get_relationship_attributes
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -340,6 +379,19 @@ SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty,
       ) USING (relationshipid, attributeid, relnvaluetimestamp)
    WHERE relnvalue.deleted is NULL
 ORDER BY relationshipid, attributename asc;
+EOF
+    )
+  end
+
+  def self.insert_relationship
+    cleanup_query(<<EOF
+insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
+  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, v.versionnum
+    from (select relationshipid, max(relntimestamp) as RelnTimestamp
+            from relationship
+          where relationshipID = ?
+          group by relationshipid
+          ) JOIN relationship using (relationshipid, relntimestamp), (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) v;
 EOF
     )
   end
@@ -361,6 +413,27 @@ insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnTy
           where relationshipID = ?
           group by relationshipid
           ) JOIN relationship using (relationshipid, relntimestamp), (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) v;
+EOF
+    )
+  end
+
+  def self.get_rel_info
+    cleanup_query(<<EOF
+select 'Last Edit by: Dummy User at '|| relntimestamp
+from relationship
+where relationshipid = ?
+  and relntimestamp = ?;
+EOF
+    )
+  end
+
+  def self.get_rel_attribute_info
+    cleanup_query(<<EOF
+select 'Last Edit by: Dummy User at '|| relnvaluetimestamp
+from relnvalue
+where relationshipid = ?
+  and relnvaluetimestamp = ?
+  and attributeid = ?;
 EOF
     )
   end

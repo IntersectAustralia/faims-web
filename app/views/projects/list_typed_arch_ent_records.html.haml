@@ -1,40 +1,21 @@
+- if (!@uuid.empty?)
+  - group_ids(@uuid)
 %h1= @project.name + " - Archaeological Entity Records"
 .content
   - if (!@uuid.empty?)
-    - prev_uuid = @uuid[0][0]
-    - uuid_array = []
-    - array = []
-    - for uuid in @uuid
-      - if prev_uuid != uuid[0]
-        - uuid_array << array
-        - array = []
-        - prev_uuid = uuid[0]
-      - array << uuid
-    - uuid_array << array
-    %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add_entity'}
-    %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project), :id => 'remove_entity'}
-    %form{:method => 'post', :id => 'compare', :action => compare_arch_ents_path(@project)}
+    %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add-entity'}
+    %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project), :id => 'remove-entity'}
+    = link_to "Back", list_arch_ent_records_path(@project), :class => 'btn'
+    = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn'
+    %form{:method => 'post', :id => 'compare'}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       - if session[:values]
-        - for value in session[:values]
-          %input{:type => 'hidden', :value => value, :name => 'ids[]', :id => value}
-      = link_to "Back", list_arch_ent_records_path(@project), :class => 'btn'
-      %input{:type => 'submit', :value => "Compare"}
+        - session[:values].length.times do |i|
+          %input{:type => 'hidden', :value => session[:values][i-1], :name => 'ids[]', :id => session[:values][i-1]}
+          %input{:type => 'hidden', :value => session[:identifiers][i-1], :name => 'identifiers[]', :id => session[:values][i-1]}
+          %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamp[]', :id => session[:values][i-1]}
       %p
-      - for uuid_group in uuid_array
-        %ul.inner
-          - if session[:values] and session[:values].include?(uuid_group[0][0].to_s)
-            %input{:type => 'checkbox', :value=> uuid_group[0][0],:checked => 'checked'}
-              - for uuids in uuid_group
-                %li
-                  %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-                    =uuids[2].to_s + ": " + uuids[3].to_s
-          - else
-            %input{:type => 'checkbox', :value=> uuid_group[0][0]}
-              - for uuids in uuid_group
-                %li
-                  %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-                    =uuids[2].to_s + ": " + uuids[3].to_s
+      = render :partial => 'edit_arch_ent_record', :locals => { uuid_array: @id_array, values: session[:values]}
   -else
     %p No Record Found
     = link_to "Back", list_arch_ent_records_path(@project), :class => 'btn'
@@ -45,9 +26,9 @@
         %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
         %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
         %input{:type => 'hidden', :value => session[:type], :name => 'type'}
-        %input{:type => 'submit', :value => "Previous"}
+        %input{:type => 'submit', :value => "Previous", :class => 'btn'}
     %form{:action => list_typed_arch_ent_records_path, :method => "get"}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
       %input{:type => 'hidden', :value => session[:type], :name => 'type'}
-      %input{:type => 'submit', :value => "Next"}
+      %input{:type => 'submit', :value => "Next", :class => 'btn'}

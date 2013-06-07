@@ -1,41 +1,22 @@
+- if (!@relationshipid.empty?)
+  - group_ids(@relationshipid)
 %h1= @project.name + " - Relationship Records"
 .content
   - if (!@relationshipid.empty?)
-    - prev_relationshipid = @relationshipid[0][0]
-    - relationshipid_array = []
-    - array = []
-    - for relationshipid in @relationshipid
-      - if prev_relationshipid != relationshipid[0]
-        - relationshipid_array << array
-        - array = []
-        - prev_relationshipid = relationshipid[0]
-      - array << relationshipid
-    - relationshipid_array << array
-    %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add_entity'}
-    %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project), :id => 'remove_entity'}
+    %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add-entity'}
+    %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project), :id => 'remove-entity'}
     %form{:method => 'post', :id => 'compare', :action => compare_rel_path(@project)}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       - if session[:values]
-        - for value in session[:values]
-          %input{:type => 'hidden', :value => value, :name => 'ids[]', :id => value}
+        - session[:values].length.times do |i|
+          %input{:type => 'hidden', :value => session[:values][i-1], :name => 'ids[]', :id => session[:values][i-1]}
+          %input{:type => 'hidden', :value => session[:identifiers][i-1], :name => 'identifiers[]', :id => session[:values][i-1]}
+          %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamp[]', :id => session[:values][i-1]}
       = link_to "Back", search_rel_records_path(@project), :class => 'btn'
-      %input{:type => 'submit', :value => "Compare"}
+      %input{:type => 'submit', :value => "Compare", :class => 'btn'}
       %p
       .records
-        - for relationshipid_group in relationshipid_array
-          %ul.inner
-            - if session[:values] and session[:values].include?(relationshipid_group[0][0].to_s)
-              %input{:type => 'checkbox', :value=> relationshipid_group[0][0],:checked => 'checked'}
-                - for relationshipids in relationshipid_group
-                  %li
-                    %a{:href => edit_rel_records_path(@project,relationshipids[0])}
-                      =relationshipids[1].to_s + ": " + relationshipids[2].to_s
-            - else
-              %input{:type => 'checkbox', :value=> relationshipid_group[0][0]}
-                - for relationshipids in relationshipid_group
-                  %li
-                    %a{:href => edit_rel_records_path(@project,relationshipids[0])}
-                      =relationshipids[1].to_s + ": " + relationshipids[2].to_s
+        = render :partial => 'edit_relationship_record', :locals => { relationshipid_array: @id_array, values: session[:values]}
   -else
     %p No Record Found
     = link_to "Back", search_rel_records_path(@project), :class => 'btn'
@@ -46,9 +27,9 @@
         %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
         %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
         %input{:type => 'hidden', :value => session[:type], :name => 'type'}
-        %input{:type => 'submit', :value => "Previous"}
+        %input{:type => 'submit', :value => "Previous", :class => 'btn'}
     %form{:action => show_rel_records_path, :method => "get"}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
       %input{:type => 'hidden', :value => session[:type], :name => 'type'}
-      %input{:type => 'submit', :value => "Next"}
+      %input{:type => 'submit', :value => "Next", :class => 'btn'}

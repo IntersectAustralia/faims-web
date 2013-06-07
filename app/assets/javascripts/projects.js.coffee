@@ -86,25 +86,35 @@ check_archive = ->
         return
   return
 
-input_checked_handler = ->
-  $(":checkbox").change(
+compare_input_checked_handler = ->
+  $('#compare input:checkbox').change(
     ->
       self = this
       value = $(self).val()
+      identifier_input = $(this).siblings('#identifier')
+      identifier_value = $(identifier_input).val()
+      timestamp_input = $(this).siblings('#timestamp')
+      timestamp_value = $(timestamp_input).val()
       if this.checked
         $('#compare').append('<input type="hidden" value="'+value+'" name="ids[]" id="'+value+ '"/>')
-        $.post $('#add_entity').val(),
-          value: value
+        $('#compare').append('<input type="hidden" value="'+identifier_value+'" name="identifiers[]" id="'+value+ '"/>')
+        $('#compare').append('<input type="hidden" value="'+timestamp_value+'" name="timestamps[]" id="'+value+ '"/>')
+        $.post $('#add-entity').val(),
+          value: value,
+          identifier: identifier_value,
+          timestamp: timestamp_value
       else
-        $('#'+value).remove();
-        $.post $('#remove_entity').val(),
-          value: value
+        $('input[id='+value+']').remove();
+        $.post $('#remove-entity').val(),
+          value: value,
+          identifier: identifier_value,
+          timestamp: timestamp_value
       return
   )
   return
 
 delete_arch_ent_members = ->
-  $('input#remove_member').each(
+  $('input#remove-member').each(
     -> $(this).click(
       ->
         $.post $(this).attr('src')
@@ -115,7 +125,7 @@ delete_arch_ent_members = ->
   return
 
 search_arch_ent_members = ->
-  $('#search_member').click(
+  $('#search-member').click(
     ->
       window.location = $(this).attr('src')
       return
@@ -123,7 +133,7 @@ search_arch_ent_members = ->
   return
 
 add_arch_ent_member = ->
-  $('#add_arch_ent').click(
+  $('#add-arch-ent').click(
     ->
       selected = $('input[type="radio"]:checked')
       verb = $('#verb').val()
@@ -146,9 +156,10 @@ add_arch_ent_member = ->
   return
 
 compare_records = ->
-  $('#compare').submit(
-
-    =>
+  $('#compare-button').click(
+    ->
+      href = $(this).attr('href')
+      $form = $('#compare')
       values = $("input[name='ids[]']")
       if values.length > 2
         alert('Can only compare two records at a time')
@@ -156,11 +167,15 @@ compare_records = ->
       else if values.length < 2
         alert('Please select two records to compare')
         false
+      else
+        $form.attr('action', href)
+        $form.submit()
+        false
   )
   return
 
 delete_records = ->
-  $('#delete_record').one("click",
+  $('#delete-record').one("click",
     ->
       $(this).click(
         =>
@@ -184,17 +199,128 @@ download_attached_file = ->
   )
   return
 
+select_all_compared_attributes = ->
+  $('#select-first').click(
+    ->
+      $('#select-form input:checkbox').each(
+        ->
+          $(this).prop('checked',false)
+          li_sibling = $(this).parents('td').siblings()
+          if(li_sibling.length)
+            $(li_sibling).find('.step-body').removeClass('selected')
+            return
+          return
+      )
+      $('td.first input:checkbox').each(
+        ->
+          $(this).prop('checked',true)
+          li_sibling = $(this).parents('li').siblings()
+          if(li_sibling.length)
+            $(li_sibling).find('.step-body').addClass('selected')
+            return
+          return
+      )
+  )
+  $('#select-second').click(
+    ->
+      $('#select-form input:checkbox').each(
+        ->
+          $(this).prop('checked',false)
+          li_sibling = $(this).parents('li').siblings()
+          if(li_sibling.length)
+            $(li_sibling).find('.step-body').removeClass('selected')
+            return
+          return
+      )
+      $('td.second input:checkbox').each(
+        ->
+          $(this).prop('checked',true)
+          li_sibling = $(this).parents('li').siblings()
+          if(li_sibling.length)
+            $(li_sibling).find('.step-body').addClass('selected')
+            return
+          return
+      )
+  )
+  return
+
+change_checked_attributes = ->
+  $('#select-form input:checkbox').change(
+    ->
+      siblings = $(this).parents('td').siblings()[0]
+      $sibling_checkbox = $(siblings).find('input:checkbox')
+      if($sibling_checkbox.length)
+        if($(this).is(':checked'))
+          if($sibling_checkbox.is(':checked'))
+            $sibling_checkbox.prop('checked', false)
+            li_sibling = $sibling_checkbox.parents('li').siblings()
+            $(li_sibling).find('.step-body').removeClass('selected')
+            li_sibling = $(this).parents('li').siblings()
+            $(li_sibling).find('.step-body').addClass('selected')
+            return
+          return
+        else
+          if(!$sibling_checkbox.is(':checked'))
+            $(this).prop('checked', true)
+            return
+          return
+      else
+        if(!$(this).is(':checked'))
+          $(this).prop('checked', true)
+          return
+        return
+  )
+  return
+
+merge_record = ->
+  $('#merge-record').click(
+    ->
+      $form = $('<form method="post">')
+      $form.attr('action',$(this).attr('href'))
+      $('#select-form').find('input:checkbox:checked').each(
+        ->
+          li_sibling = $(this).parents('li').siblings()
+          if(li_sibling.length)
+            $(li_sibling).find('input').each(
+              ->
+                if $(this).attr('name') != undefined
+                  $form.append(this)
+                  return
+                return
+            )
+            return
+          else
+            input_sibling = $(this).siblings('input')
+            $form.append(this)
+            if(input_sibling.length)
+              $(input_sibling).each(
+                ->
+                  $form.append(this)
+                  return
+              )
+              return
+
+          return
+      )
+      $form.submit()
+      false
+  )
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
     show_upload_modal_dialog()
     show_archive_modal_dialog()
     compare_records()
-    input_checked_handler()
+    compare_input_checked_handler()
     search_arch_ent_members()
     add_arch_ent_member()
     delete_arch_ent_members()
     delete_records()
     download_attached_file()
+    select_all_compared_attributes()
+    change_checked_attributes()
+    merge_record()
     return
 )

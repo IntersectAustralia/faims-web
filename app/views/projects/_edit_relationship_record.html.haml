@@ -1,0 +1,21 @@
+- for relationshipid_group in relationshipid_array
+  %ul.inner
+    %input{:type => 'hidden', :id=> 'timestamp', :value => relationshipid_group[0][6] }
+    - if values and values.include?(relationshipid_group[0][0].to_s)
+      %input{:type => 'checkbox', :value=> relationshipid_group[0][0],:checked => 'checked'}
+        - identifier = []
+        - for relationshipids in relationshipid_group
+          - identifier.push(relationshipids[3].to_s)
+          %li
+            %a{:href => edit_rel_records_path(@project,relationshipids[0])}
+              =relationshipids[2].to_s + ": " + relationshipids[3].to_s
+        %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
+    - else
+      %input{:type => 'checkbox', :value=> relationshipid_group[0][0]}
+        - identifier = []
+        - for relationshipids in relationshipid_group
+          - identifier.push(relationshipids[3].to_s)
+          %li
+            %a{:href => edit_rel_records_path(@project,relationshipids[0])}
+              =relationshipids[2].to_s + ": " + relationshipids[3].to_s
+        %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}

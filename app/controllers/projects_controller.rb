@@ -317,6 +317,18 @@ class ProjectsController < ApplicationController
     if !session[:values].include?(params[:value])
       session[:values].push(params[:value])
     end
+    if !session[:identifiers]
+      session[:identifiers] = []
+    end
+    if !session[:identifiers].include?(params[:identifier])
+      session[:identifiers].push(params[:identifier])
+    end
+    if !session[:timestamps]
+      session[:timestamps] = []
+    end
+    if !session[:timestamps].include?(params[:timestamp])
+      session[:timestamps].push(params[:timestamp])
+    end
 
     render :nothing => true
   end
@@ -325,18 +337,28 @@ class ProjectsController < ApplicationController
     if(session[:values])
       session[:values].delete(params[:value])
     end
+    if !session[:identifiers]
+      session[:identifiers].delete(params[:identifier])
+    end
+    if !session[:timestamps]
+      session[:timestamps].delete(params[:timestamp])
+    end
     render :nothing => true
   end
 
   def compare_arch_ents
     @project = Project.find(params[:id])
     session[:values] = []
+    session[:identifiers] = []
+    session[:timestamps] = []
     ids = params[:ids]
-    @first_arch_ent = @project.db.get_arch_entity_attributes(ids[0])
-    @second_arch_ent = @project.db.get_arch_entity_attributes(ids[1])
+    @identifiers = params[:identifiers]
+    @timestamps = params[:timestamps]
+    @first_uuid = ids[0]
+    @second_uuid = ids[1]
   end
 
-  def select_arch_ents
+  def merge_arch_ents
     @project = Project.find(params[:id])
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
@@ -345,6 +367,14 @@ class ProjectsController < ApplicationController
     deleted_id = params[:deleted_id]
     @project.db.delete_arch_entity(deleted_id)
 
+    uuid = params[:uuid]
+    attribute_ids = params[:attribute_id]
+    vocab_ids = params[:vocab_id]
+    measures = params[:measure]
+    freetexts = params[:freetext]
+    certainties = params[:certainty]
+
+    @project.db.insert_updated_arch_entity(uuid, vocab_ids,attribute_ids, measures, freetexts, certainties)
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
@@ -356,11 +386,15 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     ids = params[:ids]
     session[:values] = []
-    @first_rel = @project.db.get_rel_attributes(ids[0])
-    @second_rel = @project.db.get_rel_attributes(ids[1])
+    session[:identifiers] = []
+    session[:timestamps] = []
+    @identifiers = params[:identifiers]
+    @timestamps = params[:timestamps]
+    @first_rel_id = ids[0]
+    @second_rel_id = ids[1]
   end
 
-  def select_rel
+  def merge_rel
     @project = Project.find(params[:id])
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
@@ -368,10 +402,18 @@ class ProjectsController < ApplicationController
     end
     deleted_id = params[:deleted_id]
     @project.db.delete_relationship(deleted_id)
+
+    rel_id = params[:rel_id]
+    attribute_ids = params[:attribute_id]
+    vocab_ids = params[:vocab_id]
+    freetexts = params[:freetext]
+    certainties = params[:certainty]
+
+    @project.db.insert_updated_rel(rel_id, vocab_ids,attribute_ids, freetexts, certainties)
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
     end
   end
 

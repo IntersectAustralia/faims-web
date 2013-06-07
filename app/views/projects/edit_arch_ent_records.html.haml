@@ -1,6 +1,6 @@
 - get_files(@attributes,8,6)
 %h1= @project.name + " - Archaeological Entity"
-= link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn', :id => 'delete_record'
+= link_to "Delete", delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn', :id => 'delete-record'
 - if session[:show].eql?('show_rel_members')
   = link_to "Back", show_rel_members_path(@project,session[:relationshipid])+"?offset=0", :class => 'btn'
 -else
@@ -52,7 +52,7 @@
     %ul
       - @files.each do |path,name|
         %li
-          %form{:method => 'GET', :action => download_attached_file_path(@project), :id => 'download_attached_file'}
+          %form{:method => 'GET', :action => download_attached_file_path(@project), :id => 'download-attached-file'}
             %input{:type => 'hidden', :name => 'path', :value => path}
             %input{:type => 'hidden', :name => 'name', :value => name}
             %a{:href => '#'}

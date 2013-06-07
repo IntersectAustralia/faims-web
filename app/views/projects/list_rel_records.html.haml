@@ -8,5 +8,5 @@
       %option{ :value => "all"}="Show All Records"
       - for type in @type
         %option{:value=>type[1]}=type[0]
-    %input{:type => 'submit', :value => "Filter"}
+    %input{:type => 'submit', :value => "Filter", :class => 'btn'}
   = link_to "Back", project_path(@project), :class => 'btn'

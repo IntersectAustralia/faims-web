@@ -1,0 +1,21 @@
+- for uuid_group in uuid_array
+  %ul.inner
+    %input{:type => 'hidden', :id=> 'timestamp', :value => uuid_group[0][6] }
+    - if values and values.include?(uuid_group[0][0].to_s)
+      %input{:type => 'checkbox', :value=> uuid_group[0][0],:checked => 'checked'}
+        - identifier = []
+        - for uuids in uuid_group
+          - identifier.push(uuids[3].to_s)
+          %li
+            %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+              =uuids[2].to_s + ": " + uuids[3].to_s
+        %input{:type => 'hidden', :id => 'identifier', :value=> identifier * ", "}
+    - else
+      %input{:type => 'checkbox', :value=> uuid_group[0][0]}
+        - identifier = []
+        - for uuids in uuid_group
+          - identifier.push(uuids[3].to_s)
+          %li
+            %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+              =uuids[2].to_s + ": " + uuids[3].to_s
+        %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
