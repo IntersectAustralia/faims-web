@@ -35,6 +35,7 @@ Feature: Manage projects
     And I fill in "Name" with "Project 1"
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "validation_schema.xml" for "Validation Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
@@ -58,6 +59,7 @@ Feature: Manage projects
     | Name        | Project * | is invalid     |
     | Data Schema |           | can't be blank |
     | UI Schema   |           | can't be blank |
+    | Validation Schema   |           | can't be blank |
     | UI Logic    |           | can't be blank |
 
   @javascript
@@ -81,6 +83,9 @@ Feature: Manage projects
     | UI Schema   |                            | can't be blank          |
     | UI Schema   | garbage                    | must be xml file        |
     | UI Schema   | ui_schema_error1.xml       | invalid xml             |
+    | Validation Schema   |                            | can't be blank          |
+    | Validation Schema   | garbage                    | must be xml file        |
+    | Validation Schema   | data_schema_error1.xml       | invalid xml             |
     | UI Logic    |                            | can't be blank          |
     | Arch16n     | faims_error.properties     | invalid file name       |
     | Arch16n     | faims_Project_2.properties | invalid properties file |

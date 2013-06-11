@@ -196,6 +196,7 @@ describe Project do
       entries.include?(project.get_name(:ui_logic)).should be_true
       entries.include?(project.get_name(:settings)).should be_true
       entries.include?(project.get_name(:properties)).should be_true
+      entries.include?(project.get_name(:validation_schema)).should be_true
       entries.include?('test1').should be_true
       entries.include?('test2').should be_true
       entries.include?('dir1/dir2/test3').should be_true

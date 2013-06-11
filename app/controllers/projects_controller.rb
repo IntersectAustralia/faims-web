@@ -521,6 +521,7 @@ class ProjectsController < ApplicationController
     session[:ui_schema] = false
     session[:ui_logic] = false
     session[:arch16n] = false
+    session[:validation_schema] = false
   end
 
   def clear_tmp_dir
@@ -584,6 +585,18 @@ class ProjectsController < ApplicationController
           create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
           session[:arch16n] = true
         end
+      end
+    end
+
+    # check if validation schema is valid
+    if !session[:validation_schema]
+      error = Project.validate_validation_schema(params[:project][:validation_schema])
+      if error
+        @project.errors.add(:validation_schema, error)
+        valid = false
+      else
+        create_temp_file(@project.get_name(:validation_schema), params[:project][:validation_schema])
+        session[:validation_schema] = true
       end
     end
 
