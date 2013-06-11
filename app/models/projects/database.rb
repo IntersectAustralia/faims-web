@@ -49,6 +49,8 @@ class Database
         else
           @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
+
+        # run validators
       end
       @project.db_mgr.make_dirt
     end
@@ -62,6 +64,7 @@ class Database
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
+      # run validators
       @project.db_mgr.make_dirt
     end
   end
@@ -101,6 +104,7 @@ class Database
           @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
         end
       end
+      # run validators
       @project.db_mgr.make_dirt
     end
   end
@@ -113,6 +117,7 @@ class Database
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
       end
+      # run validators
       @project.db_mgr.make_dirt
     end
   end
@@ -157,7 +162,7 @@ class Database
 
   def add_arch_ent_member(relationshipid, uuid, verb)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, verb)
+      @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, userid, verb)
       @project.db_mgr.make_dirt
     end
   end
@@ -207,6 +212,8 @@ class Database
   def merge_database(fromDB, version)
     @project.db_mgr.with_lock do
       @db.execute_batch(WebQuery.merge_database(fromDB, version))
+
+      # run validators
 
       @project.db_mgr.make_dirt
     end
