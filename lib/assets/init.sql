@@ -1,143 +1,203 @@
-
-PRAGMA foreign_keys = off;
-
 PRAGMA page_size = 4096;
 PRAGMA cache_size = 400000;
 vacuum;
 
+-- The user table is incomplete. It however, holds user information.
+CREATE TABLE User (
+	UserID					INTEGER PRIMARY KEY,
+	FName               	TEXT NOT NULL,
+	LName               	TEXT NOT NULL
+ );
+
+
+-- the version table controle upload synchronization
 CREATE TABLE Version (
-  VersionNum           INTEGER NOT NULL,
-  UploadTimestamp      DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UserID               INTEGER,
-  IsMerged             INTEGER
+  VersionNum           		INTEGER PRIMARY KEY,
+  UploadTimestamp      		DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UserID               		INTEGER REFERENCES User,
+  IsMerged             		INTEGER
 );
 
-CREATE TABLE User (
-	UserID               INTEGER NOT NULL,
-	FName                TEXT,
-	LName                TEXT
+
+/* the start of the core archentity definition.
+ * ArchEnts are intended to be containers of "fact", the AentType
+ * defines a platonic ideal instance of a specific /type/ of archentity,
+ * in combination of idealAent. (which serves to identify the "ideal" columns of
+ * the nominal entity. AentType and IdealAent serve the equivalent role of a create
+ * table statement in DML land.
+ */
+CREATE TABLE AEntType (
+	AEntTypeID				INTEGER PRIMARY KEY,
+	AEntTypeName			TEXT NOT NULL, -- table name
+	AEntTypeCategory		TEXT, -- I'm honestly not sure what we use this for.
+	AEntTypeDescription 	TEXT -- human description
  );
 
-CREATE TABLE AEntType (
-	AEntTypeID            TEXT NOT NULL,
-	AEntTypeName		  TEXT,
-	AEntTypeCategory	  TEXT,
-	AEntTypeDescription   TEX
- );
+
+/* the attributekey table serves to identify the possible columns across the
+ * database. It is a central repository of columns by virtue of DKNF. Column
+ * level metadata also goes here.
+ */
 
 CREATE TABLE AttributeKey (
-	AttributeID          TEXT NOT NULL,
-	AttributeType		 TEXT,
-	AttributeName        TEXT,
-	AttributeDescription TEXT
+	AttributeID           	INTEGER PRIMARY KEY,
+	AttributeType		 	TEXT, -- this is typing for external tools. It has no bearing internally
+	AttributeName         	TEXT NOT NULL, -- effectively column name
+	AttributeDescription  	TEXT -- human-entered description for the "column"
  );
 
-create index atkey on attributekey(attributeid);
-create index atkeyname on attributekey(attributename);
+-- TODO tweak indexes for performance
+-- create index atkey on attributekey(attributeid);
+create index atkeyname on attributekey(attributename, attributeid);
 
+/* The vocabulary table is the "lookup" table for the database.
+ * Cruically, vocabNames can be mapped to our Arch16n infrastructure. {this} represents a standard string replacement expression. It will
+ * look in the arch16n file and replace {this} with whatever the mapping is.
+ * Picture URL is a *relative* path to define a picture dictionary.
+ * Semantic Map URL is the start of our attempt to represent semantic names (like cidoc-crm). It however, has not recieved any dev time.
+ */
 
 CREATE TABLE Vocabulary (
-	VocabID              INTEGER NOT NULL,
-	AttributeID          TEXT NOT NULL,
-	VocabName          	 TEXT,
-	SemanticMapURL	     TEXT,
-	PictureURL			 TEXT
+	VocabID              	INTEGER PRIMARY KEY,
+	AttributeID          	INTEGER NOT NULL REFERENCES AttributeKey,
+	VocabName          	 	TEXT NOT NULL, -- This is the human-visible part of vocab that forms lookup tables. It is likely to be Arch16nized.
+	SemanticMapURL	     	TEXT,
+	PictureURL				TEXT -- relative path.
  );
 
-create index vocabindex on vocabulary (vocabid);
-create index vocabattindex on vocabulary (attributeid, vocabname);
+--create index vocabindex on vocabulary (vocabid);
+create index vocabAttIndex on vocabulary (attributeid, vocabname);
 
+/* As Archents exist, so do relationships. Relationships serve to link ArchEnts together and to collect the subjective expertise of
+ * the archaeologist in such a way that it does not contaminate the "facts".
+ */
 
 CREATE TABLE RelnType (
-	RelnTypeID           INTEGER NOT NULL,
-	RelnTypeName		 TEXT,
-	RelnTypeDescription  TEXT,
-	RelnTypeCategory	 TEXT,
-	Parent				 TEXT,
-	Child				 TEXT
+	RelnTypeID           	INTEGER PRIMARY KEY,
+	RelnTypeName		 	TEXT NOT NULL, -- Equivalent to table-name
+	RelnTypeDescription  	TEXT, -- human description explaining purpose of the relationship type
+	RelnTypeCategory	 	TEXT, -- This is, actually, important. It identifies the *category* of relationship-meatphor: hierarchial, container, or bidirectional.
+	Parent				 	TEXT, -- This is the text string that serves to identify, for categories of type hierarchial, the "participatesverb"
+								  -- that identifies a parent. It should be possible, using this, to select all parents in a specific
+								  -- hierarchial relationship by constraining the search to this term.
+	Child				 	TEXT -- As above, but for the other side of the hierarchial relationship. Relationships of other category/metaphor do not need
+								 -- participation verbs
  );
 
+
 CREATE TABLE IdealAEnt (
-	AEntTypeID           TEXT NOT NULL,
-	AttributeID          TEXT NOT NULL,
-	AEntDescription      TEXT,
-	IsIdentifier		 BOOLEAN,
-	MinCardinality		 INTEGER,
-	MaxCardinality		 INTEGER
+	AEntTypeID           	INTEGER REFERENCES AEntType,
+	AttributeID          	INTEGER REFERENCES AttributeKey,
+	AEntDescription      	TEXT, -- human description
+	IsIdentifier		 	BOOLEAN, -- This is the means by which a designer identifies an attribute in a given aentType as an identifier.
+									 -- an identifier in this instance does not enforce not null nor uniqueness. It merely serves to identify
+									 -- what subset of rows
+	MinCardinality		 	INTEGER, -- It is theoretically possible to use these to power script-level validation
+	MaxCardinality		 	INTEGER,
+	CONSTRAINT IdealAEntPK PRIMARY KEY(AEntTypeID, AttributeID)
  );
 
 CREATE TABLE IdealReln (
-	RelnTypeID           INTEGER NOT NULL,
-	AttributeID          TEXT NOT NULL,
-	RelnDescription      TEXT,
-	IsIdentifier		 BOOLEAN,
-	MinCardinality		 INTEGER,
-	MaxCardinality		 INTEGER
+	RelnTypeID           	INTEGER REFERENCES RelnType,
+	AttributeID          	INTEGER REFERENCES AttributeKey,
+	RelnDescription      	TEXT, -- human description
+	IsIdentifier		 	BOOLEAN, -- as above
+	MinCardinality		 	INTEGER,
+	MaxCardinality		 	INTEGER,
+	CONSTRAINT IdealRelnPK PRIMARY KEY(RelnTypeID, AttributeID)
+
  );
 
 CREATE TABLE ArchEntity (
-	UUID                 integer NOT NULL,
-	AEntTimestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
-	UserID               INTEGER,
-	DOI                  TEXT,
-	AEntTypeID           TEXT,
-	Deleted				 BOOLEAN,
-	GeoSpatialColumnType TEXT,
-	VersionNum           INTEGER
+	UUID                 	INTEGER NOT NULL,
+	AEntTimestamp        	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	UserID               	INTEGER NOT NULL REFERENCES User,
+	DOI                  	TEXT,
+	AEntTypeID           	INTEGER NOT NULL REFERENCES AEntType,
+	Deleted				 	BOOLEAN,
+	VersionNum           	INTEGER REFERENCES Version,
+	isDirty					BOOLEAN, --validation "dirty bit"
+	isDirtyReason			TEXT,
+	isForked				BOOLEAN, -- fork signalling
+	ParentTimestamp			DATETIME, -- nominally we'd reference Archent here, but just no. No.
+	GeoSpatialColumnType 	TEXT, -- for humans to signal the contents of the geometry column. Not really used.
+	CONSTRAINT  ArchEntityPK PRIMARY KEY(UUID, AEntTimestamp, UserID)
  );
 
 create index aentindex on archentity (uuid);
 create index aenttimeindex on archentity (uuid, aenttimestamp);
 
 CREATE TABLE AEntValue (
-	UUID                 integer NOT NULL,
-	ValueTimestamp       DATETIME DEFAULT CURRENT_TIMESTAMP,
-	VocabID              INTEGER,
-	AttributeID          TEXT NOT NULL,
-	Measure              INT,
-	FreeText             TEXT,
-	Certainty            REAL,
-	Deleted				 BOOLEAN,
-	VersionNum           INTEGER
+	UUID                 	INTEGER NOT NULL,
+	ValueTimestamp       	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	UserID				 	INTEGER NOT NULL REFERENCES User,
+	AttributeID          	TEXT NOT NULL REFERENCES AttributeKey,
+	VocabID              	INTEGER REFERENCES Vocabulary,
+	Measure              	INTEGER,
+	FreeText             	TEXT,
+	Certainty            	REAL,
+	Deleted				 	BOOLEAN,
+	VersionNum           	INTEGER REFERENCES Version,
+	isDirty					BOOLEAN, --validation "dirty bit"
+	isDirtyReason			TEXT,
+	isForked				BOOLEAN, -- fork signalling
+	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
  );
 
 create index aentvalueindex on AentValue (uuid, attributeid, valuetimestamp desc);
 
 CREATE TABLE Relationship (
-	RelationshipID       INTEGER NOT NULL,
-	UserID               INTEGER NOT NULL,
-	RelnTimestamp        DATETIME DEFAULT CURRENT_TIMESTAMP,
-	GeoSpatialColumnType TEXT,
-	Deleted				 BOOLEAN,
-	RelnTypeID           INTEGER NOT NULL,
-	VersionNum           INTEGER
+	RelationshipID       	INTEGER NOT NULL,
+	RelnTimestamp        	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	UserID               	INTEGER NOT NULL REFERENCES User,
+	RelnTypeID           	INTEGER NOT NULL,
+	Deleted				 	BOOLEAN,
+	VersionNum           	INTEGER REFERENCES Version,
+	isDirty					BOOLEAN, --validation "dirty bit"
+	isDirtyReason			TEXT,
+	isForked				BOOLEAN, -- fork signalling
+	ParentTimestamp			DATETIME, -- nominally we'd reference Archent here, but just no. No.
+	GeoSpatialColumnType 	TEXT, -- for humans to signal the contents of the geometry column. Not really used.
+	CONSTRAINT  RelnPK PRIMARY KEY(RelationshipID, RelnTimestamp, UserID)
  );
 
 create index relnindex on relationship (relationshipid);
 
+CREATE TABLE RelnValue (
+	RelationshipID       	INTEGER NOT NULL,
+	RelnValueTimestamp   	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	UserID					INTEGER NOT NULL REFERENCES User,
+	AttributeID          	TEXT NOT NULL,
+	VocabID              	INTEGER,
+	Freetext             	TEXT,
+	Certainty            	REAL,
+	Deleted				 	BOOLEAN,
+	VersionNum           	INTEGER,
+	isDirty					BOOLEAN, --validation "dirty bit"
+	isDirtyReason			TEXT,
+	isForked				BOOLEAN, -- fork signalling
+	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
+ );
+
+create index relnvalueindex on relnvalue (relationshipid, attributeid, relnvaluetimestamp desc);
+
 CREATE TABLE AEntReln (
-	UUID                 INTEGER NOT NULL,
-	RelationshipID       INTEGER NOT NULL,
-	ParticipatesVerb     TEXT,
-	Deleted				 BOOLEAN,
-	AEntRelnTimestamp    DATETIME DEFAULT CURRENT_TIMESTAMP,
-	VersionNum           INTEGER
+	UUID                 	INTEGER NOT NULL,
+	RelationshipID       	INTEGER NOT NULL,
+	UserID					INTEGER NOT NULL REFERENCES User,
+	AEntRelnTimestamp    	DATETIME DEFAULT CURRENT_TIMESTAMP,
+	ParticipatesVerb     	TEXT,
+	Deleted				 	BOOLEAN,
+	VersionNum           	INTEGER,
+	isDirty					BOOLEAN, --validation "dirty bit"
+	isDirtyReason			TEXT,
+	isForked				BOOLEAN, -- fork signalling
+	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
  );
 
 create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp);
 
-CREATE TABLE RelnValue (
-	RelationshipID       INTEGER NOT NULL,
-	AttributeID          TEXT NOT NULL,
-	VocabID              INTEGER,
-	RelnValueTimestamp   DATETIME DEFAULT CURRENT_TIMESTAMP,
-	Deleted				 BOOLEAN,
-	Certainty            REAL,
-	Freetext             TEXT,
-	VersionNum           INTEGER
- );
-
-create index relnvalueindex on relnvalue (relationshipid, attributeid, relnvaluetimestamp desc);
+SELECT InitSpatialMetaData();
 
 SELECT AddGeometryColumn('ArchEntity', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
 SELECT AddGeometryColumn('Relationship', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');

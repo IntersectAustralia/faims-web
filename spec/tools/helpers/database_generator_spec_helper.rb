@@ -16,8 +16,8 @@ def fill_database(db, version = nil, index = nil)
         "VALUES (cast('#{i}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
-      db.execute("INSERT INTO AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, VersionNum) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
+      db.execute("INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, VersionNum) " +
+          "SELECT cast('#{i*n + j}' as integer), '0', '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
@@ -28,16 +28,16 @@ def fill_database(db, version = nil, index = nil)
         "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
-      db.execute("INSERT INTO RelnValue (RelationshipID, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, VersionNum) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', attributeId, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
+      db.execute("INSERT INTO RelnValue (RelationshipID, userid, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, VersionNum) " +
+          "SELECT cast('#{i*n + j}' as integer), '0', '0', attributeId, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
     end
   end
 
   (s..n).each do |i|
-    db.execute("INSERT INTO AEntReln (UUID, RelationshipID, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
-                                        "VALUES ('#{i}', '#{i}', '', CURRENT_TIMESTAMP, #{version});")
+    db.execute("INSERT INTO AEntReln (UUID, RelationshipID, userid, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
+                                        "VALUES ('#{i}', '#{i}', '0', '', CURRENT_TIMESTAMP, #{version});")
   end
   
   db
@@ -74,16 +74,16 @@ def is_database_same(db1, db2)
 end
 
 def is_version_database_same(db1, db2, version)
-  return false if db1.execute("select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum = #{version};") !=
-      db2.execute("select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity;")
-  return false if db1.execute("select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from aentvalue where versionnum = #{version};") !=
-      db2.execute("select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty from aentvalue;")
-  return false if db1.execute("select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn from relationship where versionnum = #{version};") !=
-      db2.execute("select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn from relationship;")
-  return false if db1.execute("select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty from relnvalue where versionnum = #{version};") !=
-      db2.execute("select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty from relnvalue;")
-  return false if db1.execute("select uuid, relationshipid, participatesverb, aentrelntimestamp from aentreln where versionnum = #{version};") !=
-      db2.execute("select uuid, relationshipid, participatesverb, aentrelntimestamp from aentreln;")
+  return false if db1.execute("select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn from archentity where versionnum = #{version};") !=
+      db2.execute("select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn from archentity;")
+  return false if db1.execute("select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp from aentvalue where versionnum = #{version};") !=
+      db2.execute("select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp from aentvalue;")
+  return false if db1.execute("select relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn from relationship where versionnum = #{version};") !=
+      db2.execute("select relationshipid, userid, relntimestamp, relntypeid, deleted, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn from relationship;")
+  return false if db1.execute("select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp from relnvalue where versionnum = #{version};") !=
+      db2.execute("select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, isdirty, isdirtyreason, isforked, parenttimestamp from relnvalue;")
+  return false if db1.execute("select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp from aentreln where versionnum = #{version};") !=
+      db2.execute("select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, isdirty, isdirtyreason, isforked, parenttimestamp from aentreln;")
   return true
 end
 

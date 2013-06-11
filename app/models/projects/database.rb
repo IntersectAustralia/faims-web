@@ -40,9 +40,9 @@ class Database
       @db.execute(WebQuery.insert_version, currenttime)
       measure.length.times do |i|
         if vocab_id.blank?
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         else
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
       end
       @project.db_mgr.make_dirt
@@ -55,7 +55,7 @@ class Database
       @db.execute(WebQuery.insert_version, currenttime)
       @db.execute(WebQuery.insert_arch_entity, userid, uuid)
       vocab_id.length.times do |i|
-        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
       @project.db_mgr.make_dirt
     end
@@ -91,9 +91,9 @@ class Database
       @db.execute(WebQuery.insert_version, currenttime)
       freetext.length.times do |i|
         if vocab_id.blank?
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime)
         else
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
         end
       end
       @project.db_mgr.make_dirt
@@ -106,7 +106,7 @@ class Database
       @db.execute(WebQuery.insert_version, currenttime)
       @db.execute(WebQuery.insert_relationship, userid, relationshipid)
       vocab_id.length.times do |i|
-        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
+        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
       end
       @project.db_mgr.make_dirt
     end
@@ -206,8 +206,8 @@ class Database
     #@project.with_lock do
 
       db = SpatialiteDB.new(toDB)
-      db.execute('select initspatialmetadata()')
-
+      db.execute('select initspatialmetadata();')
+      
       @db.execute_batch(WebQuery.create_app_database(toDB))
 
     #end
@@ -217,8 +217,8 @@ class Database
     #@project.with_lock do
 
       db = SpatialiteDB.new(toDB)
-      db.execute('select initspatialmetadata()')
-
+      db.execute('select initspatialmetadata();')
+      
       @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
 
     #end
@@ -227,7 +227,6 @@ class Database
   # static
   def self.generate_database(file, xml)
     db = SpatialiteDB.new(file)
-    db.execute('select initspatialmetadata()')
     content = File.read(Rails.root.join('lib', 'assets', 'init.sql'))
     db.execute_batch(content)
     data_definition = XSLTParser.parse_data_schema(xml)

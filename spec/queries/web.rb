@@ -46,7 +46,7 @@ describe 'Web Database Queries' do
 
   it 'Insert Arch Entity Attribute' do
     lambda {
-      result = run_query(WebQuery.insert_arch_entity_attribute, random_uuid, random_vocab_id, random_attribute_id, random_measure, random_free_text, random_certainty, timestamp)
+      result = run_query(WebQuery.insert_arch_entity_attribute, random_uuid, userid, random_vocab_id, random_attribute_id, random_measure, random_free_text, random_certainty, timestamp)
       result
     }.should_not raise_error
   end
@@ -197,8 +197,6 @@ describe 'Web Database Queries' do
         fromDB = test_db
         toDB = temp_file.path
         db = SpatialiteDB.new(toDB)
-        db.execute('select initspatialmetadata()')
-
         db = SpatialiteDB.new(fromDB)
         db.execute_batch(WebQuery.create_app_database(toDB))
       rescue Exception => e
@@ -216,9 +214,7 @@ describe 'Web Database Queries' do
         version = nil
         fromDB = test_db
         toDB = temp_file.path
-        db = SpatialiteDB.new(toDB)
-        db.execute('select initspatialmetadata()')
-
+        db = SpatialiteDB.new(toDB
         db = SpatialiteDB.new(fromDB)
         db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
       rescue Exception => e

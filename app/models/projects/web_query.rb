@@ -186,7 +186,7 @@ EOF
 
   def self.insert_arch_entity_attribute
     cleanup_query(<<EOF
-insert into AEntValue (uuid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?,
+insert into AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
 EOF
     )
@@ -398,7 +398,7 @@ EOF
 
   def self.insert_relationship_attribute
     cleanup_query(<<EOF
-insert into RelnValue (RelationshipID, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?,
+insert into RelnValue (RelationshipID, UserId, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
 EOF
     )
@@ -610,11 +610,26 @@ EOF
   def self.merge_database(fromDB, version)
     cleanup_query(<<EOF
 attach database "#{fromDB}" as import;
-insert into archentity (uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, versionnum, geospatialcolumn, deleted) select uuid, aenttimestamp, userid, doi, aenttypeid, geospatialcolumntype, '#{version}', geospatialcolumn, deleted from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
-insert into aentvalue (uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, versionnum, deleted) select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, '#{version}', deleted from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
-insert into relationship (relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, versionnum, geospatialcolumn, deleted) select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, '#{version}', geospatialcolumn, deleted from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
-insert into relnvalue (relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, versionnum, certainty, deleted) select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, '#{version}', certainty, deleted from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
-insert into aentreln (uuid, relationshipid, participatesverb, aentrelntimestamp, versionnum, deleted) select uuid, relationshipid, participatesverb, aentrelntimestamp, '#{version}', deleted from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
+insert into archentity (
+         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) 
+  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn 
+  from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
+insert into aentvalue (
+         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) 
+  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp 
+  from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
+insert into relationship (
+         relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) 
+  select relationshipid, userid, relntimestamp, relntypeid, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+  from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
+insert into relnvalue (
+         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) 
+  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp 
+  from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
+insert into aentreln (
+         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) 
+  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp
+  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
 update version set ismerged = 1 where versionnum = '#{version}';
 detach database import;
 EOF
@@ -631,12 +646,11 @@ create table export.vocabulary as select * from vocabulary;
 create table export.relntype as select * from relntype;
 create table export.idealaent as select * from idealaent;
 create table export.idealreln as select * from idealreln;
-create table export.archentity as select uuid, aenttimestamp, userid, doi, deleted, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity;
-create table export.aentvalue as select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, deleted from aentvalue;
-create table export.relationship as select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from relationship;
-create table export.relnvalue as select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty, deleted from relnvalue;
-create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln;
-detach database export;
+create table export.archentity as select * from archentity;
+create table export.aentvalue as select * from aentvalue;
+create table export.relationship as select * from relationship;
+create table export.relnvalue as select * from relnvalue;
+create table export.aentreln as select * from aentreln;
 EOF
     )
   end
@@ -644,11 +658,11 @@ EOF
   def self.create_app_database_from_version(toDB, version)
     cleanup_query(<<EOF
 attach database "#{toDB}" as export;
-create table export.archentity as select uuid, aenttimestamp, userid, doi, deleted, aenttypeid, geospatialcolumntype, geospatialcolumn from archentity where versionnum >= '#{version}';
-create table export.aentvalue as select uuid, valuetimestamp, vocabid, attributeid, freetext, measure, certainty, deleted from aentvalue where versionnum >= '#{version}';
-create table export.relationship as select relationshipid, userid, relntimestamp, geospatialcolumntype, relntypeid, geospatialcolumn, deleted from relationship where versionnum >= '#{version}';
-create table export.relnvalue as select relationshipid, attributeid, vocabid, relnvaluetimestamp, freetext, certainty, deleted from relnvalue where versionnum >= '#{version}';
-create table export.aentreln as select uuid, relationshipid, participatesverb, deleted, aentrelntimestamp from aentreln where versionnum >= '#{version}';
+create table export.archentity as select * from archentity where versionnum >= '#{version}';
+create table export.aentvalue as select * from aentvalue where versionnum >= '#{version}';
+create table export.relationship as select * from relationship where versionnum >= '#{version}';
+create table export.relnvalue as select * from relnvalue where versionnum >= '#{version}';
+create table export.aentreln as select * from aentreln where versionnum >= '#{version}';
 detach database export;
 EOF
     )
