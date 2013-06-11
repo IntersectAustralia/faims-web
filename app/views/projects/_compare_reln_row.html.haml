@@ -1,4 +1,4 @@
-- if !group[key].blank?
+- if !group[key].nil?
   %ul.inline
     %li
       - if (checked)
@@ -10,22 +10,22 @@
         - if (val)
           - if (checked)
             .step-body.selected{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key }
+              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
               %span.attribute-info
                 = attributeInfo[key]
           - else
             .step-body{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key }
+              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
               %span.attribute-info
                 = attributeInfo[key]
         - else
           - if (checked)
             .step-body.error.selected{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key }
+              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
               %span.attribute-info
                 = attributeInfo[key]
           - else
             .step-body.error{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key }
+              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
               %span.attribute-info
                 = attributeInfo[key]

@@ -186,7 +186,7 @@ delete_records = ->
   return
 
 download_attached_file = ->
-  $('form[id*=download_attached_file]').each(
+  $('form[id*=download-attached-file]').each(
     ->
       self = this
       $a_href = $(this).find('a')
@@ -302,6 +302,8 @@ merge_record = ->
 
           return
       )
+      $('body').append($form)
+      $form.hide()
       $form.submit()
       false
   )

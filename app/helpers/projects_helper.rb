@@ -42,6 +42,8 @@ module ProjectsHelper
     second_arch_ent = project.db.get_arch_entity_attributes(second_uuid)
     @firstInfo = project.db.get_arch_ent_info(first_uuid, first_timestamp)[0][0]
     @secondInfo = project.db.get_arch_ent_info(second_uuid, second_timestamp)[0][0]
+    @firstAttributeValueGroup = project.db.get_arch_ent_attribute_for_comparison(first_uuid).group_by{|a|a[1]}
+    @secondAttributeValueGroup = project.db.get_arch_ent_attribute_for_comparison(second_uuid).group_by{|a|a[1]}
     @firstAttributeGroup = first_arch_ent.group_by{|a|a[3]}
     @secondAttributeGroup = second_arch_ent.group_by{|a|a[3]}
     attributeKeys = @firstAttributeGroup.keys | @secondAttributeGroup.keys
@@ -49,23 +51,27 @@ module ProjectsHelper
     @first_attributeInfos = {}
     @second_attributeInfos = {}
     attributeKeys.each do |attributeKey|
-      first_info = project.db.get_arch_ent_attribute_info(first_uuid,@firstAttributeGroup[attributeKey][0][9],@firstAttributeGroup[attributeKey][0][1])
-      @first_attributeInfos[attributeKey] = first_info[0][0]
-      second_info = project.db.get_arch_ent_attribute_info(second_uuid,@secondAttributeGroup[attributeKey][0][9],@secondAttributeGroup[attributeKey][0][1])
-      @second_attributeInfos[attributeKey] = second_info[0][0]
-      if(@firstAttributeGroup[attributeKey].blank? || @secondAttributeGroup[attributeKey].blank?)
+      if(!@firstAttributeGroup[attributeKey].nil?)
+        first_info = project.db.get_arch_ent_attribute_info(first_uuid,@firstAttributeGroup[attributeKey][0][9],@firstAttributeGroup[attributeKey][0][1])
+        @first_attributeInfos[attributeKey] = first_info[0][0]
+      end
+      if(!@secondAttributeGroup[attributeKey].nil?)
+        second_info = project.db.get_arch_ent_attribute_info(second_uuid,@secondAttributeGroup[attributeKey][0][9],@secondAttributeGroup[attributeKey][0][1])
+        @second_attributeInfos[attributeKey] = second_info[0][0]
+      end
+
+      if(@firstAttributeGroup[attributeKey].nil? || @secondAttributeGroup[attributeKey].nil?)
         @attributeKeys[attributeKey] = false
       else
         if(@firstAttributeGroup[attributeKey].length.eql?(@secondAttributeGroup[attributeKey].length))
           @firstAttributeGroup[attributeKey].length.times do |i|
-            if(@firstAttributeGroup[attributeKey][i-1][4].eql?(@secondAttributeGroup[attributeKey][i-1][4]) &&
+            if(@firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
                 @firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
                 @firstAttributeGroup[attributeKey][i-1][6].eql?(@secondAttributeGroup[attributeKey][i-1][6]) &&
                 @firstAttributeGroup[attributeKey][i-1][7].eql?(@secondAttributeGroup[attributeKey][i-1][7]))
               @attributeKeys[attributeKey] = true
             else
               @attributeKeys[attributeKey] = false
-              break
             end
           end
         else
@@ -80,6 +86,8 @@ module ProjectsHelper
     second_reln = project.db.get_rel_attributes(second_rel_id)
     @firstInfo = project.db.get_rel_info(first_rel_id, first_timestamp)[0][0]
     @secondInfo = project.db.get_rel_info(second_rel_id, second_timestamp)[0][0]
+    @firstAttributeValueGroup = project.db.get_rel_attribute_for_comparison(first_rel_id).group_by{|a|a[2]}
+    @secondAttributeValueGroup = project.db.get_rel_attribute_for_comparison(second_rel_id).group_by{|a|a[2]}
     @firstAttributeGroup = first_reln.group_by{|a|a[3]}
     @secondAttributeGroup = second_reln.group_by{|a|a[3]}
     attributeKeys = @firstAttributeGroup.keys | @secondAttributeGroup.keys
@@ -87,11 +95,15 @@ module ProjectsHelper
     @first_attributeInfos = {}
     @second_attributeInfos = {}
     attributeKeys.each do |attributeKey|
-      first_info = project.db.get_rel_attribute_info(first_rel_id,@firstAttributeGroup[attributeKey][0][9],@firstAttributeGroup[attributeKey][0][2])
-      @first_attributeInfos[attributeKey] = first_info[0][0]
-      second_info = project.db.get_rel_attribute_info(second_rel_id,@secondAttributeGroup[attributeKey][0][9],@secondAttributeGroup[attributeKey][0][2])
-      @second_attributeInfos[attributeKey] = second_info[0][0]
-      if(@firstAttributeGroup[attributeKey].blank? || @secondAttributeGroup[attributeKey].blank?)
+      if(!@firstAttributeGroup[attributeKey].nil?)
+        first_info = project.db.get_rel_attribute_info(first_rel_id,@firstAttributeGroup[attributeKey][0][9],@firstAttributeGroup[attributeKey][0][2])
+        @first_attributeInfos[attributeKey] = first_info[0][0]
+      end
+      if(!@secondAttributeGroup[attributeKey].nil?)
+        second_info = project.db.get_rel_attribute_info(second_rel_id,@secondAttributeGroup[attributeKey][0][9],@secondAttributeGroup[attributeKey][0][2])
+        @second_attributeInfos[attributeKey] = second_info[0][0]
+      end
+      if(@firstAttributeGroup[attributeKey].nil? || @secondAttributeGroup[attributeKey].nil?)
         @attributeKeys[attributeKey] = false
       else
         if(@firstAttributeGroup[attributeKey].length.eql?(@secondAttributeGroup[attributeKey].length))
@@ -102,7 +114,6 @@ module ProjectsHelper
               @attributeKeys[attributeKey] = true
             else
               @attributeKeys[attributeKey] = false
-              break
             end
           end
         else

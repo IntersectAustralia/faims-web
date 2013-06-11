@@ -3,24 +3,15 @@
     %tr
       %td
         %h5=key
+      %td
+        = ': '
+      %td
+        = value[key][0][4]
     - for attribute in group[key]
       %input{:type => 'hidden', :name => 'attribute_id[]', :value => attribute[2]}
-      %tr
-        - if !attribute[6].blank?
-          %td
-            %label Vocab:
-          %td
-            %input{:value => attribute[6], :readonly => 'readonly'}
-            %input{:value => attribute[1], :name => 'vocab_id[]', :type => 'hidden'}
-        - else
-          %input{:value => nil, :name => 'vocab_id[]', :type => 'hidden'}
-      %tr
-        %td
-          %label Freetext:
-        %td
-          %input{:value => attribute[4], :name => 'freetext[]', :readonly => 'readonly'}
-      %tr
-        %td
-          %label Certainty:
-        %td
-          %input{:value => attribute[5], :name => 'certainty[]', :readonly => 'readonly'}
+      - if !attribute[6].blank?
+        %input{:value => attribute[1], :name => 'vocab_id[]', :type => 'hidden'}
+      - else
+        %input{:value => nil, :name => 'vocab_id[]', :type => 'hidden'}
+      %input{:value => attribute[4], :name => 'freetext[]', :type => 'hidden'}
+      %input{:value => attribute[5], :name => 'certainty[]', :type => 'hidden'}
