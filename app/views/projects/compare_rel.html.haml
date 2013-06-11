@@ -43,7 +43,7 @@
       - @attributeKeys.each do |key,val|
         %tr
           %td.first
-            = render :partial => 'compare_reln_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos }
+            = render :partial => 'compare_reln_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos, value: @firstAttributeValueGroup }
           %td.second
-            = render :partial => 'compare_reln_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos }
-    = link_to "Merge", merge_rel_path(@project), :id => 'merge_record', :class => 'btn'
+            = render :partial => 'compare_reln_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos, value: @secondAttributeValueGroup }
+    = link_to "Merge", merge_rel_path(@project), :id => 'merge-record', :class => 'btn'

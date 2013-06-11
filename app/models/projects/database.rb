@@ -34,6 +34,11 @@ class Database
     info
   end
 
+  def get_arch_ent_attribute_for_comparison(uuid)
+    attributes = @db.execute(WebQuery.get_arch_ent_attribute_for_comparison, uuid)
+    attributes
+  end
+
   def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
@@ -128,6 +133,11 @@ class Database
   def get_rel_attribute_info(relid,valuetimestamp,attribute_id)
     info = @db.execute(WebQuery.get_rel_attribute_info, relid, valuetimestamp,attribute_id)
     info
+  end
+
+  def get_rel_attribute_for_comparison(relid)
+    attributes = @db.execute(WebQuery.get_rel_attribute_for_comparison, relid)
+    attributes
   end
 
   def get_rel_arch_ent_members(relationshipid, limit, offset)

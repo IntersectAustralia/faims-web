@@ -390,6 +390,7 @@ class ProjectsController < ApplicationController
     session[:timestamps] = []
     @identifiers = params[:identifiers]
     @timestamps = params[:timestamps]
+    p @timestamps
     @first_rel_id = ids[0]
     @second_rel_id = ids[1]
   end

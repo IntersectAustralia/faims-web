@@ -231,6 +231,39 @@ EOF
     )
   end
 
+  def self.get_arch_ent_attribute_for_comparison
+    cleanup_query(<<EOF
+   select uuid, attributename, attributeid, attributetype, valuetimestamp, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              measure,
+                                                                                              vocabname,
+                                                                                              freetext), ' | ') as response
+FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp
+          FROM aentvalue
+          JOIN attributekey USING (attributeid)
+          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+          JOIN (SELECT uuid, attributeid, valuetimestamp
+                  FROM aentvalue
+                  JOIN archentity USING (uuid)
+                 WHERE archentity.deleted is NULL
+                 AND uuid = ?
+              GROUP BY uuid, attributeid
+                HAVING MAX(ValueTimestamp)
+                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
+          WHERE deleted is NULl
+       ORDER BY uuid, attributename ASC)
+group by uuid, attributename;
+EOF
+    )
+  end
+
   def self.load_relationships
     cleanup_query(<<EOF
 SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, tstamp
@@ -438,6 +471,34 @@ EOF
     )
   end
 
+  def self.get_rel_attribute_for_comparison
+    cleanup_query(<<EOF
+   select relationshipid, attributeid, attributename, attributetype,  group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                         vocabname  || ' (' || freetext || ')',
+                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                         vocabname,
+                                                                                         freetext), ' | ') as response
+from (
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp
+    FROM relnvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid
+             FROM relnvalue
+             JOIN relationship USING (relationshipid)
+            WHERE relationship.deleted is NULL
+            and relationshipid = ?
+         GROUP BY relationshipid, attributeid
+           HAVING MAX(relnvaluetimestamp)
+              AND MAX(relntimestamp)
+      ) USING (relationshipid, attributeid, relnvaluetimestamp)
+   WHERE relnvalue.deleted is NULL
+ORDER BY relationshipid, attributename asc)
+group by relationshipid, attributename;
+EOF
+    )
+  end
   def self.get_arch_entities_in_relationship
     cleanup_query(<<EOF
 SELECT uuid, aenttypename, attributename, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, max(tstamp, astamp), aentvalue.deleted
