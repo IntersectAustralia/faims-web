@@ -362,14 +362,17 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     end
     @project.db.delete_arch_entity(params[:deleted_id])
 
     @project.db.insert_updated_arch_entity(params[:uuid], params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      return
     else
       redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      return
     end
   end
 
@@ -390,14 +393,17 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     end
     @project.db.delete_relationship(params[:deleted_id])
 
     @project.db.insert_updated_rel(params[:rel_id], params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      return
     else
       redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      return
     end
   end
 
