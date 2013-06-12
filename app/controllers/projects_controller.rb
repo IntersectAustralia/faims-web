@@ -150,6 +150,12 @@ class ProjectsController < ApplicationController
 
   end
 
+  def show_arch_ent_history
+    @project = Project.find(params[:id])
+    uuid = params[:uuid]
+    @timestamps = @project.db.get_arch_ent_history(uuid)
+  end
+
   def list_rel_records
     @project = Project.find(params[:id])
     @type = @project.db.get_rel_types
@@ -256,8 +262,7 @@ class ProjectsController < ApplicationController
 
   def show_rel_members
     @project = Project.find(params[:id])
-    relationshipid = params[:relationshipid]
-    session[:relationshipid] = relationshipid
+    session[:relationshipid] = params[:relationshipid]
     limit = 25
     offset = params[:offset]
     session[:relntypeid] = params[:relntypeid]
@@ -265,7 +270,7 @@ class ProjectsController < ApplicationController
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:show] = 'show_rel_members'
-    @uuid = @project.db.get_rel_arch_ent_members(relationshipid, limit, offset)
+    @uuid = @project.db.get_rel_arch_ent_members(params[:relationshipid], limit, offset)
   end
 
   def remove_arch_ent_member
@@ -278,35 +283,29 @@ class ProjectsController < ApplicationController
 
   def search_arch_ent_member
     @project = Project.find(params[:id])
-    relationshipid = params[:relationshipid]
-    session[:relationshipid] = relationshipid
-    search_query = params[:search_query]
-    relntypeid = params[:relntypeid]
-    session[:relntypeid] = relntypeid
-    if search_query.nil?
+    session[:relationshipid] = params[:relationshipid]
+    session[:relntypeid] = params[:relntypeid]
+    if params[:search_query].nil?
       @uuid = nil
       @status = 'init'
       session.delete(:search_query)
     else
       limit = 25
       offset = params[:offset]
-      session[:search_query] = search_query
+      session[:search_query] = params[:search_query]
       session[:cur_offset] = offset
       session[:prev_offset] = Integer(offset) - Integer(limit)
       session[:next_offset] = Integer(offset) + Integer(limit)
-      @uuid = @project.db.get_non_member_arch_ent(relationshipid,search_query,limit,offset)
+      @uuid = @project.db.get_non_member_arch_ent(params[:relationshipid],params[:search_query],limit,offset)
     end
-    @verb = @project.db.get_verbs_for_relation(relntypeid)
+    @verb = @project.db.get_verbs_for_relation(params[:relntypeid])
   end
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
-    relationshipid = params[:relationshipid]
-    uuid = params[:uuid]
-    verb = params[:verb]
-    @project.db.add_arch_ent_member(relationshipid,uuid,verb)
+    @project.db.add_arch_ent_member(params[:relationshipid],params[:uuid],params[:verb])
     respond_to do |format|
-      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,relationshipid)+'?offset=0'} }
+      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0'} }
     end
   end
 
@@ -364,17 +363,9 @@ class ProjectsController < ApplicationController
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
-    deleted_id = params[:deleted_id]
-    @project.db.delete_arch_entity(deleted_id)
+    @project.db.delete_arch_entity(params[:deleted_id])
 
-    uuid = params[:uuid]
-    attribute_ids = params[:attribute_id]
-    vocab_ids = params[:vocab_id]
-    measures = params[:measure]
-    freetexts = params[:freetext]
-    certainties = params[:certainty]
-
-    @project.db.insert_updated_arch_entity(uuid, vocab_ids,attribute_ids, measures, freetexts, certainties)
+    @project.db.insert_updated_arch_entity(params[:uuid], params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
@@ -390,7 +381,6 @@ class ProjectsController < ApplicationController
     session[:timestamps] = []
     @identifiers = params[:identifiers]
     @timestamps = params[:timestamps]
-    p @timestamps
     @first_rel_id = ids[0]
     @second_rel_id = ids[1]
   end
@@ -401,20 +391,13 @@ class ProjectsController < ApplicationController
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
     end
-    deleted_id = params[:deleted_id]
-    @project.db.delete_relationship(deleted_id)
+    @project.db.delete_relationship(params[:deleted_id])
 
-    rel_id = params[:rel_id]
-    attribute_ids = params[:attribute_id]
-    vocab_ids = params[:vocab_id]
-    freetexts = params[:freetext]
-    certainties = params[:certainty]
-
-    @project.db.insert_updated_rel(rel_id, vocab_ids,attribute_ids, freetexts, certainties)
+    @project.db.insert_updated_rel(params[:rel_id], params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
     end
   end
 
@@ -440,9 +423,7 @@ class ProjectsController < ApplicationController
   end
 
   def download_attached_file
-    project = Project.find(params[:id])
-    path = params[:path]
-    send_file Rails.root.join("projects/#{project.key}/#{path}"), :filename => params[:name]
+    send_file Rails.root.join("projects/#{Project.find(params[:id]).key}/#{params[:path]}"), :filename => params[:name]
   end
 
   def update

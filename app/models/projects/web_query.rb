@@ -4,7 +4,7 @@ module WebQuery
 
   def self.load_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, tstamp, aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -50,7 +50,7 @@ EOF
 
   def self.load_all_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, tstamp, aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -93,7 +93,7 @@ EOF
 
   def self.search_arch_entity
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, tstamp, aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, aentvalue.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -264,9 +264,61 @@ EOF
     )
   end
 
+  def self.get_arch_ent_history
+    cleanup_query(<<EOF
+    select uuid, aenttimestamp as tstamp
+      FROM archentity
+        where uuid = ?
+      union
+      select uuid, valuetimestamp as tstamp
+        FROM aentvalue
+        where uuid = ?
+        group by tstamp
+      order by tstamp desc;
+EOF
+    )
+  end
+
+  def self.get_arch_ent_history_at_timestamp
+    cleanup_query(<<EOF
+  select uuid, attributename, attributeid, afname || ' ' || alname as auser, group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(valdeleted,
+                                                                                              measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              measure,
+                                                                                              vocabname,
+                                                                                              freetext), ' | ') as response
+FROM (  SELECT uuid, attributeid, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp
+          FROM aentvalue
+          JOIN attributekey USING (attributeid)
+          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+          JOIN (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
+                  FROM aentvalue
+                  JOIN archentity USING (uuid)
+                 WHERE uuid = ?
+                       and valuetimestamp <= ?
+                       and aenttimestamp <= ?
+              GROUP BY uuid, attributeid
+                HAVING MAX(ValueTimestamp)
+                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
+          join archentity using (uuid, aenttimestamp)
+          left outer join user as aentuser on (aentuser.userid = archentity.userid)
+          left outer join user as valueuser on (valueuser.userid = aentvalue.userid)
+       ORDER BY uuid, attributename ASC, archentity.deleted desc)
+group by uuid, attributename;
+EOF
+    )
+  end
+
   def self.load_relationships
     cleanup_query(<<EOF
-SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, tstamp
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, astamp
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
             FROM relationship
             JOIN relnvalue USING (relationshipid)
@@ -309,7 +361,7 @@ EOF
 
   def self.load_all_relationships
     cleanup_query(<<EOF
-SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,tstamp
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
             FROM relationship
             JOIN relnvalue USING (relationshipid)
@@ -351,7 +403,7 @@ EOF
 
   def self.search_relationship
     cleanup_query(<<EOF
-SELECT relationshipid,RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,tstamp
+SELECT relationshipid,RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
             FROM relationship
             JOIN relnvalue USING (relationshipid)
