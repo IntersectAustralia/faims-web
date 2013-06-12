@@ -10,13 +10,13 @@ class Database
 
   def get_arch_entity_type(uuid)
     type = @db.execute(WebQuery.get_arch_entity_type, uuid)
-    type[0] if type
+    return type.first.first if type and type.first
     nil
   end
 
   def get_relationship_type(relationshipid)
     type = @db.execute(WebQuery.get_relationship_type, relationshipid)
-    type[0] if type
+    return type.first.first if type and type.first
     nil
   end
 
@@ -293,6 +293,8 @@ class Database
 
       version ||= current_version
 
+      p "Version: " + version
+
       create_new_version = true
 
       reln_values = @db.execute(WebQuery.get_all_reln_values_for_version, version)
@@ -310,7 +312,7 @@ class Database
 
           result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
           if result
-            puts "Relationship[" + relationshipid + "] is " + result
+            puts "Relationship[" + relationshipid.to_s + "] is " + result
 
             # if create_new_version
             #   @db.execute(WebQuery.insert_version, current_timestamp)
@@ -340,7 +342,7 @@ class Database
 
           result = db_validator.validate_aent_value(uuid, aentvaluetimestamp, attributename, fields)
           if result
-            puts "ArchEntity[" + uuid + "] is " + result
+            puts "ArchEntity[" + uuid.to_s + "] is " + result
 
             # if create_new_version
             #   @db.execute(WebQuery.insert_version, current_timestamp)
@@ -371,7 +373,6 @@ class Database
     db.execute_batch(gps_definition)
   end
 
-  # Testing
   def spatialite_db
     @db
   end

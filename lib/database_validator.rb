@@ -37,7 +37,7 @@ class DatabaseValidator
 
 					end
 
-					properties[property['name]']] = validators
+					properties[property['name']] = validators
 				end
 
 				@relationship_validators[relationship['name']] = properties
@@ -80,6 +80,7 @@ class DatabaseValidator
 				@entity_validators[entity['type']] = properties
 			end
 		end
+
 	end
 
 	def validate_aent_value(uuid, aentvaluetimestamp, attributename, fields)
@@ -94,12 +95,20 @@ class DatabaseValidator
 
 			return nil unless validators
 
+			result = ''
 			validators.each do |validator|
-				result = validator.validate(uuid, aentvaluetimestamp, fields)
-				return result if result
+				r = validator.validate(@db.spatialite_db, uuid, aentvaluetimestamp, fields)
+				if r
+					if result
+						result = result + '\n' + r.to_s if r
+					else
+						result = r.to_s
+					end
+				end
 			end
 
-			nil
+			return nil if result.blank?
+			return result
 		rescue Exception => e
 			raise e
 		end
@@ -114,15 +123,27 @@ class DatabaseValidator
 			return nil unless properties
 
 			validators = properties[attributename]
-
+			
 			return nil unless validators
 
+			#p validators
+			p 'Attribute: ' + attributename if attributename
+			p 'Fields: ' + fields.to_s if fields
+
+			result = nil
 			validators.each do |validator|
-				result = validator.validate(relationshipid, relnvaluetimestamp, fields)
-				return result if result
+				r = validator.validate(@db.spatialite_db, relationshipid, relnvaluetimestamp, fields)
+				if r
+					if result
+						result = result + '\n' + r.to_s if r
+					else
+						result = r.to_s
+					end
+				end
 			end
 
-			nil
+			return nil if result.blank?
+			return result
 		rescue Exception => e
 			raise e
 		end
@@ -147,7 +168,7 @@ class Param
 
 	def get_value(db, id, timestamp, fields)
 		begin
-			return db.execute(@value, id, timestamp) if @type == 'query'
+			return db.execute(@value, id, timestamp).first.first if @type == 'query'
 			return fields[value]
 		rescue Exception => e
 			raise e
@@ -183,7 +204,7 @@ class EvalValidator < AttributeValidator
 				temp_cmd = temp_cmd.sub("?", p.get_value(db, id, timestamp, fields))
 			end
 			result = system "#{temp_cmd} 1>>#{temp_file.path} 2>>#{temp_file.path}"
-			return nil if result
+			return nil unless result
 			error = temp_file.read
 			return error
 		rescue Exception => e
@@ -222,8 +243,8 @@ class TypeValidator < AttributeValidator
 		begin
 			@params.each do |p|
 				value = p.get_value(db, id, timestamp, fields)
-				return "Value not an integer" if @datatype == 'integer' and !integer(value)
-				return "Value not a float" if @datatype == 'float' and !float(value)
+				return "Value not an integer" if @datatype == 'integer' and !integer?(value)
+				return "Value not a float" if @datatype == 'float' and !float?(value)
 				return "Value not a string" if value.blank?
 			end
 			return nil
