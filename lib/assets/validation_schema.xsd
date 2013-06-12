@@ -10,11 +10,18 @@
                   <xs:sequence>
                     <xs:element name="validator" maxOccurs="unbounded" minOccurs="0">
                       <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="param" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:attribute type="xs:string" name="type" use="required"/>
+                              <xs:attribute type="xs:string" name="value" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
                         <xs:attribute type="xs:string" name="type" use="required"/>
-                        <xs:attribute type="xs:string" name="valuetype" use="required"/>
-                        <xs:attribute type="xs:string" name="value" use="required"/>
                         <xs:attribute type="xs:string" name="cmd" use="optional"/>
                         <xs:attribute type="xs:string" name="datatype" use="optional"/>
+                        <xs:attribute type="xs:string" name="query" use="optional"/>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
@@ -34,11 +41,18 @@
                   <xs:sequence>
                     <xs:element name="validator" maxOccurs="unbounded" minOccurs="0">
                       <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="param" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:attribute type="xs:string" name="type" use="required"/>
+                              <xs:attribute type="xs:string" name="value" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
                         <xs:attribute type="xs:string" name="type" use="required"/>
-                        <xs:attribute type="xs:string" name="valuetype" use="required"/>
-                        <xs:attribute type="xs:string" name="value" use="required"/>
                         <xs:attribute type="xs:string" name="cmd" use="optional"/>
                         <xs:attribute type="xs:string" name="datatype" use="optional"/>
+                        <xs:attribute type="xs:string" name="query" use="optional"/>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>

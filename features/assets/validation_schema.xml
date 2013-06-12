@@ -5,19 +5,50 @@
 
 		<property name='name'>
 
-			<validator type='isCmd' cmd='' valuetype='value' value='freetext'/>
-			<validator type='isCmd' cmd='' valuetype='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?'/>
-
-			<validator type='isBlank' valuetype='value' value='freetext'/>
-			<validator type='isBlank' valuetype='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?'/>
-
-			<validator type='isType' datatype='integer' valuetype='value' value='freetext'/>
-			<validator type='isType' datatype='integer' valuetype='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?'/>
-
-			<validator type='isQuery' valuetype='value' value='freetext'/>
-			<validator type='isQuery' valuetype='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?'/>
-
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? ? | spell'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
 			
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='querychecker' query='select ? = ? | "Value is not equal' >
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+
 		</property>
 
 	</RelationshipElement>
@@ -26,17 +57,49 @@
 
 		<property name='name'>
 
-			<validator type='isCmd' cmd='' valuetype='value' value='freetext'/>
-			<validator type='isCmd' cmd='' valuetype='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?'/>
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? ? | spell'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
 
-			<validator type='isBlank' valuetype='value' value='freetext'/>
-			<validator type='isBlank' valuetype='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?'/>
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
 
-			<validator type='isType' datatype='integer' valuetype='value' value='freetext'/>
-			<validator type='isType' datatype='integer' valuetype='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?'/>
-
-			<validator type='isQuery' valuetype='value' value='freetext'/>
-			<validator type='isQuery' valuetype='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?'/>
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='querychecker' query='select ? = ? | "Value is not equal' >
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
 
 		</property>
 

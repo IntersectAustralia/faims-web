@@ -729,6 +729,34 @@ EOF
     )
   end
 
+  def self.get_arch_entity_type 
+    cleanup_query(<<EOF
+select aenttypename from archent join aenttype using (aenttypeid) where uuid = ?;
+EOF
+    )
+  end
+
+  def self.get_relationship_type 
+    cleanup_query(<<EOF
+select relntypename from relationship join relntype using (relntypeid) where relationshipid = ?;
+EOF
+    )
+  end
+
+  def self.get_all_arch_entity_for_version
+    cleanup_query(<<EOF
+select uuid from aentvalue where versionum = ?;
+EOF
+    )
+  end
+
+  def self.get_all_relationship_for_version
+    cleanup_query(<<EOF
+select relationshipid from relnvalue where versionnum = ?;
+EOF
+    )
+  end
+
   private
 
   def self.cleanup_query(query)
