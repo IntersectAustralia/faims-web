@@ -84,7 +84,7 @@ class DatabaseValidator
 
 	def validate_aent_value(uuid, aentvaluetimestamp, attributename, fields)
 		begin
-			type = db.get_arch_entity_type(uuid)
+			type = @db.get_arch_entity_type(uuid)
 
 			properties = @entity_validators[type]
 
@@ -107,7 +107,7 @@ class DatabaseValidator
 
 	def validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
 		begin
-			type = db.get_relationship_type(relationshipid)
+			type = @db.get_relationship_type(relationshipid)
 
 			properties = @relationship_validators[type]
 

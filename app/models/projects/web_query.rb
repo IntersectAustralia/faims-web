@@ -747,7 +747,7 @@ EOF
 
   def self.get_arch_entity_type 
     cleanup_query(<<EOF
-select aenttypename from archent join aenttype using (aenttypeid) where uuid = ?;
+select aenttypename from archentity join aenttype using (aenttypeid) where uuid = ?;
 EOF
     )
   end
@@ -761,7 +761,7 @@ EOF
 
   def self.get_all_aent_values_for_version
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp
+SELECT uuid, attributeid, attributename, vocabid, vocabname, measure, freetext, certainty, valuetimestamp
     FROM aentvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -773,7 +773,7 @@ EOF
 
   def self.get_all_reln_values_for_version
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp
+SELECT relationshipid, attributeid, attributename, vocabid, vocabname, freetext, certainty, relnvaluetimestamp
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)

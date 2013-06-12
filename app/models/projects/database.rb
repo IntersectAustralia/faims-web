@@ -62,7 +62,7 @@ class Database
           @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
 
-        #validate_records
+        validate_records
       end
       @project.db_mgr.make_dirt
     end
@@ -92,7 +92,7 @@ class Database
         @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
       
-      #validate_records
+      validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -133,7 +133,7 @@ class Database
         end
       end
 
-      #validate_records
+      validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -163,7 +163,7 @@ class Database
         @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
       end
       
-      #validate_records
+      validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -259,7 +259,7 @@ class Database
     @project.db_mgr.with_lock do
       @db.execute_batch(WebQuery.merge_database(fromDB, version))
 
-      #validate_records
+      validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -287,68 +287,74 @@ class Database
   end
 
   # note: assume database already locked
-  def validate_records
+  def validate_records(version = nil)
     begin
       db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
 
-      version = get_current_version
+      version ||= current_version
 
       create_new_version = true
 
-      reln_values = db.execute(WebQuery.get_all_reln_values_for_version, version)
+      reln_values = @db.execute(WebQuery.get_all_reln_values_for_version, version)
       reln_values.each do |row|
         begin 
           relationshipid = row[0]
-          relnvaluetimestamp = row[9]
-          vocabid = row[1]
-          attributeid = row[2]
-          attributename = row[3]
+          attributeid = row[1]
+          attributename = row[2]
+          vocabid = row[3]
           fields = {}
-          fields['freetext'] = row[4]
-          fields['certainty'] = row[5]
-          fields['vocabname'] = row[6]
+          fields['vocabname'] = row[4]
+          fields['freetext'] = row[5]
+          fields['certainty'] = row[6]
+          relnvaluetimestamp = row[7]
 
-          result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attribute, fields)
+          result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
           if result
-            if create_new_version
-              @db.execute(WebQuery.insert_version, current_timestamp)
-              create_new_version = false
-            end
+            puts "Relationship[" + relationshipid + "] is " + result
 
-            update_rel_attribute_dirty(relationshipid, vocabid, attributeid, fields['freetext'], fields['certainty'], 1, result)
+            # if create_new_version
+            #   @db.execute(WebQuery.insert_version, current_timestamp)
+            #   create_new_version = false
+            # end
+
+            #update_rel_attribute_dirty(relationshipid, vocabid, attributeid, fields['freetext'], fields['certainty'], 1, result)
           end
         rescue Exception => e
           puts e
         end
       end
 
-      aent_values = db.execute(WebQuery.get_all_reln_values_for_version, version)
+      aent_values = @db.execute(WebQuery.get_all_reln_values_for_version, version)
       aent_values.each do |row|
         begin 
           uuid = row[0]
-          aentvaluetimestamp = row[9]
-          vocabid[2]
           attributeid = row[1]
-          attributename = row[3]
+          attributename = row[2]
+          vocabid = row[3]
           fields = {}
-          fields['freetext'] = row[6]
-          fields['certainty'] = row[7]
           fields['vocabname'] = row[4]
           fields['measure'] = row[5]
+          fields['freetext'] = row[6]
+          fields['certainty'] = row[7]
+          aentvaluetimestamp = row[8]
 
-          result = db_validator.validate_aent_value(uuid, aentvaluetimestamp, attribute, fields)
+          result = db_validator.validate_aent_value(uuid, aentvaluetimestamp, attributename, fields)
           if result
-            if create_new_version
-              @db.execute(WebQuery.insert_version, current_timestamp)
-              create_new_version = false
-            end
+            puts "ArchEntity[" + uuid + "] is " + result
 
-            update_arch_entity_attribute_dirty(uuid, vocabid, attributeid, fields['measure'], fields['freetext'], fields['certainty'], 1, result)
+            # if create_new_version
+            #   @db.execute(WebQuery.insert_version, current_timestamp)
+            #   create_new_version = false
+            # end
+
+            #update_arch_entity_attribute_dirty(uuid, vocabid, attributeid, fields['measure'], fields['freetext'], fields['certainty'], 1, result)
           end
         rescue Exception => e
           puts e
         end
       end
+
+      nil
     rescue Exception => e
       puts e
     end

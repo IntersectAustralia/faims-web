@@ -48,7 +48,7 @@ class Project < ActiveRecord::Base
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
         data_files_archive: { name: 'data.tar.gz', path: project_dir + 'tmp/data.tar.gz' },
-        validation_schema: { name: 'validation_schema.xml', path: project_dir + 'validation_schema' },
+        validation_schema: { name: 'validation_schema.xml', path: project_dir + 'validation_schema.xml' },
     }
   end
 
