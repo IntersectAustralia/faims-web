@@ -192,6 +192,14 @@ EOF
     )
   end
 
+  def self.insert_arch_entity_attribute_dirty
+    cleanup_query(<<EOF
+insert into AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum, isDirty, isDirtyReason) values (?, ?, ?, ?, ?, ?, ?, ?,
+  (select versionnum from version where ismerged = 1 order by versionnum desc limit 1), ?, ?);
+EOF
+    )
+  end
+
   def self.delete_arch_entity
     cleanup_query(<<EOF
 insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
@@ -433,6 +441,14 @@ EOF
     cleanup_query(<<EOF
 insert into RelnValue (RelationshipID, UserId, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
+EOF
+    )
+  end
+
+  def self.insert_relationship_attribute_dirty
+    cleanup_query(<<EOF
+insert into RelnValue (RelationshipID, UserId, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum, isDirty, isDirtyReason) values (?, ?, ?, ?, ?, ?, ?,
+  (select versionnum from version where ismerged = 1 order by versionnum desc limit 1), ?, ?);
 EOF
     )
   end
@@ -743,16 +759,26 @@ EOF
     )
   end
 
-  def self.get_all_arch_entity_for_version
+  def self.get_all_aent_values_for_version
     cleanup_query(<<EOF
-select uuid from aentvalue where versionum = ?;
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp
+    FROM aentvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+    WHERE deleted is NULL and versionnum = ?
+ ORDER BY uuid, attributename ASC;
 EOF
     )
   end
 
-  def self.get_all_relationship_for_version
+  def self.get_all_reln_values_for_version
     cleanup_query(<<EOF
-select relationshipid from relnvalue where versionnum = ?;
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp
+    FROM relnvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+   WHERE relnvalue.deleted is NULL and versionnum = ?
+ORDER BY relationshipid, attributename asc;
 EOF
     )
   end

@@ -8,6 +8,18 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def get_arch_entity_type(uuid)
+    type = @db.execute(WebQuery.get_arch_entity_type, uuid)
+    type[0] if type
+    nil
+  end
+
+  def get_relationship_type(relationshipid)
+    type = @db.execute(WebQuery.get_relationship_type, relationshipid)
+    type[0] if type
+    nil
+  end
+
   def load_arch_entity(type, limit, offset)
     uuids = type.eql?('all') ?
       @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
@@ -50,10 +62,25 @@ class Database
           @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
 
-        # run validators
+        #validate_records
       end
       @project.db_mgr.make_dirt
     end
+  end
+
+  def update_arch_entity_attribute_dirty(uuid, vocab_id, attribute_id, measure, freetext, certainty, isDirty, isDirtyReason)
+    #@project.db_mgr.with_lock do
+      #currenttime = current_timestamp
+      #@db.execute(WebQuery.insert_version, currenttime)
+      measure.length.times do |i|
+        if vocab_id.blank?
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime, isDirty, isDrityReason)
+        else
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime, isDirty, isDrityReason)
+        end
+      end
+    #  @project.db_mgr.make_dirt
+    #end
   end
 
   def insert_updated_arch_entity(uuid, vocab_id, attribute_id, measure, freetext, certainty)
@@ -64,7 +91,8 @@ class Database
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
-      # run validators
+      
+      #validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -104,9 +132,26 @@ class Database
           @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
         end
       end
-      # run validators
+
+      #validate_records
       @project.db_mgr.make_dirt
     end
+  end
+
+  def update_rel_attribute_dirty(relationshipid, vocab_id, attribute_id, freetext, certainty, isDirty, isDirtyReason)
+    #@project.db_mgr.with_lock do
+    #  currenttime = current_timestamp
+    #  @db.execute(WebQuery.insert_version, currenttime)
+      freetext.length.times do |i|
+        if vocab_id.blank?
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime, isDirty, isDirtyReason)
+        else
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, isDirty, isDirtyReason)
+        end
+      end
+
+    #  @project.db_mgr.make_dirt
+    #end
   end
 
   def insert_updated_rel(relationshipid, vocab_id, attribute_id, freetext, certainty)
@@ -117,7 +162,8 @@ class Database
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
       end
-      # run validators
+      
+      #validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -213,8 +259,7 @@ class Database
     @project.db_mgr.with_lock do
       @db.execute_batch(WebQuery.merge_database(fromDB, version))
 
-      # run validators
-
+      #validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -239,6 +284,74 @@ class Database
       @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
 
     #end
+  end
+
+  # note: assume database already locked
+  def validate_records
+    begin
+      db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
+
+      version = get_current_version
+
+      create_new_version = true
+
+      reln_values = db.execute(WebQuery.get_all_reln_values_for_version, version)
+      reln_values.each do |row|
+        begin 
+          relationshipid = row[0]
+          relnvaluetimestamp = row[9]
+          vocabid = row[1]
+          attributeid = row[2]
+          attributename = row[3]
+          fields = {}
+          fields['freetext'] = row[4]
+          fields['certainty'] = row[5]
+          fields['vocabname'] = row[6]
+
+          result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attribute, fields)
+          if result
+            if create_new_version
+              @db.execute(WebQuery.insert_version, current_timestamp)
+              create_new_version = false
+            end
+
+            update_rel_attribute_dirty(relationshipid, vocabid, attributeid, fields['freetext'], fields['certainty'], 1, result)
+          end
+        rescue Exception => e
+          puts e
+        end
+      end
+
+      aent_values = db.execute(WebQuery.get_all_reln_values_for_version, version)
+      aent_values.each do |row|
+        begin 
+          uuid = row[0]
+          aentvaluetimestamp = row[9]
+          vocabid[2]
+          attributeid = row[1]
+          attributename = row[3]
+          fields = {}
+          fields['freetext'] = row[6]
+          fields['certainty'] = row[7]
+          fields['vocabname'] = row[4]
+          fields['measure'] = row[5]
+
+          result = db_validator.validate_aent_value(uuid, aentvaluetimestamp, attribute, fields)
+          if result
+            if create_new_version
+              @db.execute(WebQuery.insert_version, current_timestamp)
+              create_new_version = false
+            end
+
+            update_arch_entity_attribute_dirty(uuid, vocabid, attributeid, fields['measure'], fields['freetext'], fields['certainty'], 1, result)
+          end
+        rescue Exception => e
+          puts e
+        end
+      end
+    rescue Exception => e
+      puts e
+    end
   end
 
   # static
