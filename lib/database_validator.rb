@@ -19,6 +19,12 @@ class DatabaseValidator
 
 							raise "Invalid param type " + param['type'] unless param['type'] == 'field' or param['type'] == 'query'
 
+							if param['type'] == 'field'
+								raise "Invalid value type " + param['value'] unless param['value'] == 'freetext' or
+									param['value'] == 'vocab' or
+									param['value'] == 'certainty'
+							end
+
 							params.push(Param.new(param['type'], param['value']))
 						
 						end
@@ -55,6 +61,13 @@ class DatabaseValidator
 						validator.xpath("./param").each do |param|
 
 							raise "Invalid param type " + param['type'] unless param['type'] == 'field' or param['type'] == 'query'
+
+							if param['type'] == 'field'
+								raise "Invalid value type " + param['value'] unless param['value'] == 'freetext' or
+									param['value'] == 'measure' or
+									param['value'] == 'vocab' or
+									param['value'] == 'certainty'
+							end
 
 							params.push(Param.new(param['type'], param['value']))
 						
@@ -204,7 +217,7 @@ class EvalValidator < AttributeValidator
 				temp_cmd = temp_cmd.sub("?", p.get_value(db, id, timestamp, fields))
 			end
 			result = system "#{temp_cmd} 1>>#{temp_file.path} 2>>#{temp_file.path}"
-			return nil unless result
+			return nil if result
 			error = temp_file.read
 			return error
 		rescue Exception => e
