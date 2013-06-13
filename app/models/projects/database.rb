@@ -157,14 +157,14 @@ class Database
 
   def add_arch_ent_member(relationshipid, uuid, verb)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, verb)
+      @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, userid, verb)
       @project.db_mgr.make_dirt
     end
   end
 
   def delete_arch_ent_member(relationshipid, uuid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid)
+      @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid, userid)
       @project.make_dirt
     end
   end

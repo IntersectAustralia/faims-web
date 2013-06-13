@@ -666,14 +666,14 @@ EOF
 
   def self.insert_arch_entity_relationship
     cleanup_query(<<EOF
-insert into aentreln (UUID, RelationshipID, ParticipatesVerb) values(?, ?, ?);
+insert into aentreln (UUID, RelationshipID, UserId, ParticipatesVerb) values(?, ?, ?, ?);
 EOF
     )
   end
 
   def self.delete_arch_entity_relationship
     cleanup_query(<<EOF
-insert into aentreln (UUID, RelationshipID, Deleted) values(?, ?, 'true');
+insert into aentreln (UUID, RelationshipID, UserId, Deleted) values(?, ?, ?, 'true');
 EOF
     )
   end
