@@ -807,6 +807,48 @@ EOF
     )
   end
 
+  def self.is_arch_entity_dirty
+    cleanup_query(<<EOF
+select sum(isdirty)
+  from (
+    select isdirty, deleted
+    from aentvalue
+    where uuid = ?
+    group by uuid, attributeid
+    having max(valuetimestamp)
+    union
+    select isdirty, deleted
+    from archentity
+    where uuid =  ?
+    group by uuid
+    having max(aenttimestamp))
+
+  where deleted is null;
+EOF
+    )
+  end
+
+    def self.is_relationship_dirty
+    cleanup_query(<<EOF
+select sum(isdirty)
+  from (
+    select isdirty, deleted
+    from relnvalue
+    where relationshipid = ?
+    group by relationshipid, attributeid
+    having max(relnvaluetimestamp)
+    union
+    select isdirty, deleted
+    from relationship
+    where relationshipid =  ?
+    group by relationshipid
+    having max(relntimestamp))
+
+  where deleted is null;
+EOF
+    )
+  end
+
   private
 
   def self.cleanup_query(query)

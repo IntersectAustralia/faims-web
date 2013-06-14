@@ -8,6 +8,18 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def is_arch_entity_dirty(uuid)
+    result = @db.execute(WebQuery.is_arch_entity_dirty, uuid, uuid)
+    return result.first.first > 0 if result and result.first and result.first.first
+    nil
+  end
+
+  def is_relationship_dirty(relationshipid)
+    result = @db.execute(WebQuery.is_relationship_dirty, relationshipid)
+    return result.first.first > 0 if result and result.first and result.first.first
+    nil
+  end
+
   def get_arch_entity_type(uuid)
     type = @db.execute(WebQuery.get_arch_entity_type, uuid)
     return type.first.first if type and type.first

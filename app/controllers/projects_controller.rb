@@ -69,6 +69,12 @@ class ProjectsController < ApplicationController
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_arch_ent_records'
     @uuid = @project.db.load_arch_entity(type,limit,offset)
+
+    @entity_dirty_map = {}
+    @uuid.each do |row|
+      @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+    end
+
   end
 
   def search_arch_ent_records
@@ -174,6 +180,11 @@ class ProjectsController < ApplicationController
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_rel_records'
     @relationshipid = @project.db.load_rel(type,limit,offset)
+
+    @rel_dirty_map = {}
+    @relationshipid.each do |row|
+      @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+    end
   end
 
   def search_rel_records

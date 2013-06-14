@@ -8,7 +8,7 @@
           - identifier.push(relationshipids[3].to_s)
           %li
             %a{:href => edit_rel_records_path(@project,relationshipids[0])}
-              =relationshipids[2].to_s + ": " + relationshipids[3].to_s
+              =relationshipids[2].to_s + ": " + relationshipids[3].to_s + (@rel_dirty_map[relationshipids[0]] ? ' is dirty' : '')
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
     - else
       %input{:type => 'checkbox', :value=> relationshipid_group[0][0]}
@@ -17,5 +17,5 @@
           - identifier.push(relationshipids[3].to_s)
           %li
             %a{:href => edit_rel_records_path(@project,relationshipids[0])}
-              =relationshipids[2].to_s + ": " + relationshipids[3].to_s
+              =relationshipids[2].to_s + ": " + relationshipids[3].to_s + (@rel_dirty_map[relationshipids[0]] ? ' is dirty' : '')
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
