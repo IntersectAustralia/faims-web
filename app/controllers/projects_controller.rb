@@ -158,6 +158,14 @@ class ProjectsController < ApplicationController
     @timestamps = @project.db.get_arch_ent_history(uuid)
   end
 
+  def revert_arch_ent_to_timestamp
+    @project = Project.find(params[:id])
+    uuid = params[:uuid]
+    timestamp = params[:timestamp]
+    @project.db.revert_arch_ent_to_timestamp(uuid, timestamp)
+    redirect_to edit_arch_ent_records_path(@project, uuid)
+  end
+
   def list_rel_records
     @project = Project.find(params[:id])
     @type = @project.db.get_rel_types
@@ -245,6 +253,20 @@ class ProjectsController < ApplicationController
       render 'edit_rel_records'
     end
 
+  end
+
+  def show_rel_history
+    @project = Project.find(params[:id])
+    relid = params[:relid]
+    @timestamps = @project.db.get_rel_history(relid)
+  end
+
+  def revert_rel_to_timestamp
+    @project = Project.find(params[:id])
+    relid = params[:relid]
+    timestamp = params[:timestamp]
+    @project.db.revert_rel_to_timestamp(relid, timestamp)
+    redirect_to edit_rel_records_path(@project, relid)
   end
 
   def delete_rel_records

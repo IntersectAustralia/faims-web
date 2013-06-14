@@ -8,6 +8,7 @@
     = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset], :class => 'btn'
   - elsif session[:action].eql?('show_arch_ent_records')
     = link_to "Back", show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset], :class => 'btn'
+= link_to "Show History", show_arch_ent_history_path(@project,session[:uuid]), :class => 'btn'
 .container
   - attributeGroup = @attributes.group_by{|a|a[3]}
   - attributeGroup.each do |key,val|
