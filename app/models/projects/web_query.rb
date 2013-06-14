@@ -761,7 +761,7 @@ EOF
 
   def self.get_all_aent_values_for_version
     cleanup_query(<<EOF
-SELECT uuid, attributeid, attributename, vocabid, vocabname, measure, freetext, certainty, valuetimestamp
+SELECT uuid, attributeid, attributename, vocabid, vocabname, measure, freetext, certainty, valuetimestamp, userid
     FROM aentvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -773,7 +773,7 @@ EOF
 
   def self.get_all_reln_values_for_version
     cleanup_query(<<EOF
-SELECT relationshipid, attributeid, attributename, vocabid, vocabname, freetext, certainty, relnvaluetimestamp
+SELECT relationshipid, attributeid, attributename, vocabid, vocabname, freetext, certainty, relnvaluetimestamp, userid
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)

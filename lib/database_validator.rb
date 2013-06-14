@@ -108,6 +108,10 @@ class DatabaseValidator
 
 			return nil unless validators
 
+			#p validators
+			p 'Attribute: ' + attributename if attributename
+			p 'Fields: ' + fields.to_s if fields
+
 			result = ''
 			validators.each do |validator|
 				r = validator.validate(@db.spatialite_db, uuid, aentvaluetimestamp, fields)

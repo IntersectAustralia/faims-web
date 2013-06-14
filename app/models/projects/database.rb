@@ -68,19 +68,8 @@ class Database
     end
   end
 
-  def update_arch_entity_attribute_dirty(uuid, vocab_id, attribute_id, measure, freetext, certainty, isDirty, isDirtyReason)
-    #@project.db_mgr.with_lock do
-      #currenttime = current_timestamp
-      #@db.execute(WebQuery.insert_version, currenttime)
-      measure.length.times do |i|
-        if vocab_id.blank?
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime, isDirty, isDrityReason)
-        else
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime, isDirty, isDrityReason)
-        end
-      end
-    #  @project.db_mgr.make_dirt
-    #end
+  def insert_arch_entity_attribute_dirty(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, isDirty, isDirtyReason)
+    @db.execute(WebQuery.insert_arch_entity_attribute_dirty, uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, current_timestamp, isDirty, isDirtyReason)
   end
 
   def insert_updated_arch_entity(uuid, vocab_id, attribute_id, measure, freetext, certainty)
@@ -138,20 +127,8 @@ class Database
     end
   end
 
-  def update_rel_attribute_dirty(relationshipid, vocab_id, attribute_id, freetext, certainty, isDirty, isDirtyReason)
-    #@project.db_mgr.with_lock do
-    #  currenttime = current_timestamp
-    #  @db.execute(WebQuery.insert_version, currenttime)
-      freetext.length.times do |i|
-        if vocab_id.blank?
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime, isDirty, isDirtyReason)
-        else
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, isDirty, isDirtyReason)
-        end
-      end
-
-    #  @project.db_mgr.make_dirt
-    #end
+  def insert_rel_attribute_dirty(relationshipid, userid, vocab_id, attribute_id, freetext, certainty, isDirty, isDirtyReason)
+    @db.execute(WebQuery.insert_relationship_attribute_dirty, relationshipid, userid, attribute_id, vocab_id, freetext, certainty, current_timestamp, isDirty, isDirtyReason)
   end
 
   def insert_updated_rel(relationshipid, vocab_id, attribute_id, freetext, certainty)
@@ -309,24 +286,25 @@ class Database
           fields['freetext'] = row[5]
           fields['certainty'] = row[6]
           relnvaluetimestamp = row[7]
+          userid = row[8]
 
           result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
           if result
             puts "Relationship[" + relationshipid.to_s + "] is " + result
 
-            # if create_new_version
-            #   @db.execute(WebQuery.insert_version, current_timestamp)
-            #   create_new_version = false
-            # end
+            if create_new_version
+              @db.execute(WebQuery.insert_version, current_timestamp)
+              create_new_version = false
+            end
 
-            #update_rel_attribute_dirty(relationshipid, vocabid, attributeid, fields['freetext'], fields['certainty'], 1, result)
+            insert_rel_attribute_dirty(relationshipid, userid, vocabid, attributeid, fields['freetext'], fields['certainty'], 1, result)
           end
         rescue Exception => e
-          puts e
+          puts e.backtrace
         end
       end
 
-      aent_values = @db.execute(WebQuery.get_all_reln_values_for_version, version)
+      aent_values = @db.execute(WebQuery.get_all_aent_values_for_version, version)
       aent_values.each do |row|
         begin 
           uuid = row[0]
@@ -339,26 +317,27 @@ class Database
           fields['freetext'] = row[6]
           fields['certainty'] = row[7]
           aentvaluetimestamp = row[8]
+          userid = row[9]
 
           result = db_validator.validate_aent_value(uuid, aentvaluetimestamp, attributename, fields)
           if result
             puts "ArchEntity[" + uuid.to_s + "] is " + result
 
-            # if create_new_version
-            #   @db.execute(WebQuery.insert_version, current_timestamp)
-            #   create_new_version = false
-            # end
+            if create_new_version
+              @db.execute(WebQuery.insert_version, current_timestamp)
+              create_new_version = false
+            end
 
-            #update_arch_entity_attribute_dirty(uuid, vocabid, attributeid, fields['measure'], fields['freetext'], fields['certainty'], 1, result)
+            insert_arch_entity_attribute_dirty(uuid, userid, vocabid, attributeid, fields['measure'], fields['freetext'], fields['certainty'], 1, result)
           end
         rescue Exception => e
-          puts e
+          puts e.backtrace
         end
       end
 
       nil
     rescue Exception => e
-      puts e
+      puts e.backtrace
     end
   end
 
