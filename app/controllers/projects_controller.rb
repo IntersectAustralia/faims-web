@@ -309,7 +309,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     @project.db.add_arch_ent_member(params[:relationshipid],params[:uuid],params[:verb])
     respond_to do |format|
-      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0'} }
+      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0&relntypeid='+params[:relntypeid]} }
     end
   end
 

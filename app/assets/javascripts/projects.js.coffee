@@ -143,7 +143,7 @@ add_arch_ent_member = ->
       else
         $.ajax $(this).attr('src'),
           type: 'POST'
-          data: {relationshipid: $('#relationshipid').val(), uuid: selected.val(), verb: verb}
+          data: {relationshipid: $('#relationshipid').val(), relntypeid: $('#relntypeid').val(), uuid: selected.val(), verb: verb}
           dataType: 'json'
           success: (data, textStatus, jqXHR) ->
             if data.result == "success"
