@@ -112,6 +112,7 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     else
       uuid = params[:uuid]
       vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
@@ -137,6 +138,7 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     end
 
     uuid = params[:uuid]
@@ -225,6 +227,7 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     else
       relationshipid = params[:relationshipid]
       vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
@@ -249,6 +252,7 @@ class ProjectsController < ApplicationController
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     end
 
     relationshipid = params[:relationshipid]
