@@ -17,7 +17,7 @@
               - if @has_changes[timestamp[1]][@attribute_keys[i]].nil?
                 %td.history
                   - if (i == 0)
-                    %input{:type => 'radio', :name => 'timestamp', :value=> timestamp[1], :checked => checked}
+                    %input{:type => 'radio', :name => 'timestamp', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
                     - checked = false
                   - if @attribute_keys[i].eql?('deleted')
                     - if value
@@ -35,7 +35,7 @@
               - else
                 %td.history.error
                   - if (i == 0)
-                    %input{:type => 'radio', :name => 'history', :value=> timestamp[1], :checked => checked}
+                    %input{:type => 'radio', :name => 'history', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
                     - checked = false
                   - if @attribute_keys[i].eql?('deleted')
                     - if value

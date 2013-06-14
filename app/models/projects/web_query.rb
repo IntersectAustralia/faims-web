@@ -360,14 +360,36 @@ SELECT  uuid, attributename, ifnull(deleted, 'Attribute Present')
      having max(valuetimestamp)
   )
 union
-select uuid, attributename, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response
+select uuid, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              measure,
+                                                                                              vocabname,
+                                                                                              freetext), ' | ') as response
   from aentvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
 where uuid = ?
   AND valuetimestamp = ?
 group by uuid, attributename
 EXCEPT
-SELECT  uuid, attributename, coalesce(measure || vocabname, group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response
- from ( select uuid, measure , vocabname, freetext, attributename, valuetimestamp
+SELECT  uuid, attributename,  group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                                                                              vocabname  || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || freetext || ')',
+                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                              measure,
+                                                                                              vocabname,
+                                                                                              freetext), ' | ') as response
+ from ( select uuid, measure , vocabname, freetext, attributename, valuetimestamp, certainty
           from aentvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
          where uuid = ?
            AND valuetimestamp < ?
@@ -745,14 +767,24 @@ SELECT  relationshipid, attributename, ifnull(deleted, 'Attribute Present')
 
   )
 union
-select relationshipid, attributename, coalesce(group_concat(vocabname||' '||freetext, ', '), group_concat(vocabname, ', '), group_concat(freetext, ', ')) AS response
+select relationshipid, attributename, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                         vocabname  || ' (' || freetext || ')',
+                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                         vocabname,
+                                                                                         freetext), ' | ') as response
   from relnvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
 where relationshipid = ?
   AND relnvaluetimestamp = ?
 group by relationshipid, attributename
 EXCEPT
-SELECT  relationshipid, attributename, coalesce(group_concat(vocabname||' '||freetext, ', '), group_concat(vocabname, ', '), group_concat(freetext, ', ')) AS response
- from ( select relationshipid, vocabname, freetext, attributename, relnvaluetimestamp
+SELECT  relationshipid, attributename,group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                         vocabname  || ' (' || freetext || ')',
+                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                         vocabname,
+                                                                                         freetext), ' | ') as response
+ from ( select relationshipid, vocabname, freetext, attributename, relnvaluetimestamp, certainty
           from relnvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
          where relationshipid = ?
            AND relnvaluetimestamp < ?
@@ -760,6 +792,7 @@ SELECT  relationshipid, attributename, coalesce(group_concat(vocabname||' '||fre
         having max(relnvaluetimestamp)
   )
   group by relationshipid, attributename;
+
   ;
 EOF
     )

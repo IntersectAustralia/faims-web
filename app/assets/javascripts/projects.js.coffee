@@ -309,6 +309,20 @@ merge_record = ->
   )
   return
 
+select_timestamp = ->
+
+  $('input[name="timestamp"]:checked').parents('tr').addClass('selected')
+  $('input[name="timestamp"]').change(
+    ->
+      $('input[name="timestamp"]').each(
+        ->
+          $(this).parents('tr').removeClass('selected')
+          return
+      )
+      $(this).parents('tr').addClass('selected')
+      return
+  )
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -324,5 +338,6 @@ $(document).ready(
     select_all_compared_attributes()
     change_checked_attributes()
     merge_record()
+    select_timestamp()
     return
 )
