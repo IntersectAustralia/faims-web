@@ -1,7 +1,7 @@
 %h1= @project.name + " - Search For Archaeological Entity Member"
 .content
   %h2 Search Archaeological Entity
-  = link_to "Back", show_rel_members_path(@project,session[:relationshipid])+'?offset=0', :class => 'btn'
+  = link_to "Back", show_rel_members_path(@project,session[:relationshipid])+'?offset=0&relntypeid='+session[:relntypeid], :class => 'btn'
   %p
   .search-arch-member
     %ul.tabs
