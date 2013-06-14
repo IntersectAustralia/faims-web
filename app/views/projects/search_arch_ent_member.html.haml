@@ -62,4 +62,4 @@
             %option{:value => verb[0].to_s.strip}
               =verb[0].to_s.strip
         %input{:type => 'hidden', :id => 'relationshipid',:value => session[:relationshipid]}
-        %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-sent', :src => add_arch_ent_member_path(@project), :class => 'btn'}
+        %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-ent', :src => add_arch_ent_member_path(@project), :class => 'btn'}
