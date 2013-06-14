@@ -109,8 +109,8 @@ class DatabaseValidator
 			return nil unless validators
 
 			#p validators
-			p 'Attribute: ' + attributename if attributename
-			p 'Fields: ' + fields.to_s if fields
+			#p 'Attribute: ' + attributename if attributename
+			#p 'Fields: ' + fields.to_s if fields
 
 			result = ''
 			validators.each do |validator|
@@ -144,8 +144,8 @@ class DatabaseValidator
 			return nil unless validators
 
 			#p validators
-			p 'Attribute: ' + attributename if attributename
-			p 'Fields: ' + fields.to_s if fields
+			#p 'Attribute: ' + attributename if attributename
+			#p 'Fields: ' + fields.to_s if fields
 
 			result = nil
 			validators.each do |validator|

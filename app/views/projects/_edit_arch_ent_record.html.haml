@@ -8,7 +8,7 @@
           - identifier.push(uuids[3].to_s)
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-              =uuids[2].to_s + ": " + uuids[3].to_s
+              =uuids[2].to_s + ": " + uuids[3].to_s #+ (is_dirty ? ' is dirty' : '')
         %input{:type => 'hidden', :id => 'identifier', :value=> identifier * ", "}
     - else
       %input{:type => 'checkbox', :value=> uuid_group[0][0]}
@@ -17,5 +17,5 @@
           - identifier.push(uuids[3].to_s)
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-              =uuids[2].to_s + ": " + uuids[3].to_s
+              =uuids[2].to_s + ": " + uuids[3].to_s #+ (is_dirty ? ' is dirty' : '')
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
