@@ -1,7 +1,7 @@
 -compare_relationships(@first_rel_id, @second_rel_id, @timestamps[0],@timestamps[1], @project)
 %h1= @project.name + " - Compare Relationship Records"
 - if session[:type]
-  = link_to "Back", list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
+  = link_to "Back", list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'
 - else
   = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset=0", :class => 'btn'
 %p
