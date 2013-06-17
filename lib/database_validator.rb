@@ -6,7 +6,7 @@ class DatabaseValidator
 		@entity_validators = {}
 		File.open(filename) do |f|
 			doc = Nokogiri::XML(f)
-			doc.xpath("//RelationshipElement").each do |relationship| 
+			doc.xpath("//RelationshipElement").each do |relationship|
 				properties = {}
 
 				relationship.xpath("./property").each do |property|
@@ -91,7 +91,8 @@ class DatabaseValidator
 				end
 
 				@entity_validators[entity['type']] = properties
-			end
+      end
+
 		end
 
 	end
@@ -200,7 +201,7 @@ class AttributeValidator
 		@params = params
 	end
 
-	def validate
+	def validate(db, id, timestamp, fields)
 		raise 'Not Implemented'
 	end
 
@@ -215,19 +216,16 @@ class EvalValidator < AttributeValidator
 
 	def validate(db, id, timestamp, fields)
 		begin
-			temp_file = Tempfile.new('tmp')
 			temp_cmd = @cmd
 			@params.each do |p|
-				temp_cmd = temp_cmd.sub("?", p.get_value(db, id, timestamp, fields))
+				temp_cmd = temp_cmd.sub('?', p.get_value(db, id, timestamp, fields))
 			end
-			result = system "#{temp_cmd} 1>>#{temp_file.path} 2>>#{temp_file.path}"
+			result = system temp_cmd
 			return nil if result
-			error = temp_file.read
-			return error
+			f = IO.popen temp_cmd
+			return f.readlines.join
 		rescue Exception => e
 			return e.to_s
-		ensure
-			temp_file.unlink if temp_file
 		end	
 	end
 
@@ -298,12 +296,12 @@ class QueryValidator < AttributeValidator
 	def validate(db, id, timestamp, fields)
 		begin
 			values = []
-			params.each do |p|
+			@params.each do |p|
 				values.push(p.get_value(db, id, timestamp, fields))
-			end
-			result = db.execute(db, *values)
-			return nil if result and result[0]
-			return result[1]
+      end
+			result = db.execute(@query, *values)
+			return nil if result[0][0] == 1
+			return result[0][1]
 		rescue Exception => e
 			return e.to_s
 		end	
