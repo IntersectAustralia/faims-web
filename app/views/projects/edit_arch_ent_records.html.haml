@@ -43,12 +43,12 @@
                     = f.label :certainty, "Certainty:"
                   %td
                     = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'
-            - if attribute[10] == 1
-              %tr
-                .form-attribute-error
-                  - attribute[11].each_line('\n') do |l|
-                    - next if l.gsub('\n', '').blank?
-                    %li=l.gsub('\n', '')
+                %tr
+                  - if attribute[10] == 1
+                    %td.form-attribute-error
+                      - attribute[11].each_line('\n') do |l|
+                        - next if l.gsub('\n', '').blank?
+                        %li=l.gsub('\n', '')
             .form-actions
               = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
               = link_to "cancel", edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'

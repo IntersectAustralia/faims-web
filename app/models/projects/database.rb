@@ -280,7 +280,7 @@ class Database
       db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
 
       result = @db.execute(WebQuery.get_reln_value, relationshipid, relnvaluetimestamp, attributeid)
-      row = result.first
+      result.each do |row|
         begin 
           relationshipid = row[0]
           attributeid = row[1]
@@ -306,6 +306,7 @@ class Database
           puts e.to_s
           puts e.backtrace
         end
+      end
     rescue Exception => e
       puts e.to_s
       puts e.backtrace
@@ -317,7 +318,7 @@ class Database
       db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
 
       result = @db.execute(WebQuery.get_aent_value, uuid, valuetimestamp, attributeid)
-      row = result.first
+      result.each do |row|
         begin 
           uuid = row[0]
           attributeid = row[1]
@@ -344,6 +345,7 @@ class Database
           puts e.to_s
           puts e.backtrace
         end
+      end
     rescue Exception => e
       puts e.to_s
       puts e.backtrace
