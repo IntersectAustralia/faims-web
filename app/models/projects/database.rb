@@ -287,7 +287,7 @@ class Database
           attributename = row[2]
           vocabid = row[3]
           fields = {}
-          fields['vocabname'] = row[4]
+          fields['vocab'] = row[4]
           fields['freetext'] = row[5]
           fields['certainty'] = row[6]
           relnvaluetimestamp = row[7]
@@ -324,7 +324,7 @@ class Database
           attributename = row[2]
           vocabid = row[3]
           fields = {}
-          fields['vocabname'] = row[4]
+          fields['vocab'] = row[4]
           fields['measure'] = row[5]
           fields['freetext'] = row[6]
           fields['certainty'] = row[7]

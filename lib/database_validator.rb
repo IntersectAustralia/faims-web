@@ -19,24 +19,30 @@ class DatabaseValidator
 
 							raise "Invalid param type " + param['type'] unless param['type'] == 'field' or param['type'] == 'query'
 
+              value = param.xpath("./value").first
+              value ||= param['value']
 							if param['type'] == 'field'
-								raise "Invalid value type " + param['value'] unless param['value'] == 'freetext' or
-									param['value'] == 'vocab' or
-									param['value'] == 'certainty'
+								raise "Invalid value type " + value unless value == 'freetext' or
+                    value == 'vocab' or
+                    value == 'certainty'
 							end
 
-							params.push(Param.new(param['type'], param['value']))
+							params.push(Param.new(param['type'], value))
 						
 						end
 
 						if validator['type'] == 'evaluator'
-							validators.push(EvalValidator.new(params, validator['cmd']))
+              cmd = validator.xpath("./cmd").first
+
+							validators.push(EvalValidator.new(params, cmd ? cmd : validator['cmd']))
 						elsif validator['type'] == 'blankchecker'
 							validators.push(BlankValidator.new(params))
 						elsif validator['type'] == 'typechecker'
 							validators.push(TypeValidator.new(params, validator['datatype']))
-						elsif validator['type'] == 'querychecker'
-							validators.push(QueryValidator.new(params, validator['query']))
+            elsif validator['type'] == 'querychecker'
+              query = validator.xpath("./query").first
+
+							validators.push(QueryValidator.new(params, query ? query : validator['query']))
 						else
 							raise 'Invalid validator type ' + validator['type']
 						end
@@ -62,25 +68,31 @@ class DatabaseValidator
 
 							raise "Invalid param type " + param['type'] unless param['type'] == 'field' or param['type'] == 'query'
 
-							if param['type'] == 'field'
-								raise "Invalid value type " + param['value'] unless param['value'] == 'freetext' or
-									param['value'] == 'measure' or
-									param['value'] == 'vocab' or
-									param['value'] == 'certainty'
-							end
+              value = param.xpath("./value").first
+              value ||= param['value']
+              if param['type'] == 'field'
+                raise "Invalid value type " + value unless value == 'freetext' or
+                    value == 'vocab' or
+                    value == 'certainty'
+                    value == 'measure'
+              end
 
 							params.push(Param.new(param['type'], param['value']))
 						
 						end
 
 						if validator['type'] == 'evaluator'
-							validators.push(EvalValidator.new(params, validator['cmd']))
+              cmd = validator.xpath("./cmd").first
+
+              validators.push(EvalValidator.new(params, cmd ? cmd : validator['cmd']))
 						elsif validator['type'] == 'blankchecker'
 							validators.push(BlankValidator.new(params))
 						elsif validator['type'] == 'typechecker'
 							validators.push(TypeValidator.new(params, validator['datatype']))
 						elsif validator['type'] == 'querychecker'
-							validators.push(QueryValidator.new(params, validator['query']))
+              query = validator.xpath("./query").first
+
+              validators.push(QueryValidator.new(params, query ? query : validator['query']))
 						else
 							raise 'Invalid validator type ' + validator['type']
 						end
@@ -224,8 +236,10 @@ class EvalValidator < AttributeValidator
 			return nil if result
 			f = IO.popen temp_cmd
 			return f.readlines.join
-		rescue Exception => e
-			return e.to_s
+    rescue Exception => e
+      puts e.to_s
+      puts e.backtrace
+			return 'Error in evaluator'
 		end	
 	end
 
@@ -239,11 +253,13 @@ class BlankValidator < AttributeValidator
 	def validate(db, id, timestamp, fields)
 		begin
 			@params.each do |p|
-				return "Value is Blank" if p.get_value(db, id, timestamp, fields).blank?
+				return "Field value is Blank" if p.get_value(db, id, timestamp, fields).blank?
 			end
 			return nil
 		rescue Exception => e
-			return e.to_s
+      puts e.to_s
+      puts e.backtrace
+      return 'Error in blank checker'
 		end	
 	end
 end
@@ -258,13 +274,15 @@ class TypeValidator < AttributeValidator
 		begin
 			@params.each do |p|
 				value = p.get_value(db, id, timestamp, fields)
-				return "Value not an integer" if @datatype == 'integer' and !integer?(value)
-				return "Value not a float" if @datatype == 'float' and !float?(value)
-				return "Value not a string" if value.blank?
+				return "Field value not an integer" if @datatype == 'integer' and !integer?(value)
+				return "Field value not a real" if @datatype == 'real' and !float?(value)
+				return "Field value not text" if value.blank?
 			end
 			return nil
 		rescue Exception => e
-			return e.to_s
+      puts e.to_s
+      puts e.backtrace
+      return 'Error in type checker'
 		end	
 	end
 
@@ -303,7 +321,9 @@ class QueryValidator < AttributeValidator
 			return nil if result[0][0] == 1
 			return result[0][1]
 		rescue Exception => e
-			return e.to_s
+      puts e.to_s
+      puts e.backtrace
+      return 'Error in query checker'
 		end	
 	end
 end

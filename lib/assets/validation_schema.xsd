@@ -11,8 +11,13 @@
                     <xs:element name="validator" maxOccurs="unbounded" minOccurs="0">
                       <xs:complexType>
                         <xs:sequence>
+                          <xs:element name="cmd" minOccurs="0"/>
+                          <xs:element name="query" minOccurs="0"/>
                           <xs:element name="param" maxOccurs="unbounded" minOccurs="0">
                             <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="value" minOccurs="0"/>
+                              </xs:sequence>
                               <xs:attribute type="xs:string" name="type" use="required"/>
                               <xs:attribute type="xs:string" name="value" use="required"/>
                             </xs:complexType>
@@ -42,8 +47,13 @@
                     <xs:element name="validator" maxOccurs="unbounded" minOccurs="0">
                       <xs:complexType>
                         <xs:sequence>
+                          <xs:element name="cmd" minOccurs="0"/>
+                          <xs:element name="query" minOccurs="0"/>
                           <xs:element name="param" maxOccurs="unbounded" minOccurs="0">
                             <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="value" minOccurs="0"/>
+                              </xs:sequence>
                               <xs:attribute type="xs:string" name="type" use="required"/>
                               <xs:attribute type="xs:string" name="value" use="required"/>
                             </xs:complexType>
