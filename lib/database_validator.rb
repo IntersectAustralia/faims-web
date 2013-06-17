@@ -253,7 +253,7 @@ class BlankValidator < AttributeValidator
 	def validate(db, id, timestamp, fields)
 		begin
 			@params.each do |p|
-				return "Field value is Blank" if p.get_value(db, id, timestamp, fields).blank?
+				return "Field value is blank" if p.get_value(db, id, timestamp, fields).blank?
 			end
 			return nil
 		rescue Exception => e
@@ -288,7 +288,7 @@ class TypeValidator < AttributeValidator
 
 	def integer?(value)
 		begin
-			Integer(value)
+			Integer(value.to_s)
 			return true
 		rescue Exception => e
 			return false
@@ -297,7 +297,7 @@ class TypeValidator < AttributeValidator
 
 	def float?(value)
 		begin
-			Float(value)
+			Float(value.to_s)
 			return true
 		rescue Exception => e
 			return false
