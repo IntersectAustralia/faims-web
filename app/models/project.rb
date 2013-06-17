@@ -308,6 +308,11 @@ class Project < ActiveRecord::Base
       result = nil
     end
     return 'invalid xml' if result.nil? || !result.empty?
+    begin
+      DatabaseValidator.new(nil, schema.tempfile.path)
+    rescue Exception => e
+      return 'error initialising validation rules'
+    end
     return nil
   end
 

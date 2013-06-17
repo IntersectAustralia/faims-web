@@ -34,7 +34,7 @@ class DatabaseValidator
 						if validator['type'] == 'evaluator'
               cmd = validator.xpath("./cmd").first
 
-							validators.push(EvalValidator.new(params, cmd ? cmd : validator['cmd']))
+							validators.push(EvalValidator.new(params, cmd ? cmd.text : validator['cmd']))
 						elsif validator['type'] == 'blankchecker'
 							validators.push(BlankValidator.new(params))
 						elsif validator['type'] == 'typechecker'
@@ -42,7 +42,7 @@ class DatabaseValidator
             elsif validator['type'] == 'querychecker'
               query = validator.xpath("./query").first
 
-							validators.push(QueryValidator.new(params, query ? query : validator['query']))
+							validators.push(QueryValidator.new(params, query ? query.text : validator['query']))
 						else
 							raise 'Invalid validator type ' + validator['type']
 						end
@@ -73,7 +73,7 @@ class DatabaseValidator
               if param['type'] == 'field'
                 raise "Invalid value type " + value unless value == 'freetext' or
                     value == 'vocab' or
-                    value == 'certainty'
+                    value == 'certainty' or
                     value == 'measure'
               end
 
@@ -84,7 +84,7 @@ class DatabaseValidator
 						if validator['type'] == 'evaluator'
               cmd = validator.xpath("./cmd").first
 
-              validators.push(EvalValidator.new(params, cmd ? cmd : validator['cmd']))
+              validators.push(EvalValidator.new(params, cmd ? cmd.text : validator['cmd']))
 						elsif validator['type'] == 'blankchecker'
 							validators.push(BlankValidator.new(params))
 						elsif validator['type'] == 'typechecker'
@@ -92,7 +92,7 @@ class DatabaseValidator
 						elsif validator['type'] == 'querychecker'
               query = validator.xpath("./query").first
 
-              validators.push(QueryValidator.new(params, query ? query : validator['query']))
+              validators.push(QueryValidator.new(params, query ? query.text : validator['query']))
 						else
 							raise 'Invalid validator type ' + validator['type']
 						end
