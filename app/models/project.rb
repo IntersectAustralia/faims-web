@@ -299,7 +299,7 @@ class Project < ActiveRecord::Base
   end
 
   def self.validate_validation_schema(schema)
-    return "can't be blank" if schema.blank?
+    return nil if schema.blank?
     return 'must be xml file' if schema.content_type != 'text/xml'
     begin
       file = schema.tempfile

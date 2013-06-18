@@ -633,8 +633,10 @@ class ProjectsController < ApplicationController
         @project.errors.add(:validation_schema, error)
         valid = false
       else
-        create_temp_file(@project.get_name(:validation_schema), params[:project][:validation_schema])
-        session[:validation_schema] = true
+        if !params[:project][:validation_schema].nil?
+          create_temp_file(@project.get_name(:validation_schema), params[:project][:validation_schema])
+          session[:validation_schema] = true
+        end
       end
     end
 

@@ -329,6 +329,7 @@ class Database
   end
 
   def validate_reln_value(relationshipid, relnvaluetimestamp, attributeid)
+    return unless File.exists? @project.get_path(:validation_schema)
     begin
       db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
 
@@ -367,6 +368,7 @@ class Database
   end
 
   def validate_aent_value(uuid, valuetimestamp, attributeid)
+    return unless File.exists? @project.get_path(:validation_schema)
     begin
       db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
 
