@@ -260,3 +260,39 @@ Feature: Manage projects
 #    And I select the first record
 #    Then I click file with name "Screenshot_2013-04-29-16-38-51(1).png"
 #    And I should download attached file with name "Screenshot_2013-04-29-16-38-51(1).png"
+
+  Scenario: Update arch entity attribute causes validation error
+    # TODO
+
+  Scenario: Update arch entity attribute clears validation error
+    # TODO
+
+  Scenario: Update arch entity attribute with multiple values causes validation error
+    # TODO
+
+  Scenario: Update arch entity attribute with multiple values clears validation error
+    # TODO
+
+  Scenario: Show arch entity with validation errors as dirty
+    # TODO
+
+  Scenario: Show arch entity with validation errors as normal after validation errors cleared
+    # TODO
+
+  Scenario: Update relationship attribute causes validation error
+    # TODO
+
+  Scenario: Update relationship attribute clears validation error
+    # TODO
+
+  Scenario: Update relationship attribute with multiple values causes validation error
+    # TODO
+
+  Scenario: Update relationship attribute with multiple values clears validation error
+    # TODO
+
+  Scenario: Show relationship with validation errors as dirty
+    # TODO
+
+  Scenario: Show relationship with validation errors as normal after validation errors cleared
+    # TODO
