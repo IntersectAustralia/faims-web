@@ -55,7 +55,6 @@ group :test do
   gem 'cucumber-rails', '~> 1.3.1', require: false
   gem 'shoulda', '~> 3.4.0'
   gem 'spork', '~> 0.9.2'
-  gem 'brakeman'
   gem "simplecov", ">=0.3.8", :require => false
   gem 'simplecov-rcov'
 end
