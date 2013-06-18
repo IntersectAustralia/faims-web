@@ -5,9 +5,10 @@ class Project < ActiveRecord::Base
   include Archive::Tar
   include MD5Checksum
 
-  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant
+  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :validation_schema
 
-  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type
+  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type,
+    :validation_schema
 
   validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
@@ -47,6 +48,7 @@ class Project < ActiveRecord::Base
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
         data_files_archive: { name: 'data.tar.gz', path: project_dir + 'tmp/data.tar.gz' },
+        validation_schema: { name: 'validation_schema.xml', path: project_dir + 'validation_schema.xml' },
     }
   end
 
@@ -294,6 +296,24 @@ class Project < ActiveRecord::Base
       FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
     end
 
+  end
+
+  def self.validate_validation_schema(schema)
+    return "can't be blank" if schema.blank?
+    return 'must be xml file' if schema.content_type != 'text/xml'
+    begin
+      file = schema.tempfile
+      result = XSDValidator.validate_validation_schema(file.path)
+    rescue => e
+      result = nil
+    end
+    return 'invalid xml' if result.nil? || !result.empty?
+    begin
+      DatabaseValidator.new(nil, schema.tempfile.path)
+    rescue Exception => e
+      return 'error initialising validation rules'
+    end
+    return nil
   end
 
   def self.validate_data_schema(schema)

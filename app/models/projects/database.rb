@@ -8,6 +8,30 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def is_arch_entity_dirty(uuid)
+    result = @db.execute(WebQuery.is_arch_entity_dirty, uuid, uuid)
+    return result.first.first > 0 if result and result.first and result.first.first
+    nil
+  end
+
+  def is_relationship_dirty(relationshipid)
+    result = @db.execute(WebQuery.is_relationship_dirty, relationshipid)
+    return result.first.first > 0 if result and result.first and result.first.first
+    nil
+  end
+
+  def get_arch_entity_type(uuid)
+    type = @db.execute(WebQuery.get_arch_entity_type, uuid)
+    return type.first.first if type and type.first
+    nil
+  end
+
+  def get_relationship_type(relationshipid)
+    type = @db.execute(WebQuery.get_relationship_type, relationshipid)
+    return type.first.first if type and type.first
+    nil
+  end
+
   def load_arch_entity(type, limit, offset)
     uuids = type.eql?('all') ?
       @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
@@ -39,7 +63,7 @@ class Database
     attributes
   end
 
-  def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty)
+  def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -49,9 +73,15 @@ class Database
         else
           @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
+
+        validate_aent_value(uuid, currenttime, attribute_id) unless ignore_errors
       end
       @project.db_mgr.make_dirt
     end
+  end
+
+  def update_aent_value_as_dirty(uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, isdirty, isdirtyreason, versionnum)
+    @db.execute(WebQuery.update_aent_value_as_dirty, isdirty, isdirtyreason, uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum)
   end
 
   def insert_updated_arch_entity(uuid, vocab_id, attribute_id, measure, freetext, certainty)
@@ -62,6 +92,8 @@ class Database
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
+      
+      validate_aent_value(uuid, currenttime, attribute_id)
       @project.db_mgr.make_dirt
     end
   end
@@ -116,7 +148,7 @@ class Database
     attributes
   end
 
-  def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty)
+  def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -127,8 +159,15 @@ class Database
           @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
         end
       end
+
+      validate_reln_value(relationshipid, currenttime, attribute_id) unless ignore_errors
+
       @project.db_mgr.make_dirt
     end
+  end
+
+  def update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, isdirty, isdirtyreason, versionnum)
+    @db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
   end
 
   def insert_updated_rel(relationshipid, vocab_id, attribute_id, freetext, certainty)
@@ -139,6 +178,8 @@ class Database
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
       end
+      
+      validate_reln_value(relationshipid, currenttime, attribute_id)
       @project.db_mgr.make_dirt
     end
   end
@@ -260,6 +301,7 @@ class Database
     @project.db_mgr.with_lock do
       @db.execute_batch(WebQuery.merge_database(fromDB, version))
 
+      validate_records
       @project.db_mgr.make_dirt
     end
   end
@@ -286,6 +328,97 @@ class Database
     #end
   end
 
+  def validate_reln_value(relationshipid, relnvaluetimestamp, attributeid)
+    begin
+      db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
+
+      result = @db.execute(WebQuery.get_reln_value, relationshipid, relnvaluetimestamp, attributeid)
+      result.each do |row|
+        begin 
+          relationshipid = row[0]
+          attributeid = row[1]
+          attributename = row[2]
+          vocabid = row[3]
+          fields = {}
+          fields['vocab'] = row[4]
+          fields['freetext'] = row[5]
+          fields['certainty'] = row[6]
+          relnvaluetimestamp = row[7]
+          userid = row[8]
+          versionnum = row[9]
+
+          result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
+          if result
+            #puts "Relationship[" + relationshipid.to_s + "] is " + result
+
+            update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], 1, result, versionnum)
+          else
+            update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], 0, nil, versionnum)
+          end
+        rescue Exception => e
+          puts e.to_s
+          puts e.backtrace
+        end
+      end
+    rescue Exception => e
+      puts e.to_s
+      puts e.backtrace
+    end
+  end
+
+  def validate_aent_value(uuid, valuetimestamp, attributeid)
+    begin
+      db_validator = DatabaseValidator.new(self, @project.get_path(:validation_schema))
+
+      result = @db.execute(WebQuery.get_aent_value, uuid, valuetimestamp, attributeid)
+      result.each do |row|
+        begin 
+          uuid = row[0]
+          attributeid = row[1]
+          attributename = row[2]
+          vocabid = row[3]
+          fields = {}
+          fields['vocab'] = row[4]
+          fields['measure'] = row[5]
+          fields['freetext'] = row[6]
+          fields['certainty'] = row[7]
+          valuetimestamp = row[8]
+          userid = row[9]
+          versionnum = row[10]
+
+          result = db_validator.validate_aent_value(uuid, valuetimestamp, attributename, fields)
+          if result
+            #puts "ArchEntity[" + uuid.to_s + "] is " + result
+
+            update_aent_value_as_dirty(uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], 1, result, versionnum)
+          else
+            update_aent_value_as_dirty(uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], 0, nil, versionnum)
+          end
+        rescue Exception => e
+          puts e.to_s
+          puts e.backtrace
+        end
+      end
+    rescue Exception => e
+      puts e.to_s
+      puts e.backtrace
+    end
+  end
+
+  # note: assume database already locked
+  def validate_records(version = nil)
+    version ||= current_version
+    result = @db.execute(WebQuery.get_all_aent_values_for_version, version)
+    result.each do |row|
+      validate_aent_value(row[0], row[1], row[2])
+    end
+    result = @db.execute(WebQuery.get_all_reln_values_for_version, version)
+    result.each do |row|
+      validate_reln_value(row[0], row[1], row[2])
+    end
+    nil
+  end
+
   # static
   def self.generate_database(file, xml)
     db = SpatialiteDB.new(file)
@@ -297,7 +430,6 @@ class Database
     db.execute_batch(gps_definition)
   end
 
-  # Testing
   def spatialite_db
     @db
   end

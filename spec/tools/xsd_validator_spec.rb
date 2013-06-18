@@ -10,6 +10,14 @@ describe XSDValidator do
     XSDValidator.validate_ui_schema Rails.root.join('spec', 'assets', name).to_s
   end
 
+  def validate_validation_schema(name)
+    XSDValidator.validate_validation_schema Rails.root.join('spec', 'assets', name).to_s
+  end
+
+  describe "Validate Validation Schemas" do
+    it { validate_validation_schema('validation_schema.xml').should be_empty }
+  end
+
   describe "Validate Data Schemas" do
     # normal test case
     it { validate_data_schema('data_schema.xml').should be_empty }

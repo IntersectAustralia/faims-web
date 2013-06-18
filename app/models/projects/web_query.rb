@@ -141,7 +141,7 @@ EOF
 
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, isDirty, isDirtyReason
     FROM aentvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -188,6 +188,14 @@ EOF
     cleanup_query(<<EOF
 insert into AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
+EOF
+    )
+  end
+
+  def self.update_aent_value_as_dirty
+    cleanup_query(<<EOF
+      update aentvalue set isdirty = ?, isdirtyreason = ? 
+      where uuid is ? and valuetimestamp is ? and userid is ? and attributeid is ? and vocabid is ? and measure is ? and freetext is ? and certainty is ? and versionnum is ?
 EOF
     )
   end
@@ -572,7 +580,7 @@ EOF
 
   def self.get_relationship_attributes
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -608,6 +616,14 @@ EOF
     cleanup_query(<<EOF
 insert into RelnValue (RelationshipID, UserId, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
+EOF
+    )
+  end
+
+  def self.update_reln_value_as_dirty
+    cleanup_query(<<EOF
+      update relnvalue set isdirty = ?, isdirtyreason = ? 
+      where relationshipid is ? and relnvaluetimestamp is ? and userid is ? and attributeid is ? and vocabid is ? and freetext is ? and certainty is ? and versionnum is ?
 EOF
     )
   end
@@ -1061,6 +1077,110 @@ create table export.relationship as select * from relationship where versionnum 
 create table export.relnvalue as select * from relnvalue where versionnum >= '#{version}';
 create table export.aentreln as select * from aentreln where versionnum >= '#{version}';
 detach database export;
+EOF
+    )
+  end
+
+  def self.get_arch_entity_type 
+    cleanup_query(<<EOF
+select aenttypename from archentity join aenttype using (aenttypeid) where uuid = ?;
+EOF
+    )
+  end
+
+  def self.get_relationship_type 
+    cleanup_query(<<EOF
+select relntypename from relationship join relntype using (relntypeid) where relationshipid = ?;
+EOF
+    )
+  end
+
+  def self.get_aent_value
+    cleanup_query(<<EOF
+SELECT uuid, attributeid, attributename, vocabid, vocabname, measure, freetext, certainty, valuetimestamp, userid, versionnum
+    FROM aentvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+    WHERE deleted is NULL and uuid = ? and valuetimestamp = ? and attributeid = ?
+ ORDER BY uuid, attributename ASC;
+EOF
+    )
+  end
+
+  def self.get_reln_value
+    cleanup_query(<<EOF
+SELECT relationshipid, attributeid, attributename, vocabid, vocabname, freetext, certainty, relnvaluetimestamp, userid, versionnum
+    FROM relnvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+   WHERE relnvalue.deleted is NULL and relationshipid = ? and relnvaluetimestamp = ? and attributeid = ?
+ORDER BY relationshipid, attributename asc;
+EOF
+    )
+  end
+
+  def self.get_all_aent_values_for_version
+    cleanup_query(<<EOF
+SELECT uuid, valuetimestamp, attributeid
+    FROM aentvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+    WHERE deleted is NULL and versionnum = ?
+ ORDER BY uuid, attributename ASC;
+EOF
+    )
+  end
+
+  def self.get_all_reln_values_for_version
+    cleanup_query(<<EOF
+SELECT relationshipid, relnvaluetimestamp, attributeid
+    FROM relnvalue
+    JOIN attributekey USING (attributeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+   WHERE relnvalue.deleted is NULL and versionnum = ?
+ORDER BY relationshipid, attributename asc;
+EOF
+    )
+  end
+
+  def self.is_arch_entity_dirty
+    cleanup_query(<<EOF
+select sum(isdirty)
+  from (
+    select isdirty, deleted
+    from aentvalue
+    where uuid = ?
+    group by uuid, attributeid
+    having max(valuetimestamp)
+    union
+    select isdirty, deleted
+    from archentity
+    where uuid =  ?
+    group by uuid
+    having max(aenttimestamp))
+
+  where deleted is null;
+EOF
+    )
+  end
+
+    def self.is_relationship_dirty
+    cleanup_query(<<EOF
+select sum(isdirty)
+  from (
+    select isdirty, deleted
+    from relnvalue
+    where relationshipid = ?
+    group by relationshipid, attributeid
+    having max(relnvaluetimestamp)
+    union
+    select isdirty, deleted
+    from relationship
+    where relationshipid =  ?
+    group by relationshipid
+    having max(relntimestamp))
+
+  where deleted is null;
 EOF
     )
   end

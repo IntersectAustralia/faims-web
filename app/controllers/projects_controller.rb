@@ -69,6 +69,12 @@ class ProjectsController < ApplicationController
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_arch_ent_records'
     @uuid = @project.db.load_arch_entity(type,limit,offset)
+
+    @entity_dirty_map = {}
+    @uuid.each do |row|
+      @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+    end
+
   end
 
   def search_arch_ent_records
@@ -94,6 +100,11 @@ class ProjectsController < ApplicationController
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_arch_ent_records'
     @uuid = @project.db.search_arch_entity(limit,offset,query)
+
+    @entity_dirty_map = {}
+    @uuid.each do |row|
+      @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+    end
   end
 
   def edit_arch_ent_records
@@ -121,7 +132,9 @@ class ProjectsController < ApplicationController
       freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
       certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
+      ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+
+      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
 
       @attributes = @project.db.get_arch_entity_attributes(uuid)
       @vocab_name = {}
@@ -190,6 +203,11 @@ class ProjectsController < ApplicationController
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_rel_records'
     @relationshipid = @project.db.load_rel(type,limit,offset)
+
+    @rel_dirty_map = {}
+    @relationshipid.each do |row|
+      @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+    end
   end
 
   def search_rel_records
@@ -217,6 +235,11 @@ class ProjectsController < ApplicationController
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_rel_records'
     @relationshipid = @project.db.search_rel(limit,offset,query)
+
+    @rel_dirty_map = {}
+    @relationshipid.each do |row|
+      @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+    end
   end
 
   def edit_rel_records
@@ -243,7 +266,9 @@ class ProjectsController < ApplicationController
       freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
       certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
+      ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+
+      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty, ignore_errors)
 
       @attributes = @project.db.get_rel_attributes(relationshipid)
       @vocab_name = {}
@@ -534,6 +559,7 @@ class ProjectsController < ApplicationController
     session[:ui_schema] = false
     session[:ui_logic] = false
     session[:arch16n] = false
+    session[:validation_schema] = false
   end
 
   def clear_tmp_dir
@@ -597,6 +623,18 @@ class ProjectsController < ApplicationController
           create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
           session[:arch16n] = true
         end
+      end
+    end
+
+    # check if validation schema is valid
+    if !session[:validation_schema]
+      error = Project.validate_validation_schema(params[:project][:validation_schema])
+      if error
+        @project.errors.add(:validation_schema, error)
+        valid = false
+      else
+        create_temp_file(@project.get_name(:validation_schema), params[:project][:validation_schema])
+        session[:validation_schema] = true
       end
     end
 

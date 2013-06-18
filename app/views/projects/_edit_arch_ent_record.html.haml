@@ -9,6 +9,8 @@
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
               =uuids[2].to_s + ": " + uuids[3].to_s
+              - if @entity_dirty_map[uuids[0]]
+                .label.label-important='dirty'
         %input{:type => 'hidden', :id => 'identifier', :value=> identifier * ", "}
     - else
       %input{:type => 'checkbox', :value=> uuid_group[0][0]}
@@ -18,4 +20,6 @@
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
               =uuids[2].to_s + ": " + uuids[3].to_s
+              - if @entity_dirty_map[uuids[0]]
+                .label.label-important='dirty'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}

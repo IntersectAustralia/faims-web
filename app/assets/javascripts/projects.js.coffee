@@ -307,6 +307,14 @@ merge_record = ->
   )
   return
 
+ignore_error_records = ->
+  $('.ignore-errors-btn').click(
+    ->
+      form = $(this).closest('form')
+      form.find('#attr_ignore_errors').val('1')
+      return true
+  )
+
 select_timestamp = ->
 
   $('input[name="timestamp"]:checked').parents('tr').addClass('selected')
@@ -336,6 +344,7 @@ $(document).ready(
     select_all_compared_attributes()
     change_checked_attributes()
     merge_record()
+    ignore_error_records()
     select_timestamp()
     return
 )

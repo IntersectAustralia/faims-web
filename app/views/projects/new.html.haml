@@ -48,6 +48,14 @@
                 = f.file_field :ui_schema
                 = f.error :ui_schema
             .step-body
+              %h4 Upload Validation Schema
+              - if session[:validation_schema]
+                %span.uploaded-inline Validation Schema Uploaded!
+              - else
+                = f.label :validation_schema, 'Validation Schema:'
+                = f.file_field :validation_schema
+                = f.error :validation_schema
+            .step-body
               %h4 Upload User Interface Logic
               - if session[:ui_logic]
                 %span.uploaded-inline UI Logic Uploaded!

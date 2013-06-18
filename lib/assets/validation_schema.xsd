@@ -1,0 +1,81 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="ValidationSchema">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="RelationshipElement" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="validator" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="cmd" minOccurs="0"/>
+                          <xs:element name="query" minOccurs="0"/>
+                          <xs:element name="param" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="value" minOccurs="0"/>
+                              </xs:sequence>
+                              <xs:attribute type="xs:string" name="type" use="required"/>
+                              <xs:attribute type="xs:string" name="value" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:string" name="type" use="required"/>
+                        <xs:attribute type="xs:string" name="cmd" use="optional"/>
+                        <xs:attribute type="xs:string" name="datatype" use="optional"/>
+                        <xs:attribute type="xs:string" name="query" use="optional"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="name" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="name" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="ArchaeologicalElement" maxOccurs="unbounded" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element type="xs:string" name="description" minOccurs="0"/>
+              <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="validator" maxOccurs="unbounded" minOccurs="0">
+                      <xs:complexType>
+                        <xs:sequence>
+                          <xs:element name="cmd" minOccurs="0"/>
+                          <xs:element name="query" minOccurs="0"/>
+                          <xs:element name="param" maxOccurs="unbounded" minOccurs="0">
+                            <xs:complexType>
+                              <xs:sequence>
+                                <xs:element name="value" minOccurs="0"/>
+                              </xs:sequence>
+                              <xs:attribute type="xs:string" name="type" use="required"/>
+                              <xs:attribute type="xs:string" name="value" use="required"/>
+                            </xs:complexType>
+                          </xs:element>
+                        </xs:sequence>
+                        <xs:attribute type="xs:string" name="type" use="required"/>
+                        <xs:attribute type="xs:string" name="cmd" use="optional"/>
+                        <xs:attribute type="xs:string" name="datatype" use="optional"/>
+                        <xs:attribute type="xs:string" name="query" use="optional"/>
+                      </xs:complexType>
+                    </xs:element>
+                  </xs:sequence>
+                  <xs:attribute type="xs:string" name="name" use="required"/>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="type" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="name"/>
+      <xs:attribute type="xs:string" name="preparer"/>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

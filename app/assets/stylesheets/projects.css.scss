@@ -1,5 +1,12 @@
 // ref: http://www.smileycat.com/miaow/archives/000230.php
 
+.form-attribute-error {
+  
+  padding-left:25px;
+  color: #ff0000;
+
+}
+
 .project-list {
 }
 
@@ -91,11 +98,7 @@ ul.inline li {
 
 ul.inner li a,
 ul.inner li span {
-  display:block;
-  width:200px;
-  background-color:#eeeeee;
   margin:3px;
-  border:1px solid black;
 }
 
 .footer.search {
