@@ -16,7 +16,7 @@
             %input{:type=> 'button', :id => 'select-second', :value => 'Select All', :class => 'btn'}
         %td
           %div.record-info
-            %h3 Entity
+            %h3 Relationship
             %span
               = @firstInfo
         %td
@@ -26,12 +26,12 @@
               = @secondInfo
       %tr
         %td.first
-          %input{:type => 'checkbox', :name => 'rel_id', :value => @first_rel_id, :checked => 'checked'}
+          %input{:type => 'radio', :name => 'rel_id', :value => @first_rel_id, :checked => 'checked'}
           %input{:type => 'hidden', :name => 'deleted_id', :value => @second_rel_id}
           %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
           = @identifiers[0]
         %td.second
-          %input{:type => 'checkbox', :name => 'rel_id', :value => @second_rel_id}
+          %input{:type => 'radio', :name => 'rel_id', :value => @second_rel_id}
           %input{:type => 'hidden', :name => 'deleted_id', :value => @first_rel_id}
           %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
           = @identifiers[1]

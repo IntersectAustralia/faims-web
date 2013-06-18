@@ -202,7 +202,7 @@ download_attached_file = ->
 select_all_compared_attributes = ->
   $('#select-first').click(
     ->
-      $('#select-form input:checkbox').each(
+      $('#select-form input:radio').each(
         ->
           $(this).prop('checked',false)
           li_sibling = $(this).parents('td').siblings()
@@ -211,7 +211,7 @@ select_all_compared_attributes = ->
             return
           return
       )
-      $('td.first input:checkbox').each(
+      $('td.first input:radio').each(
         ->
           $(this).prop('checked',true)
           li_sibling = $(this).parents('li').siblings()
@@ -223,7 +223,7 @@ select_all_compared_attributes = ->
   )
   $('#select-second').click(
     ->
-      $('#select-form input:checkbox').each(
+      $('#select-form input:radio').each(
         ->
           $(this).prop('checked',false)
           li_sibling = $(this).parents('li').siblings()
@@ -232,7 +232,7 @@ select_all_compared_attributes = ->
             return
           return
       )
-      $('td.second input:checkbox').each(
+      $('td.second input:radio').each(
         ->
           $(this).prop('checked',true)
           li_sibling = $(this).parents('li').siblings()
@@ -245,10 +245,10 @@ select_all_compared_attributes = ->
   return
 
 change_checked_attributes = ->
-  $('#select-form input:checkbox').change(
+  $('#select-form input:radio').change(
     ->
       siblings = $(this).parents('td').siblings()[0]
-      $sibling_checkbox = $(siblings).find('input:checkbox')
+      $sibling_checkbox = $(siblings).find('input:radio')
       if($sibling_checkbox.length)
         if($(this).is(':checked'))
           if($sibling_checkbox.is(':checked'))
@@ -265,9 +265,7 @@ change_checked_attributes = ->
             return
           return
       else
-        if(!$(this).is(':checked'))
-          $(this).prop('checked', true)
-          return
+        $(this).prop('checked', true)
         return
   )
   return
@@ -277,7 +275,7 @@ merge_record = ->
     ->
       $form = $('<form method="post">')
       $form.attr('action',$(this).attr('href'))
-      $('#select-form').find('input:checkbox:checked').each(
+      $('#select-form').find('input:radio:checked').each(
         ->
           li_sibling = $(this).parents('li').siblings()
           if(li_sibling.length)
