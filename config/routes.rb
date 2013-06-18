@@ -49,6 +49,8 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/delete_arch_ent_records/:uuid', :to => 'projects#delete_arch_ent_records', :as => 'delete_arch_ent_records'
   get 'projects/:id/edit_arch_ent_records/:uuid', :to => 'projects#edit_arch_ent_records', :as => 'edit_arch_ent_records'
   post 'projects/:id/edit_arch_ent_records/:uuid', :to => 'projects#update_arch_ent_records', :as => 'update_arch_ent_records'
+  get 'projects/:id/show_arch_ent_history/:uuid', :to => 'projects#show_arch_ent_history', :as => 'show_arch_ent_history'
+  post 'projects/:id/revert_arch_ent_to_timestamp/:uuid', :to => 'projects#revert_arch_ent_to_timestamp', :as => 'revert_arch_ent_to_timestamp'
 
   get 'projects/:id/search_rel_records/', :to => 'projects#search_rel_records', :as => 'search_rel_records'
   get 'projects/:id/show_rel_records/', :to => 'projects#show_rel_records', :as => 'show_rel_records'
@@ -57,6 +59,8 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/delete_rel_records/:relationshipid', :to => 'projects#delete_rel_records', :as => 'delete_rel_records'
   get 'projects/:id/edit_rel_records/:relationshipid', :to => 'projects#edit_rel_records', :as => 'edit_rel_records'
   post 'projects/:id/edit_rel_records/:relationshipid', :to => 'projects#update_rel_records', :as => 'update_rel_records'
+  get 'projects/:id/show_rel_history/:relid', :to => 'projects#show_rel_history', :as => 'show_rel_history'
+  post 'projects/:id/revert_rel_to_timestamp/:relid', :to => 'projects#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
 
   get 'projects/:id/show_rel_members/:relationshipid', :to => 'projects#show_rel_members', :as => 'show_rel_members'
   post 'projects/:id/remove_arch_ent_member/', :to => 'projects#remove_arch_ent_member', :as => 'remove_arch_ent_member'

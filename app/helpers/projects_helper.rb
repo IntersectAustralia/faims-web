@@ -122,4 +122,84 @@ module ProjectsHelper
       end
     end
   end
+
+  def show_arch_ent_attributes_history(project,timestamps)
+    @history = {}
+    @has_changes = {}
+    @attribute_keys = ['timestamp','edited by']
+    timestamps.each do |timestamp|
+      attribute_history = {}
+      attributes = project.db.get_arch_ent_attributes_at_timestamp(timestamp[0],timestamp[1])
+
+      entity_deleted = false
+      attribute_history['timestamp'] = timestamp[1]
+      attribute_history['edited by'] = attributes[0][3]
+
+      attributes.each do |attribute|
+        attribute_history[attribute[1]] = attribute[9]
+        @attribute_keys.push(attribute[1])
+        entity_deleted = attribute[8].nil? ? false : true
+      end
+      attribute_history['geospatial'] = attributes[0][4]
+      attribute_history['deleted'] = entity_deleted
+      @attribute_keys = @attribute_keys.uniq
+      @history[timestamp[1]] = attribute_history
+      changes = project.db.get_arch_ent_attributes_changes_at_timestamp(timestamp[0],timestamp[1])
+      attribute_changes = {}
+      changes.each do |change|
+        if change[1].eql?('EntityDeleted')
+          if change[2].eql?('true')
+             attribute_changes['deleted'] = true
+          end
+        elsif change[1].eql?('geospatialcolumn')
+          attribute_changes['geospatial'] = true
+        else
+          attribute_changes[change[1]] = true
+        end
+      end
+      @has_changes[timestamp[1]] = attribute_changes
+    end
+    @attribute_keys.push('geospatial')
+    @attribute_keys.push('deleted')
+  end
+
+  def show_rel_attributes_history(project,timestamps)
+    @history = {}
+    @has_changes = {}
+    @attribute_keys = ['timestamp','edited by']
+    timestamps.each do |timestamp|
+      attribute_history = {}
+      attributes = project.db.get_rel_attributes_at_timestamp(timestamp[0],timestamp[1])
+
+      entity_deleted = false
+      attribute_history['timestamp'] = timestamp[1]
+      attribute_history['edited by'] = attributes[0][4]
+
+      attributes.each do |attribute|
+        attribute_history[attribute[2]] = attribute[9]
+        @attribute_keys.push(attribute[2])
+        entity_deleted = attribute[8].nil? ? false : true
+      end
+      attribute_history['geospatial'] = attributes[0][3]
+      attribute_history['deleted'] = entity_deleted
+      @attribute_keys = @attribute_keys.uniq
+      @history[timestamp[1]] = attribute_history
+      changes = project.db.get_rel_attributes_changes_at_timestamp(timestamp[0],timestamp[1])
+      attribute_changes = {}
+      changes.each do |change|
+        if change[1].eql?('RelationshipDeleted')
+          if change[2].eql?('true')
+            attribute_changes['deleted'] = true
+          end
+        elsif change[1].eql?('geospatialcolumn')
+          attribute_changes['geospatial'] = true
+        else
+          attribute_changes[change[1]] = true
+        end
+      end
+      @has_changes[timestamp[1]] = attribute_changes
+    end
+    @attribute_keys.push('geospatial')
+    @attribute_keys.push('deleted')
+  end
 end

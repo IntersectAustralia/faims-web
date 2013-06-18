@@ -1,0 +1,54 @@
+- show_rel_attributes_history(@project,@timestamps)
+%h1= @project.name + " - Relationship Records"
+= link_to "Back", edit_rel_records_path(@project,@timestamps[0][0]), :class => 'btn'
+.content
+  %form{:method => 'post', :action =>  revert_rel_to_timestamp_path(@project,@timestamps[0][0])}
+    .records
+      %table.inner
+        %tr
+        - @attribute_keys.each do |names|
+          %th
+            = names.capitalize
+        - checked = true
+        - @timestamps.each do |timestamp|
+          %tr
+            - @attribute_keys.length.times do |i|
+              - value = @history[timestamp[1]][@attribute_keys[i]]
+              - if @has_changes[timestamp[1]][@attribute_keys[i]].nil?
+                %td.history
+                  - if (i == 0)
+                    %input{:type => 'radio', :name => 'timestamp', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
+                    - checked = false
+                  - if @attribute_keys[i].eql?('deleted')
+                    - if value
+                      = 'DELETED'
+                  - elsif @attribute_keys[i].eql?('edited by')
+                    - if value.nil?
+                      = 'Dummy User'
+                    - else
+                      = value
+                  - else
+                    - if value.eql?('true')
+                      = 'DELETED'
+                    - else
+                      = value
+              - else
+                %td.history.error
+                  - if (i == 0)
+                    %input{:type => 'radio', :name => 'history', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
+                    - checked = false
+                  - if @attribute_keys[i].eql?('deleted')
+                    - if value
+                      = 'DELETED'
+                    - elsif @attribute_keys[i].eql?('edited by')
+                      - if value.nil?
+                        = 'Dummy User'
+                      - else
+                        = value
+                  - else
+                    - if value.eql?('true')
+                      = 'DELETED'
+                    - else
+                      = value
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %input{:type => 'submit', :value => 'Revert', :class => 'btn'}

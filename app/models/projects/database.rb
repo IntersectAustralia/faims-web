@@ -88,12 +88,38 @@ class Database
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_arch_entity, userid, uuid)
+      @db.execute(WebQuery.insert_arch_entity, userid, uuid,currenttime)
       vocab_id.length.times do |i|
         @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
       end
       
       validate_aent_value(uuid, currenttime, attribute_id)
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def get_arch_ent_history(uuid)
+    timestamps = @db.execute(WebQuery.get_arch_ent_history, uuid, uuid)
+    timestamps
+  end
+
+  def get_arch_ent_attributes_at_timestamp(uuid, timestamp)
+    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, uuid, timestamp, timestamp)
+    attributes
+  end
+
+  def get_arch_ent_attributes_changes_at_timestamp(uuid, timestamp)
+    changes = @db.execute(WebQuery.get_arch_ent_attributes_changes_at_timestamp, uuid, timestamp,uuid, timestamp,
+                          uuid, timestamp,uuid, timestamp,uuid, timestamp,uuid, timestamp,uuid, timestamp,uuid, timestamp)
+    changes
+  end
+
+  def revert_arch_ent_to_timestamp(uuid, timestamp)
+    @project.db_mgr.with_lock do
+      currenttime = current_timestamp
+      @db.execute(WebQuery.insert_version, currenttime)
+      @db.execute(WebQuery.insert_arch_ent_at_timestamp, userid, currenttime, uuid, timestamp)
+      @db.execute(WebQuery.insert_arch_ent_attributes_at_timestamp, userid,currenttime, uuid, timestamp)
       @project.db_mgr.make_dirt
     end
   end
@@ -158,6 +184,32 @@ class Database
     end
   end
 
+  def get_rel_history(relid)
+    timestamps = @db.execute(WebQuery.get_rel_history, relid, relid)
+    timestamps
+  end
+
+  def get_rel_attributes_at_timestamp(relid, timestamp)
+    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, relid, timestamp, timestamp)
+    attributes
+  end
+
+  def get_rel_attributes_changes_at_timestamp(relid, timestamp)
+    changes = @db.execute(WebQuery.get_rel_attributes_changes_at_timestamp, relid, timestamp,relid, timestamp,
+                          relid, timestamp,relid, timestamp,relid, timestamp,relid, timestamp,relid, timestamp,relid, timestamp)
+    changes
+  end
+
+  def revert_rel_to_timestamp(relid, timestamp)
+    @project.db_mgr.with_lock do
+      currenttime = current_timestamp
+      @db.execute(WebQuery.insert_version, currenttime)
+      @db.execute(WebQuery.insert_rel_at_timestamp, userid, currenttime, relid, timestamp)
+      @db.execute(WebQuery.insert_rel_attributes_at_timestamp, userid,currenttime, relid, timestamp)
+      @project.db_mgr.make_dirt
+    end
+  end
+
   def delete_relationship(relationshipid)
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
@@ -205,7 +257,7 @@ class Database
 
   def delete_arch_ent_member(relationshipid, uuid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid)
+      @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid, userid)
       @project.make_dirt
     end
   end

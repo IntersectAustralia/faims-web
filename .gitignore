@@ -28,3 +28,6 @@
 
 # Ignore server properties file
 server.properties
+
+# Ignore coverage dir
+/coverage
