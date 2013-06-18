@@ -26,12 +26,12 @@
               = @secondInfo
       %tr
         %td.first
-          %input{:type => 'checkbox', :name => 'uuid', :value => @first_uuid, :checked => 'checked'}
+          %input{:type => 'radio', :name => 'uuid', :value => @first_uuid, :checked => 'checked'}
           %input{:type => 'hidden', :name => 'deleted_id', :value => @second_uuid}
           %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
           = @identifiers[0]
         %td.second
-          %input{:type => 'checkbox', :name => 'uuid', :value => @second_uuid}
+          %input{:type => 'radio', :name => 'uuid', :value => @second_uuid}
           %input{:type => 'hidden', :name => 'deleted_id', :value => @first_uuid}
           %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
           = @identifiers[1]
