@@ -63,7 +63,7 @@ class Database
     attributes
   end
 
-  def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty)
+  def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -74,7 +74,7 @@ class Database
           @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
         end
 
-        validate_aent_value(uuid, currenttime, attribute_id)
+        validate_aent_value(uuid, currenttime, attribute_id) unless ignore_errors
       end
       @project.db_mgr.make_dirt
     end
@@ -122,7 +122,7 @@ class Database
     attributes
   end
 
-  def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty)
+  def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -134,7 +134,8 @@ class Database
         end
       end
 
-      validate_reln_value(relationshipid, currenttime, attribute_id)
+      validate_reln_value(relationshipid, currenttime, attribute_id) unless ignore_errors
+
       @project.db_mgr.make_dirt
     end
   end

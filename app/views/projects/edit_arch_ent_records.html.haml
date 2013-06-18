@@ -17,10 +17,12 @@
           .arch_ent_record_content
             = f.hidden_field :uuid, :value => val[0][0]
             = f.hidden_field :attribute_id, :value => val[0][1]
+            = f.hidden_field 'ignore_errors'
             %table
               %tr
                 %td
                   %h5=key
+              - show_error_button = nil
               - for attribute in val
                 %tr
                   - if !@vocab_name[attribute[1]].empty?
@@ -45,12 +47,15 @@
                     = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'
                 %tr
                   - if attribute[10] == 1
+                    - show_error_button = true
                     %td.form-attribute-error
                       - attribute[11].each_line('\n') do |l|
                         - next if l.gsub('\n', '').blank?
                         %li=l.gsub('\n', '')
             .form-actions
-              = f.submit "Update", :class => "btn btn-primary", :id => "update-arch-ent-btn"
+              = f.submit "Update", :class => "btn btn-primary"
+              - if show_error_button
+                = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn"
               = link_to "cancel", edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
 - if @files.length > 0
   .attached-files

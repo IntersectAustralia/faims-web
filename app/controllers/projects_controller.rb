@@ -131,7 +131,9 @@ class ProjectsController < ApplicationController
       freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
       certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty)
+      ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+
+      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
 
       @attributes = @project.db.get_arch_entity_attributes(uuid)
       @vocab_name = {}
@@ -247,7 +249,9 @@ class ProjectsController < ApplicationController
       freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
       certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty)
+      ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+
+      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty, ignore_errors)
 
       @attributes = @project.db.get_rel_attributes(relationshipid)
       @vocab_name = {}

@@ -309,6 +309,14 @@ merge_record = ->
   )
   return
 
+ignore_error_records = ->
+  $('.ignore-errors-btn').click(
+    ->
+      form = $(this).closest('form')
+      form.find('#attr_ignore_errors').val('1')
+      return true
+  )
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -324,5 +332,6 @@ $(document).ready(
     select_all_compared_attributes()
     change_checked_attributes()
     merge_record()
+    ignore_error_records()
     return
 )
