@@ -141,8 +141,8 @@ CREATE TABLE AentValue (
 	isDirty					BOOLEAN, --validation "dirty bit"
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
-	ParentTimestamp			DATETIME, -- nominally we'd reference Archent here, but just no. No.
-  CONSTRAINT AentValueUnique UNIQUE (UUID, ValueTimestamp, UserID, AttributeID, VocabID, Measure, FreeText, Certainty, Deleted)
+	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
+  ,CONSTRAINT AentValueUnique UNIQUE (UUID, ValueTimestamp, UserID, AttributeID, VocabID, Measure, FreeText, Certainty, Deleted)
  );
 
 
@@ -178,8 +178,8 @@ CREATE TABLE RelnValue (
 	isDirty					BOOLEAN, --validation "dirty bit"
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
-	ParentTimestamp			DATETIME, -- nominally we'd reference Archent here, but just no. No.
-	CONSTRAINT RelnValueUnique UNIQUE (RelationshipID, RelnValueTimestamp, UserID, AttributeID, VocabID, FreeText, Certainty, Deleted)
+	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
+	,CONSTRAINT RelnValueUnique UNIQUE (RelationshipID, RelnValueTimestamp, UserID, AttributeID, VocabID, FreeText, Certainty, Deleted)
  );
 
 create index relnvalueindex on relnvalue (relationshipid, attributeid, relnvaluetimestamp desc);
