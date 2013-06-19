@@ -130,7 +130,7 @@ class DatabaseValidator
 				r = validator.validate(@db.spatialite_db, uuid, aentvaluetimestamp, fields)
 				if r
 					if result
-						result = result + '\n' + r.to_s if r
+						result = result + ';' + r.to_s if r
 					else
 						result = r.to_s
 					end
@@ -165,7 +165,7 @@ class DatabaseValidator
 				r = validator.validate(@db.spatialite_db, relationshipid, relnvaluetimestamp, fields)
 				if r
 					if result
-						result = result + '\n' + r.to_s if r
+						result = result + ';' + r.to_s if r
 					else
 						result = r.to_s
 					end

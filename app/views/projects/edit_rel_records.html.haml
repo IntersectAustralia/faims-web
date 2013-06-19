@@ -44,9 +44,9 @@
                   - if attribute[10] == 1
                     - show_error_button = true
                     %td.form-attribute-error
-                      - attribute[11].each_line('\n') do |l|
-                        - next if l.gsub('\n', '').blank?
-                        %li=l.gsub('\n', '')
+                      - attribute[11].each_line(';') do |l|
+                        - next if l.gsub(';', '').blank?
+                        %li=l.gsub(';', '')
 
             .form-actions
               = f.submit "Update", :class => "btn btn-primary"
