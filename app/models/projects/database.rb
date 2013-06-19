@@ -80,7 +80,7 @@ class Database
     end
   end
 
-  def update_aent_value_as_dirty(uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, isdirty, isdirtyreason, versionnum)
+  def update_aent_value_as_dirty(uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum, isdirty, isdirtyreason)
     @db.execute(WebQuery.update_aent_value_as_dirty, isdirty, isdirtyreason, uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum)
   end
 
@@ -166,7 +166,7 @@ class Database
     end
   end
 
-  def update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, isdirty, isdirtyreason, versionnum)
+  def update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum, isdirty, isdirtyreason)
     @db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
   end
 
@@ -350,11 +350,7 @@ class Database
 
           result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
           if result
-            #puts "Relationship[" + relationshipid.to_s + "] is " + result
-
-            update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], 1, result, versionnum)
-          else
-            update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], 0, nil, versionnum)
+            update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
           puts e.to_s
@@ -390,11 +386,7 @@ class Database
 
           result = db_validator.validate_aent_value(uuid, valuetimestamp, attributename, fields)
           if result
-            #puts "ArchEntity[" + uuid.to_s + "] is " + result
-
-            update_aent_value_as_dirty(uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], 1, result, versionnum)
-          else
-            update_aent_value_as_dirty(uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], 0, nil, versionnum)
+            update_aent_value_as_dirty(uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
           puts e.to_s

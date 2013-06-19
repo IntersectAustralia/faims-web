@@ -127,7 +127,7 @@ CREATE TABLE ArchEntity (
 create index aentindex on archentity (uuid);
 create index aenttimeindex on archentity (uuid, aenttimestamp);
 
-CREATE TABLE AEntValue (
+CREATE TABLE AentValue (
 	UUID                 	INTEGER NOT NULL,
 	ValueTimestamp       	DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UserID				 	INTEGER NOT NULL REFERENCES User,
@@ -141,8 +141,10 @@ CREATE TABLE AEntValue (
 	isDirty					BOOLEAN, --validation "dirty bit"
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
-	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
+	ParentTimestamp			DATETIME, -- nominally we'd reference Archent here, but just no. No.
+  CONSTRAINT AentValueUnique UNIQUE (UUID, ValueTimestamp, UserID, AttributeID, VocabID, Measure, FreeText, Certainty, Deleted)
  );
+
 
 create index aentvalueindex on AentValue (uuid, attributeid, valuetimestamp desc);
 
@@ -176,7 +178,8 @@ CREATE TABLE RelnValue (
 	isDirty					BOOLEAN, --validation "dirty bit"
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
-	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
+	ParentTimestamp			DATETIME, -- nominally we'd reference Archent here, but just no. No.
+	CONSTRAINT RelnValueUnique UNIQUE (RelationshipID, RelnValueTimestamp, UserID, AttributeID, VocabID, FreeText, Certainty, Deleted)
  );
 
 create index relnvalueindex on relnvalue (relationshipid, attributeid, relnvaluetimestamp desc);

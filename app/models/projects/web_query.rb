@@ -194,7 +194,7 @@ EOF
 
   def self.update_aent_value_as_dirty
     cleanup_query(<<EOF
-      update aentvalue set isdirty = ?, isdirtyreason = ? 
+      update aentvalue set isdirty = ?, isdirtyreason = ?
       where uuid is ? and valuetimestamp is ? and userid is ? and attributeid is ? and vocabid is ? and measure is ? and freetext is ? and certainty is ? and versionnum is ?
 EOF
     )
@@ -622,7 +622,7 @@ EOF
 
   def self.update_reln_value_as_dirty
     cleanup_query(<<EOF
-      update relnvalue set isdirty = ?, isdirtyreason = ? 
+      update relnvalue set isdirty = ?, isdirtyreason = ?
       where relationshipid is ? and relnvaluetimestamp is ? and userid is ? and attributeid is ? and vocabid is ? and freetext is ? and certainty is ? and versionnum is ?
 EOF
     )
