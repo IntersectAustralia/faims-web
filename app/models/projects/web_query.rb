@@ -1020,6 +1020,31 @@ EOF
     )
   end
 
+  def self.get_attributes_containing_vocab
+    cleanup_query(<<EOF
+    select attributeid, attributename
+      from attributekey
+      where attributeid in (select attributeid from vocabulary);
+EOF
+    )
+  end
+
+  def self.get_vocabs_for_attribute
+    cleanup_query(<<EOF
+    select attributeid, vocabid, vocabname
+      from vocabulary
+      where attributeid = ?;
+EOF
+    )
+  end
+
+  def self.update_attributes_vocab
+    cleanup_query(<<EOF
+    insert or replace into vocabulary (vocabid, attributeid, vocabname) VALUES(?, ?, ?);
+EOF
+    )
+  end
+
   def self.merge_database(fromDB, version)
     cleanup_query(<<EOF
 attach database "#{fromDB}" as import;
@@ -1076,6 +1101,7 @@ create table export.aentvalue as select * from aentvalue where versionnum >= '#{
 create table export.relationship as select * from relationship where versionnum >= '#{version}';
 create table export.relnvalue as select * from relnvalue where versionnum >= '#{version}';
 create table export.aentreln as select * from aentreln where versionnum >= '#{version}';
+create table export.vocabulary as select * from vocabulary;
 detach database export;
 EOF
     )

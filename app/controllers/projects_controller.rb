@@ -458,6 +458,48 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def list_attributes_with_vocab
+    @project = Project.find(params[:id])
+    @attributes = @project.db.get_attributes_containing_vocab()
+  end
+
+  def list_vocab_for_attribute
+    @project = Project.find(params[:id])
+    attribute_id = params[:attribute_id]
+    vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
+    vocabularies = []
+    vocabs.each do |vocab|
+      vocabulary = {}
+      vocabulary['vocab_id'] = vocab[1]
+      vocabulary['vocab_name'] = vocab[2]
+      vocabularies.push(vocabulary)
+    end
+    respond_to do |format|
+      format.json { render :json => vocabularies.to_json }
+    end
+  end
+
+  def update_attributes_vocab
+    @project = Project.find(params[:id])
+    attribute_id = params[:attribute_id]
+    vocab_id = params[:vocab_id]
+    vocab_name = params[:vocab_name]
+    if !@project.db_mgr.locked?
+      @project.db.update_attributes_vocab(attribute_id, vocab_id, vocab_name)
+    end
+    vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
+    vocabularies = []
+    vocabs.each do |vocab|
+      vocabulary = {}
+      vocabulary['vocab_id'] = vocab[1]
+      vocabulary['vocab_name'] = vocab[2]
+      vocabularies.push(vocabulary)
+    end
+    respond_to do |format|
+      format.json { render :json => vocabularies.to_json }
+    end
+  end
+
   def edit_project_setting
     @project = Project.find(params[:id])
     @project_setting = JSON.parse(File.read(@project.get_path(:settings)))

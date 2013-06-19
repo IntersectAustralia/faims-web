@@ -261,6 +261,89 @@ Feature: Manage projects
 #    Then I click file with name "Screenshot_2013-04-29-16-38-51(1).png"
 #    And I should download attached file with name "Screenshot_2013-04-29-16-38-51(1).png"
 
+  @javascript
+  Scenario: View Vocabularies
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Create Project"
+    Then I should be on the new projects page
+    And I fill in "Name" with "Project 1"
+    And I pick file "data_schema.xml" for "Data Schema"
+    And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I pick file "ui_logic.bsh" for "UI Logic"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
+    And I press "Submit"
+    Then I should see "New project created."
+    And I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Vocabulary"
+    And I select "Soil Texture" for the attribute
+    Then I should see vocabularies
+    | name  |
+    | Green |
+    | Pink  |
+    | Blue  |
+
+  @javascript
+  Scenario: Update Vocabulary
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Create Project"
+    Then I should be on the new projects page
+    And I fill in "Name" with "Project 1"
+    And I pick file "data_schema.xml" for "Data Schema"
+    And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I pick file "ui_logic.bsh" for "UI Logic"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
+    And I press "Submit"
+    Then I should see "New project created."
+    And I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Vocabulary"
+    And I select "Soil Texture" for the attribute
+    And I modify vocabulary "Green" with "Red"
+    Then I follow "Update"
+    And I should see vocabularies
+      | name  |
+      | Red   |
+      | Pink  |
+      | Blue  |
+
+  @javascript
+  Scenario: Insert Vocabulary
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Create Project"
+    Then I should be on the new projects page
+    And I fill in "Name" with "Project 1"
+    And I pick file "data_schema.xml" for "Data Schema"
+    And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I pick file "ui_logic.bsh" for "UI Logic"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
+    And I press "Submit"
+    Then I should see "New project created."
+    And I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Vocabulary"
+    And I select "Soil Texture" for the attribute
+    And I wait
+    Then I follow "Insert"
+    And I wait
+    And I add "Red" to the vobulary list
+    Then I follow "Update"
+    And I should see vocabularies
+      | name  |
+      | Green |
+      | Red   |
+      | Pink  |
+      | Blue  |
+
   Scenario: Update arch entity attribute causes validation error
     # TODO
 

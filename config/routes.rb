@@ -76,6 +76,10 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/compare_rel', :to => 'projects#compare_rel', :as => 'compare_rel'
   post 'projects/:id/merge_rel', :to => 'projects#merge_rel', :as => 'merge_rel'
 
+  get 'projects/:id/list_attributes_with_vocab/', :to => 'projects#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
+  get 'projects/:id/list_vocab_for_attribute/:attribute_id', :to => 'projects#list_vocab_for_attribute', :as => 'list_vocab_for_attribute'
+  put 'projects/:id/update_attributes_vocab', :to => 'projects#update_attributes_vocab', :as => 'update_attributes_vocab'
+
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
 
   get 'android/project/:key/settings_archive', :to => 'android#settings_archive', :as => 'android_settings_archive'
