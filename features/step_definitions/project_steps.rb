@@ -487,6 +487,26 @@ When(/^I should download attached file with name "([^"]*)"$/) do |name|
   pending
 end
 
+When(/^I select "([^"]*)" for the attribute$/) do |name|
+  select name, :from => 'attribute_id'
+end
+
+Then(/^I should see vocabularies$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//input[@value='#{value}']")
+    end
+  end
+end
+
+When(/^I modify vocabulary "([^"]*)" with "([^"]*)"$/) do |original, value|
+  find(:xpath, "//input[@value='#{original}']").set value
+end
+
+When(/^I add "([^"]*)" to the vobulary list$/) do |value|
+  all(:xpath, "//input[@name='vocab_name[]']").last.set value
+end
+
 def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')

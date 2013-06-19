@@ -1,0 +1,13 @@
+%h1= @project.name + " - Attributes"
+.content
+  %form{:id => 'attribute_form'}
+    %label Attribute
+    %select{:id => 'attribute', :name => 'attribute_id'}
+      %option
+      - @attributes.each do |attribute|
+        %option{:value => attribute[0], :data => {:url => list_vocab_for_attribute_path(@project,attribute[0])}}
+          = attribute[1]
+    #vocab-content
+  %br
+  = link_to "Update", update_attributes_vocab_path(@project),:id => 'update_vocab', :class => 'btn hidden'
+  = link_to "Insert",'#', :id => 'insert_vocab', :class => 'btn hidden'

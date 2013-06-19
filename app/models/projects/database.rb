@@ -306,14 +306,33 @@ class Database
     end
   end
 
+  def get_attributes_containing_vocab
+    attributes = @db.execute(WebQuery.get_attributes_containing_vocab)
+    attributes
+  end
+
+  def get_vocabs_for_attribute(attribute_id)
+    vocabs = @db.execute(WebQuery.get_vocabs_for_attribute, attribute_id)
+    vocabs
+  end
+
+  def update_attributes_vocab(attribute_id, vocab_id, vocab_name)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      vocab_id.length.times do |i|
+        vocab_id[i-1] = vocab_id[i-1].blank? ? nil : vocab_id[i-1]
+        if !vocab_name[i-1].blank?
+          @db.execute_batch(WebQuery.update_attributes_vocab,vocab_id[i-1],attribute_id,vocab_name[i-1])
+        end
+      end
+      @project.db_mgr.make_dirt
+    end
+  end
+
   def create_app_database(toDB)
     #@project.with_lock do
-
-      db = SpatialiteDB.new(toDB)
-      db.execute('select initspatialmetadata();')
-      
-      @db.execute_batch(WebQuery.create_app_database(toDB))
-
+    fromDB = @project.get_path(:db)
+    FileUtils.cp(fromDB,toDB)
     #end
   end
 

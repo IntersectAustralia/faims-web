@@ -8,6 +8,7 @@
 = link_to "Search Relationship Records", search_rel_records_path(@project), :class => 'btn'
 = link_to "List Archaeological Entity Records", list_arch_ent_records_path(@project), :class => 'btn'
 = link_to "List Relationship Records", list_rel_records_path(@project), :class => 'btn'
+= link_to "Edit Vocabulary", list_attributes_with_vocab_path(@project), :class => 'btn'
 = link_to "Back", projects_path, :class => 'btn'
 #loading.hidden.indicator
   = image_tag "loading.gif"

@@ -199,7 +199,7 @@ download_attached_file = ->
   )
   return
 
-select_all_compared_attributes = ->
+merge_record_management = ->
   $('#select-first').click(
     ->
       $('#select-form input:radio').each(
@@ -242,9 +242,7 @@ select_all_compared_attributes = ->
           return
       )
   )
-  return
 
-change_checked_attributes = ->
   $('#select-form input:radio').change(
     ->
       siblings = $(this).parents('td').siblings()[0]
@@ -268,9 +266,7 @@ change_checked_attributes = ->
         $(this).prop('checked', true)
         return
   )
-  return
 
-merge_record = ->
   $('#merge-record').click(
     ->
       $form = $('<form method="post">')
@@ -315,7 +311,7 @@ ignore_error_records = ->
       return true
   )
 
-select_timestamp = ->
+history_management = ->
 
   $('input[name="timestamp"]:checked').parents('tr').addClass('selected')
   $('input[name="timestamp"]').change(
@@ -329,6 +325,65 @@ select_timestamp = ->
       return
   )
 
+vocab_management = ->
+  $('#attribute').change(
+    ->
+      value = $(this).val()
+      selected = $(this).find('option:selected');
+      url = selected.data('url')
+      $('#vocab-content').empty()
+      if (value == "")
+        $('#update_vocab').addClass('hidden')
+        $('#insert_vocab').addClass('hidden')
+        return
+      else
+        $('#update_vocab').removeClass('hidden')
+        $('#insert_vocab').removeClass('hidden')
+        $.get url, (data) ->
+          $('<label>Vocab List</label>').appendTo($('#vocab-content'))
+          table = $('<table></table>').appendTo($('#vocab-content'))
+          $(data).each(
+            ->
+              value = '<tr><td><input type="hidden" name="vocab_id[]" value="'+this.vocab_id+'"/><input name="vocab_name[]"value="'+this.vocab_name+'"/></td></tr>'
+              $(value).appendTo($(table))
+              return
+          )
+          return
+        return
+      return
+  )
+  $('#insert_vocab').click(
+    ->
+      value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
+      table = $('#vocab-content').find('table')
+      $(value).appendTo($(table))
+      return false
+  )
+
+  $('#update_vocab').click(
+    ->
+      self = this
+      $(this).attr('disabled','disabled')
+      $.ajax $(this).attr('href'),
+        type: 'put'
+        data: $('#attribute_form').serializeArray()
+        dataType: 'json'
+        success:(data, textStatus, jqXHR) ->
+          $('#vocab-content').empty()
+          $('<label>Vocab List</label>').appendTo($('#vocab-content'))
+          table = $('<table></table>').appendTo($('#vocab-content'))
+          $(data).each(
+            ->
+              value = '<tr><td><input type="hidden" name="vocab_id[]" value="'+this.vocab_id+'"/><input name="vocab_name[]"value="'+this.vocab_name+'"/></td></tr>'
+              $(value).appendTo($(table))
+              return
+          )
+          $(self).removeAttr('disabled')
+          return
+      return false
+  )
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -341,10 +396,9 @@ $(document).ready(
     delete_arch_ent_members()
     delete_records()
     download_attached_file()
-    select_all_compared_attributes()
-    change_checked_attributes()
-    merge_record()
     ignore_error_records()
-    select_timestamp()
+    merge_record_management()
+    history_management()
+    vocab_management()
     return
 )
