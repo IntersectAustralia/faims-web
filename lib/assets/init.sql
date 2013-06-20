@@ -142,7 +142,7 @@ CREATE TABLE AentValue (
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
 	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
-  ,CONSTRAINT AentValueUnique UNIQUE (UUID, ValueTimestamp, UserID, AttributeID, VocabID, Measure, FreeText, Certainty, Deleted)
+  , UNIQUE (UUID, ValueTimestamp, UserID, AttributeID, VocabID, Measure, FreeText, Certainty, Deleted) ON CONFLICT REPLACE
  );
 
 
@@ -179,7 +179,7 @@ CREATE TABLE RelnValue (
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
 	ParentTimestamp			DATETIME -- nominally we'd reference Archent here, but just no. No.
-	,CONSTRAINT RelnValueUnique UNIQUE (RelationshipID, RelnValueTimestamp, UserID, AttributeID, VocabID, FreeText, Certainty, Deleted)
+	, UNIQUE (RelationshipID, RelnValueTimestamp, UserID, AttributeID, VocabID, FreeText, Certainty, Deleted) ON CONFLICT REPLACE
  );
 
 create index relnvalueindex on relnvalue (relationshipid, attributeid, relnvaluetimestamp desc);
