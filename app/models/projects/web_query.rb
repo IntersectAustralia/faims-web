@@ -289,36 +289,38 @@ EOF
 
   def self.get_arch_ent_attributes_at_timestamp
     cleanup_query(<<EOF
-  select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(GeoSpatialColumn), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(valdeleted,
-                                                                                              measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              measure,
-                                                                                              vocabname,
-                                                                                              freetext), ' | ') as response
+select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(GeoSpatialColumn), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(valdeleted,
+                                                                                             measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                                                                             measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                             vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                                                                             measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                                                                             vocabname  || ' (' || freetext || ')',
+                                                                                             measure    || ' (' || freetext || ')',
+                                                                                             measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                             measure,
+                                                                                             vocabname,
+                                                                                             freetext), ' | ') as response
 FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp
-          FROM aentvalue
-          JOIN attributekey USING (attributeid)
-          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-          JOIN (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
-                  FROM aentvalue
-                  JOIN archentity USING (uuid)
-                 WHERE uuid = ?
-                       and valuetimestamp <= ?
-                       and aenttimestamp <= ?
-              GROUP BY uuid, attributeid
-                HAVING MAX(ValueTimestamp)
-                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-          join archentity using (uuid, aenttimestamp)
-          left outer join user as aentuser on (aentuser.userid = archentity.userid)
-          left outer join user as valueuser on (valueuser.userid = aentvalue.userid)
-       ORDER BY uuid, attributename ASC, archentity.deleted desc)
+         FROM aentvalue
+         JOIN attributekey USING (attributeid)
+         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+         join archentity using (uuid)
+         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp
+                 FROM aentvalue
+                WHERE uuid = ?
+                  and valuetimestamp <= ?
+             GROUP BY uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+        JOIN (
+               SELECT uuid, max(aenttimestamp) as aenttimestamp
+                 FROM archentity
+                WHERE uuid = ?
+                  and aenttimestamp <= ?
+             GROUP BY uuid) USING (uuid, aenttimestamp)
+         left outer join user as aentuser on (aentuser.userid = archentity.userid)
+         left outer join user as valueuser on (valueuser.userid = aentvalue.userid)
+      ORDER BY uuid, attributename ASC, archentity.deleted desc)
 group by uuid, attributename;
 EOF
     )
@@ -709,29 +711,32 @@ EOF
   def self.get_rel_attributes_at_timestamp
     cleanup_query(<<EOF
 select relationshipid, attributeid, attributename, astext(geospatialcolumn), group_concat(rfname || ' ' || rlname) as ruser,group_concat(vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(relnvaluedeleted, vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                         vocabname  || ' (' || freetext || ')',
-                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                         vocabname,
-                                                                                         freetext), ' | ') as response
+                                                                                        vocabname  || ' (' || freetext || ')',
+                                                                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                                                                        vocabname,
+                                                                                        freetext), ' | ') as response
 from (
 SELECT relationshipid, geospatialcolumn, vocabid, attributeid, relnuser.fname as rfname, relnuser.lname as rlname, rvalueuser.fname as vfname, rvalueuser.lname as vlname, attributename, freetext, certainty, relationship.deleted, relnvalue.deleted as relnvaluedeleted, vocabname, relntypeid, attributetype, relnvaluetimestamp, relntimestamp
-    FROM relnvalue
-    JOIN attributekey USING (attributeid)
-    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntimestamp
-             FROM relnvalue
-             JOIN relationship USING (relationshipid)
-            WHERE relationshipid = ?
-             and relnvaluetimestamp <= ?
-                       and relntimestamp <= ?
-         GROUP BY relationshipid, attributeid
-           HAVING MAX(relnvaluetimestamp)
-              AND MAX(relntimestamp)
-      ) USING (relationshipid, attributeid, relnvaluetimestamp)
-    join relationship using (relationshipid, relntimestamp)
-    left outer join user as relnuser on (relnuser.userid = relationship.userid)
-    left outer join user as rvalueuser on (rvalueuser.userid = relnvalue.userid)
+   FROM relnvalue
+   JOIN attributekey USING (attributeid)
+   LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+   join relationship using (relationshipid)
+   JOIN ( SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+            FROM relnvalue
+            JOIN relationship USING (relationshipid)
+           WHERE relationshipid = ?
+            and relnvaluetimestamp <= ?
+        GROUP BY relationshipid, attributeid
+     ) USING (relationshipid, attributeid, relnvaluetimestamp)
+   JOIN (select relationshipid, max(relntimestamp) as relntimestamp
+         from relationship
+         where relationshipid = ?
+         and relntimestamp <= ?
+         group by relationshipid
+         ) USING (relationshipid, relntimestamp)
+   left outer join user as relnuser on (relnuser.userid = relationship.userid)
+   left outer join user as rvalueuser on (rvalueuser.userid = relnvalue.userid)
 ORDER BY relationshipid, attributename asc)
 group by relationshipid, attributename;
 EOF

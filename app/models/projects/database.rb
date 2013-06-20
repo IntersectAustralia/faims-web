@@ -104,7 +104,7 @@ class Database
   end
 
   def get_arch_ent_attributes_at_timestamp(uuid, timestamp)
-    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, uuid, timestamp, timestamp)
+    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, uuid, timestamp,uuid, timestamp)
     attributes
   end
 
@@ -190,7 +190,7 @@ class Database
   end
 
   def get_rel_attributes_at_timestamp(relid, timestamp)
-    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, relid, timestamp, timestamp)
+    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, relid, timestamp,relid, timestamp)
     attributes
   end
 
