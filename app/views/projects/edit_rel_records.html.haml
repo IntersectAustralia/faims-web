@@ -43,7 +43,7 @@
                 %tr
                   - if attribute[10] == 1
                     - show_error_button = true
-                    %td.form-attribute-error
+                    %td.form-attribute-error{colspan:'3'}
                       - attribute[11].each_line(';') do |l|
                         - next if l.gsub(';', '').blank?
                         %li=l.gsub(';', '')
