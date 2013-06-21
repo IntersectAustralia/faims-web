@@ -1178,11 +1178,11 @@ EOF
     cleanup_query(<<EOF
 select sum(isdirty)
 from (
-  select sum(isdirty) as isdirty, deleted
-  from aentvalue
-  where uuid = ?
-  group by uuid, attributeid
-  having max(valuetimestamp)
+  select isdirty, deleted
+  from aentvalue join (
+    select uuid, attributeid, max(valuetimestamp) as valuetimestamp
+    from aentvalue
+    where uuid = ? group by uuid, attributeid) using (uuid, attributeid, valuetimestamp)
   union
   select isdirty, deleted
   from archentity
@@ -1198,11 +1198,11 @@ EOF
     cleanup_query(<<EOF
 select sum(isdirty)
 from (
-  select sum(isdirty) as isdirty, deleted
-  from relnvalue
-  where relationshipid = ?
-  group by relationshipid, attributeid
-  having max(relnvaluetimestamp)
+  select isdirty, deleted
+  from relnvalue join (
+    select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+    from relnvalue
+    where relationshipid = ? group by relationshipid, attributeid) using (relationshipid, attributeid, relnvaluetimestamp)
   union
   select isdirty, deleted
   from relationship
