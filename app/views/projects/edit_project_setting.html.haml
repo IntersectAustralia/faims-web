@@ -8,6 +8,9 @@
         = f.text_field :name, :value => @project.name
         = f.error :name
         %p
+        = f.label :season, 'Project SRID:'
+        = f.select :srid, @spatial_list, :selected => @project_setting['srid']
+        %p
         = f.label :season, "Project Season:"
         = f.text_field :season, :value => @project_setting['season']
         %p

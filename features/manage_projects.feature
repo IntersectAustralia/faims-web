@@ -60,6 +60,26 @@ Feature: Manage projects
     And I should be on the projects page
     And I have project files for "Project 1"
 
+  @javascript
+  Scenario: Set srid on project creation
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Create Project"
+    Then I should be on the new projects page
+    And I fill in "Name" with "Project 1"
+    And I fill in "Project SRID" with "EPSG:4326 - WGS 84"
+    And I pick file "data_schema.xml" for "Data Schema"
+    And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I pick file "ui_logic.bsh" for "UI Logic"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
+    And I press "Submit"
+    Then I should see "New project created."
+    And I should be on the projects page
+    And I have project files for "Project 1"
+    And I should have setting "srid" for "Project 1" as "4326"
+
   Scenario Outline: Cannot create project due to errors
     Given I am on the home page
     And I have project "Project 1"
@@ -167,6 +187,20 @@ Feature: Manage projects
     Then I should see "Unsupported format of file, please upload the correct file"
 
   Scenario Outline: Edit static data
+    Given I am on the home page
+    And I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Project Setting"
+    And I fill in "<field>" with "<value>"
+    And I press "Update"
+    And I should have setting "<setting>" for "Project 1" as "<setting_value>"
+  Examples:
+    | field        | value     | setting | setting_value |
+    | Project SRID | EPSG:4326 - WGS 84          | srid | 4326 |
+
+  Scenario Outline: Edit static data fails with errors
     Given I am on the home page
     And I have project "Project 1"
     And I follow "Show Projects"

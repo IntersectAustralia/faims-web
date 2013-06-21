@@ -534,3 +534,9 @@ def compare_dir(dir1, dir2)
   end
   return true
 end
+
+And /^I should have setting "([^"]*)" for "([^"]*)" as "([^"]*)"$/ do |setting_name, name, srid|
+  project = Project.find_by_name(name)
+  settings = JSON.parse(File.read(project.get_path(:settings)).as_json)
+  settings[setting_name].should == srid
+end

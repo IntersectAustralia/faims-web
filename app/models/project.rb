@@ -5,10 +5,12 @@ class Project < ActiveRecord::Base
   include Archive::Tar
   include MD5Checksum
 
-  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :validation_schema
+  SRID = 4326
+
+  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :validation_schema, :srid
 
   attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type,
-    :validation_schema
+    :validation_schema, :srid
 
   validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
@@ -215,6 +217,10 @@ class Project < ActiveRecord::Base
     package_project
   end
 
+  def get_settings
+    JSON.parse(File.read(get_path(:settings).as_json))
+  end
+
   def update_settings(params)
     settings_mgr.with_lock do
       File.open(get_path(:settings), 'w') do |file|
@@ -225,7 +231,8 @@ class Project < ActiveRecord::Base
                     :permit_no => params[:project][:permit_no],
                     :permit_holder => params[:project][:permit_holder],
                     :contact_address => params[:project][:contact_address],
-                    :participant => params[:project][:participant]
+                    :participant => params[:project][:participant],
+                    :srid => params[:project][:srid]
                    }.to_json)
         settings_mgr.make_dirt
       end

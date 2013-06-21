@@ -104,13 +104,14 @@ class Database
   end
 
   def get_arch_ent_attributes_at_timestamp(uuid, timestamp)
-    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, uuid, timestamp,uuid, timestamp)
+    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, @project.get_settings['srid'], @uuid, timestamp, uuid, timestamp)
     attributes
   end
 
   def get_arch_ent_attributes_changes_at_timestamp(uuid, timestamp)
-    changes = @db.execute(WebQuery.get_arch_ent_attributes_changes_at_timestamp, uuid, timestamp,uuid, timestamp,
-                          uuid, timestamp,uuid, timestamp,uuid, timestamp,uuid, timestamp,uuid, timestamp,uuid, timestamp)
+    srid = @project.get_settings['srid']
+    changes = @db.execute(WebQuery.get_arch_ent_attributes_changes_at_timestamp, uuid, timestamp, uuid, timestamp, srid,
+                          uuid, timestamp, srid, uuid, timestamp, uuid, timestamp, uuid, timestamp, uuid, timestamp, uuid, timestamp)
     changes
   end
 
@@ -190,13 +191,14 @@ class Database
   end
 
   def get_rel_attributes_at_timestamp(relid, timestamp)
-    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, relid, timestamp,relid, timestamp)
+    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, @project.get_settings['srid'], relid, timestamp, relid, timestamp)
     attributes
   end
 
   def get_rel_attributes_changes_at_timestamp(relid, timestamp)
-    changes = @db.execute(WebQuery.get_rel_attributes_changes_at_timestamp, relid, timestamp,relid, timestamp,
-                          relid, timestamp,relid, timestamp,relid, timestamp,relid, timestamp,relid, timestamp,relid, timestamp)
+    srid = @project.get_settings['srid']
+    changes = @db.execute(WebQuery.get_rel_attributes_changes_at_timestamp, relid, timestamp, relid, timestamp, srid,
+                          relid, timestamp, srid, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp)
     changes
   end
 
@@ -457,6 +459,17 @@ class Database
 
   def path
     @db.path
+  end
+
+  def self.get_spatial_ref_list
+    begin
+      temp = Tempfile.new('db')
+      db = SpatialiteDB.new(temp.path)
+      db.execute('select initspatialmetadata()')
+      result = db.execute("select upper(auth_name) || ':' || srid || ' - ' || ref_sys_name, auth_srid from spatial_ref_sys;")
+    ensure
+      temp.unlink if temp
+    end
   end
 
   private

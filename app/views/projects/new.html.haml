@@ -10,6 +10,9 @@
             = f.text_field :name
             = f.error :name
             %p
+            = f.label :season, 'Project SRID:'
+            = f.select :srid, @spatial_list, :selected => (session[:srid] ? session[:srid] : Project::SRID)
+            %p
             = f.label :season, 'Project Season:'
             = f.text_field :season, :value => session[:season]
             %p

@@ -11,6 +11,7 @@ class ProjectsController < ApplicationController
 
   def new
     @project = Project.new
+    @spatial_list = Database.get_spatial_ref_list
 
     # make temp directory and store its path in session
     create_tmp_dir
@@ -35,6 +36,7 @@ class ProjectsController < ApplicationController
       flash[:notice] = t 'projects.new.success'
       redirect_to :projects
     else
+      @spatial_list = Database.get_spatial_ref_list
       flash.now[:error] = t 'projects.new.failure'
       render 'new'
     end
@@ -503,6 +505,7 @@ class ProjectsController < ApplicationController
   def edit_project_setting
     @project = Project.find(params[:id])
     @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+    @spatial_list = Database.get_spatial_ref_list
   end
 
   def update_project_setting
@@ -517,6 +520,7 @@ class ProjectsController < ApplicationController
       redirect_to :project
     else
       @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+      @spatial_list = Database.get_spatial_ref_list
       render 'edit_project_setting'
     end
   end
@@ -689,6 +693,7 @@ class ProjectsController < ApplicationController
       session[:permit_holder] = ''
       session[:contact_address] = ''
       session[:participant] = ''
+      session[:srid] = ''
     else
       session[:season] = params[:project][:season]
       session[:description] = params[:project][:description]
@@ -696,6 +701,7 @@ class ProjectsController < ApplicationController
       session[:permit_holder] = params[:project][:permit_holder]
       session[:contact_address] = params[:project][:contact_address]
       session[:participant] = params[:project][:participant]
+      session[:srid] = params[:project][:srid]
     end
 
     valid
