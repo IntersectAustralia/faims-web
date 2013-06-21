@@ -10,7 +10,7 @@
             %a{:href => edit_rel_records_path(@project,relationshipids[0])}
               =relationshipids[2].to_s + ": " + relationshipids[3].to_s
               - if @rel_dirty_map[relationshipids[0]]
-                .label.label-important='dirty'
+                .label.label-important='review'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
     - else
       %input{:type => 'checkbox', :value=> relationshipid_group[0][0]}
@@ -21,5 +21,5 @@
             %a{:href => edit_rel_records_path(@project,relationshipids[0])}
               =relationshipids[2].to_s + ": " + relationshipids[3].to_s
               - if @rel_dirty_map[relationshipids[0]]
-                .label.label-important='dirty'
+                .label.label-important='review'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}

@@ -11,7 +11,7 @@
             = f.error :name
             %p
             = f.label :season, 'Project SRID:'
-            = f.select :srid, @spatial_list, :selected => (session[:srid] ? session[:srid] : Project::SRID)
+            = f.select :srid, @spatial_list, :selected => (session[:srid].blank? ? Project::SRID : session[:srid])
             %p
             = f.label :season, 'Project Season:'
             = f.text_field :season, :value => session[:season]
