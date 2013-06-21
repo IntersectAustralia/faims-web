@@ -133,7 +133,7 @@ CREATE TABLE AentValue (
 	UserID				 	INTEGER NOT NULL REFERENCES User,
 	AttributeID          	TEXT NOT NULL REFERENCES AttributeKey,
 	VocabID              	INTEGER REFERENCES Vocabulary,
-	Measure              	INTEGER,
+	Measure              	REAL,
 	FreeText             	TEXT,
 	Certainty            	REAL,
 	Deleted				 	BOOLEAN,
@@ -152,7 +152,7 @@ CREATE TABLE Relationship (
 	RelationshipID       	INTEGER NOT NULL,
 	RelnTimestamp        	DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UserID               	INTEGER NOT NULL REFERENCES User,
-	RelnTypeID           	INTEGER NOT NULL,
+	RelnTypeID           	INTEGER NOT NULL REFERENCES RelnType,
 	Deleted				 	BOOLEAN,
 	VersionNum           	INTEGER REFERENCES Version,
 	isDirty					BOOLEAN, --validation "dirty bit"
@@ -169,12 +169,12 @@ CREATE TABLE RelnValue (
 	RelationshipID       	INTEGER NOT NULL,
 	RelnValueTimestamp   	DATETIME DEFAULT CURRENT_TIMESTAMP,
 	UserID					INTEGER NOT NULL REFERENCES User,
-	AttributeID          	TEXT NOT NULL,
-	VocabID              	INTEGER,
+	AttributeID          	TEXT NOT NULL REFERENCES AttributeKey,
+	VocabID              	INTEGER REFERENCES Vocabulary,
 	Freetext             	TEXT,
 	Certainty            	REAL,
 	Deleted				 	BOOLEAN,
-	VersionNum           	INTEGER,
+	VersionNum           	INTEGER REFERENCES Version,
 	isDirty					BOOLEAN, --validation "dirty bit"
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling
@@ -191,7 +191,7 @@ CREATE TABLE AEntReln (
 	AEntRelnTimestamp    	DATETIME DEFAULT CURRENT_TIMESTAMP,
 	ParticipatesVerb     	TEXT,
 	Deleted				 	BOOLEAN,
-	VersionNum           	INTEGER,
+	VersionNum           	INTEGER REFERENCES Version,
 	isDirty					BOOLEAN, --validation "dirty bit"
 	isDirtyReason			TEXT,
 	isForked				BOOLEAN, -- fork signalling

@@ -230,7 +230,9 @@ class EvalValidator < AttributeValidator
 		begin
 			temp_cmd = @cmd
 			@params.each do |p|
-				temp_cmd = temp_cmd.sub('?', p.get_value(db, id, timestamp, fields))
+        v = p.get_value(db, id, timestamp, fields)
+        v ||= ''
+				temp_cmd = temp_cmd.sub('?', v.to_s)
 			end
 			result = system temp_cmd
 			return nil if result
