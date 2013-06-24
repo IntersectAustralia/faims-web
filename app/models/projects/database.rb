@@ -470,7 +470,7 @@ class Database
       temp = Tempfile.new('db')
       db = SpatialiteDB.new(temp.path)
       db.execute('select initspatialmetadata()')
-      result = db.execute("select upper(auth_name) || ':' || srid || ' - ' || ref_sys_name, auth_srid from spatial_ref_sys;")
+      result = db.execute("select srid || ' / ' || ref_sys_name, auth_srid from spatial_ref_sys;")
     ensure
       temp.unlink if temp
     end
