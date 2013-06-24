@@ -168,8 +168,8 @@ EOF
 
   def self.insert_arch_entity
     cleanup_query(<<EOF
-insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, aenttimestamp)
-                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, v.versionnum, ?
+insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, aenttimestamp, parenttimestamp)
+                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, v.versionnum, ? , aenttimestamp
                   from (select uuid, max(aenttimestamp) as aenttimestamp
                         from archentity
                        where uuid = ?
@@ -186,8 +186,15 @@ EOF
 
   def self.insert_arch_entity_attribute
     cleanup_query(<<EOF
-insert into AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?, ?,
+insert into AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, parenttimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
+EOF
+    )
+  end
+
+  def self.get_parent_timestamp_for_aentvalue
+    cleanup_query(<<EOF
+    select max(ValueTimestamp) from aentvalue where uuid = ? and attributeid = ? group by attributeid;
 EOF
     )
   end
@@ -202,8 +209,8 @@ EOF
 
   def self.delete_arch_entity
     cleanup_query(<<EOF
-insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
-                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum
+insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
+                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum, aentTimestamp
                   from (select uuid, max(aenttimestamp) as aenttimestamp
                         from archentity
                        where uuid = ?
@@ -603,8 +610,8 @@ EOF
 
   def self.insert_relationship
     cleanup_query(<<EOF
-insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
-  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, v.versionnum
+insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, relntimestamp, parentTimestamp)
+  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, v.versionnum, ?, RelnTimestamp
     from (select relationshipid, max(relntimestamp) as RelnTimestamp
             from relationship
           where relationshipID = ?
@@ -616,8 +623,15 @@ EOF
 
   def self.insert_relationship_attribute
     cleanup_query(<<EOF
-insert into RelnValue (RelationshipID, UserId, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?,
+insert into RelnValue (RelationshipID, UserId, AttributeID, VocabID, FreeText, Certainty, RelnValueTimestamp, parentTimestamp, versionnum) values (?, ?, ?, ?, ?, ?, ?, ?,
   (select versionnum from version where ismerged = 1 order by versionnum desc limit 1));
+EOF
+    )
+  end
+
+  def self.get_parent_timestamp_for_relnvalue
+    cleanup_query(<<EOF
+    select max(relnvalueTimestamp) from relnvalue where relationshipid = ? and attributeid = ? group by attributeid;
 EOF
     )
   end
@@ -632,8 +646,8 @@ EOF
 
   def self.delete_relationship
     cleanup_query(<<EOF
-insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum)
-  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum
+insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
+  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum, RelnTimestamp
     from (select relationshipid, max(relntimestamp) as RelnTimestamp
             from relationship
           where relationshipID = ?

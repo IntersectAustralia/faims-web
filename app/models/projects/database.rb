@@ -67,11 +67,12 @@ class Database
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
+      parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id)
       measure.length.times do |i|
         if vocab_id.blank?
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime,parenttimestamp[0][0])
         else
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime,parenttimestamp[0][0])
         end
 
         validate_aent_value(uuid, currenttime, attribute_id) unless ignore_errors
@@ -88,9 +89,10 @@ class Database
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_arch_entity, userid, uuid,currenttime)
+      @db.execute(WebQuery.insert_arch_entity, userid, currenttime, uuid)
       vocab_id.length.times do |i|
-        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime)
+        parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id[i-1])
+        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
       end
       
       validate_aent_value(uuid, currenttime, attribute_id)
@@ -153,11 +155,12 @@ class Database
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
+      parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id)
       freetext.length.times do |i|
         if vocab_id.blank?
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
         else
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
+          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
         end
       end
 
@@ -175,9 +178,10 @@ class Database
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_relationship, userid, relationshipid)
+      @db.execute(WebQuery.insert_relationship, userid, currenttime, relationshipid)
       vocab_id.length.times do |i|
-        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime)
+        parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id[i-1])
+        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
       end
       
       validate_reln_value(relationshipid, currenttime, attribute_id)
