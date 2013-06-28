@@ -296,7 +296,7 @@ EOF
 
   def self.get_arch_ent_attributes_at_timestamp
     cleanup_query(<<EOF
-select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(valdeleted,
+select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(valdeleted,
                                                                                              measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
@@ -349,12 +349,12 @@ SELECT  uuid, 'EntityDeleted', ifnull(deleted, 'Record Present')
       having max(aenttimestamp)
   )
 union
-select uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?)
+select uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
   from archentity
 where uuid = ?
   AND aenttimestamp = ?
 EXCEPT
-SELECT  uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?)
+SELECT  uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
  from ( SELECT uuid, aenttimestamp, GeoSpatialColumn
           FROM archentity
          where uuid = ?
@@ -724,7 +724,7 @@ EOF
 
   def self.get_rel_attributes_at_timestamp
     cleanup_query(<<EOF
-select relationshipid, attributeid, attributename, astext(transform(GeoSpatialColumn,?), group_concat(rfname || ' ' || rlname) as ruser,group_concat(vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(relnvaluedeleted, vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+select relationshipid, attributeid, attributename, astext(transform(GeoSpatialColumn,?)), group_concat(rfname || ' ' || rlname) as ruser,group_concat(vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(relnvaluedeleted, vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                         vocabname  || ' (' || freetext || ')',
                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
@@ -773,12 +773,12 @@ SELECT  relationshipid, 'RelationshipDeleted', ifnull(deleted, 'Record Present')
       having max(relntimestamp)
   )
 union
-select relationshipid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?)
+select relationshipid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
   from relationship
 where relationshipid = ?
   AND relntimestamp = ?
 EXCEPT
-SELECT  relationshipid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?)
+SELECT  relationshipid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
  from ( SELECT relationshipid, GeoSpatialColumn
           FROM relationship
          where relationshipid = ?
