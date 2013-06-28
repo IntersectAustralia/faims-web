@@ -106,7 +106,7 @@ class Database
   end
 
   def get_arch_ent_attributes_at_timestamp(uuid, timestamp)
-    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, @project.get_settings['srid'], @uuid, timestamp, uuid, timestamp)
+    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, @project.get_settings['srid'], uuid, timestamp, uuid, timestamp)
     attributes
   end
 
