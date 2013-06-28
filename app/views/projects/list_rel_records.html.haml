@@ -1,12 +1,15 @@
-%h1= @project.name + " - Relationship Records"
+%h1
+  %span= @project.name + " - Relationship Records"
 .content
   %h2 Filter based on Relationship type
   %form{:action => list_typed_rel_records_path, :method => "get"}
-    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-    %input{:type => 'hidden', :value => 0, :name => 'offset'}
-    %select{:name => 'type'}
-      %option{ :value => "all"}="Show All Records"
-      - for type in @type
-        %option{:value=>type[1]}=type[0]
-    %input{:type => 'submit', :value => "Filter", :class => 'btn'}
+    .input-append
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => 0, :name => 'offset'}
+      %select{:name => 'type'}
+        %option{ :value => "all"}="Show All Records"
+        - for type in @type
+          %option{:value=>type[1]}=type[0]
+      %input{:type => 'submit', :value => "Filter", :class => 'btn'}
+.form-actions
   = link_to "Back", project_path(@project), :class => 'btn'

@@ -1,4 +1,5 @@
-%h1= @project.name + " - Attributes"
+%h1
+  %span= @project.name + " - Attributes"
 .content
   %form{:id => 'attribute_form'}
     %label Attribute
@@ -8,7 +9,7 @@
         %option{:value => attribute[0], :data => {:url => list_vocab_for_attribute_path(@project,attribute[0])}}
           = attribute[1]
     #vocab-content
-  %br
   = link_to "Update", update_attributes_vocab_path(@project),:id => 'update_vocab', :class => 'btn hidden'
   = link_to "Insert",'#', :id => 'insert_vocab', :class => 'btn hidden'
+.form-actions
   = link_to "Back", project_path(@project), :class => 'btn'

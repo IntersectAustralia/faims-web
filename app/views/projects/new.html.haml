@@ -1,82 +1,78 @@
 .container
   = simple_form_for @project, :url => projects_path, :method => 'post', :multipart => true do |f|
-    %ul.tabs
-      %li.settings
-        .step-container
-          .number-circle 1
-          .step-body
+    .row-fluid
+      .settings.span6
+        .step
+          .step-body.span12
             %h4 Static Data
             = f.label :name, 'Project Name:'
-            = f.text_field :name
+            = f.text_field :name, :class => "input-block-level"
             = f.error :name
             %p
             = f.label :season, 'Project SRID:'
-            = f.select :srid, @spatial_list, :selected => (session[:srid].blank? ? Project::SRID : session[:srid])
+            = f.select :srid, @spatial_list, :selected => (session[:srid].blank? ? Project::SRID : session[:srid]), :class => "input-block-level"
             %p
             = f.label :season, 'Project Season:'
-            = f.text_field :season, :value => session[:season]
+            = f.text_field :season, :value => session[:season], :class => "input-block-level"
             %p
             = f.label :description, 'Project Description:'
-            = f.text_area :description, :size => '40x5', :class => 'project-textarea', :value => session[:description]
+            = f.text_area :description, :size => '40x5', :class => 'project-textarea span12', :value => session[:description]
             %p
             = f.label :permit_no, 'Permit No:'
-            = f.text_field :permit_no, :value => session[:permit_no]
+            = f.text_field :permit_no, :value => session[:permit_no], :class => "input-block-level"
             %p
             = f.label :permit_holder, 'Permit Holder:'
-            = f.text_area :permit_holder, :size => '40x5', :class => 'project-textarea', :value => session[:permit_holder]
+            = f.text_area :permit_holder, :size => '40x5', :class => 'project-textarea span12', :value => session[:permit_holder]
             %p
             = f.label :contact_address, 'Contact and Address:'
-            = f.text_area :contact_address, :size => '40x5', :class => 'project-textarea', :value => session[:contact_address]
+            = f.text_area :contact_address, :size => '40x5', :class => 'project-textarea span12', :value => session[:contact_address]
             %p
             = f.label :participant, 'Participants:'
-            = f.text_area :participant, :size => '40x5', :class => 'project-textarea', :value => session[:participant]
-      %li.upload
-        .step-container
-          .number-circle 2
-          .step-body
-            .step-body
-              %h4 Upload Data Definition Schema
-              - if session[:data_schema]
-                %span.uploaded-inline Data Schema Uploaded!
-              - else
-                = f.label :data_schema, 'Data Schema:'
-                = f.file_field :data_schema
-                = f.error :data_schema
-            .step-body
-              %h4 Upload User Interface Schema
-              - if session[:ui_schema]
-                %span.uploaded-inline UI Schema Uploaded!
-              - else
-                = f.label :ui_schema, 'UI Schema:'
-                = f.file_field :ui_schema
-                = f.error :ui_schema
-            .step-body
-              %h4 Upload Validation Schema
-              - if session[:validation_schema]
-                %span.uploaded-inline Validation Schema Uploaded!
-              - else
-                = f.label :validation_schema, 'Validation Schema:'
-                = f.file_field :validation_schema
-                = f.error :validation_schema
-            .step-body
-              %h4 Upload User Interface Logic
-              - if session[:ui_logic]
-                %span.uploaded-inline UI Logic Uploaded!
-              - else
-                = f.label :ui_logic, 'UI Logic:'
-                = f.file_field :ui_logic
-                = f.error :ui_logic
-            .step-body
-              %h4 Upload Arch16n file
-              - if session[:arch16n]
-                %span.uploaded-inline Arch16n Uploaded!
-              - else
-                = f.label :arch16n, 'Arch16n:'
-                = f.file_field :arch16n
-                = f.error :arch16n
-          .form-actions
-            = f.submit 'Submit', :class => 'btn btn-primary', :id => 'submit-project-btn'
-            = link_to 'Clear', new_project_path, :class => 'btn'
+            = f.text_area :participant, :size => '40x5', :class => 'project-textarea span12', :value => session[:participant]
+      .upload.span6
+        .well
+          %h4 Upload Data Definition Schema
+          - if session[:data_schema]
+            %span.uploaded-inline Data Schema Uploaded!
+          - else
+            = f.label :data_schema, 'Data Schema:'
+            = f.file_field :data_schema
+            = f.error :data_schema
+        .well
+          %h4 Upload User Interface Schema
+          - if session[:ui_schema]
+            %span.uploaded-inline UI Schema Uploaded!
+          - else
+            = f.label :ui_schema, 'UI Schema:'
+            = f.file_field :ui_schema
+            = f.error :ui_schema
+        .well
+          %h4 Upload Validation Schema
+          - if session[:validation_schema]
+            %span.uploaded-inline Validation Schema Uploaded!
+          - else
+            = f.label :validation_schema, 'Validation Schema:'
+            = f.file_field :validation_schema
+            = f.error :validation_schema
+        .well
+          %h4 Upload User Interface Logic
+          - if session[:ui_logic]
+            %span.uploaded-inline UI Logic Uploaded!
+          - else
+            = f.label :ui_logic, 'UI Logic:'
+            = f.file_field :ui_logic
+            = f.error :ui_logic
+        .well
+          %h4 Upload Arch16n file
+          - if session[:arch16n]
+            %span.uploaded-inline Arch16n Uploaded!
+          - else
+            = f.label :arch16n, 'Arch16n:'
+            = f.file_field :arch16n
+            = f.error :arch16n
+    .form-actions
+      = f.submit 'Submit', :class => 'btn btn-primary', :id => 'submit-project-btn'
+      = link_to 'Clear', new_project_path, :class => 'btn'
 
 #loading.hidden.indicator
   = image_tag 'loading.gif'

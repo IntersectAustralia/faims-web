@@ -1,0 +1,92 @@
+body {
+font-family: "Source Sans Pro","source-sans-pro","HelveticaNeue","Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+
+a { color: #00B4FF; }
+
+.navbar-inverse .brand {
+  color: #EEE;
+  font-weight: 800;
+font-style: italic;
+  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+
+.navbar-inverse .nav>li>a {
+  color: #00B4FF;
+  text-shadow: 0 -1px 0 rgba(0,0,0,0.25);
+  font-weight: 400;
+}
+
+h1 {
+  margin: 30px 0 60px 0;
+  padding: 10px 0 5px 0;
+  border-bottom: 1px solid #CCC;
+  line-height: 0;
+}
+
+h1 span {
+padding: 0 20px 0 0;
+background: white;
+padding: 0 20px 0 0;
+background: white;
+line-height: 20px;
+}
+
+.dir h3 {
+  margin: 20px 0;
+  padding: 0;
+  border-bottom: 1px solid #CCC;
+  line-height: 0;
+}
+
+.dir h3 span {
+padding: 0 20px 0 0;
+background: white;
+line-height: 0px;
+}
+
+.dir span.pull-right {
+margin: -15px 0 0 0;
+padding: 0 0 0 20px;
+}
+
+
+.step-body {
+margin: 0;
+width: auto;
+}
+
+.form-actions { clear: both; }
+.row-fluid { margin-bottom: 20px; }
+
+.dir {
+padding-left: 20px; 
+margin-bottom: 20px;
+border-left: 1px solid #CCC;
+}
+
+
+.dir-header { margin: 0 0 20px 0; }
+
+.file-manager .dir .dir-body {
+	padding: 0;
+	margin: 0;
+}
+
+.file-manager .dir .dir-body form {
+margin: 0px;
+padding: 0px;
+padding-bottom: 0px;
+}
+
+.file-manager .inline {
+display: inline-block;
+vertical-align: top;
+}
+
+
+.upload-container, .create-container { margin: 0 10px 0 0; } 
+
+input#file_manager_file { padding: 0 0 0 10px; height: 28px; border: 1px solid #CCC; }

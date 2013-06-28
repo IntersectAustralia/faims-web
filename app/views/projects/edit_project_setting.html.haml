@@ -1,33 +1,33 @@
-%h1= @project_setting['name']
+%h1
+  %span= @project_setting['name']
 .container
   = simple_form_for @project, :url => update_project_setting_path, :method => "post" do|f|
-    .step-container
-      .step-body{:style => "width: 315px;"}
-        %h4 Static Data
-        = f.label :name, "Project Name:"
-        = f.text_field :name, :value => @project.name
-        = f.error :name
-        %p
-        = f.label :season, 'Project SRID:'
-        = f.select :srid, @spatial_list, :selected => @project_setting['srid']
-        %p
-        = f.label :season, "Project Season:"
-        = f.text_field :season, :value => @project_setting['season']
-        %p
-        = f.label :description, "Project Description:"
-        = f.text_area :description, :size => "40x5", :class => 'project-textarea', :value => @project_setting['description']
-        %p
-        = f.label :permit_no, "Permit No:"
-        = f.text_field :permit_no, :value => @project_setting['permit_no']
-        %p
-        = f.label :permit_holder, "Permit Holder:"
-        = f.text_area :permit_holder, :size => "40x5", :class => 'project-textarea', :value => @project_setting['permit_holder']
-        %p
-        = f.label :contact_address, "Contact and Address:"
-        = f.text_area :contact_address, :size => "40x5", :class => 'project-textarea', :value => @project_setting['contact_address']
-        %p
-        = f.label :participant, "Participants:"
-        = f.text_area :participant, :size => "40x5", :class => 'project-textarea', :value => @project_setting['participant']
+    .span12
+      %h4 Static Data
+      = f.label :name, "Project Name:"
+      = f.text_field :name, :value => @project.name
+      = f.error :name
+      %p
+      = f.label :season, 'Project SRID:'
+      = f.select :srid, @spatial_list, :selected => @project_setting['srid']
+      %p
+      = f.label :season, "Project Season:"
+      = f.text_field :season, :value => @project_setting['season']
+      %p
+      = f.label :description, "Project Description:"
+      = f.text_area :description, :size => "40x5", :class => 'project-textarea', :value => @project_setting['description']
+      %p
+      = f.label :permit_no, "Permit No:"
+      = f.text_field :permit_no, :value => @project_setting['permit_no']
+      %p
+      = f.label :permit_holder, "Permit Holder:"
+      = f.text_area :permit_holder, :size => "40x5", :class => 'project-textarea', :value => @project_setting['permit_holder']
+      %p
+      = f.label :contact_address, "Contact and Address:"
+      = f.text_area :contact_address, :size => "40x5", :class => 'project-textarea', :value => @project_setting['contact_address']
+      %p
+      = f.label :participant, "Participants:"
+      = f.text_area :participant, :size => "40x5", :class => 'project-textarea', :value => @project_setting['participant']
     .form-actions
       = f.submit "Update", :class => "btn btn-primary", :id => "update-project-setting-btn"
       = link_to "Back", project_path(@project), :class => 'btn'

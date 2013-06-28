@@ -1,18 +1,24 @@
 .container
-  .pull-left
-    %h1 Projects
-  .pull-right
+  %h1
+    %span Projects
+  .well
     = link_to "Create Project", new_project_path, :class => "btn"
     = link_to "Upload Project", upload_project_path, :class => "btn"
 .clear
 - if @projects
-  %ul.project-list
-  - index = 0
-  - for project in @projects
-    - index = index + 1
-    %a.project{href:project_path(project)}
-      %li.media
-        %h1.pull-left.project-number.hidden-phone= index.to_s + "."
-        .project-body
-          %h4.project-name= project.name
+  %table.table
+    %tr
+      %th No.
+      %th Name
+      %th Created
+    - index = 0
+    - for project in @projects
+      - index = index + 1
+      %tr
+        %td
+          = index.to_s + "."
+        %td
+          %a.project{href:project_path(project)}
+            = project.name
+        %td
           = project.created_at.localtime.strftime("%d/%m/%Y %I:%M%p")
