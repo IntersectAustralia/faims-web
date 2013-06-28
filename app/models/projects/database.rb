@@ -106,12 +106,12 @@ class Database
   end
 
   def get_arch_ent_attributes_at_timestamp(uuid, timestamp)
-    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, @project.get_settings['srid'], @uuid, timestamp, uuid, timestamp)
+    attributes =  @db.execute(WebQuery.get_arch_ent_attributes_at_timestamp, @project.get_settings['srid'].to_i, uuid, timestamp, uuid, timestamp)
     attributes
   end
 
   def get_arch_ent_attributes_changes_at_timestamp(uuid, timestamp)
-    srid = @project.get_settings['srid']
+    srid = @project.get_settings['srid'].to_i
     changes = @db.execute(WebQuery.get_arch_ent_attributes_changes_at_timestamp, uuid, timestamp, uuid, timestamp, srid,
                           uuid, timestamp, srid, uuid, timestamp, uuid, timestamp, uuid, timestamp, uuid, timestamp, uuid, timestamp)
     changes
@@ -195,12 +195,12 @@ class Database
   end
 
   def get_rel_attributes_at_timestamp(relid, timestamp)
-    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, @project.get_settings['srid'], relid, timestamp, relid, timestamp)
+    attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, @project.get_settings['srid'].to_i, relid, timestamp, relid, timestamp)
     attributes
   end
 
   def get_rel_attributes_changes_at_timestamp(relid, timestamp)
-    srid = @project.get_settings['srid']
+    srid = @project.get_settings['srid'].to_i
     changes = @db.execute(WebQuery.get_rel_attributes_changes_at_timestamp, relid, timestamp, relid, timestamp, srid,
                           relid, timestamp, srid, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp)
     changes
