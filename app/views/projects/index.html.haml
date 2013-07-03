@@ -2,8 +2,8 @@
   %h1
     %span Projects
   .well
-    = link_to "Create Project", new_project_path, :class => "btn"
-    = link_to "Upload Project", upload_project_path, :class => "btn"
+    = link_to "<i class='icon-pencil icon-white'></i> Create Project".html_safe, new_project_path, :class => "btn btn-inverse"
+    = link_to "<i class='icon-upload'></i> Upload Project".html_safe, upload_project_path, :class => "btn"
 .clear
 - if @projects
   %table.table

@@ -205,18 +205,18 @@ merge_record_management = ->
       $('#select-form input:radio').each(
         ->
           $(this).prop('checked',false)
-          li_sibling = $(this).parents('td').siblings()
+          li_sibling = $(this).parents('tr').siblings()
           if(li_sibling.length)
-            $(li_sibling).find('.step-body').removeClass('selected')
+            $(li_sibling).find('td.second').removeClass('selected')
             return
           return
       )
       $('td.first input:radio').each(
         ->
           $(this).prop('checked',true)
-          li_sibling = $(this).parents('li').siblings()
+          li_sibling = $(this).parents('tr').siblings()
           if(li_sibling.length)
-            $(li_sibling).find('.step-body').addClass('selected')
+            $(li_sibling).find('td.first').addClass('selected')
             return
           return
       )
@@ -226,18 +226,18 @@ merge_record_management = ->
       $('#select-form input:radio').each(
         ->
           $(this).prop('checked',false)
-          li_sibling = $(this).parents('li').siblings()
+          li_sibling = $(this).parents('tr').siblings()
           if(li_sibling.length)
-            $(li_sibling).find('.step-body').removeClass('selected')
+            $(li_sibling).find('td.first').removeClass('selected')
             return
           return
       )
       $('td.second input:radio').each(
         ->
           $(this).prop('checked',true)
-          li_sibling = $(this).parents('li').siblings()
+          li_sibling = $(this).parents('tr').siblings()
           if(li_sibling.length)
-            $(li_sibling).find('.step-body').addClass('selected')
+            $(li_sibling).find('td.second').addClass('selected')
             return
           return
       )
@@ -251,10 +251,8 @@ merge_record_management = ->
         if($(this).is(':checked'))
           if($sibling_checkbox.is(':checked'))
             $sibling_checkbox.prop('checked', false)
-            li_sibling = $sibling_checkbox.parents('li').siblings()
-            $(li_sibling).find('.step-body').removeClass('selected')
-            li_sibling = $(this).parents('li').siblings()
-            $(li_sibling).find('.step-body').addClass('selected')
+            $(this).parents('tr').find('td').removeClass('selected')
+            $(this).parents('td').addClass('selected')
             return
           return
         else
@@ -266,6 +264,7 @@ merge_record_management = ->
         $(this).prop('checked', true)
         return
   )
+
 
   $('#merge-record').click(
     ->

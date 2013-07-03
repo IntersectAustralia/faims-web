@@ -1,58 +1,52 @@
 - get_files(@attributes,8,4)
-%h1= @project.name + " - Relationship"
-= link_to "Delete", delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn', :id => 'delete-record'
-- if session[:action].eql?('list_typed_rel_records')
-  = link_to "Back", list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
-- elsif session[:action].eql?('show_rel_records')
-  = link_to "Back", show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
-= link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0&relntypeid=" + @attributes[0][7].to_s, :class => 'btn'
-= link_to "Show History", show_rel_history_path(@project,session[:relationshipid]), :class => 'btn'
+%h1
+  %span= @project.name + " - Relationship"
+.well
+  - if session[:action].eql?('list_typed_rel_records')
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
+  - elsif session[:action].eql?('show_rel_records')
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
+  = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn btn-warning', :id => 'delete-record'
+  = link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0&relntypeid=" + @attributes[0][7].to_s, :class => 'btn'
+  = link_to "Show History", show_rel_history_path(@project,session[:relationshipid]), :class => 'btn'
 .container
   - attributeGroup = @attributes.group_by{|a|a[3]}
   - attributeGroup.each do |key,val|
     = simple_form_for :attr, :url => update_rel_records_path, :method => "post" do|f|
       .step-container
-        .step-body{:style => "width: 700px;"}
-          .arch_ent_record_content
-            = f.hidden_field :relationshipid, :value => val[0][0]
-            = f.hidden_field :attribute_id, :value => val[0][2]
-            = f.hidden_field 'ignore_errors'
-            %table
-              %tr
-                %td
-                  %h5=key
-              - show_error_button = nil
-              - for attribute in val
-                %tr
-                - if !@vocab_name[attribute[2]].empty?
-                  %td
-                    = f.label :vocab_id, "Vocab:"
-                  %td
-                    - if attribute[1].blank?
-                      = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, input_html: {name: 'attr[vocab_id][]'}
-                    - else
-                      = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
-                %td
-                  = f.label :freetext, "Freetext:"
-                %td
-                  = f.text_field :freetext, :value => attribute[4], name: 'attr[freetext][]'
-                %td
-                  = f.label :certainty, "Certainty:"
-                %td
-                  = f.text_field :certainty, :value => attribute[5], name: 'attr[certainty][]'
-                %tr
-                  - if attribute[10] == 1
-                    - show_error_button = true
-                    %td.form-attribute-error{colspan:'3'}
-                      - attribute[11].each_line(';') do |l|
-                        - next if l.gsub(';', '').blank?
-                        %li=l.gsub(';', '')
+        .arch_ent_record_content
+          = f.hidden_field :relationshipid, :value => val[0][0]
+          = f.hidden_field :attribute_id, :value => val[0][2]
+          = f.hidden_field 'ignore_errors'
+          %h4=key
+          - show_error_button = nil
+          - for attribute in val
+            .row-fluid
+              - if !@vocab_name[attribute[2]].empty?
+                = f.label :vocab_id, "Vocab:"
+                - if attribute[1].blank?
+                  = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, input_html: {name: 'attr[vocab_id][]'}
+                - else
+                  = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
+              .span6
+                = f.label :freetext, "Freetext:"
+                = f.text_field :freetext, :value => attribute[4], name: 'attr[freetext][]', :class => "span12"
+              .span6
+                = f.label :certainty, "Certainty:"
+                = f.text_field :certainty, :value => attribute[5], name: 'attr[certainty][]', :class => "span12"
+            - if attribute[10] == 1
+              .row-fluid
+                - show_error_button = true
+                .form-attribute-error
+                  - attribute[11].each_line(';') do |l|
+                    - next if l.gsub(';', '').blank?
+                    %li=l.gsub(';', '')
 
-            .form-actions
-              = f.submit "Update", :class => "btn btn-primary"
-              - if show_error_button
-                = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn"
-              = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
+          .form-actions
+            = f.submit "Update", :class => "btn btn-inverse"
+            - if show_error_button
+              = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn"
+            = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
 - if @files.length > 0
   .attached-files
     %h2 Attached Files

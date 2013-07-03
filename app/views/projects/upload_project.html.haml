@@ -6,10 +6,9 @@
     = f.label :project_file, "Project File:"
     = f.file_field :project_file
   .form-actions
-    = f.submit "Upload", :class => "btn btn-primary", :id => "upload-project-btn"
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, projects_path, :class => 'btn'
+    = f.submit "Upload", :class => "btn btn-inverse", :id => "upload-project-btn"
     = link_to "Clear", upload_project_path, :class => "btn"
-.form-actions
-  = link_to "Back", projects_path, :class => 'btn'
 
 #loading.hidden.indicator
   = image_tag "loading.gif"

@@ -1,31 +1,28 @@
 - if !group[key].nil?
-  %ul.inline
-    %li
+  %label.radio
+    - if (checked)
+      %input{:type => 'radio', :checked => 'checked'}
+    - else
+      %input{:type => 'radio'}
+    - if (val)
       - if (checked)
-        %input{:type => 'radio', :checked => 'checked'}
+        .attrib
+          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
+          %span.attribute-info
+            = attributeInfo[key]
       - else
-        %input{:type => 'radio'}
-    %li
-      .step-container
-        - if (val)
-          - if (checked)
-            .step-body.selected{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-              %span.attribute-info
-                = attributeInfo[key]
-          - else
-            .step-body{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-              %span.attribute-info
-                = attributeInfo[key]
-        - else
-          - if (checked)
-            .step-body.error.selected{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-              %span.attribute-info
-                = attributeInfo[key]
-          - else
-            .step-body.error{:style => "width: 315px;"}
-              = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-              %span.attribute-info
-                = attributeInfo[key]
+        .attrib
+          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
+          %span.attribute-info
+            = attributeInfo[key]
+    - else
+      - if (checked)
+        .attrib.error
+          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
+          %span.attribute-info
+            = attributeInfo[key]
+      - else
+        .attrib.error
+          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
+          %span.attribute-info
+            = attributeInfo[key]

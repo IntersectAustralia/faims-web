@@ -3,5 +3,5 @@
   = render "shared/error_messages", :target => @user
   = render :partial => 'personal_details', :locals => {:f => f}
   .form-actions
-    = f.submit "Update", :class => "btn btn-primary"
-    = link_to 'Cancel', user_path(current_user), :class => "btn"
+    = link_to "<i class='icon-arrow-left'></i> Cancel".html_safe, user_path(current_user), :class => "btn"
+    = f.submit "Update", :class => "btn btn-inverse"

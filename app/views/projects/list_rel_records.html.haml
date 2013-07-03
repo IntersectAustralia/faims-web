@@ -12,4 +12,4 @@
           %option{:value=>type[1]}=type[0]
       %input{:type => 'submit', :value => "Filter", :class => 'btn'}
 .form-actions
-  = link_to "Back", project_path(@project), :class => 'btn'
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'

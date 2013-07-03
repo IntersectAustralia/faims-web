@@ -1,7 +1,7 @@
-%h1= @project.name + " - Search For Archaeological Entity Member"
+%h1
+  %span= @project.name + " - Search For Archaeological Entity Member"
 .content
   %h2 Search Archaeological Entity
-  = link_to "Back", show_rel_members_path(@project,session[:relationshipid])+'?offset=0&relntypeid='+session[:relntypeid], :class => 'btn'
   %p
   .search-arch-member
     %ul.tabs
@@ -10,11 +10,12 @@
           %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
           %input{:type => 'hidden', :value => 0, :name => 'offset'}
           %input{:type => 'hidden', :value => session[:relntypeid], :name => 'relntypeid'}
-          - if session[:query]
-            %input{:type => 'text', :name => 'search_query', :value=> session[:search_query]}
-          -else
-            %input{:type => 'text', :name => 'search_query'}
-          %input{:type => 'submit', :value => "Search", :class => 'btn'}
+          .input-append
+            - if session[:query]
+              %input{:type => 'text', :name => 'search_query', :value=> session[:search_query]}
+            -else
+              %input{:type => 'text', :name => 'search_query'}
+            %input{:type => 'submit', :value => "Search", :class => 'btn'}
         - if !@uuid.nil? and !@uuid.empty?
           - prev_uuid = @uuid[0][0]
           - uuid_array = []
@@ -57,10 +58,13 @@
       %li.verb
         %h4 Archaeological Entity Verb
         %label Verb (if required)
-        %select{:id => 'verb'}
-          - for verb in @verb
-            %option{:value => verb[0].to_s.strip}
-              =verb[0].to_s.strip
-        %input{:type => 'hidden', :id => 'relationshipid',:value => session[:relationshipid]}
-        %input{:type => 'hidden', :id => 'relntypeid',:value => session[:relntypeid]}
-        %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-ent', :src => add_arch_ent_member_path(@project), :class => 'btn'}
+        .input-append
+          %select{:id => 'verb'}
+            - for verb in @verb
+              %option{:value => verb[0].to_s.strip}
+                =verb[0].to_s.strip
+          %input{:type => 'hidden', :id => 'relationshipid',:value => session[:relationshipid]}
+          %input{:type => 'hidden', :id => 'relntypeid',:value => session[:relntypeid]}
+          %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-ent', :src => add_arch_ent_member_path(@project), :class => 'btn'}
+  .form-actions
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project,session[:relationshipid])+'?offset=0&relntypeid='+session[:relntypeid], :class => 'btn'

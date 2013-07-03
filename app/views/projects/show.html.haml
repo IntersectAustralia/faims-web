@@ -21,7 +21,7 @@
     = link_to "List Archaeological Entity Records", list_arch_ent_records_path(@project), :class => 'btn'
     = link_to "List Relationship Records", list_rel_records_path(@project), :class => 'btn'
 .form-actions
-  = link_to "Back", projects_path, :class => 'btn'
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, projects_path, :class => 'btn'
 
 #loading.hidden.indicator
   = image_tag "loading.gif"

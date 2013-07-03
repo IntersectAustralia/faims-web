@@ -1,7 +1,7 @@
-%h1= @project.name + " - Relationship Archaeological Entity Members"
+%h1
+  %span= @project.name + " - Relationship Archaeological Entity Members"
 .content
   - if !@uuid.nil? and !@uuid.empty?
-    = link_to "Back", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
     - prev_uuid = @uuid[0][0]
     - uuid_array = []
     - array = []
@@ -21,10 +21,13 @@
               %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
                 =uuids[2].to_s + ": " + uuids[3].to_s
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_arch_ent_member_path(@project,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
   -else
-    = link_to "Back", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
     %p No Members Found
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_arch_ent_member_path(@project,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
 -if !@uuid.nil? and !@uuid.empty?
   .footer.search
     - if (session[:prev_offset] >= 0)

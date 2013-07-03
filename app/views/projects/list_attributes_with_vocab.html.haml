@@ -12,4 +12,4 @@
   = link_to "Update", update_attributes_vocab_path(@project),:id => 'update_vocab', :class => 'btn hidden'
   = link_to "Insert",'#', :id => 'insert_vocab', :class => 'btn hidden'
 .form-actions
-  = link_to "Back", project_path(@project), :class => 'btn'
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'

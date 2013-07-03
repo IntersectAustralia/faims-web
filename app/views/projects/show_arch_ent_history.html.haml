@@ -1,10 +1,11 @@
 - show_arch_ent_attributes_history(@project,@timestamps)
-%h1= @project.name + " - Archaeological Entity Records"
-= link_to "Back", edit_arch_ent_records_path(@project,@timestamps[0][0]), :class => 'btn'
+%h1
+  %span= @project.name + " - Archaeological Entity Records"
+
 .content
   %form{:method => 'post', :action =>  revert_arch_ent_to_timestamp_path(@project,@timestamps[0][0])}
     .records
-      %table.inner
+      %table.table.inner
         %tr
         - @attribute_keys.each do |names|
           %th
@@ -50,5 +51,9 @@
                       = 'DELETED'
                     - else
                       = value
-    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-    %input{:type => 'submit', :value => 'Revert', :class => 'btn'}
+
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,@timestamps[0][0]), :class => 'btn'
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'submit', :value => 'Revert', :class => 'btn btn-inverse'}
+

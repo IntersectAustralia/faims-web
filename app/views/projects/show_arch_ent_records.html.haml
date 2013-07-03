@@ -1,12 +1,11 @@
 - if (!@uuid.empty?)
   - group_ids(@uuid)
-%h1= @project.name + " - Archaeological Entity Records"
+%h1
+  %span= @project.name + " - Archaeological Entity Records"
 .content
   - if (!@uuid.empty?)
     %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add-entity'}
     %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project), :id => 'remove-sentity'}
-    = link_to "Back", search_arch_ent_records_path(@project), :class => 'btn'
-    = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn'
     %form{:method => 'post', :id => 'compare'}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       - if session[:values]
@@ -16,6 +15,9 @@
           %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamp[]', :id => session[:values][i-1]}
       %p
       = render :partial => 'edit_arch_ent_record', :locals => { uuid_array: @id_array, values: session[:values]}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project), :class => 'btn'
+      = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn btn-inverse'
   -else
     %p No Record Found
     = link_to "Back", search_arch_ent_records_path(@project), :class => 'btn'
