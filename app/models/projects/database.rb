@@ -93,9 +93,9 @@ class Database
       vocab_id.length.times do |i|
         parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id[i-1])
         @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
+        validate_aent_value(uuid, currenttime, attribute_id[i-1])
       end
       
-      validate_aent_value(uuid, currenttime, attribute_id)
       @project.db_mgr.make_dirt
     end
   end
@@ -182,9 +182,10 @@ class Database
       vocab_id.length.times do |i|
         parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id[i-1])
         @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
+        validate_reln_value(relationshipid, currenttime, attribute_id[i-1])
       end
       
-      validate_reln_value(relationshipid, currenttime, attribute_id)
+
       @project.db_mgr.make_dirt
     end
   end

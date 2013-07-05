@@ -20,31 +20,27 @@
               %small
                 = @secondInfo
             %input{:type=> 'button', :id => 'select-second', :value => 'Select All', :class => 'btn'}
-      %tr
-        %td.first
-          %label.radio
-            %input{:type => 'radio', :name => 'rel_id', :value => @first_rel_id, :checked => 'checked'}
-            .attrib
-              %input{:type => 'hidden', :name => 'deleted_id', :value => @second_rel_id}
-              %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-              = @identifiers[0]
-        %td.second
-          %label.radio
-            %input{:type => 'radio', :name => 'rel_id', :value => @second_rel_id}
-            .attrib
-              %input{:type => 'hidden', :name => 'deleted_id', :value => @first_rel_id}
-              %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-              = @identifiers[1]
+      %tr.merge-row
+        %td.first.span6.merge-left
+          %input{:type => 'radio', :name => 'rel_id', :value => @first_rel_id, :checked => 'checked'}
+          %input{:type => 'hidden', :name => 'deleted_id', :value => @second_rel_id}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          = @identifiers[0]
+        %td.second.span6.merge-right
+          %input{:type => 'radio', :name => 'rel_id', :value => @second_rel_id}
+          %input{:type => 'hidden', :name => 'deleted_id', :value => @first_rel_id}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          = @identifiers[1]
       %tr
         %td
           %h4 Attributes
         %td
           %h4 Attributes
       - @attributeKeys.each do |key,val|
-        %tr
-          %td.first.selected
+        %tr.merge-row
+          %td.first.span6.merge-left
             = render :partial => 'compare_reln_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos, value: @firstAttributeValueGroup }
-          %td.second
+          %td.second.span6.merge-right
             = render :partial => 'compare_reln_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos, value: @secondAttributeValueGroup }
 
     .form-actions

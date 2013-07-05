@@ -25,7 +25,7 @@
                       = 'DELETED'
                   - elsif @attribute_keys[i].eql?('edited by')
                     - if value.nil?
-                      = 'Dummy User'
+                      = 'Admin User'
                     - else
                       = value
                   - else
@@ -43,7 +43,7 @@
                       = 'DELETED'
                     - elsif @attribute_keys[i].eql?('edited by')
                       - if value.nil?
-                        = 'Dummy User'
+                        = 'Admin User'
                       - else
                         = value
                   - else

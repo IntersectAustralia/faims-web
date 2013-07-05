@@ -270,29 +270,16 @@ merge_record_management = ->
     ->
       $form = $('<form method="post">')
       $form.attr('action',$(this).attr('href'))
-      $('#select-form').find('input:radio:checked').each(
+      $('#select-form').find('.merge-row').each (
         ->
-          li_sibling = $(this).parents('li').siblings()
-          if(li_sibling.length)
-            $(li_sibling).find('input').each(
-              ->
-                if $(this).attr('name') != undefined
-                  $form.append(this)
-                  return
-                return
-            )
-            return
+          if ($(this).find('.merge-left').find('input:radio:checked').length)
+            row = $(this).find('.merge-left')
           else
-            input_sibling = $(this).siblings('input')
-            $form.append(this)
-            if(input_sibling.length)
-              $(input_sibling).each(
-                ->
-                  $form.append(this)
-                  return
-              )
-              return
-
+            row = $(this).find('.merge-right')
+          row.find('input').each(
+            ->
+              $form.append(this)
+          )
           return
       )
       $('body').append($form)
