@@ -245,24 +245,18 @@ merge_record_management = ->
 
   $('#select-form input:radio').change(
     ->
-      siblings = $(this).parents('td').siblings()[0]
-      $sibling_checkbox = $(siblings).find('input:radio')
-      if($sibling_checkbox.length)
-        if($(this).is(':checked'))
-          if($sibling_checkbox.is(':checked'))
-            $sibling_checkbox.prop('checked', false)
-            $(this).parents('tr').find('td').removeClass('selected')
-            $(this).parents('td').addClass('selected')
-            return
-          return
-        else
-          if(!$sibling_checkbox.is(':checked'))
-            $(this).prop('checked', true)
-            return
-          return
+      isLeft = $(this).parents('td').hasClass('merge-left')
+      row = $(this).parents('.merge-row')
+      if isLeft
+        row.find('.merge-right').find('input:radio').prop('checked', false)
+        row.find('.merge-left').find('input:radio').prop('checked', true)
+        row.find('.merge-right').removeClass('selected')
+        row.find('.merge-left').addClass('selected')
       else
-        $(this).prop('checked', true)
-        return
+        row.find('.merge-right').find('input:radio').prop('checked', true)
+        row.find('.merge-left').find('input:radio').prop('checked', false)
+        row.find('.merge-right').addClass('selected')
+        row.find('.merge-left').removeClass('selected')
   )
 
 
