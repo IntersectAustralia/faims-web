@@ -16,6 +16,7 @@ describe XSDValidator do
 
   describe "Validate Validation Schemas" do
     it { validate_validation_schema('validation_schema.xml').should be_empty }
+    it { validate_validation_schema('validation_schema_error1.xml').should_not be_empty }
   end
 
   describe "Validate Data Schemas" do
@@ -25,6 +26,8 @@ describe XSDValidator do
     it { validate_data_schema('data_schema_2.xml').should be_empty }
     # empty data
     it { validate_data_schema('data_schema_3.xml').should be_empty }
+    # error
+    it { validate_data_schema('data_schema_error1.xml').should_not be_empty }
   end
 
   describe "Validate UI Schemas" do
@@ -82,6 +85,8 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_26.xml').should be_empty }
     # map
     it { validate_ui_schema('ui_schema_27.xml').should be_empty }
+    # error
+    it { validate_ui_schema('ui_schema_error1.xml').should_not be_empty }
   end
 
 end

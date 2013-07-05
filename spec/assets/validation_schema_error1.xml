@@ -1,0 +1,108 @@
+<ValidationSchema>
+
+	<RelationshipElement1 name='AboveBelow'>
+
+
+		<property name='name'>
+
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? ? | spell'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+			<validator type='querychecker' query='select ? = ? | "Value is not equal' >
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from relationship where relationshipid = ? and relntimestamp = ?' />
+			</validator>
+
+		</property>
+
+	</RelationshipElement1>
+
+	<ArchaeologicalElement type='SimpleEntity'>
+
+		<property name='name'>
+
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? | spell'>
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='evaluator' cmd='echo ? ? | spell'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='blankchecker'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='typechecker' datatype='integer'>
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='field' value='freetext' />
+			</validator>
+			<validator type='querychecker' query='select ? = "Test" | "Value is not equal to Test"' >
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+			<validator type='querychecker' query='select ? = ? | "Value is not equal' >
+				<param type='field' value='freetext' />
+				<param type='query' value='select freetext from archentity where uuid = ? and aenttimestamp = ?' />
+			</validator>
+
+		</property>
+
+	</ArchaeologicalElement>
+
+</ValidationSchema>
