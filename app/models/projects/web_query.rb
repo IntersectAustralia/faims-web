@@ -227,7 +227,7 @@ EOF
 
   def self.get_arch_ent_info
     cleanup_query(<<EOF
-select 'Last Edit by: Dummy User at '|| aenttimestamp
+select 'Last Edit by: Admin User at '|| aenttimestamp
 from archentity
 where uuid = ?
   and aenttimestamp = ?;
@@ -237,7 +237,7 @@ EOF
 
   def self.get_arch_ent_attribute_info
     cleanup_query(<<EOF
-select 'Last Edit by: Dummy User at '|| valuetimestamp
+select 'Last Edit by: Admin User at '|| valuetimestamp
 from aentvalue
 where uuid = ?
   and valuetimestamp = ?
@@ -659,7 +659,7 @@ EOF
 
   def self.get_rel_info
     cleanup_query(<<EOF
-select 'Last Edit by: Dummy User at '|| relntimestamp
+select 'Last Edit by: Admin User at '|| relntimestamp
 from relationship
 where relationshipid = ?
   and relntimestamp = ?;
@@ -669,7 +669,7 @@ EOF
 
   def self.get_rel_attribute_info
     cleanup_query(<<EOF
-select 'Last Edit by: Dummy User at '|| relnvaluetimestamp
+select 'Last Edit by: Admin User at '|| relnvaluetimestamp
 from relnvalue
 where relationshipid = ?
   and relnvaluetimestamp = ?
