@@ -19,7 +19,7 @@
               = @secondInfo
           %input{:type=> 'button', :id => 'select-second', :value => 'Select All', :class => 'btn'}
       %tr.merge-row
-        %td.first.span6.merge-left
+        %td.first.selected.span6.merge-left
           %input{:type => 'radio', :name => 'uuid', :value => @first_uuid, :checked => 'checked'}
           %input{:type => 'hidden', :name => 'deleted_id', :value => @second_uuid}
           %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
@@ -36,7 +36,7 @@
           %h4 Attributes
       - @attributeKeys.each do |key,val|
         %tr.merge-row
-          %td.first.span6.merge-left
+          %td.first.selected.span6.merge-left
             = render :partial => 'compare_arch_ent_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos, value: @firstAttributeValueGroup }
           %td.second.span6.merge-right
             = render :partial => 'compare_arch_ent_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos, value: @secondAttributeValueGroup }
