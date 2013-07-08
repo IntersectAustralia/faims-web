@@ -1,6 +1,6 @@
 - show_rel_attributes_history(@project,@timestamps)
 %h1
-  %span= @project.name + " - Relationship Records"
+  %span.page-title= @project.name + " - Relationship Records"
 
 .content
   %form{:method => 'post', :action =>  revert_rel_to_timestamp_path(@project,@timestamps[0][0])}

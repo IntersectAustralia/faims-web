@@ -1,6 +1,6 @@
 - get_files(@attributes,8,4)
 %h1
-  %span= @project.name + " - Relationship"
+  %span.page-title= @project.name + " - Relationship"
 .well
   - if session[:action].eql?('list_typed_rel_records')
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s, :class => 'btn'

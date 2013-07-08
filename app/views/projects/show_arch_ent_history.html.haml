@@ -1,6 +1,6 @@
 - show_arch_ent_attributes_history(@project,@timestamps)
 %h1
-  %span= @project.name + " - Archaeological Entity Records"
+  %span.page-title= @project.name + " - Archaeological Entity Records"
 
 .content
   %form{:method => 'post', :action =>  revert_arch_ent_to_timestamp_path(@project,@timestamps[0][0])}

@@ -1,6 +1,6 @@
 - get_files(@attributes,8,6)
 %h1
-  %span= @project.name + " - Archaeological Entity"
+  %span.page-title= @project.name + " - Archaeological Entity"
 .form-actions
   - if session[:show].eql?('show_rel_members')
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project,session[:relationshipid])+"?offset=0", :class => 'btn'
