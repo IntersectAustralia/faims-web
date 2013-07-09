@@ -36,7 +36,7 @@
               - else
                 %td.history.error
                   - if (i == 0)
-                    %input{:type => 'radio', :name => 'history', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
+                    %input{:type => 'radio', :name => 'timestamp', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
                     - checked = false
                   - if @attribute_keys[i].eql?('deleted')
                     - if value
