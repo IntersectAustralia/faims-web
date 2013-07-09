@@ -173,7 +173,7 @@ Feature: Manage projects
     And I follow "Upload Project"
     And I pick file "project_corrupted2.tar.bz2" for "Project File"
     And I press "Upload"
-    Then I should see "Uploaded project file is corrupted"
+    Then I should see "Project failed to upload"
 
   @javascript
   Scenario: Upload Project with wrong file should fail
@@ -184,7 +184,7 @@ Feature: Manage projects
     And I follow "Upload Project"
     And I pick file "project.tar" for "Project File"
     And I press "Upload"
-    Then I should see "Unsupported format of file, please upload the correct file"
+    Then I should see "Project failed to upload"
 
   Scenario Outline: Edit static data
     Given I am on the home page
