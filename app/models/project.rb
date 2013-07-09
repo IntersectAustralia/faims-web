@@ -626,27 +626,25 @@ class Project < ActiveRecord::Base
     tmp_dir = nil
     begin
       tar_file = params[:project][:project_file]
-      if !(tar_file.content_type =~ /bzip/)
-        return 'Unsupported format of file, please upload the correct file'
+
+      tmp_dir = Dir.mktmpdir + '/'
+      `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
+      project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
+      if !Project.checksum_uploaded_file(tmp_dir + 'project/')
+        return 'Wrong hash sum for the project'
+      elsif !Project.find_by_key(project_settings['key']).blank?
+        return 'This project already exists in the system'
       else
-        tmp_dir = Dir.mktmpdir + '/'
-        `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
-        project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
-        if !Project.checksum_uploaded_file(tmp_dir + 'project/')
-          return 'Wrong hash sum for the project'  
-        elsif !Project.find_by_key(project_settings['key']).blank?
-          return 'This project already exists in the system'
-        else
-          project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
-          project.transaction do
-            project.save
-            project.create_project_from_compressed_file(tmp_dir + 'project')
-          end
-          return project
+        project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
+        project.transaction do
+          project.save
+          project.create_project_from_compressed_file(tmp_dir + 'project')
         end
+        return project
       end
+
     rescue Exception
-      return 'Uploaded project file is corrupted'
+      return 'Project failed to upload'
     ensure
       FileUtils.rm_rf tmp_dir if tmp_dir
     end
