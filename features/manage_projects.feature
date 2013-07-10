@@ -261,6 +261,7 @@ Feature: Manage projects
     Then I should be on the projects page
     And I click on "Project 2"
     Then I follow "Edit Project"
+    And I wait
     And I pick file "<value>" for "<field>"
     And I wait
     And I press "Update"
@@ -429,6 +430,7 @@ Feature: Manage projects
     Then I should be on the projects page
     And I follow "Create Project"
     Then I should be on the new projects page
+    And I wait
     And I fill in "Name" with "Project 1"
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
