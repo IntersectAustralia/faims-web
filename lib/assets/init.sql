@@ -6,8 +6,7 @@ vacuum;
 CREATE TABLE User (
 	UserID					INTEGER PRIMARY KEY,
 	FName               	TEXT NOT NULL,
-	LName               	TEXT NOT NULL,
-	Deleted				 	BOOLEAN
+	LName               	TEXT NOT NULL
  );
 
 
@@ -63,8 +62,7 @@ CREATE TABLE Vocabulary (
 	AttributeID          	INTEGER NOT NULL REFERENCES AttributeKey,
 	VocabName          	 	TEXT NOT NULL, -- This is the human-visible part of vocab that forms lookup tables. It is likely to be Arch16nized.
 	SemanticMapURL	     	TEXT,
-	PictureURL				TEXT, -- relative path.
-	Deleted				 	BOOLEAN
+	PictureURL				TEXT -- relative path.
  );
 
 --create index vocabindex on vocabulary (vocabid);
