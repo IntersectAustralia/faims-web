@@ -483,23 +483,18 @@ class ProjectsController < ApplicationController
 
   def update_attributes_vocab
     @project = Project.find(params[:id])
-    attribute_id = params[:attribute_id]
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
-    if !@project.db_mgr.locked?
-      @project.db.update_attributes_vocab(attribute_id, vocab_id, vocab_name)
-    end
-    vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
-    vocabularies = []
-    vocabs.each do |vocab|
-      vocabulary = {}
-      vocabulary['vocab_id'] = vocab[1]
-      vocabulary['vocab_name'] = vocab[2]
-      vocabularies.push(vocabulary)
-    end
-    respond_to do |format|
-      format.json { render :json => vocabularies.to_json }
-    end
+    @attribute_id = params[:attribute_id]
+    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name)
+    @attributes = @project.db.get_attributes_containing_vocab()
+    flash[:notice] = 'Successfully updating vocabulary'
+    render 'list_attributes_with_vocab'
   end
 
   def edit_project

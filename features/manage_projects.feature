@@ -415,6 +415,7 @@ Feature: Manage projects
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
     Then I follow "Update"
+    And I should see "Successfully updating vocabulary"
     And I should see vocabularies
       | name  |
       | Red   |
@@ -445,6 +446,7 @@ Feature: Manage projects
     And I wait
     And I add "Red" to the vobulary list
     Then I follow "Update"
+    And I should see "Successfully updating vocabulary"
     And I should see vocabularies
       | name  |
       | Green |
