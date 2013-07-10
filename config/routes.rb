@@ -6,6 +6,8 @@ FaimsWeb::Application.routes.draw do
     put '/users/update', :to => 'user_registers#update'
     get '/users/edit_password', :to => 'user_registers#edit_password' #allow users to edit their own password
     put '/users/update_password', :to => 'user_registers#update_password' #allow users to edit their own password
+
+    get '/users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
   end
 
   resources :users, :only => [:show] do
@@ -26,6 +28,8 @@ FaimsWeb::Application.routes.draw do
   end
 
   resources :projects
+
+  get 'users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
 
   get 'projects/:id/file_list', :to => 'file_manager#file_list', :as => 'project_file_list'
   get 'projects/:id/download_file', :to => 'file_manager#download_file', :as => 'download_project_file'
