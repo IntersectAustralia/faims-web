@@ -147,7 +147,7 @@ Devise.setup do |config|
 
   # ==> Configuration for :lockable
 
-  config.lock_strategy = :failed_attempts
+  config.lock_strategy = :none
   config.unlock_strategy = :time
   config.maximum_attempts = 3
   config.unlock_in = 1.hour
