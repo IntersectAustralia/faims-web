@@ -192,7 +192,7 @@ Feature: Manage projects
     And I follow "Show Projects"
     Then I should be on the projects page
     And I click on "Project 1"
-    Then I follow "Edit Project Setting"
+    Then I follow "Edit Project"
     And I fill in "<field>" with "<value>"
     And I press "Update"
     And I should have setting "<setting>" for "Project 1" as "<setting_value>"
@@ -206,7 +206,7 @@ Feature: Manage projects
     And I follow "Show Projects"
     Then I should be on the projects page
     And I click on "Project 1"
-    Then I follow "Edit Project Setting"
+    Then I follow "Edit Project"
     And I fill in "<field>" with "<value>"
     And I press "Update"
     Then I should see "<field>" with error "<error>"
@@ -214,6 +214,65 @@ Feature: Manage projects
     | field        | value     | error          |
     | Project Name |           | can't be blank |
     | Project Name | Project * | is invalid     |
+
+  Scenario:  Edit project but not upload new file
+    Given I am on the home page
+    And I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Project"
+    And I press "Update"
+    Then I should see "Successfully updating project"
+
+  @javascript
+  Scenario: Edit project and upload correct file
+    Given I am on the home page
+    And I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Project"
+    And I pick file "ui_schema.xml" for "UI Schema"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I pick file "ui_logic.bsh" for "UI Logic"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
+    And I press "Update"
+    Then I should see "Successfully updating project"
+
+  @javascript
+  Scenario: Edit project and upload correct file so project has correct file
+    Given I am on the home page
+    And I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 1"
+    Then I follow "Edit Project"
+    And I pick file "faims_Project_1.properties" for "Arch16n"
+    And I press "Update"
+    Then I should see "Successfully updating project"
+    And Project "Project 1" should have the same file "faims_Project_1.properties"
+
+  @javascript
+  Scenario Outline: Edit project and upload incorrect file
+    Given I am on the home page
+    And I have project "Project 2"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I click on "Project 2"
+    Then I follow "Edit Project"
+    And I pick file "<value>" for "<field>"
+    And I wait
+    And I press "Update"
+    Then I should see "<field>" with error "<error>"
+  Examples:
+    | field       | value                      | error                   |
+    | UI Schema   | garbage                    | must be xml file        |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml             |
+    | Validation Schema   | garbage                    | must be xml file        |
+    | Validation Schema   | data_schema_error1.xml       | invalid xml             |
+    | Arch16n     | faims_error.properties     | invalid file name       |
+    | Arch16n     | faims_Project_2.properties | invalid properties file |
 
   Scenario: Pull a list of projects
     Given I have projects

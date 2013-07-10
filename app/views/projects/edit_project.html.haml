@@ -1,0 +1,69 @@
+%h1
+  %span= @project.name
+.container
+  = simple_form_for @project, :url => update_project_path, :class =>"span12", :method => "post" do|f|
+    .row-fluid
+      .settings.span6
+        .step
+          .step-body.span12
+            %h4 Static Data
+            = f.label :name, "Project Name:"
+            = f.text_field :name, :value => session[:name], :class => "input-block-level"
+            = f.error :name
+            %p
+            = f.label :season, 'Project SRID:'
+            = f.select :srid, @spatial_list, :selected => session[:srid], :class => "input-block-level"
+            %p
+            = f.label :season, "Project Season:"
+            = f.text_field :season, :value => session[:season], :class => "input-block-level"
+            %p
+            = f.label :description, "Project Description:"
+            = f.text_area :description, :size => "40x5", :class => 'project-textarea input-block-level', :value => session[:description]
+            %p
+            = f.label :permit_no, "Permit No:"
+            = f.text_field :permit_no, :value => session[:permit_no], :class => "input-block-level"
+            %p
+            = f.label :permit_holder, "Permit Holder:"
+            = f.text_area :permit_holder, :size => "40x5", :class => 'project-textarea input-block-level', :value => session[:permit_holder]
+            %p
+            = f.label :contact_address, "Contact and Address:"
+            = f.text_area :contact_address, :size => "40x5", :class => 'project-textarea input-block-level', :value => session[:contact_address]
+            %p
+            = f.label :participant, "Participants:"
+            = f.text_area :participant, :size => "40x5", :class => 'project-textarea input-block-level', :value => session[:participant]
+      .upload.span6
+        .well
+          %h4 Upload User Interface Schema
+          - if session[:ui_schema]
+            %span.uploaded-inline UI Schema Uploaded!
+          - else
+            = f.label :ui_schema, 'UI Schema:'
+            = f.file_field :ui_schema
+            = f.error :ui_schema
+        .well
+          %h4 Upload Validation Schema
+          - if session[:validation_schema]
+            %span.uploaded-inline Validation Schema Uploaded!
+          - else
+            = f.label :validation_schema, 'Validation Schema:'
+            = f.file_field :validation_schema
+            = f.error :validation_schema
+        .well
+          %h4 Upload User Interface Logic
+          - if session[:ui_logic]
+            %span.uploaded-inline UI Logic Uploaded!
+          - else
+            = f.label :ui_logic, 'UI Logic:'
+            = f.file_field :ui_logic
+            = f.error :ui_logic
+        .well
+          %h4 Upload Arch16n file
+          - if session[:arch16n]
+            %span.uploaded-inline Arch16n Uploaded!
+          - else
+            = f.label :arch16n, 'Arch16n:'
+            = f.file_field :arch16n
+            = f.error :arch16n
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'
+      = f.submit "Update", :class => "btn btn-inverse", :id => "update-project-setting-btn"

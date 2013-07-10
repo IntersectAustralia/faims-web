@@ -33,8 +33,8 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/create_dir', :to => 'file_manager#create_dir', :as => 'project_create_dir'
   match 'projects/:id/delete_file', :to => 'file_manager#delete_file', :as => 'delete_project_file'
 
-  get 'projects/:id/edit_project_setting', :to => 'projects#edit_project_setting', :as => 'edit_project_setting'
-  post 'projects/:id/edit_project_setting', :to => 'projects#update_project_setting', :as => 'update_project_setting'
+  get 'projects/:id/edit_project', :to => 'projects#edit_project', :as => 'edit_project'
+  post 'projects/:id/update_project', :to => 'projects#update_project', :as => 'update_project'
 
   get 'projects/:id/archive_project', :to => 'projects#archive_project', :as => 'archive_project'
   get 'projects/:id/download_project', :to => 'projects#download_project', :as => 'download_project'
