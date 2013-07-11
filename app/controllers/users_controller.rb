@@ -88,8 +88,9 @@ class UsersController < ApplicationController
   def create
     @user = User.new(params[:user])
     if @user.valid?
-      @user.save
+      @user.activate
       @user.role = Role.find_by_name('user')
+      @user.save
       flash[:notice] = "New user created."
       redirect_to :users
     else

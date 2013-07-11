@@ -1,8 +1,9 @@
 - title 'Listing Users'
-.well
-  %h3 User Actions
-  .btn-group
-    = link_to "Add User", new_user_path, :class => "btn"
+- if current_user.admin?
+  .well
+    %h3 User Actions
+    .btn-group
+      = link_to "Add User", new_user_path, :class => "btn"
 %table#users.table.table-bordered.table-striped.table-condensed
   %tr
     %th First name
