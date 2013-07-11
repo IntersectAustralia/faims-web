@@ -1,7 +1,5 @@
+- title @project.name + " - Relationship History"
 - show_rel_attributes_history(@project,@timestamps)
-%h1
-  %span.page-title= @project.name + " - Relationship Records"
-
 .content
   %form{:method => 'post', :action =>  revert_rel_to_timestamp_path(@project,@timestamps[0][0])}
     .records
@@ -34,7 +32,7 @@
                     - else
                       = value
               - else
-                %td.history.error
+                %td.history.box-error
                   - if (i == 0)
                     %input{:type => 'radio', :name => 'timestamp', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
                     - checked = false

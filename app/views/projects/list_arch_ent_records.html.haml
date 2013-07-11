@@ -1,5 +1,4 @@
-%h1
-  %span.page-title= @project.name + " - Archaeological Entity Records"
+- title @project.name + " - Archaeological Entity Records"
 .content
   %h2 Filter based on Archaeological Entity type
   %form{:action => list_typed_arch_ent_records_path, :method => "get"}

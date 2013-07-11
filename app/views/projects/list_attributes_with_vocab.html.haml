@@ -1,5 +1,4 @@
-%h1
-  %span.page-title= @project.name + " - Attributes"
+- title @project.name + " - Vocabulary"
 .content
   %form{:id => 'attribute_form', :action => update_attributes_vocab_path(@project), :method => 'post'}
     %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}

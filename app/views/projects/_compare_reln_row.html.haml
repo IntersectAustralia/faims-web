@@ -17,12 +17,12 @@
             = attributeInfo[key]
     - else
       - if (checked)
-        .attrib.error
+        .attrib.box-error
           = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
           %span.attribute-info
             = attributeInfo[key]
       - else
-        .attrib.error
+        .attrib.box-error
           = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
           %span.attribute-info
             = attributeInfo[key]

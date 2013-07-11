@@ -1,7 +1,6 @@
+- title @project.name + " - Relationship Records"
 - if (!@relationshipid.empty?)
   - group_ids(@relationshipid)
-%h1
-  %span.page-title= @project.name + " - Relationship Records"
 .content
   - if (!@relationshipid.empty?)
     %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add-entity'}

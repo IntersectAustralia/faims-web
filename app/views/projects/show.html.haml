@@ -1,5 +1,4 @@
-%h1
-  %span.page-title= @project.name
+- title @project.name
 
 %input{:type => 'hidden', :value => check_archive_status_path(@project), :id=> 'check-archive'}
 %input{:type => 'hidden', :value => download_project_path(@project), :id=> 'download-project'}

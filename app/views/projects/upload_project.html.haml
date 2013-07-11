@@ -1,5 +1,4 @@
-%h1
-  %span Upload New Project
+- title "Upload New Project"
 = simple_form_for @project, :url => upload_new_project_path, :method => "post", :multipart => true do |f|
   .well
     %h4 Project Archive

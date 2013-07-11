@@ -1,0 +1,20 @@
+- title "Add User"
+= simple_form_for(@user) do |f|
+  = f.label :first_name, "First Name:"
+  = f.text_field :first_name
+  = f.error :first_name
+  = f.label :last_name, "Last Name:"
+  = f.text_field :last_name
+  = f.error :last_name
+  = f.label :email, "Email:"
+  = f.text_field :email
+  = f.error :email
+  = f.label :password, "Password:"
+  = f.password_field :password
+  = f.error :password
+  = f.label :password_confirmation, "Password Confirmation:"
+  = f.password_field :password_confirmation
+  = f.error :password_confirmation
+  .form-actions
+    = f.submit "Submit", :class => "btn btn-inverse"
+    = link_to "Back", users_path, :class => "btn"

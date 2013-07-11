@@ -10,7 +10,7 @@ FaimsWeb::Application.routes.draw do
     get '/users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
   end
 
-  resources :users, :only => [:show] do
+  resources :users, :only => [:show, :new, :create, :destroy] do
 
     collection do
       get :index

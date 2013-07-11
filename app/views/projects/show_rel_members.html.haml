@@ -1,5 +1,4 @@
-%h1
-  %span.page-title= @project.name + " - Relationship Archaeological Entity Members"
+- title @project.name + " - Relationship Archaeological Entity Members"
 .content
   - if !@uuid.nil? and !@uuid.empty?
     - prev_uuid = @uuid[0][0]

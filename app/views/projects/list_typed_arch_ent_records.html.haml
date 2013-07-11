@@ -1,7 +1,6 @@
+- title @project.name + " - Archaeological Entity Records"
 - if (!@uuid.empty?)
   - group_ids(@uuid)
-%h1
-  %span.page-title= @project.name + " - Archaeological Entity Records"
 .content
   - if (!@uuid.empty?)
     %input{:type => 'hidden', :value => add_entity_to_compare_path(@project), :id => 'add-entity'}

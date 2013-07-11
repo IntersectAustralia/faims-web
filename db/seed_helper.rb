@@ -2,8 +2,8 @@ def create_roles_and_users
   Role.delete_all
   User.delete_all
 
-  superuser = 'superuser'
-  Role.create!(:name => superuser)
+  Role.create!(:name => 'superuser')
+  Role.create!(:name => 'user')
 
   create_user(first_name: 'Faims',
               last_name: 'Admin',
