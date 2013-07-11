@@ -471,15 +471,15 @@ class Database
     db = SpatialiteDB.new(temp.path)
     db.execute('select initspatialmetadata()')
     result = db.execute("select srid || ' / ' || ref_sys_name, auth_srid from spatial_ref_sys;")
-    File.open(Rails.root.join('tmp/spatial_ref_list.json'), 'w') do |f|
+    File.open(Rails.root.join('lib/assets/spatial_ref_list.json'), 'w') do |f|
       f.write(result.to_json)
     end
   end
 
   def self.get_spatial_ref_list
     begin
-      generate_spatial_ref_list unless File.exists? Rails.root.join('tmp/spatial_ref_list.json')
-      return JSON.parse File.read(Rails.root.join('tmp/spatial_ref_list.json'))
+      generate_spatial_ref_list unless File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')
+      return JSON.parse File.read(Rails.root.join('lib/assets/spatial_ref_list.json'))
     end
   end
 
