@@ -462,7 +462,7 @@ class Database
     gps_definition = XSLTParser.parse_data_schema(Rails.root.join('lib/assets/gps_schema.xml'))
     db.execute_batch(gps_definition)
     admin_user = User.first
-    db.execute("INSERT into user (userid,fname,lname) VALUES (" + admin_user.id.to_s + ",'" + admin_user.first_name.to_s + "','" + admin_user.last_name.to_s + "');" )
+    db.execute("INSERT into user (userid,fname,lname) VALUES (" + admin_user.id.to_s + ",'" + admin_user.first_name.to_s + "','" + admin_user.last_name.to_s + "');" ) if admin_user
   end
 
   def spatialite_db
