@@ -22,6 +22,11 @@ begin
         Project.all.each { |p| Project.package_project(p.key) }
       end
     end
+    desc 'Initialise projection list'
+    task :init_projection_list => :environment do
+      require Rails.root.join('app/models/projects/database')
+      Database.generate_spatial_ref_list
+    end
     namespace :test do
       desc 'Generate test projects'
       task :create, [:size] => :environment do |t, args|
