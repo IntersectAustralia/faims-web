@@ -8,6 +8,19 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def get_list_of_users
+    users = @db.execute(WebQuery.get_list_of_users)
+    users
+  end
+
+  def update_list_of_users(user)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.update_list_of_users, user.id, user.first_name, user.last_name)
+      @project.db_mgr.make_dirt
+    end
+  end
+
   def is_arch_entity_dirty(uuid)
     result = @db.execute(WebQuery.is_arch_entity_dirty, uuid, uuid)
     return result.first.first > 0 if result and result.first and result.first.first
@@ -448,6 +461,8 @@ class Database
     db.execute_batch(data_definition)
     gps_definition = XSLTParser.parse_data_schema(Rails.root.join('lib/assets/gps_schema.xml'))
     db.execute_batch(gps_definition)
+    admin_user = User.first
+    db.execute("INSERT into user (userid,fname,lname) VALUES (" + admin_user.id.to_s + ",'" + admin_user.first_name.to_s + "','" + admin_user.last_name.to_s + "');" )
   end
 
   def spatialite_db

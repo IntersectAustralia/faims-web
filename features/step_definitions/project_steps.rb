@@ -514,6 +514,26 @@ When(/^Project "([^"]*)" should have the same file "([^"]*)"$/) do |project_name
   (project_hash_sum.eql?(file_hash_sum)).should be_true
 end
 
+When(/^I should have user for selection$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//select/option[text() = '#{value}']")
+    end
+  end
+end
+
+When(/^I select "([^"]*)" from the user list$/) do |name|
+  select name, :from => 'user_id'
+end
+
+When(/^I should have user for project$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//input[@value='#{value}']")
+    end
+  end
+end
+
 def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')

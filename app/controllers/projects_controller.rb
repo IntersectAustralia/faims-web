@@ -47,6 +47,24 @@ class ProjectsController < ApplicationController
     session[:has_attached_files] = @project.has_attached_files
   end
 
+  def edit_project_user
+    @project = Project.find(params[:id])
+    @users = @project.db.get_list_of_users
+    @server_user = User.where('id NOT IN (?)', @users.transpose[0])
+  end
+
+  def update_project_user
+    @project = Project.find(params[:id])
+    user = User.find(params[:user_id])
+    @project.db.update_list_of_users(user)
+    @users = @project.db.get_list_of_users
+    @server_user = User.where('id NOT IN (?)', @users.transpose[0])
+    flash[:notice] = 'Successfully updated user'
+    render 'edit_project_user'
+  end
+
+  # Arch entity functionalities
+
   def list_arch_ent_records
     @project = Project.find(params[:id])
     @type = @project.db.get_arch_ent_types
@@ -167,6 +185,37 @@ class ProjectsController < ApplicationController
 
   end
 
+  def compare_arch_ents
+    @project = Project.find(params[:id])
+    session[:values] = []
+    session[:identifiers] = []
+    session[:timestamps] = []
+    ids = params[:ids]
+    @identifiers = params[:identifiers]
+    @timestamps = params[:timestamps]
+    @first_uuid = ids[0]
+    @second_uuid = ids[1]
+  end
+
+  def merge_arch_ents
+    @project = Project.find(params[:id])
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
+    @project.db.delete_arch_entity(params[:deleted_id])
+
+    @project.db.insert_updated_arch_entity(params[:uuid], params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
+    if session[:type]
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      return
+    else
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      return
+    end
+  end
+
   def show_arch_ent_history
     @project = Project.find(params[:id])
     uuid = params[:uuid]
@@ -180,6 +229,8 @@ class ProjectsController < ApplicationController
     @project.db.revert_arch_ent_to_timestamp(uuid, timestamp)
     redirect_to edit_arch_ent_records_path(@project, uuid)
   end
+
+  # Relationship functionalities
 
   def list_rel_records
     @project = Project.find(params[:id])
@@ -396,37 +447,6 @@ class ProjectsController < ApplicationController
       session[:timestamps].delete(params[:timestamp])
     end
     render :nothing => true
-  end
-
-  def compare_arch_ents
-    @project = Project.find(params[:id])
-    session[:values] = []
-    session[:identifiers] = []
-    session[:timestamps] = []
-    ids = params[:ids]
-    @identifiers = params[:identifiers]
-    @timestamps = params[:timestamps]
-    @first_uuid = ids[0]
-    @second_uuid = ids[1]
-  end
-
-  def merge_arch_ents
-    @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    end
-    @project.db.delete_arch_entity(params[:deleted_id])
-
-    @project.db.insert_updated_arch_entity(params[:uuid], params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
-    if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
-      return
-    else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
-      return
-    end
   end
 
   def compare_rel

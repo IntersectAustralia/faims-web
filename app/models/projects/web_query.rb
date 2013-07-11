@@ -1121,6 +1121,7 @@ create table export.relationship as select * from relationship where versionnum 
 create table export.relnvalue as select * from relnvalue where versionnum >= '#{version}';
 create table export.aentreln as select * from aentreln where versionnum >= '#{version}';
 create table export.vocabulary as select * from vocabulary;
+create table export.user as select * from user;
 detach database export;
 EOF
     )
@@ -1224,6 +1225,20 @@ from (
   group by relationshipid
   having max(relntimestamp))
 where deleted is null;
+EOF
+    )
+  end
+
+  def self.get_list_of_users
+    cleanup_query(<<EOF
+    select userid, fname, lname from user;
+EOF
+    )
+  end
+
+  def self.update_list_of_users
+    cleanup_query(<<EOF
+    insert into user (userid, fname, lname) values (?,?,?);
 EOF
     )
   end

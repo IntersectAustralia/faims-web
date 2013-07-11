@@ -108,6 +108,7 @@ Feature: Manage projects
     Then I should be on the new projects page
     And I wait
     And I fill in "Project Name" with "Project 2"
+    And I wait
     And I pick file "<value>" for "<field>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
@@ -223,7 +224,7 @@ Feature: Manage projects
     And I click on "Project 1"
     Then I follow "Edit Project"
     And I press "Update"
-    Then I should see "Successfully updating project"
+    Then I should see "Successfully updated project"
 
   @javascript
   Scenario: Edit project and upload correct file
@@ -238,7 +239,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Update"
-    Then I should see "Successfully updating project"
+    Then I should see "Successfully updated project"
 
   @javascript
   Scenario: Edit project and upload correct file so project has correct file
@@ -250,7 +251,7 @@ Feature: Manage projects
     Then I follow "Edit Project"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Update"
-    Then I should see "Successfully updating project"
+    Then I should see "Successfully updated project"
     And Project "Project 1" should have the same file "faims_Project_1.properties"
 
   @javascript
@@ -260,6 +261,7 @@ Feature: Manage projects
     And I follow "Show Projects"
     Then I should be on the projects page
     And I click on "Project 2"
+    And I wait
     Then I follow "Edit Project"
     And I wait
     And I pick file "<value>" for "<field>"
@@ -344,6 +346,7 @@ Feature: Manage projects
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
     And I click on "Sync Test"
+    And I wait
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     And I select the first record
@@ -387,6 +390,7 @@ Feature: Manage projects
     Then I should see "New project created."
     And I should be on the projects page
     And I click on "Project 1"
+    And I wait
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see vocabularies
@@ -416,7 +420,7 @@ Feature: Manage projects
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
     Then I follow "Update"
-    And I should see "Successfully updating vocabulary"
+    And I should see "Successfully updated vocabulary"
     And I should see vocabularies
       | name  |
       | Red   |
@@ -441,6 +445,7 @@ Feature: Manage projects
     Then I should see "New project created."
     And I should be on the projects page
     And I click on "Project 1"
+    And I wait
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I wait
@@ -448,13 +453,51 @@ Feature: Manage projects
     And I wait
     And I add "Red" to the vobulary list
     Then I follow "Update"
-    And I should see "Successfully updating vocabulary"
+    And I should see "Successfully updated vocabulary"
     And I should see vocabularies
       | name  |
       | Green |
       | Red   |
       | Pink  |
       | Blue  |
+
+  @javascript
+  Scenario: Seeing users to be added for project
+    Given I have users
+      | first_name | last_name | email                  |
+      | User1      | Last1     | user1@intersect.org.au |
+      | User2      | Last2     | user2@intersect.org.au |
+    And I have project "Project 1"
+    Then I follow "Show Projects"
+    And I should be on the projects page
+    And I click on "Project 1"
+    And I wait
+    Then I follow "Edit User"
+    And I should have user for selection
+      | name        |
+      | User1 Last1 |
+      | User2 Last2 |
+
+
+  @javascript
+  Scenario: Adding users to the project
+    Given I have users
+      | first_name | last_name | email                  |
+      | User1      | Last1     | user1@intersect.org.au |
+      | User2      | Last2     | user2@intersect.org.au |
+    And I have project "Project 1"
+    Then I follow "Show Projects"
+    And I should be on the projects page
+    And I click on "Project 1"
+    And I wait
+    Then I follow "Edit User"
+    And I select "User1 Last1" from the user list
+    Then I follow "Add"
+    And I should see "Successfully updated user"
+    And I should have user for project
+      | first_name | last_name |
+      | Fred       | Bloggs     |
+      | User1      | Last1     |
 
   Scenario: Update arch entity attribute causes validation error
     # TODO

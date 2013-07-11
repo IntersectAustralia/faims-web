@@ -84,6 +84,9 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/list_vocab_for_attribute/:attribute_id', :to => 'projects#list_vocab_for_attribute', :as => 'list_vocab_for_attribute'
   post 'projects/:id/update_attributes_vocab', :to => 'projects#update_attributes_vocab', :as => 'update_attributes_vocab'
 
+  get 'project/:id/edit_project_user' , :to => 'projects#edit_project_user', :as => 'edit_project_user'
+  post 'project/:id/update_project_user' , :to => 'projects#update_project_user', :as => 'update_project_user'
+
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
 
   get 'android/project/:key/settings_archive', :to => 'android#settings_archive', :as => 'android_settings_archive'

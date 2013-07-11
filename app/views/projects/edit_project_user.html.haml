@@ -1,0 +1,24 @@
+- title @project.name + " - Users"
+.content
+  %form{:id => 'user_form', :action => update_project_user_path(@project), :method => 'post'}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %label User
+    .input-append
+      %select{:name => 'user_id', :id => 'select_user'}
+        %option
+        - for user in @server_user
+          %option{:value => user.id}=user.first_name + ' ' + user.last_name
+      = link_to "Add",'#', :id => 'add_user', :class => 'btn'
+    %table
+      %th
+        = "First Name"
+      %th
+        = "Last Name"
+      - @users.each do |user|
+        %tr
+          %td
+            %input{:name => 'fname[]', :value=> user[1]}
+          %td
+            %input{:name => 'lname[]', :value=> user[2]}
+.form-actions
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'

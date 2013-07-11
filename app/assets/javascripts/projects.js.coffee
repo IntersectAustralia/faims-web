@@ -365,6 +365,16 @@ vocab_management = ->
   )
   return
 
+user_management = ->
+  $('#add_user').click(
+    ->
+      if $('#select_user').val() != ""
+        $('#user_form').submit()
+        return false
+      return false
+  )
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -381,5 +391,6 @@ $(document).ready(
     merge_record_management()
     history_management()
     vocab_management()
+    user_management()
     return
 )
