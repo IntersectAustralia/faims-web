@@ -493,7 +493,7 @@ class ProjectsController < ApplicationController
     @attribute_id = params[:attribute_id]
     @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name)
     @attributes = @project.db.get_attributes_containing_vocab()
-    flash[:notice] = 'Successfully updating vocabulary'
+    flash[:notice] = 'Successfully updated vocabulary'
     render 'list_attributes_with_vocab'
   end
 
@@ -527,7 +527,7 @@ class ProjectsController < ApplicationController
 
         FileUtils.remove_entry_secure session[:tmpdir]
 
-        flash[:notice] = 'Successfully updating project'
+        flash[:notice] = 'Successfully updated project'
         redirect_to :project
         return
       else
