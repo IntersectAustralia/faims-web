@@ -332,6 +332,24 @@ vocab_management = ->
         return
       return
   )
+
+  if ($('#attribute').val() != "")
+    $('#attribute').change()
+    $('#insert_vocab').click(
+      ->
+        value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
+        table = $('#vocab-content').find('table')
+        $(value).appendTo($(table))
+        return false
+    )
+
+    $('#update_vocab').click(
+      ->
+        $('#attribute_form').submit();
+        return false
+    )
+    return
+
   $('#insert_vocab').click(
     ->
       value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
@@ -342,24 +360,7 @@ vocab_management = ->
 
   $('#update_vocab').click(
     ->
-      self = this
-      $(this).attr('disabled','disabled')
-      $.ajax $(this).attr('href'),
-        type: 'put'
-        data: $('#attribute_form').serializeArray()
-        dataType: 'json'
-        success:(data, textStatus, jqXHR) ->
-          $('#vocab-content').empty()
-          $('<label>Vocab List</label>').appendTo($('#vocab-content'))
-          table = $('<table></table>').appendTo($('#vocab-content'))
-          $(data).each(
-            ->
-              value = '<tr><td><input type="hidden" name="vocab_id[]" value="'+this.vocab_id+'"/><input name="vocab_name[]"value="'+this.vocab_name+'"/></td></tr>'
-              $(value).appendTo($(table))
-              return
-          )
-          $(self).removeAttr('disabled')
-          return
+      $('#attribute_form').submit();
       return false
   )
   return

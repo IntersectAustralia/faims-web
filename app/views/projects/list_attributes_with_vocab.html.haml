@@ -1,15 +1,20 @@
 %h1
   %span.page-title= @project.name + " - Attributes"
 .content
-  %form{:id => 'attribute_form'}
+  %form{:id => 'attribute_form', :action => update_attributes_vocab_path(@project), :method => 'post'}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
     %label Attribute
     %select{:id => 'attribute', :name => 'attribute_id'}
       %option
       - @attributes.each do |attribute|
-        %option{:value => attribute[0], :data => {:url => list_vocab_for_attribute_path(@project,attribute[0])}}
-          = attribute[1]
+        - if @attribute_id.eql?(attribute[0].to_s)
+          %option{:value => attribute[0], :selected => 'selected', :data => {:url => list_vocab_for_attribute_path(@project,attribute[0])}}
+            = attribute[1]
+        - else
+          %option{:value => attribute[0], :data => {:url => list_vocab_for_attribute_path(@project,attribute[0])}}
+            = attribute[1]
     #vocab-content
-  = link_to "Update", update_attributes_vocab_path(@project),:id => 'update_vocab', :class => 'btn hidden'
+  = link_to "Update",'#', :id => 'update_vocab', :class => 'btn hidden'
   = link_to "Insert",'#', :id => 'insert_vocab', :class => 'btn hidden'
 .form-actions
   = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'

@@ -260,6 +260,23 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def update_project_from(tmp_dir)
+    settings_mgr.with_lock do
+      begin
+        # copy files from temp directory to projects directory
+        FileHelper.copy_dir(tmp_dir, get_path(:project_dir))
+
+        # generate archive
+        settings_mgr.make_dirt
+      rescue Exception => e
+        raise e
+        FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
+      ensure
+        # ignore
+      end
+    end
+  end
+
   def create_project_from_compressed_file(tmp_dir)
     begin
       # copy files from temp directory to projects directory

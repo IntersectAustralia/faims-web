@@ -507,6 +507,13 @@ When(/^I add "([^"]*)" to the vobulary list$/) do |value|
   all(:xpath, "//input[@name='vocab_name[]']").last.set value
 end
 
+When(/^Project "([^"]*)" should have the same file "([^"]*)"$/) do |project_name, file_name|
+  project = Project.find_by_name(project_name)
+  project_hash_sum = MD5Checksum.compute_checksum(project.get_path(:project_dir) + file_name)
+  file_hash_sum =  MD5Checksum.compute_checksum(File.expand_path("../../assets/" + file_name, __FILE__))
+  (project_hash_sum.eql?(file_hash_sum)).should be_true
+end
+
 def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')

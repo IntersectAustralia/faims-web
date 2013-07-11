@@ -7,7 +7,7 @@
 .well
   %h3 Project Actions
   .btn-group
-    = link_to "Edit Project Setting", edit_project_setting_path(@project), :class => 'btn'
+    = link_to "Edit Project", edit_project_path(@project), :class => 'btn'
     = link_to "Edit Vocabulary", list_attributes_with_vocab_path(@project), :class => 'btn'
   .btn-group
     = link_to "Upload Files", project_file_list_path(@project), :class => 'btn', :id => 'project-file-list-btn'

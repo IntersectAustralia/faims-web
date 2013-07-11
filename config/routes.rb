@@ -37,8 +37,8 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/create_dir', :to => 'file_manager#create_dir', :as => 'project_create_dir'
   match 'projects/:id/delete_file', :to => 'file_manager#delete_file', :as => 'delete_project_file'
 
-  get 'projects/:id/edit_project_setting', :to => 'projects#edit_project_setting', :as => 'edit_project_setting'
-  post 'projects/:id/edit_project_setting', :to => 'projects#update_project_setting', :as => 'update_project_setting'
+  get 'projects/:id/edit_project', :to => 'projects#edit_project', :as => 'edit_project'
+  post 'projects/:id/update_project', :to => 'projects#update_project', :as => 'update_project'
 
   get 'projects/:id/archive_project', :to => 'projects#archive_project', :as => 'archive_project'
   get 'projects/:id/download_project', :to => 'projects#download_project', :as => 'download_project'
@@ -80,9 +80,9 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/compare_rel', :to => 'projects#compare_rel', :as => 'compare_rel'
   post 'projects/:id/merge_rel', :to => 'projects#merge_rel', :as => 'merge_rel'
 
-  get 'projects/:id/list_attributes_with_vocab/', :to => 'projects#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
+  get 'projects/:id/list_attributes_with_vocab', :to => 'projects#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
   get 'projects/:id/list_vocab_for_attribute/:attribute_id', :to => 'projects#list_vocab_for_attribute', :as => 'list_vocab_for_attribute'
-  put 'projects/:id/update_attributes_vocab', :to => 'projects#update_attributes_vocab', :as => 'update_attributes_vocab'
+  post 'projects/:id/update_attributes_vocab', :to => 'projects#update_attributes_vocab', :as => 'update_attributes_vocab'
 
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
 

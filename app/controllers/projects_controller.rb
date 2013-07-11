@@ -483,45 +483,80 @@ class ProjectsController < ApplicationController
 
   def update_attributes_vocab
     @project = Project.find(params[:id])
-    attribute_id = params[:attribute_id]
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
-    if !@project.db_mgr.locked?
-      @project.db.update_attributes_vocab(attribute_id, vocab_id, vocab_name)
-    end
-    vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
-    vocabularies = []
-    vocabs.each do |vocab|
-      vocabulary = {}
-      vocabulary['vocab_id'] = vocab[1]
-      vocabulary['vocab_name'] = vocab[2]
-      vocabularies.push(vocabulary)
-    end
-    respond_to do |format|
-      format.json { render :json => vocabularies.to_json }
-    end
+    @attribute_id = params[:attribute_id]
+    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name)
+    @attributes = @project.db.get_attributes_containing_vocab()
+    flash[:notice] = 'Successfully updating vocabulary'
+    render 'list_attributes_with_vocab'
   end
 
-  def edit_project_setting
+  def edit_project
     @project = Project.find(params[:id])
-    @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+    project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+    session[:name] = @project.name
+    session[:season] = project_setting['season']
+    session[:description] = project_setting['description']
+    session[:permit_no] = project_setting['permit_no']
+    session[:permit_holder] = project_setting['permit_holder']
+    session[:contact_address] = project_setting['contact_address']
+    session[:participant] = project_setting['participant']
+    session[:srid] = project_setting['srid']
+    create_tmp_dir
     @spatial_list = Database.get_spatial_ref_list
   end
 
-  def update_project_setting
+  def update_project
     if @project.settings_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     end
-    if @project.update_attributes(:name => params[:project][:name])
-      @project.update_settings(params)
-      session[:name] = ''
-      flash[:notice] = 'Static data updated'
-      redirect_to :project
+    valid = validate_project_update
+    if valid
+      if @project.update_attributes(:name => params[:project][:name])
+        @project.update_settings(params)
+
+        @project.update_project_from(session[:tmpdir])
+
+        FileUtils.remove_entry_secure session[:tmpdir]
+
+        flash[:notice] = 'Successfully updating project'
+        redirect_to :project
+        return
+      else
+        session[:name] = params[:project][:name]
+        session[:season] = params[:project][:season]
+        session[:description] = params[:project][:description]
+        session[:permit_no] = params[:project][:permit_no]
+        session[:permit_holder] = params[:project][:permit_holder]
+        session[:contact_address] = params[:project][:contact_address]
+        session[:participant] = params[:project][:participant]
+        session[:srid] = params[:project][:srid]
+        @spatial_list = Database.get_spatial_ref_list
+        flash.now[:error] = 'Error updating project'
+        render 'edit_project'
+        return
+      end
     else
-      @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+      session[:name] = params[:project][:name]
+      session[:season] = params[:project][:season]
+      session[:description] = params[:project][:description]
+      session[:permit_no] = params[:project][:permit_no]
+      session[:permit_holder] = params[:project][:permit_holder]
+      session[:contact_address] = params[:project][:contact_address]
+      session[:participant] = params[:project][:participant]
+      session[:srid] = params[:project][:srid]
       @spatial_list = Database.get_spatial_ref_list
-      render 'edit_project_setting'
+      flash.now[:error] = 'Error updating project'
+      render 'edit_project'
+      return
     end
   end
 
@@ -653,6 +688,82 @@ class ProjectsController < ApplicationController
         @project.errors.add(:ui_logic, error)
         valid = false
       else
+        create_temp_file(@project.get_name(:ui_logic), params[:project][:ui_logic])
+        session[:ui_logic] = true
+      end
+    end
+
+    # check if arch16n is valid
+    if !session[:arch16n]
+      error = Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
+      if error
+        @project.errors.add(:arch16n, error)
+        valid = false
+      else
+        if !params[:project][:arch16n].nil?
+          create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
+          session[:arch16n] = true
+        end
+      end
+    end
+
+    # check if validation schema is valid
+    if !session[:validation_schema]
+      error = Project.validate_validation_schema(params[:project][:validation_schema])
+      if error
+        @project.errors.add(:validation_schema, error)
+        valid = false
+      else
+        if !params[:project][:validation_schema].nil?
+          create_temp_file(@project.get_name(:validation_schema), params[:project][:validation_schema])
+          session[:validation_schema] = true
+        end
+      end
+    end
+
+    if valid
+      session[:season] = ''
+      session[:description] = ''
+      session[:permit_no] = ''
+      session[:permit_holder] = ''
+      session[:contact_address] = ''
+      session[:participant] = ''
+      session[:srid] = ''
+    else
+      session[:season] = params[:project][:season]
+      session[:description] = params[:project][:description]
+      session[:permit_no] = params[:project][:permit_no]
+      session[:permit_holder] = params[:project][:permit_holder]
+      session[:contact_address] = params[:project][:contact_address]
+      session[:participant] = params[:project][:participant]
+      session[:srid] = params[:project][:srid]
+    end
+
+    valid
+  end
+
+  def validate_project_update
+    # check if project is valid
+
+    valid = true
+
+    # check if ui schema is valid
+    if !session[:ui_schema]
+      if !params[:project][:ui_schema].blank?
+        error = Project.validate_ui_schema(params[:project][:ui_schema])
+        if error
+          @project.errors.add(:ui_schema, error)
+          valid = false
+        else
+          create_temp_file(@project.get_name(:ui_schema), params[:project][:ui_schema])
+          session[:ui_schema] = true
+        end
+      end
+    end
+
+    # check if arch16n is valid
+    if !session[:ui_logic]
+      if !params[:project][:ui_logic].nil?
         create_temp_file(@project.get_name(:ui_logic), params[:project][:ui_logic])
         session[:ui_logic] = true
       end
