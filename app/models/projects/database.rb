@@ -454,6 +454,8 @@ class Database
 
   # static
   def self.generate_database(file, xml)
+    generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), file # clone template db
     db = SpatialiteDB.new(file)
     content = File.read(Rails.root.join('lib', 'assets', 'init.sql'))
     db.execute_batch(content)
@@ -489,6 +491,11 @@ class Database
     File.open(Rails.root.join('lib/assets/spatial_ref_list.json'), 'w') do |f|
       f.write(result.to_json)
     end
+  end
+
+  def self.generate_template_db
+    db = SpatialiteDB.new(Rails.root.join('lib/assets/template_db.sqlite3').to_s)
+    db.execute("SELECT InitSpatialMetaData();")
   end
 
   def self.get_spatial_ref_list
