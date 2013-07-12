@@ -76,7 +76,7 @@ class Database
     attributes
   end
 
-  def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
+  def update_arch_entity_attribute(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -98,7 +98,7 @@ class Database
     @db.execute(WebQuery.update_aent_value_as_dirty, isdirty, isdirtyreason, uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum)
   end
 
-  def insert_updated_arch_entity(uuid, vocab_id, attribute_id, measure, freetext, certainty)
+  def insert_updated_arch_entity(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -130,7 +130,7 @@ class Database
     changes
   end
 
-  def revert_arch_ent_to_timestamp(uuid, timestamp)
+  def revert_arch_ent_to_timestamp(uuid,userid, timestamp)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -140,7 +140,7 @@ class Database
     end
   end
 
-  def delete_arch_entity(uuid)
+  def delete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.delete_arch_entity, userid, uuid)
@@ -164,7 +164,7 @@ class Database
     attributes
   end
 
-  def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
+  def update_rel_attribute(relationshipid, userid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -187,7 +187,7 @@ class Database
     @db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
   end
 
-  def insert_updated_rel(relationshipid, vocab_id, attribute_id, freetext, certainty)
+  def insert_updated_rel(relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -220,7 +220,7 @@ class Database
     changes
   end
 
-  def revert_rel_to_timestamp(relid, timestamp)
+  def revert_rel_to_timestamp(relid, userid, timestamp)
     @project.db_mgr.with_lock do
       currenttime = current_timestamp
       @db.execute(WebQuery.insert_version, currenttime)
@@ -230,7 +230,7 @@ class Database
     end
   end
 
-  def delete_relationship(relationshipid)
+  def delete_relationship(relationshipid, userid)
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
       @db.execute(WebQuery.delete_relationship, userid, relationshipid)
@@ -268,14 +268,14 @@ class Database
     verbs
   end
 
-  def add_arch_ent_member(relationshipid, uuid, verb)
+  def add_arch_ent_member(relationshipid,userid, uuid, verb)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, userid, verb)
       @project.db_mgr.make_dirt
     end
   end
 
-  def delete_arch_ent_member(relationshipid, uuid)
+  def delete_arch_ent_member(relationshipid,userid, uuid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid, userid)
       @project.make_dirt
@@ -502,10 +502,6 @@ class Database
 
   def current_timestamp
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
-  end
-
-  def userid
-    0
   end
 
 end

@@ -4,5 +4,5 @@
   .field
     = f.input :role, :collection => @roles
   .form-actions
-    = f.submit "Approve", :class => "btn btn-primary"
-    = link_to 'Back', access_requests_users_path, :class => "btn"
+    = f.submit "Approve", :class => 'btn btn-inverse'
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, access_requests_users_path, :class => "btn"

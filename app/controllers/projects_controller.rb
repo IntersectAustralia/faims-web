@@ -154,7 +154,7 @@ class ProjectsController < ApplicationController
 
       ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
+      @project.db.update_arch_entity_attribute(uuid,current_user.id,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
 
       @attributes = @project.db.get_arch_entity_attributes(uuid)
       @vocab_name = {}
@@ -175,7 +175,7 @@ class ProjectsController < ApplicationController
     end
 
     uuid = params[:uuid]
-    @project.db.delete_arch_entity(uuid)
+    @project.db.delete_arch_entity(uuid,current_user.id)
 
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
@@ -204,9 +204,9 @@ class ProjectsController < ApplicationController
       render 'show'
       return
     end
-    @project.db.delete_arch_entity(params[:deleted_id])
+    @project.db.delete_arch_entity(params[:deleted_id],current_user.id)
 
-    @project.db.insert_updated_arch_entity(params[:uuid], params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
+    @project.db.insert_updated_arch_entity(params[:uuid],current_user.id, params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
       return
@@ -226,7 +226,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     timestamp = params[:timestamp]
-    @project.db.revert_arch_ent_to_timestamp(uuid, timestamp)
+    @project.db.revert_arch_ent_to_timestamp(uuid,current_user.id, timestamp)
     redirect_to edit_arch_ent_records_path(@project, uuid)
   end
 
@@ -321,7 +321,7 @@ class ProjectsController < ApplicationController
 
       ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty, ignore_errors)
+      @project.db.update_rel_attribute(relationshipid,current_user.id,vocab_id,attribute_id, freetext, certainty, ignore_errors)
 
       @attributes = @project.db.get_rel_attributes(relationshipid)
       @vocab_name = {}
@@ -343,7 +343,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relid = params[:relid]
     timestamp = params[:timestamp]
-    @project.db.revert_rel_to_timestamp(relid, timestamp)
+    @project.db.revert_rel_to_timestamp(relid,current_user.id, timestamp)
     redirect_to edit_rel_records_path(@project, relid)
   end
 
@@ -356,7 +356,7 @@ class ProjectsController < ApplicationController
     end
 
     relationshipid = params[:relationshipid]
-    @project.db.delete_relationship(relationshipid)
+    @project.db.delete_relationship(relationshipid,current_user.id)
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
     else
@@ -381,7 +381,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
-    @project.db.delete_arch_ent_member(relationshipid,uuid)
+    @project.db.delete_arch_ent_member(relationshipid,current_user.id,uuid)
     render :nothing => true
   end
 
@@ -407,7 +407,7 @@ class ProjectsController < ApplicationController
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
-    @project.db.add_arch_ent_member(params[:relationshipid],params[:uuid],params[:verb])
+    @project.db.add_arch_ent_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0&relntypeid='+params[:relntypeid]} }
     end
@@ -468,9 +468,9 @@ class ProjectsController < ApplicationController
       render 'show'
       return
     end
-    @project.db.delete_relationship(params[:deleted_id])
+    @project.db.delete_relationship(params[:deleted_id],current_user.id)
 
-    @project.db.insert_updated_rel(params[:rel_id], params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
+    @project.db.insert_updated_rel(params[:rel_id],current_user.id, params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
       return
