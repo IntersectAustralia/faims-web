@@ -17,8 +17,8 @@
       - @users.each do |user|
         %tr
           %td
-            %input{:name => 'fname[]', :value=> user[1]}
+            %input{:name => 'fname[]', :value=> user[1], :readonly => 'readonly'}
           %td
-            %input{:name => 'lname[]', :value=> user[2]}
+            %input{:name => 'lname[]', :value=> user[2], :readonly => 'readonly'}
 .form-actions
   = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'
