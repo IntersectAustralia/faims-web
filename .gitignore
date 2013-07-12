@@ -31,3 +31,6 @@ server.properties
 
 # Ignore coverage dir
 /coverage
+
+/lib/assets/template_db.sqlite3
+/lib/assets/template_db.sqlite3-journal
