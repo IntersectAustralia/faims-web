@@ -15,17 +15,18 @@ module XSDValidator
   end
 
   def self.validate_schema(xsd, file)
-    begin
+  begin
       xsd = Nokogiri::XML::Schema(File.read(xsd))
       doc = Nokogiri::XML(File.read(file)) { |config| config.strict }
 
-      result = xsd.validate(doc).each do |error|
-        error.message
+      result = []
+      xsd.validate(doc).each do |error|
+        result.push(error)
       end
 
       result
     rescue Nokogiri::XML::SyntaxError => e
-      return [e]
+      raise e
     end
   end
 

@@ -116,15 +116,15 @@ Feature: Manage projects
     | field       | value                      | error                   |
     | Data Schema |                            | can't be blank          |
     | Data Schema | garbage                    | must be xml file        |
-    | Data Schema | data_schema_error1.xml     | invalid xml             |
+    | Data Schema | data_schema_error1.xml     | invalid xml at line 0   |
     | UI Schema   |                            | can't be blank          |
     | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml             |
-    | Validation Schema   | garbage                    | must be xml file        |
-    | Validation Schema   | data_schema_error1.xml       | invalid xml             |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml at line 0      |
+    | Validation Schema   | garbage                | must be xml file       |
+    | Validation Schema   | data_schema_error1.xml | invalid xml at line 0  |
     | UI Logic    |                            | can't be blank          |
     | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file |
+    | Arch16n     | faims_Project_2.properties | invalid properties file at line 1 |
 
   @javascript
   Scenario: Upload Project
@@ -271,11 +271,11 @@ Feature: Manage projects
   Examples:
     | field       | value                      | error                   |
     | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml             |
-    | Validation Schema   | garbage                    | must be xml file        |
-    | Validation Schema   | data_schema_error1.xml       | invalid xml             |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml at line 0   |
+    | Validation Schema   | garbage                | must be xml file    |
+    | Validation Schema   | data_schema_error1.xml | invalid xml at line 0 |
     | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file |
+    | Arch16n     | faims_Project_2.properties | invalid properties file at line 1|
 
   Scenario: Pull a list of projects
     Given I have projects

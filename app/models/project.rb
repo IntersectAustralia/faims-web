@@ -328,10 +328,11 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_validation_schema(file.path)
-    rescue => e
+    rescue
       result = nil
     end
-    return 'invalid xml' if result.nil? || !result.empty?
+    return "Invalid xml" if result.nil?
+    return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     begin
       DatabaseValidator.new(nil, schema.tempfile.path)
     rescue Exception => e
@@ -346,10 +347,11 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
-    rescue => e
+    rescue
       result = nil
     end
-    return 'invalid xml' if result.nil? || !result.empty?
+    return "Invalid xml" if result.nil?
+    return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     return nil
   end
 
@@ -359,10 +361,11 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
-    rescue => e
+    rescue
       result = nil
     end
-    return 'invalid xml' if result.nil? || !result.empty?
+    return "Invalid xml" if result.nil?
+    return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     return nil
   end
 
@@ -375,17 +378,20 @@ class Project < ActiveRecord::Base
     return 'invalid file name' if !(arch16n.original_filename).eql?("faims_#{project_name.gsub(/\s+/, '_')}.properties")
     begin
       file = arch16n.tempfile
+      line_num = 0
+      error = ""
       File.open(file,'r').read.each_line do |line|
-        line.strip!
-        return 'invalid properties file' if line[0] == ?=
+        line_num += 1
+        next if line.blank?
         i = line.index('=')
-        return 'invalid properties file' if !i
-        return 'invalid properties file' if line[i + 1..-1].strip.blank?
+        error += "invalid properties file at line #{line_num}<br/>" if !i
+        error += "invalid properties file at line #{line_num}<br/>" if line[0..i] =~ /\s/
       end
     rescue
       return 'invalid properties file'
     end
-    return nil
+    return nil if error.empty?
+    return error
   end
 
   def self.validate_directory(dir)
