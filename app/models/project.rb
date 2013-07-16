@@ -328,10 +328,9 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_validation_schema(file.path)
-    rescue
-      result = nil
+    rescue => e
+      result = [e]
     end
-    return "Invalid xml" if result.nil?
     return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     begin
       DatabaseValidator.new(nil, schema.tempfile.path)
@@ -347,10 +346,9 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
-    rescue
-      result = nil
+    rescue => e
+      result = [e]
     end
-    return "Invalid xml" if result.nil?
     return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     return nil
   end
@@ -361,10 +359,9 @@ class Project < ActiveRecord::Base
     begin
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
-    rescue
-      result = nil
+    rescue => e
+      result = [e]
     end
-    return "Invalid xml" if result.nil?
     return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     return nil
   end
