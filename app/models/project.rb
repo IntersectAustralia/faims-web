@@ -656,9 +656,12 @@ class Project < ActiveRecord::Base
         return 'This project already exists in the system'
       else
         project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
-        project.transaction do
+        begin
           project.save
           project.create_project_from_compressed_file(tmp_dir + 'project')
+        rescue
+          File.rm_rf project.get_path(:project_dir) if File.directory? project.get_path(:project_dir)
+          project.destroy
         end
         return project
       end

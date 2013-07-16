@@ -24,12 +24,14 @@ class ProjectsController < ApplicationController
 
     if valid
 
-      @project.transaction do
+      begin
         @project.save
-
         @project.update_settings(params)
         @project.create_project_from(session[:tmpdir])
-
+      rescue
+        File.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
+        @project.destroy
+      ensure
         FileUtils.remove_entry_secure session[:tmpdir]
       end
 
