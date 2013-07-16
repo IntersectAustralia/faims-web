@@ -6,7 +6,7 @@ class SpatialiteDB
     @path = file
     @db = SQLite3::Database.new(file)
     @db.enable_load_extension(true)
-    @db.execute("select load_extension('#{spatialite_library}')")
+    @db.execute("select load_extension('#{SpatialiteDB.spatialite_library}')")
   end
 
   def execute(sql, *bind_vars)
@@ -21,9 +21,22 @@ class SpatialiteDB
     @path
   end
 
+  def self.library_exists?(lib = nil)
+    lib ||= spatialite_library
+    temp_file = Tempfile.new('tmpdb.sqlite3')
+    db = SQLite3::Database.new(temp_file.path)
+    db.enable_load_extension(true)
+    db.execute("select load_extension('#{lib}')")
+    true
+  rescue
+    false
+  ensure
+    temp_file.unlink
+  end
+
   private
 
-  def spatialite_library
+  def self.spatialite_library
     return 'libspatialite.dylib' if (/darwin/ =~ RUBY_PLATFORM) != nil
     return 'libspatialite.so'
   end

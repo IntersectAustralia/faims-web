@@ -20,6 +20,13 @@ class ProjectsController < ApplicationController
   def create
     # create project if valid and schemas uploaded
 
+    unless SpatialiteDB.library_exists?
+      @spatial_list = Database.get_spatial_ref_list
+      flash.now[:error] = 'Cannot find library libspatialite. Please install library to create project.'
+      render 'new'
+      return
+    end
+
     valid = create_project
 
     if valid
@@ -633,6 +640,13 @@ class ProjectsController < ApplicationController
   end
 
   def upload_new_project
+    unless SpatialiteDB.library_exists?
+      @project = Project.new
+      flash.now[:error] = 'Cannot find library libspatialite. Please install library to upload project.'
+      render 'upload_project'
+      return
+    end
+
     if params[:project]
       project_or_error = Project.upload_project(params)
       if project_or_error.class == String
