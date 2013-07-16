@@ -324,7 +324,7 @@ class Project < ActiveRecord::Base
 
   def self.validate_validation_schema(schema)
     return nil if schema.blank?
-    return 'must be xml file' if schema.content_type != 'text/xml'
+    return 'must be xml file' unless schema.content_type =~ /xml/
     begin
       file = schema.tempfile
       result = XSDValidator.validate_validation_schema(file.path)
@@ -342,7 +342,7 @@ class Project < ActiveRecord::Base
 
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
-    return 'must be xml file' if schema.content_type != 'text/xml'
+    return 'must be xml file' unless schema.content_type =~ /xml/
     begin
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
@@ -355,7 +355,7 @@ class Project < ActiveRecord::Base
 
   def self.validate_ui_schema(schema)
     return "can't be blank" if schema.blank?
-    return 'must be xml file' if schema.content_type != 'text/xml'
+    return 'must be xml file' unless schema.content_type =~ /xml/
     begin
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
