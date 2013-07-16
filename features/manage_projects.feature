@@ -112,15 +112,15 @@ Feature: Manage projects
     | field       | value                      | error                   |
     | Data Schema |                            | can't be blank          |
     | Data Schema | garbage                    | must be xml file        |
-    | Data Schema | data_schema_error1.xml     | invalid xml at line 0   |
+    | Data Schema | data_schema_error1.xml     | invalid xml at line   |
     | UI Schema   |                            | can't be blank          |
     | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml at line 0      |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml at line      |
     | Validation Schema   | garbage                | must be xml file       |
-    | Validation Schema   | data_schema_error1.xml | invalid xml at line 0  |
+    | Validation Schema   | data_schema_error1.xml | invalid xml at line  |
     | UI Logic    |                            | can't be blank          |
     | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file at line 1 |
+    | Arch16n     | faims_Project_2.properties | invalid properties file at line |
 
   Scenario: Upload Project
     Given I am on the home page
@@ -259,11 +259,11 @@ Feature: Manage projects
   Examples:
     | field       | value                      | error                   |
     | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml at line 0   |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml at line   |
     | Validation Schema   | garbage                | must be xml file    |
-    | Validation Schema   | data_schema_error1.xml | invalid xml at line 0 |
+    | Validation Schema   | data_schema_error1.xml | invalid xml at line |
     | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file at line 1|
+    | Arch16n     | faims_Project_2.properties | invalid properties file at line|
 
   Scenario: Pull a list of projects
     Given I have projects

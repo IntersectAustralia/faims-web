@@ -26,7 +26,7 @@ And /^I have project "([^"]*)"$/ do |name|
 end
 
 Then /^I should see "([^"]*)" with error "([^"]*)"$/ do |field, error|
-  page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and text()=\"#{error}\"]")
+  page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and contains(text(),\"#{error}\")]")
 end
 
 Given /^I have projects$/ do |table|
