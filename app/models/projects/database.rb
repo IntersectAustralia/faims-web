@@ -268,17 +268,38 @@ class Database
     verbs
   end
 
-  def add_arch_ent_member(relationshipid,userid, uuid, verb)
+  def get_arch_ent_rel_associations(uuid, limit, offset)
+    params = {
+        uuid:uuid,
+        limit:limit,
+        offset:offset
+    }
+    rels = @db.execute(WebQuery.get_relationships_for_arch_ent, params)
+    rels
+  end
+
+  def get_non_arch_ent_rel_associations(uuid, query, limit, offset)
+    params = {
+        uuid:uuid,
+        limit:limit,
+        query:query,
+        offset:offset
+    }
+    rels = @db.execute(WebQuery.get_relationships_not_belong_to_arch_ent, params)
+    rels
+  end
+
+  def add_member(relationshipid,userid, uuid, verb)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, userid, verb)
       @project.db_mgr.make_dirt
     end
   end
 
-  def delete_arch_ent_member(relationshipid,userid, uuid)
+  def delete_member(relationshipid,userid, uuid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid, userid)
-      @project.make_dirt
+      @project.db_mgr.make_dirt
     end
   end
 

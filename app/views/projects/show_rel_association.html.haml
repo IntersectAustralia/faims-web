@@ -1,0 +1,40 @@
+- title @project.name + " - Archaeological Entity Relationship Associations"
+.content
+  - if !@relationships.nil? and !@relationships.empty?
+    - prev_id = @relationships[0][0]
+    - id_array = []
+    - array = []
+    - for relationship in @relationships
+      - if prev_id != relationship[0]
+        - id_array << array
+        - array = []
+        - prev_id = relationship[0]
+      - array << relationship
+    - id_array << array
+    .records
+      - for id_group in id_array
+        %ul.inner
+          %input{:type => 'button',:id => 'remove-member', :class => 'remove-member ui-icon ui-icon-circle-minus', :src=> remove_arch_ent_member_path(@project)+'?relationshipid='+id_group[0][0].to_s+'&uuid='+session[:uuid].to_s}
+          - for ids in id_group
+            %li
+              %a{:href => edit_rel_records_path(@project,ids[0])}
+                =ids[2].to_s + ": " + ids[3].to_s
+    %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
+  -else
+    %p No Members Found
+    %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
+-if !@uuid.nil? and !@uuid.empty?
+  .footer.search
+    - if (session[:prev_offset] >= 0)
+      %form{:action => show_rel_members_path, :method => "get"}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
+        %input{:type => 'submit', :value => "Previous", :class => 'btn'}
+    %form{:action => show_rel_members_path, :method => "get"}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
+      %input{:type => 'submit', :value => "Next", :class => 'btn'}
