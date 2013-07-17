@@ -78,18 +78,29 @@ class Database
 
   def update_arch_entity_attribute(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id)
-      measure.length.times do |i|
-        if vocab_id.blank?
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime,parenttimestamp[0][0])
-        else
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime,parenttimestamp[0][0])
-        end
 
-        validate_aent_value(uuid, currenttime, attribute_id) unless ignore_errors
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      (0..(freetext.length-1)).each do |i|
+
+        params = {
+            uuid:uuid,
+            userid:userid,
+            attributeid:attribute_id,
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            measure:measure[i],
+            freetext:freetext[i],
+            certainty:certainty[i],
+            valuetimestamp:timestamp
+        }
+
+        @db.execute(WebQuery.insert_arch_entity_attribute, params)
+
       end
+
+      validate_aent_value(uuid, timestamp, attribute_id) unless ignore_errors
+
       @project.db_mgr.make_dirt
     end
   end
@@ -100,15 +111,34 @@ class Database
 
   def insert_updated_arch_entity(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_arch_entity, userid, currenttime, uuid)
-      vocab_id.length.times do |i|
-        parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id[i-1])
-        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
-        validate_aent_value(uuid, currenttime, attribute_id[i-1])
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          aenttimestamp:timestamp
+      }
+
+      @db.execute(WebQuery.insert_arch_entity, params)
+
+      (0..(freetext.length-1)).each do |i|
+        params = {
+            uuid:uuid,
+            userid:userid,
+            attributeid:attribute_id[i],
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            measure:measure[i],
+            freetext:freetext[i],
+            certainty:certainty[i],
+            valuetimestamp:timestamp
+        }
+
+        @db.execute(WebQuery.insert_arch_entity_attribute, params)
+
+        validate_aent_value(uuid, timestamp, attribute_id[i])
       end
-      
+
       @project.db_mgr.make_dirt
     end
   end
@@ -130,12 +160,29 @@ class Database
     changes
   end
 
-  def revert_arch_ent_to_timestamp(uuid,userid, timestamp)
+  def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_arch_ent_at_timestamp, userid, currenttime, uuid, timestamp)
-      @db.execute(WebQuery.insert_arch_ent_attributes_at_timestamp, userid,currenttime, uuid, timestamp)
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          aenttimestamp:timestamp,
+          timestamp: revert_timestamp
+      }
+
+      @db.execute(WebQuery.insert_arch_ent_at_timestamp, params)
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          valuetimestamp:timestamp,
+          timestamp: revert_timestamp
+      }
+
+      @db.execute(WebQuery.insert_arch_ent_attributes_at_timestamp, params)
+
       @project.db_mgr.make_dirt
     end
   end
@@ -143,7 +190,13 @@ class Database
   def delete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_arch_entity, userid, uuid)
+
+      params = {
+          uuid:uuid,
+          userid:userid
+      }
+
+      @db.execute(WebQuery.delete_arch_entity, params)
       @project.db_mgr.make_dirt
     end
   end
@@ -166,18 +219,26 @@ class Database
 
   def update_rel_attribute(relationshipid, userid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id)
-      freetext.length.times do |i|
-        if vocab_id.blank?
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
-        else
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
-        end
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      (0..(freetext.length-1)).each do |i|
+
+        params = {
+            relationshipid:relationshipid,
+            userid:userid,
+            attributeid:attribute_id,
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            freetext:freetext[i],
+            certainty:certainty[i],
+            relnvaluetimestamp:timestamp
+        }
+
+        @db.execute(WebQuery.insert_relationship_attribute, params)
       end
 
-      validate_reln_value(relationshipid, currenttime, attribute_id) unless ignore_errors
+      validate_reln_value(relationshipid, timestamp, attribute_id) unless ignore_errors
 
       @project.db_mgr.make_dirt
     end
@@ -189,15 +250,32 @@ class Database
 
   def insert_updated_rel(relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_relationship, userid, currenttime, relationshipid)
-      vocab_id.length.times do |i|
-        parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id[i-1])
-        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
-        validate_reln_value(relationshipid, currenttime, attribute_id[i-1])
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          relationshipid:relationshipid,
+          userid:userid,
+          relntimestamp:timestamp
+      }
+
+      @db.execute(WebQuery.insert_relationship, params)
+
+      (0..(freetext.length-1)).each do |i|
+        params = {
+            relationshipid:relationshipid,
+            userid:userid,
+            attributeid:attribute_id[i],
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            freetext:freetext[i],
+            certainty:certainty[i],
+            relnvaluetimestamp:timestamp
+        }
+
+        @db.execute(WebQuery.insert_relationship_attribute, params)
+
+        validate_reln_value(relationshipid, timestamp, attribute_id[i])
       end
-      
 
       @project.db_mgr.make_dirt
     end
@@ -220,12 +298,29 @@ class Database
     changes
   end
 
-  def revert_rel_to_timestamp(relid, userid, timestamp)
+  def revert_rel_to_timestamp(relid, userid, revert_timestamp)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_rel_at_timestamp, userid, currenttime, relid, timestamp)
-      @db.execute(WebQuery.insert_rel_attributes_at_timestamp, userid,currenttime, relid, timestamp)
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          relationshipid:relid,
+          userid:userid,
+          relntimestamp:timestamp,
+          timestamp: revert_timestamp
+      }
+
+      @db.execute(WebQuery.insert_rel_at_timestamp, params)
+
+      params = {
+          relationshipid:relid,
+          userid:userid,
+          relnvaluetimestamp:timestamp,
+          timestamp: revert_timestamp
+      }
+
+      @db.execute(WebQuery.insert_rel_attributes_at_timestamp, params)
+
       @project.db_mgr.make_dirt
     end
   end
@@ -233,7 +328,14 @@ class Database
   def delete_relationship(relationshipid, userid)
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_relationship, userid, relationshipid)
+
+      params = {
+          relationshipid:relationshipid,
+          userid:userid
+      }
+
+      @db.execute(WebQuery.delete_relationship, params)
+
       @project.db_mgr.make_dirt
     end
   end
@@ -268,16 +370,41 @@ class Database
     verbs
   end
 
-  def add_arch_ent_member(relationshipid,userid, uuid, verb)
+  def add_arch_ent_member(relationshipid, userid, uuid, verb)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, userid, verb)
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          relationshipid:relationshipid,
+          userid:userid,
+          verb:verb,
+          aentrelntimestamp:timestamp
+      }
+
+      @db.execute(WebQuery.insert_arch_entity_relationship, params)
+
       @project.db_mgr.make_dirt
     end
   end
 
-  def delete_arch_ent_member(relationshipid,userid, uuid)
+  def delete_arch_ent_member(relationshipid, userid, uuid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid, userid)
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          relationshipid:relationshipid,
+          userid:userid,
+          aentrelntimestamp:timestamp
+      }
+
+      @db.execute(WebQuery.delete_arch_entity_relationship, params)
+
       @project.make_dirt
     end
   end
