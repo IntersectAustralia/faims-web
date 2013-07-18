@@ -85,6 +85,7 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
   end
 
   def list_typed_arch_ent_records
@@ -92,12 +93,15 @@ class ProjectsController < ApplicationController
     limit = 25
     type = params[:type]
     offset = params[:offset]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    p show_deleted
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_arch_ent_records'
-    @uuid = @project.db.load_arch_entity(type,limit,offset)
+    @uuid = @project.db.load_arch_entity(type,limit,offset, show_deleted)
 
     @entity_dirty_map = {}
     @uuid.each do |row|
@@ -116,6 +120,7 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
   end
 
   def show_arch_ent_records
@@ -123,12 +128,14 @@ class ProjectsController < ApplicationController
     limit = 25
     query = params[:query]
     offset = params[:offset]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:query] = query
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_arch_ent_records'
-    @uuid = @project.db.search_arch_entity(limit,offset,query)
+    @uuid = @project.db.search_arch_entity(limit,offset,query,show_deleted)
 
     @entity_dirty_map = {}
     @uuid.each do |row|
@@ -186,11 +193,28 @@ class ProjectsController < ApplicationController
     uuid = params[:uuid]
     @project.db.delete_arch_entity(uuid,current_user.id)
 
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
     end
+
+  end
+
+  def undelete_arch_ent_records
+    @project = Project.find(params[:id])
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
+
+    uuid = params[:uuid]
+    @project.db.undelete_arch_entity(uuid,current_user.id)
+
+    flash[:notice] = 'Successfully restore arch entity'
+    redirect_to edit_arch_ent_records_path(@project,uuid)
 
   end
 
@@ -216,11 +240,12 @@ class ProjectsController < ApplicationController
     @project.db.delete_arch_entity(params[:deleted_id],current_user.id)
 
     @project.db.insert_updated_arch_entity(params[:uuid],current_user.id, params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
       return
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
       return
     end
   end
@@ -252,6 +277,7 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
   end
 
   def list_typed_rel_records
@@ -259,12 +285,14 @@ class ProjectsController < ApplicationController
     limit = 25
     type=params[:type]
     offset = params[:offset]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_rel_records'
-    @relationshipid = @project.db.load_rel(type,limit,offset)
+    @relationshipid = @project.db.load_rel(type,limit,offset,show_deleted)
 
     @rel_dirty_map = {}
     @relationshipid.each do |row|
@@ -282,6 +310,7 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
   end
 
   def show_rel_records
@@ -290,13 +319,15 @@ class ProjectsController < ApplicationController
     query = params[:query]
     offset = params[:offset]
     relationshipid = params[:relationshipid]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:relationshipid] = relationshipid
     session[:query] = query
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_rel_records'
-    @relationshipid = @project.db.search_rel(limit,offset,query)
+    @relationshipid = @project.db.search_rel(limit,offset,query,show_deleted)
 
     @rel_dirty_map = {}
     @relationshipid.each do |row|
@@ -366,11 +397,26 @@ class ProjectsController < ApplicationController
 
     relationshipid = params[:relationshipid]
     @project.db.delete_relationship(relationshipid,current_user.id)
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
     end
+  end
+
+  def undelete_rel_records
+    @project = Project.find(params[:id])
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
+
+    relationshipid = params[:relationshipid]
+    @project.db.undelete_relationship(relationshipid,current_user.id)
+    flash[:notice] = 'Successfully restore relationship'
+    redirect_to edit_rel_records_path(@project,relationshipid)
   end
 
   def show_rel_members
@@ -525,11 +571,12 @@ class ProjectsController < ApplicationController
     @project.db.delete_relationship(params[:deleted_id],current_user.id)
 
     @project.db.insert_updated_rel(params[:rel_id],current_user.id, params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
       return
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
       return
     end
   end

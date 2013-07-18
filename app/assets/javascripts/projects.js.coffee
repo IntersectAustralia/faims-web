@@ -211,7 +211,7 @@ compare_records = ->
   )
   return
 
-delete_records = ->
+delete_undelete_records = ->
   $('#delete-record').one("click",
     ->
       $(this).click(
@@ -219,6 +219,14 @@ delete_records = ->
           return false
       )
       return
+  )
+  $('#undelete-record').one("click",
+  ->
+    $(this).click(
+      =>
+        return false
+    )
+    return
   )
   return
 
@@ -412,6 +420,14 @@ user_management = ->
   )
   return
 
+show_hide_deleted = ->
+  $('#show-hide-deleted').click(
+    ->
+      $('#show-hide-deleted-form').submit()
+      return false
+  )
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -420,12 +436,13 @@ $(document).ready(
     compare_records()
     compare_input_checked_handler()
     aent_rel_management()
-    delete_records()
+    delete_undelete_records()
     download_attached_file()
     ignore_error_records()
     merge_record_management()
     history_management()
     vocab_management()
     user_management()
+    show_hide_deleted()
     return
 )

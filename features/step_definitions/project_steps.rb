@@ -534,6 +534,22 @@ When(/^I should have user for project$/) do |table|
   end
 end
 
+Then(/^I should see records$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//a[contains(text(),\"#{value}\")]")
+    end
+  end
+end
+
+When(/^I should not see records$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should_not have_xpath("//a[contains(text(),\"#{value}\")]")
+    end
+  end
+end
+
 def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')

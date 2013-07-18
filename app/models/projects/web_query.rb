@@ -4,7 +4,7 @@ module WebQuery
 
   def self.load_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, archentity.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -48,9 +48,54 @@ EOF
     )
   end
 
+  def self.load_arch_entities_include_deleted
+    cleanup_query(<<EOF
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, archentity.deleted
+    FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
+            FROM archentity
+            JOIN aentvalue USING (uuid)
+            JOIN idealaent using (aenttypeid, attributeid)
+           WHERE isIdentifier = 'true'
+             AND uuid IN (SELECT uuid
+                            FROM (SELECT uuid, max(aenttimestamp) as aenttimestamp, deleted as entDel
+                                    FROM archentity
+                                WHERE aenttypeid = ?
+                                GROUP BY uuid, aenttypeid
+                                  HAVING max(aenttimestamp)
+                                     )
+                            JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp
+                                    FROM aentvalue
+                                  WHERE deleted is null
+                                GROUP BY uuid
+                                  HAVING max(valuetimestamp)
+                                    )
+                           USING (uuid)
+                           GROUP BY uuid
+                        ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                        LIMIT ?
+                        OFFSET ?
+                      )
+        GROUP BY uuid, attributeid
+          HAVING MAX(ValueTimestamp)
+             AND MAX(AEntTimestamp)
+             )
+    JOIN attributekey using (attributeid)
+    JOIN aentvalue using (uuid, attributeid, valuetimestamp)
+    JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+    JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+    JOIN archentity using (uuid, aenttimestamp)
+    JOIN aenttype using (aenttypeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+WHERE aentvalue.deleted is null
+group by uuid, attributeid, valuetimestamp
+ORDER BY max(tstamp,astamp) desc, uuid, attributename;
+EOF
+    )
+  end
+
   def self.load_all_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, archentity.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -91,9 +136,51 @@ EOF
     )
   end
 
+  def self.load_all_arch_entities_include_deleted
+    cleanup_query(<<EOF
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, archentity.deleted
+    FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
+            FROM archentity
+            JOIN aentvalue USING (uuid)
+            JOIN idealaent using (aenttypeid, attributeid)
+           WHERE isIdentifier = 'true'
+             AND uuid IN (SELECT uuid
+                            FROM (SELECT uuid, aenttypeid, max(aenttimestamp) as aenttimestamp, deleted as entDel
+                                    FROM archentity
+                                GROUP BY uuid, aenttypeid
+                                  HAVING max(aenttimestamp)
+                                     )
+                            JOIN (SELECT uuid, max(valuetimestamp) as valuetimestamp, group_concat(deleted) as valDel, count(*) as foo
+                                    FROM aentvalue
+                                GROUP BY uuid
+                                  HAVING max(valuetimestamp)
+                                    )
+                           USING (uuid)
+                        ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                        LIMIT ?
+                        OFFSET ?
+                      )
+        GROUP BY uuid, attributeid
+          HAVING MAX(ValueTimestamp)
+             AND MAX(AEntTimestamp)
+             )
+    JOIN attributekey using (attributeid)
+    JOIN aentvalue using (uuid, attributeid, valuetimestamp)
+    JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+    JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+    JOIN archentity using (uuid, aenttimestamp)
+    JOIN aenttype using (aenttypeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+WHERE aentvalue.deleted is null
+group by uuid, attributeid, valuetimestamp
+ORDER BY max(tstamp,astamp) desc, uuid, attributename;
+EOF
+    )
+  end
+
   def self.search_arch_entity
     cleanup_query(<<EOF
-SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, aentvalue.deleted
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, archentity.deleted
     FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
             FROM archentity
             JOIN aentvalue USING (uuid)
@@ -139,21 +226,67 @@ EOF
     )
   end
 
+  def self.search_arch_entity_include_deleted
+    cleanup_query(<<EOF
+SELECT uuid, aenttypename, attributename, coalesce(group_concat(measure || vocabname), group_concat(vocabname, ', '), group_concat(measure, ', '), group_concat(freetext, ', ')) AS response, vocabid, attributeid, astamp, archentity.deleted
+    FROM (SELECT uuid, attributeid, valuetimestamp, aenttimestamp
+            FROM archentity
+            JOIN aentvalue USING (uuid)
+            JOIN idealaent using (aenttypeid, attributeid)
+           WHERE isIdentifier = 'true'
+             AND uuid IN (SELECT distinct uuid
+                            FROM (SELECT uuid, aenttypeid, max(aenttimestamp) as aenttimestamp, deleted as entDel
+                                    FROM archentity
+                                GROUP BY uuid, aenttypeid
+                                  HAVING max(aenttimestamp)
+                                     )
+                            JOIN (select uuid, valuetimestamp
+                                    FROM (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp
+                                            FROM aentvalue
+                                        GROUP BY uuid, attributeid
+                                          HAVING max(valuetimestamp))
+                                  JOIN aentvalue using (uuid, attributeid, valuetimestamp)
+                                  LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                                 WHERE (freetext LIKE '%'||?||'%'
+                                    OR measure LIKE '%'||?||'%'
+                                    OR vocabname LIKE '%'||?||'%')
+                                   AND deleted is null
+                                  ) USING (uuid)
+                        ORDER BY max(valuetimestamp, aenttimestamp) desc, uuid
+                        LIMIT ?
+                        OFFSET ?
+                      )
+        GROUP BY uuid, attributeid
+          HAVING MAX(ValueTimestamp)
+             AND MAX(AEntTimestamp))
+    JOIN attributekey using (attributeid)
+    JOIN aentvalue using (uuid, attributeid, valuetimestamp)
+    JOIN (SELECT uuid, max(valuetimestamp) AS tstamp FROM aentvalue GROUP BY uuid) USING (uuid)
+    JOIN (SELECT uuid, max(aenttimestamp) AS astamp FROM archentity GROUP BY uuid) USING (uuid)
+    JOIN archentity using (uuid, aenttimestamp)
+    JOIN aenttype using (aenttypeid)
+    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+   WHERE aentvalue.deleted is NULL
+GROUP BY uuid, attributeid, valuetimestamp
+ORDER BY max(tstamp,astamp) DESC, uuid, attributename;
+EOF
+    )
+  end
+
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, isDirty, isDirtyReason
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, isDirty, isDirtyReason, archDeleted
     FROM aentvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-    JOIN (SELECT uuid, attributeid, valuetimestamp
+    JOIN (SELECT uuid, attributeid, valuetimestamp, archentity.deleted as archDeleted, aentvalue.deleted as valueDeleted
             FROM aentvalue
             JOIN archentity USING (uuid)
-           WHERE archentity.deleted is NULL
-           AND uuid = ?
+           WHERE uuid = ?
         GROUP BY uuid, attributeid
           HAVING MAX(ValueTimestamp)
              AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-    WHERE deleted is NULl
+    WHERE valueDeleted is NULL
  ORDER BY uuid, attributename ASC;
 EOF
     )
@@ -207,13 +340,13 @@ EOF
     )
   end
 
-  def self.delete_arch_entity
+  def self.delete_or_undelete_arch_entity
     cleanup_query(<<EOF
 insert into archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
-                 select uuid, ? , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum, aentTimestamp
+                 select uuid, :userid , AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, :deleted , v.versionnum, aentTimestamp
                   from (select uuid, max(aenttimestamp) as aenttimestamp
                         from archentity
-                       where uuid = ?
+                       where uuid = :uuid
                        group by uuid)
                   JOIN archentity using (uuid, aenttimestamp),  (select versionnum
                            from version
@@ -460,10 +593,10 @@ EOF
 
   def self.load_relationships
     cleanup_query(<<EOF
-SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, astamp
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, astamp, relationship.deleted
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
-            FROM relationship
-            JOIN relnvalue USING (relationshipid)
+            FROM relationship join (select relationshipid, max(relntimestamp) as relntimestamp from relationship group by relationshipid ) using (relationshipid, relntimestamp)
+            JOIN relnvalue USING (relationshipid) join  (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp from relnvalue group by relationshipid, attributeid ) using (relationshipid, attributeid, relnvaluetimestamp)
             JOIN idealreln using (relntypeid, attributeid)
            WHERE isIdentifier = 'true'
              AND relationshipid in (SELECT relationshipid
@@ -501,12 +634,54 @@ EOF
     )
   end
 
+  def self.load_relationships_include_deleted
+    cleanup_query(<<EOF
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, astamp, relationship.deleted
+   FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
+            FROM relationship join (select relationshipid, max(relntimestamp) as relntimestamp from relationship group by relationshipid ) using (relationshipid, relntimestamp)
+            JOIN relnvalue USING (relationshipid) join  (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp from relnvalue group by relationshipid, attributeid ) using (relationshipid, attributeid, relnvaluetimestamp)
+            JOIN idealreln using (relntypeid, attributeid)
+           WHERE isIdentifier = 'true'
+             AND relationshipid in (SELECT relationshipid
+                                      FROM (SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted
+                                              FROM relationship
+                                          WHERE relntypeid = ?
+                                          GROUP BY relationshipid
+                                            HAVING max(relntimestamp))
+                                      JOIN (SELECT relationshipid, max(relnvaluetimestamp) as relnvaluetimestamp
+                                              FROM relnvalue
+                                             WHERE deleted is null
+                                          GROUP BY relationshipid, attributeid
+                                            HAVING max(relnvaluetimestamp)
+                                        ) USING (relationshipid)
+                                  GROUP BY relationshipid
+                                  ORDER BY max(relnvaluetimestamp, relntimestamp) desc, relationshipid
+                                  LIMIT ?
+                                  OFFSET ?
+                                    )
+        GROUP BY relationshipid, attributeid
+          HAVING MAX(relntimestamp)
+             AND MAX(relnvaluetimestamp))
+   JOIN relationship using (relationshipid, relntimestamp)
+   JOIN relntype using (relntypeid)
+   JOIN attributekey using (attributeid)
+   JOIN relnvalue using (relationshipid, relnvaluetimestamp, attributeid)
+   LEFT OUTER JOIN vocabulary using (vocabid, attributeid)
+   JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)
+   JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)
+  WHERE relnvalue.deleted is NULL
+GROUP BY relationshipid, attributeid, relnvaluetimestamp
+ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;
+EOF
+    )
+  end
+
   def self.load_all_relationships
     cleanup_query(<<EOF
-SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp, relationship.deleted
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
-            FROM relationship
-            JOIN relnvalue USING (relationshipid)
+            FROM relationship join (select relationshipid, max(relntimestamp) as relntimestamp from relationship group by relationshipid ) using (relationshipid, relntimestamp)
+            JOIN relnvalue USING (relationshipid) join  (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp from relnvalue group by relationshipid, attributeid ) using (relationshipid, attributeid, relnvaluetimestamp)
             JOIN idealreln using (relntypeid, attributeid)
            WHERE isIdentifier = 'true'
              AND relationshipid in (SELECT relationshipid
@@ -543,12 +718,53 @@ EOF
     )
   end
 
+  def self.load_all_relationships_include_deleted
+    cleanup_query(<<EOF
+SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp, relationship.deleted
+   FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
+            FROM relationship join (select relationshipid, max(relntimestamp) as relntimestamp from relationship group by relationshipid ) using (relationshipid, relntimestamp)
+            JOIN relnvalue USING (relationshipid) join  (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp from relnvalue group by relationshipid, attributeid ) using (relationshipid, attributeid, relnvaluetimestamp)
+            JOIN idealreln using (relntypeid, attributeid)
+           WHERE isIdentifier = 'true'
+             AND relationshipid in (SELECT relationshipid
+                                      FROM (SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted
+                                              FROM relationship
+                                          GROUP BY relationshipid
+                                            HAVING max(relntimestamp))
+                                      JOIN (SELECT relationshipid, max(relnvaluetimestamp) as relnvaluetimestamp
+                                              FROM relnvalue
+                                             WHERE deleted is null
+                                          GROUP BY relationshipid, attributeid
+                                            HAVING max(relnvaluetimestamp)
+                                        ) USING (relationshipid)
+                                  GROUP BY relationshipid
+                                  ORDER BY max(relnvaluetimestamp, relntimestamp) desc, relationshipid
+                                  LIMIT ?
+                                  OFFSET ?
+                                    )
+        GROUP BY relationshipid, attributeid
+          HAVING MAX(relntimestamp)
+             AND MAX(relnvaluetimestamp))
+   JOIN relationship using (relationshipid, relntimestamp)
+   JOIN relntype using (relntypeid)
+   JOIN attributekey using (attributeid)
+   JOIN relnvalue using (relationshipid, relnvaluetimestamp, attributeid)
+   LEFT OUTER JOIN vocabulary using (vocabid, attributeid)
+   JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)
+   JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)
+  WHERE relnvalue.deleted is NULL
+GROUP BY relationshipid, attributeid, relnvaluetimestamp
+ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;
+EOF
+    )
+  end
+
   def self.search_relationship
     cleanup_query(<<EOF
-SELECT relationshipid,RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp
+SELECT relationshipid,RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp, relationship.deleted
    FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
-            FROM relationship
-            JOIN relnvalue USING (relationshipid)
+            FROM relationship join (select relationshipid, max(relntimestamp) as relntimestamp from relationship group by relationshipid ) using (relationshipid, relntimestamp)
+            JOIN relnvalue USING (relationshipid) join  (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp from relnvalue group by relationshipid, attributeid ) using (relationshipid, attributeid, relnvaluetimestamp)
             JOIN idealreln using (relntypeid, attributeid)
            WHERE isIdentifier = 'true'
              AND relationshipid in (SELECT distinct relationshipid
@@ -589,22 +805,67 @@ EOF
     )
   end
 
+  def self.search_relationship_include_deleted
+    cleanup_query(<<EOF
+SELECT relationshipid,RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid,astamp, relationship.deleted
+   FROM ( SELECT relationshipid, attributeid, relntimestamp, relnvaluetimestamp
+            FROM relationship join (select relationshipid, max(relntimestamp) as relntimestamp from relationship group by relationshipid ) using (relationshipid, relntimestamp)
+            JOIN relnvalue USING (relationshipid) join  (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp from relnvalue group by relationshipid, attributeid ) using (relationshipid, attributeid, relnvaluetimestamp)
+            JOIN idealreln using (relntypeid, attributeid)
+           WHERE isIdentifier = 'true'
+             AND relationshipid in (SELECT distinct relationshipid
+                                      FROM (SELECT relationshipid, max(relntimestamp) as relntimestamp, deleted as relnDeleted
+                                              FROM relationship
+                                          GROUP BY relationshipid
+                                            HAVING max(relntimestamp))
+                                      JOIN (SELECT relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+                                              FROM relnvalue
+                                             WHERE deleted is null
+                                          GROUP BY relationshipid, attributeid, vocabid
+                                            HAVING max(relnvaluetimestamp)
+                                        ) USING (relationshipid)
+                                      JOIN relnvalue using (relationshipid, attributeid, relnvaluetimestamp)
+                                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                                       WHERE (freetext LIKE '%'||?||'%'
+                                            OR vocabname LIKE '%'||?||'%')
+                                  GROUP BY relationshipid
+                                  ORDER BY max(relnvaluetimestamp, relntimestamp) desc, relationshipid
+                                  LIMIT ?
+                                  OFFSET ?
+                                    )
+        GROUP BY relationshipid, attributeid
+          HAVING MAX(relntimestamp)
+             AND MAX(relnvaluetimestamp))
+   JOIN relationship using (relationshipid, relntimestamp)
+   JOIN relntype using (relntypeid)
+   JOIN attributekey using (attributeid)
+   JOIN relnvalue using (relationshipid, relnvaluetimestamp, attributeid)
+   LEFT OUTER JOIN vocabulary using (vocabid, attributeid)
+   JOIN (SELECT relationshipid, max(relnvaluetimestamp) AS tstamp FROM relnvalue GROUP BY relationshipid) USING (relationshipid)
+   JOIN (SELECT relationshipid, max(relntimestamp) AS astamp FROM relationship GROUP BY relationshipid) USING (relationshipid)
+  WHERE relnvalue.deleted is NULL
+GROUP BY relationshipid, attributeid, relnvaluetimestamp
+ORDER BY max(tstamp,astamp) desc, relationshipid, attributename;
+EOF
+    )
+  end
+
   def self.get_relationship_attributes
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason, r.deleted
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid
+    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid, relationship.deleted
              FROM relnvalue
              JOIN relationship USING (relationshipid)
-            WHERE relationship.deleted is NULL
-            and relationshipid = ?
+            WHERE relationshipid = ?
          GROUP BY relationshipid, attributeid
            HAVING MAX(relnvaluetimestamp)
               AND MAX(relntimestamp)
-      ) USING (relationshipid, attributeid, relnvaluetimestamp)
+      ) r USING (relationshipid, attributeid, relnvaluetimestamp)
    WHERE relnvalue.deleted is NULL
+
 ORDER BY relationshipid, attributename asc;
 EOF
     )
@@ -646,13 +907,13 @@ EOF
     )
   end
 
-  def self.delete_relationship
+  def self.delete_or_undelete_relationship
     cleanup_query(<<EOF
 insert into relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
-  select RelationshipID, ?, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, 'true', v.versionnum, RelnTimestamp
+  select RelationshipID, :userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, :deleted, v.versionnum, RelnTimestamp
     from (select relationshipid, max(relntimestamp) as RelnTimestamp
             from relationship
-          where relationshipID = ?
+          where relationshipID = :relationshipid
           group by relationshipid
           ) JOIN relationship using (relationshipid, relntimestamp), (select versionnum from version where ismerged = 1 order by versionnum desc limit 1) v;
 EOF

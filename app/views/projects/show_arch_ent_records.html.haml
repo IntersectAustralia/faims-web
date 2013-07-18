@@ -17,9 +17,19 @@
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project), :class => 'btn'
       = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn btn-inverse'
+      - if session[:show_deleted].nil?
+        = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+      - else
+        = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+      %form{:action => show_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}
+        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+        %input{:type => 'hidden', :value => session[:cur_offset], :name => 'offset'}
+        %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+        - if session[:show_deleted].nil?
+          %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
   -else
     %p No Record Found
-    = link_to "Back", search_arch_ent_records_path(@project), :class => 'btn'
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project), :class => 'btn'
 -if !@uuid.empty?
   .footer
     - if (session[:prev_offset] >= 0)
@@ -27,9 +37,11 @@
         %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
         %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
         %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+        %input{:type => 'hidden', :value => session[:show_deleted], :name => 'show_deleted'}
         %input{:type => 'submit', :value => "Previous", :class => 'btn'}
     %form{:action => show_arch_ent_records_path, :method => "get"}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
       %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+      %input{:type => 'hidden', :value => session[:show_deleted], :name => 'show_deleted'}
       %input{:type => 'submit', :value => "Next", :class => 'btn'}

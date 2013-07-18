@@ -4,11 +4,15 @@
   - if !session[:show].nil?
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project,session[:relationshipid])+"?offset=0&relntypeid="+session[:relntypeid].to_s, :class => 'btn'
   -else
+    - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     - if session[:action].eql?('list_typed_arch_ent_records')
-      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset], :class => 'btn'
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_arch_ent_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset]+"&show_deleted="+ show_deleted, :class => 'btn'
     - elsif session[:action].eql?('show_arch_ent_records')
-      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset], :class => 'btn'
-  = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn btn-warning', :id => 'delete-record'
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset]+"&show_deleted="+ show_deleted, :class => 'btn'
+  - if !@attributes[0][12].nil?
+    = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn btn-warning', :id => 'undelete-record'
+  - else
+    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn btn-warning', :id => 'delete-record'
   = link_to "Show Relationship Association", show_rel_association_path(@project,session[:uuid]) + "?offset=0", :class => 'btn'
   = link_to "Show History", show_arch_ent_history_path(@project,session[:uuid]), :class => 'btn'
 .container

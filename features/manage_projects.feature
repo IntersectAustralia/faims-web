@@ -485,6 +485,204 @@ Feature: Manage projects
       | Fred       | Bloggs     |
       | User1      | Last1     |
 
+  Scenario: Show arch entity list not include the deleted value
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    Then I should see records
+      | name            |
+      | entity: Small 2 |
+      | entity: Small 3 |
+      | entity: Small 4 |
+
+  @javascript
+  Scenario: Show arch entity list include the deleted value
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    And I follow "Show Deleted"
+    Then I should see records
+      | name            |
+      | entity: Small 1 |
+      | entity: Small 2 |
+      | entity: Small 3 |
+      | entity: Small 4 |
+
+  Scenario: Delete arch entity
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    Then I select the first record
+    And I follow "Delete"
+    Then I should not see records
+      | name            |
+      | entity: Small 1 |
+      | entity: Small 3 |
+
+  @javascript
+  Scenario: Restore arch entity
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    Then I select the first record
+    And I wait
+    Then I follow "Delete"
+    And I wait
+    Then I follow "Show Deleted"
+    And I wait
+    Then I select the first record
+    And I wait
+    Then I follow "Restore"
+    And I should see "Successfully restore arch entity"
+    Then I follow "Back"
+    And I wait
+    Then I follow "Hide Deleted"
+    And I should not see records
+      | name            |
+      | entity: Small 1 |
+    But I should see records
+      | name            |
+      | entity: Small 3 |
+
+  Scenario: Show relationship list not include the deleted value
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    Then I should see records
+      | name                        |
+      | relationship: AboveBelow 1  |
+      | relationship: AboveBelow 2  |
+      | relationship: AboveBelow 3  |
+
+  @javascript
+  Scenario: Show relationship list include the deleted value
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    And I follow "Show Deleted"
+    Then I should see records
+      | name                        |
+      | relationship: AboveBelow 1  |
+      | relationship: AboveBelow 2  |
+      | relationship: AboveBelow 3  |
+      | relationship: AboveBelow 4  |
+
+  Scenario: Delete relationship
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    Then I select the first record
+    And I follow "Delete"
+    Then I should not see records
+      | name            |
+      | relationship: AboveBelow 2  |
+      | relationship: AboveBelow 4  |
+
+  @javascript
+  Scenario: Restore relationship
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    Then I select the first record
+    And I wait
+    Then I follow "Delete"
+    And I wait
+    Then I follow "Show Deleted"
+    And I wait
+    Then I select the first record
+    And I wait
+    Then I follow "Restore"
+    And I should see "Successfully restore relationship"
+    Then I follow "Back"
+    And I wait
+    Then I follow "Hide Deleted"
+    And I should not see records
+      | name                        |
+      | relationship: AboveBelow 4  |
+    But I should see records
+      | name            |
+      | relationship: AboveBelow 2  |
+
   Scenario: Update arch entity attribute causes validation error
     # TODO
 
@@ -519,4 +717,22 @@ Feature: Manage projects
     # TODO
 
   Scenario: Show relationship with validation errors as normal after validation errors cleared
+    # TODO
+
+  Scenario: Show relationship association for arch ent
+    # TODO
+
+  Scenario: Remove relationship association from arch ent
+    # TODO
+
+  Scenario: Add relationship association to arch ent
+    # TODO
+
+  Scenario: Show arch ent member for relationship
+    # TODO
+
+  Scenario: Remove arch ent member from relationship
+    # TODO
+
+  Scenario: Add arch ent member to relationship
     # TODO

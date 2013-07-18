@@ -45,15 +45,26 @@ class Database
     nil
   end
 
-  def load_arch_entity(type, limit, offset)
-    uuids = type.eql?('all') ?
-      @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
-    uuids
+  def load_arch_entity(type, limit, offset, show_deleted)
+    if show_deleted
+      uuids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_arch_entities_include_deleted, limit, offset) : @db.execute(WebQuery.load_arch_entities_include_deleted, type, limit, offset)
+      uuids
+    else
+      uuids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
+      uuids
+    end
   end
 
-  def search_arch_entity(limit, offset, query)
-    uuids = @db.execute(WebQuery.search_arch_entity, query, query, query, limit, offset)
-    uuids
+  def search_arch_entity(limit, offset, query, show_deleted)
+    if show_deleted
+      uuids = @db.execute(WebQuery.search_arch_entity_include_deleted, query, query, query, limit, offset)
+      uuids
+    else
+      uuids = @db.execute(WebQuery.search_arch_entity, query, query, query, limit, offset)
+      uuids
+    end
   end
 
   def get_arch_entity_attributes(uuid)
@@ -143,20 +154,49 @@ class Database
   def delete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_arch_entity, userid, uuid)
+      params = {
+          userid:userid,
+          deleted:'true',
+          uuid:uuid
+      }
+      @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
       @project.db_mgr.make_dirt
     end
   end
 
-  def load_rel(type, limit, offset)
-    relationshipids = type.eql?('all') ?
-      @db.execute(WebQuery.load_all_relationships, limit, offset) : @db.execute(WebQuery.load_relationships, type, limit, offset)
-    relationshipids
+  def undelete_arch_entity(uuid, userid)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      params = {
+          userid:userid,
+          deleted:nil,
+          uuid:uuid
+      }
+      @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
+      @project.db_mgr.make_dirt
+    end
   end
 
-  def search_rel(limit, offset, query)
-    relationshipids = @db.execute(WebQuery.search_relationship, query, query, limit, offset)
-    relationshipids
+  def load_rel(type, limit, offset, show_deleted)
+    if show_deleted
+      relationshipids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_relationships_include_deleted, limit, offset) : @db.execute(WebQuery.load_relationships_include_deleted, type, limit, offset)
+      relationshipids
+    else
+      relationshipids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_relationships, limit, offset) : @db.execute(WebQuery.load_relationships, type, limit, offset)
+      relationshipids
+    end
+  end
+
+  def search_rel(limit, offset, query, show_deleted)
+    if show_deleted
+      relationshipids = @db.execute(WebQuery.search_relationship_include_deleted, query, query, limit, offset)
+      relationshipids
+    else
+      relationshipids = @db.execute(WebQuery.search_relationship, query, query, limit, offset)
+      relationshipids
+    end
   end
 
   def get_rel_attributes(relationshipid)
@@ -233,7 +273,25 @@ class Database
   def delete_relationship(relationshipid, userid)
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_relationship, userid, relationshipid)
+      params = {
+          userid:userid,
+          deleted:'true',
+          relationshipid:relationshipid
+      }
+      @db.execute(WebQuery.delete_or_undelete_relationship, params)
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def undelete_relationship(relationshipid, userid)
+    @project.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      params = {
+          userid:userid,
+          deleted:nil,
+          relationshipid:relationshipid
+      }
+      @db.execute(WebQuery.delete_or_undelete_relationship, params)
       @project.db_mgr.make_dirt
     end
   end

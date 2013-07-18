@@ -9,8 +9,10 @@
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
               =uuids[2].to_s + ": " + uuids[3].to_s
-              - if @entity_dirty_map[uuids[0]]
-                .label.label-important='review'
+            - if @entity_dirty_map[uuids[0]]
+              .label.label-important='review'
+            - if !uuids[7].nil?
+              = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
         %input{:type => 'hidden', :id => 'identifier', :value=> identifier * ", "}
     - else
       %input{:type => 'checkbox', :value=> uuid_group[0][0]}
@@ -20,6 +22,9 @@
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
               =uuids[2].to_s + ": " + uuids[3].to_s
-              - if @entity_dirty_map[uuids[0]]
-                .label.label-important='review'
+              - if !uuids[7].nil?
+                = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
+              -else
+                - if @entity_dirty_map[uuids[0]]
+                  .label.label-important='review'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
