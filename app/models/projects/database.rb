@@ -507,8 +507,8 @@ class Database
   def create_app_database_from_version(toDB, version)
     #@project.with_lock do
 
-      db = SpatialiteDB.new(toDB)
-      db.execute('select initspatialmetadata();')
+      generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+      FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB # clone template db
       
       @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
 
@@ -634,7 +634,7 @@ class Database
   def self.generate_spatial_ref_list
     temp = Tempfile.new('db')
     db = SpatialiteDB.new(temp.path)
-    db.execute('select initspatialmetadata()')
+    db.execute("SELECT InitSpatialMetaData();")
     result = db.execute("select srid || ' / ' || ref_sys_name, auth_srid from spatial_ref_sys;")
     FileUtils.rm Rails.root.join('lib/assets/spatial_ref_list.json') if File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')
     File.open(Rails.root.join('lib/assets/spatial_ref_list.json'), 'w') do |f|
