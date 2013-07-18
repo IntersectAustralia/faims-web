@@ -183,8 +183,8 @@ JOIN archentity USING (uuid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v,
-  (SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
           aenttimestamp
    FROM archentity
    JOIN
@@ -206,8 +206,8 @@ FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v,
-  (SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
           valuetimestamp
    FROM aentvalue
    JOIN
@@ -254,8 +254,8 @@ JOIN archentity USING (uuid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v,
-  (SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
           aenttimestamp
    FROM archentity
    JOIN
@@ -481,8 +481,8 @@ JOIN
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v,
-  (SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
           aenttimestamp
    FROM archentity
    JOIN
@@ -512,7 +512,7 @@ JOIN
             attributeid HAVING MAX (valuetimestamp)) USING (uuid,
                                                             valuetimestamp,
                                                             attributeid)
-JOIN
+LEFT OUTER JOIN
   (SELECT isforked,
           valuetimestamp,
           uuid,
@@ -704,8 +704,8 @@ JOIN relationship USING (relationshipid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v, (
-SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
        relntimestamp
 FROM relationship
 JOIN
@@ -728,8 +728,8 @@ FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v, (
-SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
        relnvaluetimestamp
 FROM relnvalue
 JOIN
@@ -778,8 +778,8 @@ JOIN relationship USING (relationshipid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v, (
-SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
        relntimestamp
 FROM relationship
 JOIN
@@ -973,8 +973,8 @@ EOF
 
   def self.insert_rel_at_timestamp
     cleanup_query(<<EOF
-INSERT INTO relationship (relationshipid, userid, doi, relntypeid, deleted, versionnum, isDirty, isDirtyReason, isForked, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, relntimestamp)
-SELECT relationshipid, :userid, doi, relntypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.isforked, parent.relntimestamp, GeoSpatialColumnType,GeoSpatialColumn, :relntimestamp
+INSERT INTO relationship (relationshipid, userid, relntypeid, deleted, versionnum, isDirty, isDirtyReason, isForked, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, relntimestamp)
+SELECT relationshipid, :userid, relntypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.isforked, parent.relntimestamp, GeoSpatialColumnType,GeoSpatialColumn, :relntimestamp
 
 FROM relationship
 JOIN
@@ -990,8 +990,8 @@ JOIN
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v, (
-SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
        relntimestamp
 FROM relationship
 JOIN
@@ -1024,7 +1024,7 @@ JOIN
             attributeid HAVING MAX (relnvaluetimestamp)) USING (relationshipid,
                                                             relnvaluetimestamp,
                                                             attributeid)
-JOIN
+LEFT OUTER JOIN
   (SELECT isforked,
           relnvaluetimestamp,
           relationshipid,
@@ -1169,8 +1169,8 @@ FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v, (
-SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
        aentrelntimestamp
 FROM aentreln
 JOIN
@@ -1198,8 +1198,8 @@ FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v, (
-SELECT isforked,
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT isforked,
        aentrelntimestamp
 FROM aentreln
 JOIN
