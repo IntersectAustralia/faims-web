@@ -113,7 +113,7 @@ compare_input_checked_handler = ->
   )
   return
 
-delete_arch_ent_members = ->
+aent_rel_management = ->
   $('input#remove-member').each(
     -> $(this).click(
       ->
@@ -122,28 +122,65 @@ delete_arch_ent_members = ->
         return
     )
   )
-  return
 
-search_arch_ent_members = ->
   $('#search-member').click(
     ->
       window.location = $(this).attr('src')
       return
   )
-  return
 
-add_arch_ent_member = ->
+  $('input[name="rel_id"]').change(
+    ->
+      $relntypeid = $(this).siblings('#relntypeid')
+      $.ajax $relntypeid.attr('src'),
+        type: 'GET'
+        data: {relntypeid: $('#relntypeid').val()}
+        dataType: 'json'
+        success: (data, textStatus, jqXHR) ->
+          $('#verb').find('option').remove()
+          if data.length
+            $.each(data, ->
+              $('#verb').append('<option value="'+ this + '">' + this + '</option>')
+              return
+            )
+            return
+          else
+            return false
+      return
+  )
+
   $('#add-arch-ent').click(
     ->
       selected = $('input[type="radio"]:checked')
       verb = $('#verb').val()
       if selected.length == 0
-        alert('No Archaeological Entity is selected to be added')
+        alert('No arch entity is selected to be added')
         return false
       else
         $.ajax $(this).attr('src'),
           type: 'POST'
           data: {relationshipid: $('#relationshipid').val(), relntypeid: $('#relntypeid').val(), uuid: selected.val(), verb: verb}
+          dataType: 'json'
+          success: (data, textStatus, jqXHR) ->
+            if data.result == "success"
+              window.location = data.url
+              return
+            else
+              return false
+        return
+  )
+
+  $('#add-rel').click(
+    ->
+      selected = $('input[type="radio"]:checked')
+      verb = $('#verb').val()
+      if selected.length == 0
+        alert('No relationship is selected to be added')
+        return false
+      else
+        $.ajax $(this).attr('src'),
+          type: 'POST'
+          data: {relationshipid: selected.val(), uuid: $('#uuid').val(), verb: verb}
           dataType: 'json'
           success: (data, textStatus, jqXHR) ->
             if data.result == "success"
@@ -382,9 +419,7 @@ $(document).ready(
     show_archive_modal_dialog()
     compare_records()
     compare_input_checked_handler()
-    search_arch_ent_members()
-    add_arch_ent_member()
-    delete_arch_ent_members()
+    aent_rel_management()
     delete_records()
     download_attached_file()
     ignore_error_records()

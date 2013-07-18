@@ -25,7 +25,6 @@ Feature: Manage projects
       | Project 2 |
       | Project 3 |
 
-  @javascript
   Scenario: Create a new project
     Given I am on the home page
     And I follow "Show Projects"
@@ -43,7 +42,6 @@ Feature: Manage projects
     And I should be on the projects page
     And I have project files for "Project 1"
 
-  @javascript
   Scenario: Optional validation schema
     Given I am on the home page
     And I follow "Show Projects"
@@ -60,7 +58,6 @@ Feature: Manage projects
     And I should be on the projects page
     And I have project files for "Project 1"
 
-  @javascript
   Scenario: Set srid on project creation
     Given I am on the home page
     And I follow "Show Projects"
@@ -98,7 +95,6 @@ Feature: Manage projects
     | UI Schema   |           | can't be blank |
     | UI Logic    |           | can't be blank |
 
-  @javascript
   Scenario Outline: Cannot create project due to errors
     Given I am on the home page
     And I have project "Project 1"
@@ -116,17 +112,16 @@ Feature: Manage projects
     | field       | value                      | error                   |
     | Data Schema |                            | can't be blank          |
     | Data Schema | garbage                    | must be xml file        |
-    | Data Schema | data_schema_error1.xml     | invalid xml at line 0   |
+    | Data Schema | data_schema_error1.xml     | invalid xml at line   |
     | UI Schema   |                            | can't be blank          |
     | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml at line 0      |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml at line      |
     | Validation Schema   | garbage                | must be xml file       |
-    | Validation Schema   | data_schema_error1.xml | invalid xml at line 0  |
+    | Validation Schema   | data_schema_error1.xml | invalid xml at line  |
     | UI Logic    |                            | can't be blank          |
     | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file at line 1 |
+    | Arch16n     | faims_Project_2.properties | invalid properties file at line |
 
-  @javascript
   Scenario: Upload Project
     Given I am on the home page
     And I follow "Show Projects"
@@ -139,7 +134,6 @@ Feature: Manage projects
     And I should be on the projects page
     And I have project files for "Simple Project"
 
-  @javascript
   Scenario: Upload Project if project already exists should fail
     Given I am on the home page
     And I follow "Show Projects"
@@ -154,7 +148,6 @@ Feature: Manage projects
     And I press "Upload"
     Then I should see "This project already exists in the system"
 
-  @javascript
   Scenario: Upload Project with wrong checksum should fail
     Given I am on the home page
     And I follow "Show Projects"
@@ -165,7 +158,6 @@ Feature: Manage projects
     And I press "Upload"
     Then I should see "Wrong hash sum for the project"
 
-  @javascript
   Scenario: Upload Project with corrupted file should fail
     Given I am on the home page
     And I follow "Show Projects"
@@ -176,7 +168,6 @@ Feature: Manage projects
     And I press "Upload"
     Then I should see "Project failed to upload"
 
-  @javascript
   Scenario: Upload Project with wrong file should fail
     Given I am on the home page
     And I follow "Show Projects"
@@ -226,7 +217,6 @@ Feature: Manage projects
     And I press "Update"
     Then I should see "Successfully updated project"
 
-  @javascript
   Scenario: Edit project and upload correct file
     Given I am on the home page
     And I have project "Project 1"
@@ -241,7 +231,6 @@ Feature: Manage projects
     And I press "Update"
     Then I should see "Successfully updated project"
 
-  @javascript
   Scenario: Edit project and upload correct file so project has correct file
     Given I am on the home page
     And I have project "Project 1"
@@ -254,7 +243,6 @@ Feature: Manage projects
     Then I should see "Successfully updated project"
     And Project "Project 1" should have the same file "faims_Project_1.properties"
 
-  @javascript
   Scenario Outline: Edit project and upload incorrect file
     Given I am on the home page
     And I have project "Project 2"
@@ -271,11 +259,11 @@ Feature: Manage projects
   Examples:
     | field       | value                      | error                   |
     | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml at line 0   |
+    | UI Schema   | ui_schema_error1.xml       | invalid xml at line   |
     | Validation Schema   | garbage                | must be xml file    |
-    | Validation Schema   | data_schema_error1.xml | invalid xml at line 0 |
+    | Validation Schema   | data_schema_error1.xml | invalid xml at line |
     | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file at line 1|
+    | Arch16n     | faims_Project_2.properties | invalid properties file at line|
 
   Scenario: Pull a list of projects
     Given I have projects
@@ -296,7 +284,6 @@ Feature: Manage projects
     Then I automatically download project package "Project 1"
     Then I should download project package file for "Project 1"
 
-  @javascript
   Scenario: See attached files for arch ent
     Given I am on the home page
     And I follow "Show Projects"
@@ -334,7 +321,6 @@ Feature: Manage projects
 #    Then I click file with name "Screenshot_2013-04-09-10-32-04(1).png"
 #    And I should download attached file with name "Screenshot_2013-04-09-10-32-04(1).png"
 
-  @javascript
   Scenario: See attached files for relationship
     Given I am on the home page
     And I follow "Show Projects"

@@ -31,12 +31,14 @@ class ProjectsController < ApplicationController
 
     if valid
 
-      @project.transaction do
+      begin
         @project.save
-
         @project.update_settings(params)
         @project.create_project_from(session[:tmpdir])
-
+      rescue
+        File.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
+        @project.destroy
+      ensure
         FileUtils.remove_entry_secure session[:tmpdir]
       end
 
@@ -388,7 +390,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
-    @project.db.delete_arch_ent_member(relationshipid,current_user.id,uuid)
+    @project.db.delete_member(relationshipid,current_user.id,uuid)
     render :nothing => true
   end
 
@@ -414,9 +416,54 @@ class ProjectsController < ApplicationController
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
-    @project.db.add_arch_ent_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
+    @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0&relntypeid='+params[:relntypeid]} }
+    end
+  end
+
+  def show_rel_association
+    @project = Project.find(params[:id])
+    session[:uuid] = params[:uuid]
+    limit = 25
+    offset = params[:offset]
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:show] = 'show_rel_associations'
+    @relationships = @project.db.get_arch_ent_rel_associations(params[:uuid], limit, offset)
+  end
+
+  def search_rel_association
+    @project = Project.find(params[:id])
+    session[:uuid] = params[:uuid]
+    if params[:search_query].nil?
+      @uuid = nil
+      @status = 'init'
+      session.delete(:search_query)
+    else
+      limit = 25
+      offset = params[:offset]
+      session[:search_query] = params[:search_query]
+      session[:cur_offset] = offset
+      session[:prev_offset] = Integer(offset) - Integer(limit)
+      session[:next_offset] = Integer(offset) + Integer(limit)
+      @relationships = @project.db.get_non_arch_ent_rel_associations(params[:uuid],params[:search_query],limit,offset)
+    end
+  end
+
+  def get_verbs_for_rel_association
+    verbs = @project.db.get_verbs_for_relation(params[:relntypeid])
+    respond_to do |format|
+      format.json { render :json => verbs.to_json }
+    end
+  end
+
+  def add_rel_association
+    @project = Project.find(params[:id])
+    @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
+    respond_to do |format|
+      format.json { render :json => {:result => 'success', :url => show_rel_association_path(@project,params[:uuid])+'?offset=0'} }
     end
   end
 
