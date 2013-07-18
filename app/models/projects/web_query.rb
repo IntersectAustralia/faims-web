@@ -301,9 +301,8 @@ EOF
 
   def self.insert_arch_entity
     cleanup_query(<<EOF
-INSERT INTO archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, aenttimestamp, versionnum, isforked, parenttimestamp)
+INSERT INTO archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, aenttimestamp, versionnum, parenttimestamp)
 SELECT uuid, :userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, :aenttimestamp, v.versionnum,
-                                                                                                  parent.isforked,
                                                                                                   parent.aenttimestamp
 FROM
   (SELECT uuid,
@@ -317,8 +316,7 @@ JOIN archentity USING (uuid,
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-          aenttimestamp
+LEFT OUTER JOIN (SELECT aenttimestamp
    FROM archentity
    JOIN
      (SELECT uuid,
@@ -333,15 +331,14 @@ EOF
 
   def self.insert_arch_entity_attribute
     cleanup_query(<<EOF
-INSERT INTO aentvalue (uuid, userid, attributeid, vocabid, measure, freetext, certainty, versionnum, isforked, parenttimestamp, valuetimestamp)
-SELECT :uuid, :userid, :attributeid, :vocabid, :measure, :freetext, :certainty, v.versionnum, parent.isforked, parent.valuetimestamp, :valuetimestamp
+INSERT INTO aentvalue (uuid, userid, attributeid, vocabid, measure, freetext, certainty, versionnum, parenttimestamp, valuetimestamp)
+SELECT :uuid, :userid, :attributeid, :vocabid, :measure, :freetext, :certainty, v.versionnum, parent.valuetimestamp, :valuetimestamp
 FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-          valuetimestamp
+LEFT OUTER JOIN (SELECT valuetimestamp
    FROM aentvalue
    JOIN
      (SELECT uuid,
@@ -368,13 +365,12 @@ EOF
 
   def self.delete_or_undelete_arch_entity
     cleanup_query(<<EOF
-INSERT INTO archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, isforked, parentTimestamp)
+INSERT INTO archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
 SELECT uuid, :userid, AEntTypeID,
                        GeoSpatialColumnType,
                        GeoSpatialColumn,
                        :deleted,
                        v.versionnum,
-                       parent.isforked,
                        parent.aenttimestamp
 FROM
   (SELECT uuid,
@@ -388,8 +384,7 @@ JOIN archentity USING (uuid,
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-          aenttimestamp
+LEFT OUTER JOIN (SELECT aenttimestamp
    FROM archentity
    JOIN
      (SELECT uuid,
@@ -600,8 +595,8 @@ EOF
 
   def self.insert_arch_ent_at_timestamp
      cleanup_query(<<EOF
-INSERT INTO archentity (uuid, userid, doi, aenttypeid, deleted, versionnum, isDirty, isDirtyReason, isForked, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, aenttimestamp)
-SELECT uuid, :userid, doi, aenttypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.isforked, parent.aenttimestamp, GeoSpatialColumnType,GeoSpatialColumn, :aenttimestamp
+INSERT INTO archentity (uuid, userid, doi, aenttypeid, deleted, versionnum, isDirty, isDirtyReason, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, aenttimestamp)
+SELECT uuid, :userid, doi, aenttypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.aenttimestamp, GeoSpatialColumnType,GeoSpatialColumn, :aenttimestamp
 FROM archentity
 JOIN
   (SELECT uuid,
@@ -615,8 +610,7 @@ JOIN
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-          aenttimestamp
+LEFT OUTER JOIN (SELECT aenttimestamp
    FROM archentity
    JOIN
      (SELECT uuid,
@@ -631,8 +625,8 @@ EOF
 
   def self.insert_arch_ent_attributes_at_timestamp
     cleanup_query(<<EOF
-INSERT INTO aentvalue (uuid, userid, attributeid, vocabid, measure, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, valuetimestamp)
-SELECT uuid, :userid, attributeid, vocabid, measure, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.isforked, parent.valuetimestamp, :valuetimestamp
+INSERT INTO aentvalue (uuid, userid, attributeid, vocabid, measure, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, parenttimestamp, valuetimestamp)
+SELECT uuid, :userid, attributeid, vocabid, measure, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.valuetimestamp, :valuetimestamp
 FROM aentvalue
 JOIN
   (SELECT uuid,
@@ -646,8 +640,7 @@ JOIN
                                                             valuetimestamp,
                                                             attributeid)
 LEFT OUTER JOIN
-  (SELECT isforked,
-          valuetimestamp,
+  (SELECT valuetimestamp,
           uuid,
           attributeid
    FROM aentvalue
@@ -949,9 +942,8 @@ EOF
 
   def self.insert_relationship
     cleanup_query(<<EOF
-INSERT INTO relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, relntimestamp, versionnum, isforked, parenttimestamp)
+INSERT INTO relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, relntimestamp, versionnum, parenttimestamp)
 SELECT RelationshipID, :userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, :relntimestamp, v.versionnum,
-                                                                                                          parent.isforked,
                                                                                                           parent.relntimestamp
 FROM
   (SELECT relationshipid,
@@ -966,8 +958,7 @@ JOIN relationship USING (relationshipid,
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-       relntimestamp
+LEFT OUTER JOIN (SELECT relntimestamp
 FROM relationship
 JOIN
   (SELECT relationshipid,
@@ -982,16 +973,15 @@ EOF
 
   def self.insert_relationship_attribute
     cleanup_query(<<EOF
-INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, versionnum, isforked, parenttimestamp, relnvaluetimestamp)
-SELECT :relationshipid, :userid, :attributeid, :vocabid, :freetext, :certainty, v.versionnum, parent.isforked, parent.relnvaluetimestamp, :relnvaluetimestamp
+INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, versionnum, parenttimestamp, relnvaluetimestamp)
+SELECT :relationshipid, :userid, :attributeid, :vocabid, :freetext, :certainty, v.versionnum, parent.relnvaluetimestamp, :relnvaluetimestamp
 
 FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-       relnvaluetimestamp
+LEFT OUTER JOIN (SELECT relnvaluetimestamp
 FROM relnvalue
 JOIN
   (SELECT relationshipid,
@@ -1019,13 +1009,12 @@ EOF
 
   def self.delete_or_undelete_relationship
     cleanup_query(<<EOF
-INSERT INTO relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, isforked, parentTimestamp)
+INSERT INTO relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
 SELECT relationshipid, :userid, RelnTypeID,
                       GeoSpatialColumnType,
                       GeoSpatialColumn,
                       :deleted,
                       v.versionnum,
-                      parent.isforked,
                       parent.relntimestamp
 FROM
   (SELECT relationshipid,
@@ -1040,8 +1029,7 @@ JOIN relationship USING (relationshipid,
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-       relntimestamp
+LEFT OUTER JOIN (SELECT relntimestamp
 FROM relationship
 JOIN
   (SELECT relationshipid,
@@ -1234,8 +1222,8 @@ EOF
 
   def self.insert_rel_at_timestamp
     cleanup_query(<<EOF
-INSERT INTO relationship (relationshipid, userid, relntypeid, deleted, versionnum, isDirty, isDirtyReason, isForked, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, relntimestamp)
-SELECT relationshipid, :userid, relntypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.isforked, parent.relntimestamp, GeoSpatialColumnType,GeoSpatialColumn, :relntimestamp
+INSERT INTO relationship (relationshipid, userid, relntypeid, deleted, versionnum, isDirty, isDirtyReason, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, relntimestamp)
+SELECT relationshipid, :userid, relntypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.relntimestamp, GeoSpatialColumnType,GeoSpatialColumn, :relntimestamp
 
 FROM relationship
 JOIN
@@ -1252,8 +1240,7 @@ JOIN
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-       relntimestamp
+LEFT OUTER JOIN (SELECT relntimestamp
 FROM relationship
 JOIN
   (SELECT relationshipid,
@@ -1268,8 +1255,8 @@ EOF
 
   def self.insert_rel_attributes_at_timestamp
     cleanup_query(<<EOF
-INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, relnvaluetimestamp)
-SELECT relationshipid, :userid, attributeid, vocabid, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.isforked, parent.relnvaluetimestamp, :relnvaluetimestamp
+INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, parenttimestamp, relnvaluetimestamp)
+SELECT relationshipid, :userid, attributeid, vocabid, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.relnvaluetimestamp, :relnvaluetimestamp
 
 FROM relnvalue
 JOIN
@@ -1286,8 +1273,7 @@ JOIN
                                                             relnvaluetimestamp,
                                                             attributeid)
 LEFT OUTER JOIN
-  (SELECT isforked,
-          relnvaluetimestamp,
+  (SELECT relnvaluetimestamp,
           relationshipid,
           attributeid
    FROM relnvalue
@@ -1422,17 +1408,15 @@ EOF
 
   def self.insert_arch_entity_relationship
     cleanup_query(<<EOF
-INSERT INTO aentreln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, versionnum, isforked, parenttimestamp)
+INSERT INTO aentreln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, versionnum, parenttimestamp)
 SELECT :uuid, :relationshipid, :userid, :verb, :aentrelntimestamp, v.versionnum,
-                                                                   parent.isforked,
                                                                    parent.aentrelntimestamp
 FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-       aentrelntimestamp
+LEFT OUTER JOIN (SELECT aentrelntimestamp
 FROM aentreln
 JOIN
   (SELECT uuid,
@@ -1451,17 +1435,15 @@ EOF
 
   def self.delete_arch_entity_relationship
     cleanup_query(<<EOF
-INSERT INTO aentreln (UUID, RelationshipID, UserId, Deleted, AEntRelnTimestamp, versionnum, isforked, parenttimestamp)
+INSERT INTO aentreln (UUID, RelationshipID, UserId, Deleted, AEntRelnTimestamp, versionnum, parenttimestamp)
 SELECT :uuid, :relationshipid, :userid, 'true', :aentrelntimestamp, v.versionnum,
-                                                                   parent.isforked,
-                                                                   parent.aentrelntimestamp
+                                                                    parent.aentrelntimestamp
 FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT isforked,
-       aentrelntimestamp
+LEFT OUTER JOIN (SELECT aentrelntimestamp
 FROM aentreln
 JOIN
   (SELECT uuid,
