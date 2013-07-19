@@ -104,8 +104,10 @@ class ProjectsController < ApplicationController
     @uuid = @project.db.load_arch_entity(type,limit,offset, show_deleted)
 
     @entity_dirty_map = {}
+    @entity_forked_map = {}
     @uuid.each do |row|
       @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+      @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
 
   end
@@ -138,8 +140,10 @@ class ProjectsController < ApplicationController
     @uuid = @project.db.search_arch_entity(limit,offset,query,show_deleted)
 
     @entity_dirty_map = {}
+    @entity_forked_map = {}
     @uuid.each do |row|
       @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+      @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
   end
 
@@ -151,6 +155,10 @@ class ProjectsController < ApplicationController
     @vocab_name = {}
     for attribute in @attributes
       @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
+    end
+
+    if @project.db.is_arch_entity_forked(uuid)
+      flash.now[:warning] = "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     end
   end
 
@@ -295,8 +303,10 @@ class ProjectsController < ApplicationController
     @relationshipid = @project.db.load_rel(type,limit,offset,show_deleted)
 
     @rel_dirty_map = {}
+    @rel_forked_map = {}
     @relationshipid.each do |row|
       @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+      @rel_forked_map[row[0]] = @project.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
   end
 
@@ -330,8 +340,10 @@ class ProjectsController < ApplicationController
     @relationshipid = @project.db.search_rel(limit,offset,query,show_deleted)
 
     @rel_dirty_map = {}
+    @rel_forked_map = {}
     @relationshipid.each do |row|
       @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+      @rel_forked_map[row[0]] = @project.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
   end
 
@@ -343,6 +355,10 @@ class ProjectsController < ApplicationController
     @vocab_name = {}
     for attribute in @attributes
       @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
+    end
+
+    if @project.db.is_relationship_forked(relationshipid)
+      flash.now[:warning] = "This Relationship record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     end
   end
 

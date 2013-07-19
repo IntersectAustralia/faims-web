@@ -11,6 +11,8 @@
               =relationshipids[2].to_s + ": " + relationshipids[3].to_s
               - if @rel_dirty_map[relationshipids[0]]
                 .label.label-important='review'
+              - if @rel_forked_map[relationshipids[0]]
+                .label.label-warning='conflict'
               - if !relationshipids[7].nil?
                 = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,relationshipids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
@@ -27,4 +29,6 @@
               -else
                 - if @rel_dirty_map[relationshipids[0]]
                   .label.label-important='review'
+                - if @rel_forked_map[relationshipids[0]]
+                  .label.label-warning='conflict'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}

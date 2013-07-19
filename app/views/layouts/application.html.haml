@@ -24,7 +24,13 @@
     .container.main_content
       - flash.each do |name, msg|
         - next if name == :timedout
-        %div{:class => "alert alert-#{name == :notice ? "success" : "error"}"}
+        - if name == :warning
+          - alert = "alert"
+        - elsif name == :notice
+          - alert = "alert alert-success"
+        - else
+          - alert = "alert alert-error"
+        %div{:class => "alert #{alert}"}
           %a.close{"data-dismiss" => "alert"} ×
           = msg
       .container
