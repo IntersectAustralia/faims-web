@@ -1711,28 +1711,60 @@ EOF
 
   def self.merge_database(fromDB, version)
     cleanup_query(<<EOF
-attach database "#{fromDB}" as import;
+attach database '#{fromDB}' as import;
+
 insert into archentity (
-         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) 
-  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn 
-  from import.archentity where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
+         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
+  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+  from import.archentity
+  left outer join (
+		select uuid, i.aenttimestamp, 1 as isForked
+		  from main.archentity m join  import.archentity i using (uuid, parenttimestamp)
+		where m.aenttimestamp != i.aenttimestamp) a using (uuid, aenttimestamp)
+  where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
+
 insert into aentvalue (
-         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) 
-  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp 
-  from import.aentvalue where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
+         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
+  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
+  from import.aentvalue
+  left outer join (
+		select uuid, attributeid, i.valuetimestamp, 1 as isForked
+		  from main.aentvalue m join  import.aentvalue i using (uuid, attributeid, parenttimestamp)
+		where m.valuetimestamp != i.valuetimestamp) a using (uuid, attributeid, valuetimestamp)
+  where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
+
 insert into relationship (
-         relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn) 
-  select relationshipid, userid, relntimestamp, relntypeid, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
-  from import.relationship where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
+         relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
+  select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+  from import.relationship
+	  left outer join (
+		select relationshipid, i.relntimestamp, 1 as isForked
+		  from main.relationship m join  import.relationship i using (relationshipid, parenttimestamp)
+		where m.relntimestamp != i.relntimestamp) a using (relationshipid, relntimestamp)
+  where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
+
 insert into relnvalue (
-         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) 
-  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp 
-  from import.relnvalue where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
+         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
+  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
+  from import.relnvalue
+  left outer join (
+		select relationshipid, attributeid, i.relnvaluetimestamp, 1 as isForked
+		  from main.relnvalue m join  import.relnvalue i using (relationshipid, attributeid, parenttimestamp)
+		where m.relnvaluetimestamp != i.relnvaluetimestamp) a using (relationshipid, attributeid, relnvaluetimestamp)
+  where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
+
 insert into aentreln (
-         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp) 
-  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, '#{version}', isdirty, isdirtyreason, isforked, parenttimestamp
-  from import.aentreln where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
-update version set ismerged = 1 where versionnum = '#{version}';
+         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
+  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
+  from import.aentreln
+	left outer join (
+		select relationshipid, uuid, i.aentrelntimestamp, 1 as isForked
+		  from main.aentreln m join  import.aentreln i using (relationshipid, uuid, parenttimestamp)
+		where m.aentrelntimestamp != i.aentrelntimestamp) a using (relationshipid, uuid, aentrelntimestamp)
+   where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
+
+update version set ismerged = 1 where versionnum = #{version};
+
 detach database import;
 EOF
     )
