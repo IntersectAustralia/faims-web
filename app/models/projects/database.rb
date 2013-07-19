@@ -645,6 +645,22 @@ class Database
     nil
   end
 
+  def is_arch_entity_forked(uuid)
+    result = @db.get_first_value WebQuery.is_arch_entity_forked, uuid
+    return true if result and result > 0
+    result = @db.get_first_value WebQuery.is_aentvalue_forked, uuid
+    return true if result and result > 0
+    return false
+  end
+
+  def is_relationship_forked(relationshipid)
+    result = @db.get_first_value WebQuery.is_relationship_forked, relationshipid
+    return true if result and result > 0
+    result = @db.get_first_value WebQuery.is_relnvalue_forked, relationshipid
+    return true if result and result > 0
+    return false
+  end
+
   # static
   def self.generate_database(file, xml)
     generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')

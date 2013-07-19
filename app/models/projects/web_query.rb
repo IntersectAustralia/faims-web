@@ -1920,6 +1920,34 @@ EOF
     )
   end
 
+  def self.is_arch_entity_forked
+    cleanup_query(<<EOF
+    select count(isforked) from archentity where uuid = ?;
+EOF
+    )
+  end
+
+  def self.is_aentvalue_forked
+    cleanup_query(<<EOF
+    select count(isforked) from aentvalue where uuid = ?;
+EOF
+    )
+  end
+
+  def self.is_relationship_forked
+    cleanup_query(<<EOF
+    select count(isforked) from relationship where relationshipid = ?;
+EOF
+    )
+  end
+
+  def self.is_relnvalue_forked
+    cleanup_query(<<EOF
+    select count(isforked) from relnvalue where relationshipid = ?;
+EOF
+    )
+  end
+
   private
 
   def self.cleanup_query(query)

@@ -13,6 +13,14 @@ class SpatialiteDB
     @db.execute(sql, bind_vars)
   end
 
+  def get_first_row(sql, *bind_vars)
+    @db.get_first_row(sql, bind_vars)
+  end
+
+  def get_first_value(sql, *bind_vars)
+    @db.get_first_value(sql, bind_vars)
+  end
+
   def execute_batch(sql, *bind_vars)
     @db.execute_batch(sql, bind_vars)
   end
