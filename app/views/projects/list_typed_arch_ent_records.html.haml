@@ -28,7 +28,7 @@
         - if session[:show_deleted].nil?
           %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
   -else
-    %p No Record Found
+    %p No Records Found
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_arch_ent_records_path(@project), :class => 'btn'
 -if !@uuid.empty?

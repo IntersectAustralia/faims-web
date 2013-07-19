@@ -1,7 +1,7 @@
 - title @project.name + " - Archaeological Entity"
 - get_files(@attributes,8,6)
 .form-actions
-  - if !session[:show].nil?
+  - if !session[:show].nil? and session[:show].length > 0
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project,session[:relationshipid])+"?offset=0&relntypeid="+session[:relntypeid].to_s, :class => 'btn'
   -else
     - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]

@@ -147,6 +147,10 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     session[:uuid] = uuid
+    if !session[:show].nil? and session[:show][-1].eql?('show_rel_associations')
+      session[:show].pop()
+      p session[:show]
+    end
     @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
     for attribute in @attributes
@@ -339,6 +343,10 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
+    if !session[:show].nil? and session[:show][-1].eql?('show_rel_members')
+      session[:show].pop()
+      p session[:show]
+    end
     @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
     for attribute in @attributes
@@ -428,7 +436,14 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:show] = 'show_rel_members'
+    if session[:show].nil?
+      session[:show] = []
+      session[:show].push('show_rel_members')
+    else
+      if !session[:show][-1].eql?('show_rel_members')
+        session[:show].push('show_rel_members')
+      end
+    end
     @uuid = @project.db.get_rel_arch_ent_members(params[:relationshipid], limit, offset)
   end
 
@@ -476,7 +491,14 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:show] = 'show_rel_associations'
+    if session[:show].nil?
+      session[:show] = []
+      session[:show].push('show_rel_associations')
+    else
+      if !session[:show][-1].eql?('show_rel_associations')
+        session[:show].push('show_rel_associations')
+      end
+    end
     @relationships = @project.db.get_arch_ent_rel_associations(params[:uuid], limit, offset)
   end
 
