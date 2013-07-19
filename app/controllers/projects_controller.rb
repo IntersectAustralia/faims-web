@@ -156,6 +156,7 @@ class ProjectsController < ApplicationController
     for attribute in @attributes
       @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
     end
+    @deleted = @project.db.get_arch_entity_deleted_status(uuid)
   end
 
   def update_arch_ent_records
@@ -217,7 +218,7 @@ class ProjectsController < ApplicationController
     uuid = params[:uuid]
     @project.db.undelete_arch_entity(uuid,current_user.id)
 
-    flash[:notice] = 'Successfully restore arch entity'
+    flash[:notice] = 'Successfully restored archaeological entity record'
     redirect_to edit_arch_ent_records_path(@project,uuid)
 
   end
@@ -352,6 +353,7 @@ class ProjectsController < ApplicationController
     for attribute in @attributes
       @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
     end
+    @deleted = @project.db.get_rel_deleted_status(relationshipid)
   end
 
   def update_rel_records
@@ -423,7 +425,7 @@ class ProjectsController < ApplicationController
 
     relationshipid = params[:relationshipid]
     @project.db.undelete_relationship(relationshipid,current_user.id)
-    flash[:notice] = 'Successfully restore relationship'
+    flash[:notice] = 'Successfully restored relationship record'
     redirect_to edit_rel_records_path(@project,relationshipid)
   end
 

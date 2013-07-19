@@ -573,7 +573,7 @@ Feature: Manage projects
     Then I select the first record
     And I wait
     Then I follow "Restore"
-    And I should see "Successfully restore arch entity"
+    And I should see "Successfully restored archaeological entity record"
     Then I follow "Back"
     And I wait
     Then I follow "Hide Deleted"
@@ -672,7 +672,7 @@ Feature: Manage projects
     Then I select the first record
     And I wait
     Then I follow "Restore"
-    And I should see "Successfully restore relationship"
+    And I should see "Successfully restored relationship record"
     Then I follow "Back"
     And I wait
     Then I follow "Hide Deleted"
