@@ -67,6 +67,11 @@ class Database
     end
   end
 
+  def get_arch_entity_deleted_status(uuid)
+    deleted = @db.execute(WebQuery.get_arch_entity_deleted_status, uuid).first
+    deleted
+  end
+
   def get_arch_entity_attributes(uuid)
     attributes = @db.execute(WebQuery.get_arch_entity_attributes, uuid)
     attributes
@@ -244,6 +249,11 @@ class Database
       relationshipids = @db.execute(WebQuery.search_relationship, query, query, limit, offset)
       relationshipids
     end
+  end
+
+  def get_rel_deleted_status(relationshipid)
+    deleted = @db.execute(WebQuery.get_rel_deleted_status, relationshipid).first
+    deleted
   end
 
   def get_rel_attributes(relationshipid)

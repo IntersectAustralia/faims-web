@@ -1,7 +1,7 @@
 - title @project.name + " - Relationship"
 - get_files(@attributes,8,4)
 .well
-  - if !session[:show].nil?
+  - if !session[:show].nil? and session[:show].length > 0
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_association_path(@project,session[:uuid])+"?offset=0", :class => 'btn'
   - else
     - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
@@ -9,7 +9,7 @@
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s+"&show_deleted="+ show_deleted, :class => 'btn'
     - elsif session[:action].eql?('show_rel_records')
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s+"&show_deleted="+ show_deleted, :class => 'btn'
-  - if !@attributes[0][12].nil?
+  - if !@deleted[1].nil?
     = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,session[:relationshipid]), :class => 'btn btn-warning', :id => 'undelete-record'
   - else
     = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn btn-warning', :id => 'delete-record'

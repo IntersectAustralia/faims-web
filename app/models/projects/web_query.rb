@@ -273,20 +273,28 @@ EOF
     )
   end
 
+  def self.get_arch_entity_deleted_status
+    cleanup_query(<<EOF
+    SELECT uuid, deleted from ArchEntity where uuid || aenttimestamp IN
+			( SELECT uuid || max(aenttimestamp) FROM archentity WHERE uuid = ?);
+EOF
+    )
+  end
+
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, isDirty, isDirtyReason, archDeleted
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, isDirty, isDirtyReason
     FROM aentvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-    JOIN (SELECT uuid, attributeid, valuetimestamp, archentity.deleted as archDeleted, aentvalue.deleted as valueDeleted
+    JOIN (SELECT uuid, attributeid, valuetimestamp
             FROM aentvalue
             JOIN archentity USING (uuid)
            WHERE uuid = ?
         GROUP BY uuid, attributeid
           HAVING MAX(ValueTimestamp)
              AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-    WHERE valueDeleted is NULL
+    WHERE deleted is NULl
  ORDER BY uuid, attributename ASC;
 EOF
     )
@@ -919,22 +927,29 @@ EOF
     )
   end
 
+  def self.get_rel_deleted_status
+    cleanup_query(<<EOF
+    SELECT relationshipid, deleted from relationship where relationshipid || relntimestamp IN
+			( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);
+EOF
+    )
+  end
+
   def self.get_relationship_attributes
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason, r.deleted
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid, relationship.deleted
+    JOIN ( SELECT relationshipid, attributeid, relnvaluetimestamp, relntypeid
              FROM relnvalue
              JOIN relationship USING (relationshipid)
             WHERE relationshipid = ?
          GROUP BY relationshipid, attributeid
            HAVING MAX(relnvaluetimestamp)
               AND MAX(relntimestamp)
-      ) r USING (relationshipid, attributeid, relnvaluetimestamp)
+      ) USING (relationshipid, attributeid, relnvaluetimestamp)
    WHERE relnvalue.deleted is NULL
-
 ORDER BY relationshipid, attributename asc;
 EOF
     )

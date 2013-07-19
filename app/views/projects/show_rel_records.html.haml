@@ -28,7 +28,7 @@
         - if session[:show_deleted].nil?
           %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
   -else
-    %p No Record Found
+    %p No Records Found
     = link_to "Back", search_rel_records_path(@project), :class => 'btn'
 -if !@relationshipid.empty?
   .footer

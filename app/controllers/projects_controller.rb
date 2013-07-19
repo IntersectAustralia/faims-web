@@ -151,6 +151,10 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     session[:uuid] = uuid
+    if !session[:show].nil? and session[:show][-1].eql?('show_rel_associations')
+      session[:show].pop()
+      p session[:show]
+    end
     @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
     for attribute in @attributes
@@ -160,6 +164,8 @@ class ProjectsController < ApplicationController
     if @project.db.is_arch_entity_forked(uuid)
       flash.now[:warning] = "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     end
+
+    @deleted = @project.db.get_arch_entity_deleted_status(uuid)
   end
 
   def update_arch_ent_records
@@ -221,7 +227,7 @@ class ProjectsController < ApplicationController
     uuid = params[:uuid]
     @project.db.undelete_arch_entity(uuid,current_user.id)
 
-    flash[:notice] = 'Successfully restore arch entity'
+    flash[:notice] = 'Successfully restored archaeological entity record'
     redirect_to edit_arch_ent_records_path(@project,uuid)
 
   end
@@ -351,6 +357,10 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
+    if !session[:show].nil? and session[:show][-1].eql?('show_rel_members')
+      session[:show].pop()
+      p session[:show]
+    end
     @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
     for attribute in @attributes
@@ -360,6 +370,9 @@ class ProjectsController < ApplicationController
     if @project.db.is_relationship_forked(relationshipid)
       flash.now[:warning] = "This Relationship record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     end
+
+    @deleted = @project.db.get_rel_deleted_status(relationshipid)
+
   end
 
   def update_rel_records
@@ -431,7 +444,7 @@ class ProjectsController < ApplicationController
 
     relationshipid = params[:relationshipid]
     @project.db.undelete_relationship(relationshipid,current_user.id)
-    flash[:notice] = 'Successfully restore relationship'
+    flash[:notice] = 'Successfully restored relationship record'
     redirect_to edit_rel_records_path(@project,relationshipid)
   end
 
@@ -444,7 +457,14 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:show] = 'show_rel_members'
+    if session[:show].nil?
+      session[:show] = []
+      session[:show].push('show_rel_members')
+    else
+      if !session[:show][-1].eql?('show_rel_members')
+        session[:show].push('show_rel_members')
+      end
+    end
     @uuid = @project.db.get_rel_arch_ent_members(params[:relationshipid], limit, offset)
   end
 
@@ -492,7 +512,14 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:show] = 'show_rel_associations'
+    if session[:show].nil?
+      session[:show] = []
+      session[:show].push('show_rel_associations')
+    else
+      if !session[:show][-1].eql?('show_rel_associations')
+        session[:show].push('show_rel_associations')
+      end
+    end
     @relationships = @project.db.get_arch_ent_rel_associations(params[:uuid], limit, offset)
   end
 

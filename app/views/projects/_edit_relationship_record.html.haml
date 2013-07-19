@@ -13,9 +13,9 @@
                 .label.label-important='review'
               - if @rel_forked_map[relationshipids[0]]
                 .label.label-warning='conflict'
-              - if !relationshipids[7].nil?
-                = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,relationshipids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
-        %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
+      - if !relationshipid_group[0][7].nil?
+        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,relationshipids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
+      %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
     - else
       %input{:type => 'checkbox', :value=> relationshipid_group[0][0]}
         - identifier = []
@@ -24,11 +24,10 @@
           %li
             %a{:href => edit_rel_records_path(@project,relationshipids[0])}
               =relationshipids[2].to_s + ": " + relationshipids[3].to_s
-              - if !relationshipids[7].nil?
-                = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,relationshipids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
-              -else
-                - if @rel_dirty_map[relationshipids[0]]
-                  .label.label-important='review'
-                - if @rel_forked_map[relationshipids[0]]
-                  .label.label-warning='conflict'
+              - if @rel_dirty_map[relationshipids[0]]
+                .label.label-important='review'
+              - if @rel_forked_map[relationshipids[0]]
+                .label.label-warning='conflict'
+      - if !relationshipid_group[0][7].nil?
+        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,relationshipids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
         %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
