@@ -683,7 +683,31 @@ Feature: Manage projects
       | name            |
       | relationship: AboveBelow 2  |
 
-  Scenario: Update arch entity attribute causes validation error
+  Scenario: See related arch entities
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I wait
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I click on "Sync Example"
+    And I wait
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    Then I follow "entity: Small 2"
+    And I wait
+    Then I follow "small Below AboveBelow: Small 3"
+    And I wait
+    Then I follow "Back"
+    And I should see related arch entities
+      | name                            |
+      | small Below AboveBelow: Small 3 |
+      | small Below AboveBelow: Small 4 |
+
+  Scenario: Update arch entity attribute causes validation error    s
     # TODO
 
   Scenario: Update arch entity attribute clears validation error

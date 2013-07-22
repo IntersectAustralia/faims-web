@@ -18,7 +18,7 @@
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_arch_ent_records_path(@project), :class => 'btn'
       = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn btn-inverse'
       - if session[:show_deleted].nil?
-        = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+        = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
       - else
         = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
       %form{:action => list_typed_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}

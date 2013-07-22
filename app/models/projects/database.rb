@@ -229,6 +229,14 @@ class Database
     end
   end
 
+  def get_related_arch_entities(uuid)
+    params = {
+        uuid:uuid
+    }
+    related_arch_ents = @db.execute(WebQuery.get_related_arch_entities, params)
+    related_arch_ents
+  end
+
   def load_rel(type, limit, offset, show_deleted)
     if show_deleted
       relationshipids = type.eql?('all') ?
