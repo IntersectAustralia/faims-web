@@ -1,7 +1,7 @@
 - title @project.name + " - Relationship"
 - get_files(@attributes,8,4)
 .well
-  - if !session[:show].nil? and session[:show].length > 0
+  - if !session[:show].nil? and !session[:show].empty?
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_association_path(@project,session[:uuid])+"?offset=0", :class => 'btn'
   - else
     - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
@@ -54,7 +54,7 @@
             - if show_error_button
               = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn"
             = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
-- if @files.length > 0
+- if !@files.empty?
   .attached-files
     %h2 Attached Files
     %ul

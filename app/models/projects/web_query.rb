@@ -670,6 +670,130 @@ EOF
     )
   end
 
+  def self.get_related_arch_entities
+    cleanup_query(<<EOF
+SELECT uuid,
+       aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||group_concat(response,', ')
+FROM
+  (SELECT uuid,
+          group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)', measure || ' (' || freetext ||'; '|| (certainty * 100.0) || '% certain)', vocabname || ' (' || freetext ||'; '|| (certainty * 100.0) || '% certain)', measure || ' ' || vocabname ||' ('|| (certainty * 100.0) || '% certain)', vocabname || ' (' || freetext || ')', measure || ' (' || freetext || ')', measure || ' (' || (certainty * 100.0) || '% certain)', vocabname || ' (' || (certainty * 100.0) || '% certain)', freetext || ' (' || (certainty * 100.0) || '% certain)', measure, vocabname, freetext), ' | ') AS response,
+          aenttypename,
+          participatesverb,
+          relntypename
+   FROM
+     (SELECT uuid,
+             attributeid,
+             vocabid,
+             attributename,
+             vocabname,
+             measure,
+             freetext,
+             certainty,
+             attributetype,
+             valuetimestamp,
+             aenttypename,
+             relntypename,
+             participatesverb
+      FROM aentvalue
+      JOIN
+        (SELECT uuid,
+                attributeid,
+                max(valuetimestamp) AS valuetimestamp
+         FROM aentvalue
+         GROUP BY uuid,
+                  attributeid) USING (uuid,
+                                      attributeid,
+                                      valuetimestamp)
+      JOIN attributekey USING (attributeid)
+      JOIN archentity USING (uuid)
+      JOIN
+        (SELECT uuid,
+                max(aenttimestamp) AS aenttimestamp
+         FROM archentity
+         GROUP BY uuid) USING (uuid,
+                               aenttimestamp)
+      JOIN
+        (SELECT attributeid,
+                aenttypeid
+         FROM idealaent
+         JOIN aenttype USING (aenttypeid)
+         WHERE isIdentifier IS 'true') USING (attributeid,
+                                              aenttypeid)
+      LEFT OUTER JOIN vocabulary USING (vocabid,
+                                        attributeid)
+      JOIN
+        (SELECT uuid,
+                attributeid,
+                valuetimestamp
+         FROM aentvalue
+         JOIN archentity USING (uuid)
+         WHERE archentity.deleted IS NULL
+         GROUP BY uuid,
+                  attributeid HAVING MAX(ValueTimestamp)
+         AND MAX(AEntTimestamp)) USING (uuid,
+                                        attributeid,
+                                        valuetimestamp)
+      JOIN
+        (SELECT DISTINCT uuid,
+                         relationshipid,
+                         participatesverb
+         FROM aentreln
+         JOIN
+           (SELECT uuid,
+                   relationshipid,
+                   max(aentrelntimestamp) AS aentrelntimestamp
+            FROM aentreln
+            GROUP BY uuid,
+                     relationshipid) USING (uuid,
+                                            relationshipid,
+                                            aentrelntimestamp)
+         JOIN archentity USING (uuid)
+         JOIN
+           (SELECT uuid,
+                   max(aenttimestamp) AS aenttimestamp
+            FROM archentity
+            GROUP BY uuid) USING (uuid,
+                                  aenttimestamp)
+         JOIN relationship USING (relationshipid)
+         JOIN
+           (SELECT relationshipid,
+                   max(relntimestamp) AS relntimestamp
+            FROM relationship
+            GROUP BY relationshipid) USING (relationshipid,
+                                            relntimestamp)
+         WHERE relationshipid IN
+             ( SELECT DISTINCT relationshipid
+              FROM aentreln
+              JOIN
+                (SELECT uuid,
+                        relationshipid,
+                        max(aentrelntimestamp) AS aentrelntimestamp
+                 FROM aentreln
+                 GROUP BY uuid,
+                          relationshipid having MAX(aentrelntimestamp)) USING (uuid,
+                                                 relationshipid,
+                                                 aentrelntimestamp)
+              WHERE uuid = :uuid AND aentreln.deleted IS NULL)
+           AND uuid != :uuid
+           AND relationship.deleted IS NULL
+           AND aentreln.deleted IS NULL
+           AND archentity.deleted IS NULL) USING (uuid)
+      JOIN relationship USING (relationshipid)
+      JOIN
+        (SELECT relationshipid,
+                max(relntimestamp) AS relntimestamp
+         FROM relationship
+         GROUP BY relationshipid) USING (relationshipid,
+                                         relntimestamp)
+      JOIN relntype USING (relntypeid)
+      JOIN aenttype USING (aenttypeid) )
+   GROUP BY uuid,
+            attributeid)
+GROUP BY uuid;
+EOF
+    )
+  end
+
   def self.load_relationships
     cleanup_query(<<EOF
 SELECT relationshipid, RelnTypeName, attributename, coalesce(group_concat(vocabname, ', '), group_concat(freetext, ', ')) as response, vocabid, attributeid, astamp, relationship.deleted

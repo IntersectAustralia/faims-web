@@ -86,6 +86,7 @@ class ProjectsController < ApplicationController
     session.delete(:prev_offset)
     session.delete(:next_offset)
     session.delete(:show_deleted)
+    session.delete(:prev_id)
   end
 
   def list_typed_arch_ent_records
@@ -123,6 +124,7 @@ class ProjectsController < ApplicationController
     session.delete(:prev_offset)
     session.delete(:next_offset)
     session.delete(:show_deleted)
+    session.delete(:prev_id)
   end
 
   def show_arch_ent_records
@@ -153,7 +155,6 @@ class ProjectsController < ApplicationController
     session[:uuid] = uuid
     if !session[:show].nil? and session[:show][-1].eql?('show_rel_associations')
       session[:show].pop()
-      p session[:show]
     end
     @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
@@ -166,6 +167,20 @@ class ProjectsController < ApplicationController
     end
 
     @deleted = @project.db.get_arch_entity_deleted_status(uuid)
+    @related_arch_ents = @project.db.get_related_arch_entities(uuid)
+    prev_id = params[:prev_id]
+    if prev_id.nil?
+      if !session[:prev_id].nil?
+        session[:prev_id].pop()
+      end
+    else
+      if session[:prev_id].nil?
+        session[:prev_id] = []
+      end
+      if !session[:prev_id][-1].eql?(prev_id)
+        session[:prev_id].push(prev_id)
+      end
+    end
   end
 
   def update_arch_ent_records
