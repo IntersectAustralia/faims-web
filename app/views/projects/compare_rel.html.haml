@@ -35,12 +35,12 @@
         %td
           %h4 Attributes
       - @attributeKeys.each do |key,val|
-        %tr.merge-row
+        - classes = "merge-row " + (val ? '' : 'box-error')
+        %tr{class:classes}
           %td.first.selected.span6.merge-left
             = render :partial => 'compare_reln_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos, value: @firstAttributeValueGroup }
           %td.second.span6.merge-right
             = render :partial => 'compare_reln_row', :locals => { group: @secondAttributeGroup, key: key, val: val, checked: false, attributeInfo: @second_attributeInfos, value: @secondAttributeValueGroup }
-
     .form-actions
       - if session[:type]
         = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset=0", :class => 'btn'

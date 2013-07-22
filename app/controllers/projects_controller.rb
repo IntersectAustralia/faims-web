@@ -422,10 +422,22 @@ class ProjectsController < ApplicationController
 
   def revert_rel_to_timestamp
     @project = Project.find(params[:id])
-    relid = params[:relid]
-    timestamp = params[:timestamp]
-    @project.db.revert_rel_to_timestamp(relid,current_user.id, timestamp)
-    redirect_to edit_rel_records_path(@project, relid)
+
+    data = params[:data].map { |x, y| y }
+
+    rel = data.select { |x| x[:attributeid] == nil }.first
+    attributes = data.select { |x| x[:attributeid] != nil }
+
+    @project.db.revert_rel_to_timestamp(rel[:relationshipid], rel[:userid], rel[:timestamp])
+
+    attributes.each do | attribute |
+      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], attribute[:userid], attribute[:attributeid], attribute[:timestamp])
+    end
+
+    # clear conflicts
+    @project.db.resolve_rel_conflicts(rel[:relationshipid]) if params[:resolve] == 'true'
+
+    redirect_to show_rel_history_path(@project, params[:relid])
   end
 
   def delete_rel_records

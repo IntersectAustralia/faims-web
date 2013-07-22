@@ -376,14 +376,34 @@ class Database
 
       @db.execute(WebQuery.insert_rel_at_timestamp, params)
 
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def revert_relnvalues_to_timestamp(relid, userid, attributeid, revert_timestamp)
+    @project.db_mgr.with_lock do
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
       params = {
           relationshipid:relid,
           userid:userid,
+          attributeid:attributeid,
           relnvaluetimestamp:timestamp,
           timestamp: revert_timestamp
       }
 
-      @db.execute(WebQuery.insert_rel_attributes_at_timestamp, params)
+      @db.execute(WebQuery.insert_relnvalue_at_timestamp, params)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def resolve_rel_conflicts(relid)
+    @project.db_mgr.with_lock do
+
+      @db.execute(WebQuery.clear_rel_fork, relid)
+      @db.execute(WebQuery.clear_relnvalue_fork, relid)
 
       @project.db_mgr.make_dirt
     end

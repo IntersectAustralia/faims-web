@@ -1133,9 +1133,9 @@ select relationshipid, attributeid, attributename, astext(transform(GeoSpatialCo
                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
                                                                                         vocabname,
-                                                                                        freetext), ' | ') as response
+                                                                                        freetext), ' | ') as response, ruserid, rvuserid, rforked, rvforked
 from (
-SELECT relationshipid, geospatialcolumn, vocabid, attributeid, relnuser.fname as rfname, relnuser.lname as rlname, rvalueuser.fname as vfname, rvalueuser.lname as vlname, attributename, freetext, certainty, relationship.deleted, relnvalue.deleted as relnvaluedeleted, vocabname, relntypeid, attributetype, relnvaluetimestamp, relntimestamp
+SELECT relationshipid, geospatialcolumn, vocabid, attributeid, relnuser.fname as rfname, relnuser.lname as rlname, rvalueuser.fname as vfname, rvalueuser.lname as vlname, attributename, freetext, certainty, relationship.deleted, relnvalue.deleted as relnvaluedeleted, vocabname, relntypeid, attributetype, relnvaluetimestamp, relntimestamp, relnuser.userid as ruserid, rvalueuser.userid as rvuserid, relationship.isforked as rforked, relnvalue.isforked as rvforked
    FROM relnvalue
    JOIN attributekey USING (attributeid)
    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -1270,7 +1270,7 @@ EOF
     )
   end
 
-  def self.insert_rel_attributes_at_timestamp
+  def self.insert_relnvalue_at_timestamp
     cleanup_query(<<EOF
 INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, parenttimestamp, relnvaluetimestamp)
 SELECT relationshipid, :userid, attributeid, vocabid, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.relnvaluetimestamp, :relnvaluetimestamp
@@ -1282,30 +1282,31 @@ JOIN
           attributeid
    FROM relnvalue
    WHERE relationshipid = :relationshipid
-
+     AND attributeid = :attributeid
      AND relnvaluetimestamp <= :timestamp
 
    GROUP BY relationshipid,
             attributeid HAVING MAX (relnvaluetimestamp)) USING (relationshipid,
                                                             relnvaluetimestamp,
-                                                            attributeid)
-LEFT OUTER JOIN
-  (SELECT relnvaluetimestamp,
-          relationshipid,
-          attributeid
-   FROM relnvalue
-   JOIN
-     (SELECT relationshipid, attributeid, MAX(relnvaluetimestamp) AS relnvaluetimestamp
-      FROM relnvalue
-      GROUP BY relationshipid,
-               attributeid) USING (relationshipid,
-                                   attributeid,
-                                   relnvaluetimestamp)) parent USING (relationshipid,
-                                                                  attributeid),
+                                                            attributeid),
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v;
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT relnvaluetimestamp
+FROM relnvalue
+JOIN
+  (SELECT relationshipid,
+          attributeid,
+          MAX(relnvaluetimestamp) AS relnvaluetimestamp
+   FROM relnvalue
+   GROUP BY relationshipid,
+            attributeid) USING (relationshipid,
+                                attributeid,
+                                relnvaluetimestamp)
+WHERE relationshipid = :relationshipid
+
+  AND attributeid = :attributeid) parent ;
 EOF
     )
   end
@@ -1975,6 +1976,20 @@ EOF
   def self.clear_aentvalue_fork
     cleanup_query(<<EOF
     update aentvalue set isforked = NULL where uuid = ?;
+EOF
+    )
+  end
+
+  def self.clear_rel_fork
+    cleanup_query(<<EOF
+    update relationship set isforked = NULL where relationshipid = ?;
+EOF
+    )
+  end
+
+  def self.clear_relnvalue_fork
+    cleanup_query(<<EOF
+    update relnvalue set isforked = NULL where relationshipid = ?;
 EOF
     )
   end

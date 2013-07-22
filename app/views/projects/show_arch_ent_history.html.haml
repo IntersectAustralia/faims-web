@@ -20,7 +20,7 @@
               - if cell[:isforked]
                 - box_error = 'box-warning'
               %td{:class => "history #{box_error}"}
-                %input{:type => 'radio', :name => 'data[' + key + '][selected]', :checked => row_index == @timestamps.size - 1}
+                %input{:type => 'radio', :name => 'data[' + key + '][selected]', :checked => row_index == 0 }
                 - if cell[:attributeid]
                   %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
                   %input{type:'hidden', name: 'data[' + key + '][attributeid]', value:cell[:attributeid] }
@@ -40,4 +40,3 @@
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,@timestamps[0][0]), :class => 'btn'
       %input{:type => 'submit', :value => 'Revert', :class => 'btn btn-inverse'}
       %input{:type => 'submit', :value => 'Revert and Resovle Conflicts', :class => 'btn btn-inverse history-resolve-btn'}
-
