@@ -490,8 +490,8 @@ select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) a
                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
                                                                                              measure,
                                                                                              vocabname,
-                                                                                             freetext), ' | ') as response
-FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp
+                                                                                             freetext), ' | ') as response, auserid, vuserid, aentforked, avalforked
+FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp, aentuser.userid as auserid, valueuser.userid as vuserid, archentity.isforked as aentforked, aentvalue.isforked as avalforked
          FROM aentvalue
          JOIN attributekey USING (attributeid)
          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
@@ -631,7 +631,8 @@ EOF
     )
   end
 
-  def self.insert_arch_ent_attributes_at_timestamp
+
+  def self.insert_aentvalue_at_timestamp
     cleanup_query(<<EOF
 INSERT INTO aentvalue (uuid, userid, attributeid, vocabid, measure, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, parenttimestamp, valuetimestamp)
 SELECT uuid, :userid, attributeid, vocabid, measure, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.valuetimestamp, :valuetimestamp
@@ -642,28 +643,29 @@ JOIN
           attributeid
    FROM aentvalue
    WHERE uuid = :uuid
+     AND attributeid = :attributeid
      AND valuetimestamp <= :timestamp
    GROUP BY uuid,
             attributeid HAVING MAX (valuetimestamp)) USING (uuid,
                                                             valuetimestamp,
-                                                            attributeid)
-LEFT OUTER JOIN
-  (SELECT valuetimestamp,
-          uuid,
-          attributeid
+                                                            attributeid),
+  (SELECT versionnum
+   FROM VERSION
+   WHERE ismerged = 1
+   ORDER BY versionnum DESC LIMIT 1) v
+LEFT OUTER JOIN (SELECT valuetimestamp
    FROM aentvalue
    JOIN
-     (SELECT uuid, attributeid, MAX(valuetimestamp) AS valuetimestamp
+     (SELECT uuid,
+             attributeid,
+             MAX(valuetimestamp) AS valuetimestamp
       FROM aentvalue
       GROUP BY uuid,
                attributeid) USING (uuid,
                                    attributeid,
-                                   valuetimestamp)) parent USING (uuid,
-                                                                  attributeid),
-  (SELECT versionnum
-   FROM VERSION
-   WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v;
+                                   valuetimestamp)
+   WHERE uuid = :uuid
+     AND attributeid = :attributeid) parent ;
 EOF
     )
   end
@@ -1959,6 +1961,20 @@ EOF
   def self.is_relnvalue_forked
     cleanup_query(<<EOF
     select count(isforked) from relnvalue where relationshipid = ?;
+EOF
+    )
+  end
+
+  def self.clear_arch_ent_fork
+    cleanup_query(<<EOF
+    update archentity set isforked = NULL where uuid = ?;
+EOF
+    )
+  end
+
+  def self.clear_aentvalue_fork
+    cleanup_query(<<EOF
+    update aentvalue set isforked = NULL where uuid = ?;
 EOF
     )
   end

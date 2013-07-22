@@ -272,10 +272,22 @@ class ProjectsController < ApplicationController
 
   def revert_arch_ent_to_timestamp
     @project = Project.find(params[:id])
-    uuid = params[:uuid]
-    timestamp = params[:timestamp]
-    @project.db.revert_arch_ent_to_timestamp(uuid,current_user.id, timestamp)
-    redirect_to edit_arch_ent_records_path(@project, uuid)
+
+    data = params[:data].map { |x, y| y }
+
+    entity = data.select { |x| x[:attributeid] == nil }.first
+    attributes = data.select { |x| x[:attributeid] != nil }
+
+    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], entity[:userid], entity[:timestamp])
+
+    attributes.each do | attribute |
+      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], attribute[:userid], attribute[:attributeid], attribute[:timestamp])
+    end
+
+    # clear conflicts
+    @project.db.resolve_arch_ent_conflicts(entity[:uuid]) if params[:resolve] == 'true'
+
+    redirect_to show_arch_ent_history_path(@project, params[:uuid])
   end
 
   # Relationship functionalities

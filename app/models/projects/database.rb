@@ -190,14 +190,34 @@ class Database
 
       @db.execute(WebQuery.insert_arch_ent_at_timestamp, params)
 
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def revert_aentvalues_to_timestamp(uuid, userid, attributeid, revert_timestamp)
+    @project.db_mgr.with_lock do
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
       params = {
           uuid:uuid,
           userid:userid,
+          attributeid:attributeid,
           valuetimestamp:timestamp,
           timestamp: revert_timestamp
       }
 
-      @db.execute(WebQuery.insert_arch_ent_attributes_at_timestamp, params)
+      @db.execute(WebQuery.insert_aentvalue_at_timestamp, params)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def resolve_arch_ent_conflicts(uuid)
+    @project.db_mgr.with_lock do
+
+      @db.execute(WebQuery.clear_arch_ent_fork, uuid)
+      @db.execute(WebQuery.clear_aentvalue_fork, uuid)
 
       @project.db_mgr.make_dirt
     end

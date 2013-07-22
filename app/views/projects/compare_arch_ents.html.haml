@@ -33,7 +33,8 @@
         %td.span6
           %h4 Attributes
       - @attributeKeys.each do |key,val|
-        %tr.merge-row
+        - classes = "merge-row " + (val ? '' : 'box-error')
+        %tr{class:classes}
           %td.first.selected.span6.merge-left
             = render :partial => 'compare_arch_ent_row', :locals => { group: @firstAttributeGroup, key: key, val: val, checked: true, attributeInfo: @first_attributeInfos, value: @firstAttributeValueGroup }
           %td.second.span6.merge-right

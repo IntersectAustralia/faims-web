@@ -337,17 +337,35 @@ ignore_error_records = ->
   )
 
 history_management = ->
-
-  $('input[name="timestamp"]:checked').parents('tr').addClass('selected')
-  $('input[name="timestamp"]').change(
+  $('input[type="radio"]:checked').each(
     ->
-      $('input[name="timestamp"]').each(
+      name = $(this).attr('name')
+      selector = 'input[type="radio"][name="' + name + '"]'
+      $(selector).parents('td').removeClass('selected')
+      $(this).parents('td').addClass('selected')
+  )
+  $('input[type="radio"]').change(
+    ->
+      name = $(this).attr('name')
+      selector = 'input[type="radio"][name="' + name + '"]'
+      $(selector).parents('td').removeClass('selected')
+      $(this).parents('td').addClass('selected')
+  )
+  $('.history-select-btn').click(
+    ->
+      $(this).parents('tr').find('input[type="radio"]').click()
+      return false
+  )
+  $('.history-form').submit(
+    ->
+      $('input[type="radio"]:not(:checked)').each(
         ->
-          $(this).parents('tr').removeClass('selected')
-          return
+          $(this).parents('td').find('input[type="hidden"]').remove()
       )
-      $(this).parents('tr').addClass('selected')
-      return
+  )
+  $('.history-resolve-btn').click(
+    ->
+      $('input[name="resolve"]').val('true')
   )
 
 vocab_management = ->
