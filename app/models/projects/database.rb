@@ -228,7 +228,8 @@ class Database
           userid:userid,
           attributeid:attributeid,
           valuetimestamp:timestamp,
-          timestamp: revert_timestamp
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attributeid)
       }
 
       @db.execute(WebQuery.insert_aentvalue_at_timestamp, params)
@@ -445,7 +446,8 @@ class Database
           userid:userid,
           attributeid:attributeid,
           relnvaluetimestamp:timestamp,
-          timestamp: revert_timestamp
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relid, attributeid)
       }
 
       @db.execute(WebQuery.insert_relnvalue_at_timestamp, params)

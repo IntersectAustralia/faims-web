@@ -629,7 +629,7 @@ EOF
   def self.insert_aentvalue_at_timestamp
     cleanup_query(<<EOF
 INSERT INTO aentvalue (uuid, userid, attributeid, vocabid, measure, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, parenttimestamp, valuetimestamp)
-SELECT uuid, :userid, attributeid, vocabid, measure, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.valuetimestamp, :valuetimestamp
+SELECT uuid, :userid, attributeid, vocabid, measure, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, :parenttimestamp, :valuetimestamp
 FROM aentvalue
 JOIN
   (SELECT uuid,
@@ -646,20 +646,7 @@ JOIN
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT valuetimestamp
-   FROM aentvalue
-   JOIN
-     (SELECT uuid,
-             attributeid,
-             MAX(valuetimestamp) AS valuetimestamp
-      FROM aentvalue
-      GROUP BY uuid,
-               attributeid) USING (uuid,
-                                   attributeid,
-                                   valuetimestamp)
-   WHERE uuid = :uuid
-     AND attributeid = :attributeid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v;
 EOF
     )
   end
@@ -1383,7 +1370,7 @@ EOF
   def self.insert_relnvalue_at_timestamp
     cleanup_query(<<EOF
 INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, parenttimestamp, relnvaluetimestamp)
-SELECT relationshipid, :userid, attributeid, vocabid, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, parent.relnvaluetimestamp, :relnvaluetimestamp
+SELECT relationshipid, :userid, attributeid, vocabid, freetext, certainty, deleted, v.versionnum, isdirty, isdirtyreason, :parenttimestamp, :relnvaluetimestamp
 
 FROM relnvalue
 JOIN
@@ -1402,21 +1389,7 @@ JOIN
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT relnvaluetimestamp
-FROM relnvalue
-JOIN
-  (SELECT relationshipid,
-          attributeid,
-          MAX(relnvaluetimestamp) AS relnvaluetimestamp
-   FROM relnvalue
-   GROUP BY relationshipid,
-            attributeid) USING (relationshipid,
-                                attributeid,
-                                relnvaluetimestamp)
-WHERE relationshipid = :relationshipid
-
-  AND attributeid = :attributeid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
