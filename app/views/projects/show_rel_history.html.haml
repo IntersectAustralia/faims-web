@@ -36,7 +36,7 @@
                     %span= cell[:geospatial] ? cell[:geospatial] : 'NULL'
                     %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
                     - if cell[:deleted]
-                      %p.text-error= cell[:deleted]
+                      %p.text-error=  'Deleted'
               - else
                 %td{:class => "history #{box_error}"}
     .form-actions
