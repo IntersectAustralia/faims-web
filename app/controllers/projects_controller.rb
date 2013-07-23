@@ -201,12 +201,7 @@ class ProjectsController < ApplicationController
 
       @project.db.update_arch_entity_attribute(uuid,current_user.id,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
 
-      @attributes = @project.db.get_arch_entity_attributes(uuid)
-      @vocab_name = {}
-      for attribute in @attributes
-        @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
-      end
-      render 'edit_arch_ent_records'
+      redirect_to edit_arch_ent_records_path(@project, uuid)
     end
 
   end
@@ -419,12 +414,7 @@ class ProjectsController < ApplicationController
 
       @project.db.update_rel_attribute(relationshipid,current_user.id,vocab_id,attribute_id, freetext, certainty, ignore_errors)
 
-      @attributes = @project.db.get_rel_attributes(relationshipid)
-      @vocab_name = {}
-      for attribute in @attributes
-        @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
-      end
-      render 'edit_rel_records'
+      redirect_to edit_rel_records_path(@project, relationshipid)
     end
 
   end

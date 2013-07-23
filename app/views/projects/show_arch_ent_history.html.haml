@@ -16,26 +16,29 @@
             %td= link_to 'Select Row', '', :class => 'btn history-select-btn'
             - @history_keys.each do |key|
               - cell = @history_rows[timestamp[1]][key]
-              - box_error = has_history_change(row_index, key) ? 'box-error' : nil
-              - if cell[:isforked]
-                - box_error = 'box-warning'
-              %td{:class => "history #{box_error}"}
-                %input{:type => 'radio', :name => 'data[' + key + '][selected]', :checked => row_index == 0 }
-                - if cell[:attributeid]
-                  %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
-                  %input{type:'hidden', name: 'data[' + key + '][attributeid]', value:cell[:attributeid] }
-                  %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
-                  %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
-                  %span= cell[:value]
-                  %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
-                - else
-                  %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
-                  %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
-                  %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
-                  %span= cell[:geospatial] ? cell[:geospatial] : 'NULL'
-                  %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
-                  - if cell[:deleted]
-                    %p.text-error= cell[:deleted]
+              - if cell
+                - box_error = has_history_change(row_index, key) ? 'box-error' : nil
+                - if cell[:isforked]
+                  - box_error = 'box-warning'
+                %td{:class => "history #{box_error}"}
+                  %input{:type => 'radio', :name => 'data[' + key + '][selected]', :checked => row_index == 0 }
+                  - if cell[:attributeid]
+                    %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
+                    %input{type:'hidden', name: 'data[' + key + '][attributeid]', value:cell[:attributeid] }
+                    %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
+                    %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
+                    %span= cell[:value]
+                    %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
+                  - else
+                    %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
+                    %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
+                    %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
+                    %span= cell[:geospatial] ? cell[:geospatial] : 'NULL'
+                    %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
+                    - if cell[:deleted]
+                      %p.text-error= cell[:deleted]
+              - else
+                %td{:class => "history #{box_error}"}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,@timestamps[0][0]), :class => 'btn'
       %input{:type => 'submit', :value => 'Revert', :class => 'btn btn-inverse'}

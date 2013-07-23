@@ -127,6 +127,7 @@ module ProjectsHelper
     return true if row_index == @history_rows.size - 1
     c1 = @history_rows[@timestamps[row_index][1]][key]
     c2 = @history_rows[@timestamps[row_index + 1][1]][key]
+    return true if c1 == nil or c2 == nil
     return c1[:value] != c2[:value] if c1[:attributeid]
     return (c1[:geospatial] != c2[:geospatial]) | (c1[:deleted] != c2[:deleted])
   end
