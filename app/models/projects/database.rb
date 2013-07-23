@@ -98,7 +98,17 @@ class Database
       timestamp = current_timestamp
       @db.execute(WebQuery.insert_version, timestamp)
 
+      cache_timestamps = {}
+
       (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id]
+          parenttimestamp = cache_timestamps[attribute_id]
+        else
+          parenttimestamp = @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id)
+
+          cache_timestamps[attribute_id] = parenttimestamp
+        end
 
         params = {
             uuid:uuid,
@@ -108,7 +118,8 @@ class Database
             measure:measure[i],
             freetext:freetext[i],
             certainty:certainty[i],
-            valuetimestamp:timestamp
+            valuetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
         }
 
         @db.execute(WebQuery.insert_arch_entity_attribute, params)
@@ -138,7 +149,19 @@ class Database
 
       @db.execute(WebQuery.insert_arch_entity, params)
 
+      cache_timestamps = {}
+
       (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id[i]]
+          parenttimestamp = cache_timestamps[attribute_id[i]]
+        else
+          parenttimestamp = @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id[i])
+
+          cache_timestamps[attribute_id[i]] = parenttimestamp
+        end
+
+
         params = {
             uuid:uuid,
             userid:userid,
@@ -147,7 +170,8 @@ class Database
             measure:measure[i],
             freetext:freetext[i],
             certainty:certainty[i],
-            valuetimestamp:timestamp
+            valuetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
         }
 
         @db.execute(WebQuery.insert_arch_entity_attribute, params)
@@ -295,7 +319,17 @@ class Database
       timestamp = current_timestamp
       @db.execute(WebQuery.insert_version, timestamp)
 
+      cache_timestamps = {}
+
       (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id]
+          parenttimestamp = cache_timestamps[attribute_id]
+        else
+          parenttimestamp = @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id)
+
+          cache_timestamps[attribute_id] = parenttimestamp
+        end
 
         params = {
             relationshipid:relationshipid,
@@ -304,7 +338,8 @@ class Database
             vocabid:vocab_id ? vocab_id[i] : nil,
             freetext:freetext[i],
             certainty:certainty[i],
-            relnvaluetimestamp:timestamp
+            relnvaluetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
         }
 
         @db.execute(WebQuery.insert_relationship_attribute, params)
@@ -333,7 +368,18 @@ class Database
 
       @db.execute(WebQuery.insert_relationship, params)
 
+      cache_timestamps = {}
+
       (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id[i]]
+          parenttimestamp = cache_timestamps[attribute_id[i]]
+        else
+          parenttimestamp = @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id[i])
+
+          cache_timestamps[attribute_id[i]] = parenttimestamp
+        end
+
         params = {
             relationshipid:relationshipid,
             userid:userid,
@@ -341,7 +387,8 @@ class Database
             vocabid:vocab_id ? vocab_id[i] : nil,
             freetext:freetext[i],
             certainty:certainty[i],
-            relnvaluetimestamp:timestamp
+            relnvaluetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
         }
 
         @db.execute(WebQuery.insert_relationship_attribute, params)

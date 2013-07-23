@@ -65,7 +65,7 @@ module ProjectsHelper
       else
         if(@firstAttributeGroup[attributeKey].length.eql?(@secondAttributeGroup[attributeKey].length))
           @firstAttributeGroup[attributeKey].length.times do |i|
-            if(@firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
+            if(@firstAttributeGroup[attributeKey][i-1][4].eql?(@secondAttributeGroup[attributeKey][i-1][4]) &&
                 @firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
                 @firstAttributeGroup[attributeKey][i-1][6].eql?(@secondAttributeGroup[attributeKey][i-1][6]) &&
                 @firstAttributeGroup[attributeKey][i-1][7].eql?(@secondAttributeGroup[attributeKey][i-1][7]))
