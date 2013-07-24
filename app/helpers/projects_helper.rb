@@ -166,7 +166,8 @@ module ProjectsHelper
           user: attribute[5],
           value: attribute[9],
           userid: attribute[11],
-          isforked: attribute[13]
+          isforked: attribute[13],
+          deleted: attribute[14]
         }
 
         row[attribute[1]] = cell
@@ -212,7 +213,8 @@ module ProjectsHelper
             user: attribute[5],
             value: attribute[9],
             userid: attribute[11],
-            isforked: attribute[13]
+            isforked: attribute[13],
+            deleted: attribute[14]
         }
 
         row[attribute[2]] = cell

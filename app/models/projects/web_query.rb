@@ -472,7 +472,7 @@ EOF
 
   def self.get_arch_ent_attributes_at_timestamp
     cleanup_query(<<EOF
-select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(valdeleted,
+select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(
                                                                                              measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
@@ -484,7 +484,7 @@ select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) a
                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
                                                                                              measure,
                                                                                              vocabname,
-                                                                                             freetext), ' | ') as response, auserid, vuserid, aentforked, avalforked
+                                                                                             freetext), ' | ') as response, auserid, vuserid, aentforked, avalforked, valdeleted
 FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp, aentuser.userid as auserid, valueuser.userid as vuserid, archentity.isforked as aentforked, aentvalue.isforked as avalforked
          FROM aentvalue
          JOIN attributekey USING (attributeid)
@@ -1225,12 +1225,12 @@ EOF
 
   def self.get_rel_attributes_at_timestamp
     cleanup_query(<<EOF
-select relationshipid, attributeid, attributename, astext(transform(GeoSpatialColumn,?)), group_concat(rfname || ' ' || rlname) as ruser,group_concat(vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(relnvaluedeleted, vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+select relationshipid, attributeid, attributename, astext(transform(GeoSpatialColumn,?)), group_concat(rfname || ' ' || rlname) as ruser,group_concat(vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                         vocabname  || ' (' || freetext || ')',
                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
                                                                                         vocabname,
-                                                                                        freetext), ' | ') as response, ruserid, rvuserid, rforked, rvforked
+                                                                                        freetext), ' | ') as response, ruserid, rvuserid, rforked, rvforked, relnvaluedeleted
 from (
 SELECT relationshipid, geospatialcolumn, vocabid, attributeid, relnuser.fname as rfname, relnuser.lname as rlname, rvalueuser.fname as vfname, rvalueuser.lname as vlname, attributename, freetext, certainty, relationship.deleted, relnvalue.deleted as relnvaluedeleted, vocabname, relntypeid, attributetype, relnvaluetimestamp, relntimestamp, relnuser.userid as ruserid, rvalueuser.userid as rvuserid, relationship.isforked as rforked, relnvalue.isforked as rvforked
    FROM relnvalue

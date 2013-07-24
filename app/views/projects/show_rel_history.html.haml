@@ -29,6 +29,8 @@
                     %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
                     %span= cell[:value]
                     %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
+                    - if cell[:deleted]
+                      %p.text-error= 'Deleted'
                   - else
                     %input{type:'hidden', name: 'data[' + key + '][relationshipid]', value:cell[:relationshipid] }
                     %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
