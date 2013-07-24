@@ -311,7 +311,7 @@ EOF
     cleanup_query(<<EOF
 INSERT INTO archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, aenttimestamp, versionnum, parenttimestamp)
 SELECT uuid, :userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, :aenttimestamp, v.versionnum,
-                                                                                                  parent.aenttimestamp
+                                                                                                :parenttimestamp
 FROM
   (SELECT uuid,
           max(aenttimestamp) AS aenttimestamp
@@ -323,16 +323,7 @@ JOIN archentity USING (uuid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT aenttimestamp
-   FROM archentity
-   JOIN
-     (SELECT uuid,
-             max(aenttimestamp) AS aenttimestamp
-      FROM archentity
-      GROUP BY uuid) USING (uuid,
-                            aenttimestamp)
-   WHERE uuid = :uuid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
@@ -346,6 +337,13 @@ FROM
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v;
+EOF
+    )
+  end
+
+  def self.get_arch_ent_parenttimestamp
+    cleanup_query(<<EOF
+SELECT max(aenttimestamp) FROM archentity WHERE uuid = ? group by uuid;
 EOF
     )
   end
@@ -373,7 +371,7 @@ SELECT uuid, :userid, AEntTypeID,
                        GeoSpatialColumn,
                        :deleted,
                        v.versionnum,
-                       parent.aenttimestamp
+                       :parenttimestamp
 FROM
   (SELECT uuid,
           max(aenttimestamp) AS aenttimestamp
@@ -385,16 +383,7 @@ JOIN archentity USING (uuid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT aenttimestamp
-   FROM archentity
-   JOIN
-     (SELECT uuid,
-             max(aenttimestamp) AS aenttimestamp
-      FROM archentity
-      GROUP BY uuid) USING (uuid,
-                            aenttimestamp)
-   WHERE uuid = :uuid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
@@ -598,7 +587,7 @@ EOF
   def self.insert_arch_ent_at_timestamp
      cleanup_query(<<EOF
 INSERT INTO archentity (uuid, userid, doi, aenttypeid, deleted, versionnum, isDirty, isDirtyReason, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, aenttimestamp)
-SELECT uuid, :userid, doi, aenttypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.aenttimestamp, GeoSpatialColumnType,GeoSpatialColumn, :aenttimestamp
+SELECT uuid, :userid, doi, aenttypeid, deleted, v.versionnum, isDirty, isDirtyReason, :parenttimestamp, GeoSpatialColumnType,GeoSpatialColumn, :aenttimestamp
 FROM archentity
 JOIN
   (SELECT uuid,
@@ -611,16 +600,7 @@ JOIN
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT aenttimestamp
-   FROM archentity
-   JOIN
-     (SELECT uuid,
-             max(aenttimestamp) AS aenttimestamp
-      FROM archentity
-      GROUP BY uuid) USING (uuid,
-                            aenttimestamp)
-   WHERE uuid = :uuid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
@@ -1066,7 +1046,7 @@ EOF
     cleanup_query(<<EOF
 INSERT INTO relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, relntimestamp, versionnum, parenttimestamp)
 SELECT RelationshipID, :userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, :relntimestamp, v.versionnum,
-                                                                                                          parent.relntimestamp
+                                                                                                          :parenttimestamp
 FROM
   (SELECT relationshipid,
           max(relntimestamp) AS RelnTimestamp
@@ -1079,16 +1059,7 @@ JOIN relationship USING (relationshipid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT relntimestamp
-FROM relationship
-JOIN
-  (SELECT relationshipid,
-          max(relntimestamp) AS relntimestamp
-   FROM relationship
-   GROUP BY relationshipid) USING (relationshipid,
-                         relntimestamp)
-WHERE relationshipid = :relationshipid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
@@ -1102,6 +1073,13 @@ FROM
    FROM VERSION
    WHERE ismerged = 1
    ORDER BY versionnum DESC LIMIT 1) v;
+EOF
+    )
+  end
+
+  def self.get_rel_parenttimestamp
+    cleanup_query(<<EOF
+SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;
 EOF
     )
   end
@@ -1129,7 +1107,7 @@ SELECT relationshipid, :userid, RelnTypeID,
                       GeoSpatialColumn,
                       :deleted,
                       v.versionnum,
-                      parent.relntimestamp
+                      :parenttimestamp
 FROM
   (SELECT relationshipid,
           max(relntimestamp) AS relntimestamp
@@ -1142,16 +1120,7 @@ JOIN relationship USING (relationshipid,
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT relntimestamp
-FROM relationship
-JOIN
-  (SELECT relationshipid,
-          max(relntimestamp) AS relntimestamp
-   FROM relationship
-   GROUP BY relationshipid) USING (relationshipid,
-                         relntimestamp)
-WHERE relationshipid = :relationshipid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
@@ -1337,7 +1306,7 @@ EOF
   def self.insert_rel_at_timestamp
     cleanup_query(<<EOF
 INSERT INTO relationship (relationshipid, userid, relntypeid, deleted, versionnum, isDirty, isDirtyReason, ParentTimestamp, GeoSpatialColumnType, GeoSpatialColumn, relntimestamp)
-SELECT relationshipid, :userid, relntypeid, deleted, v.versionnum, isDirty, isDirtyReason, parent.relntimestamp, GeoSpatialColumnType,GeoSpatialColumn, :relntimestamp
+SELECT relationshipid, :userid, relntypeid, deleted, v.versionnum, isDirty, isDirtyReason, :parenttimestamp, GeoSpatialColumnType,GeoSpatialColumn, :relntimestamp
 
 FROM relationship
 JOIN
@@ -1353,16 +1322,7 @@ JOIN
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT relntimestamp
-FROM relationship
-JOIN
-  (SELECT relationshipid,
-          max(relntimestamp) AS relntimestamp
-   FROM relationship
-   GROUP BY relationshipid) USING (relationshipid,
-                         relntimestamp)
-WHERE relationshipid = :relationshipid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v;
 EOF
     )
   end
@@ -1507,29 +1467,23 @@ EOF
     )
   end
 
+  def self.get_arch_ent_rel_parenttimestamp
+    cleanup_query(<<EOF
+SELECT max(AEntRelnTimestamp) FROM aentreln WHERE uuid = ? and relationshipid = ? group by uuid, relationshipid;
+EOF
+    )
+  end
+
   def self.insert_arch_entity_relationship
     cleanup_query(<<EOF
 INSERT INTO aentreln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, versionnum, parenttimestamp)
 SELECT :uuid, :relationshipid, :userid, :verb, :aentrelntimestamp, v.versionnum,
-                                                                   parent.aentrelntimestamp
+                                                                   :parenttimestamp
 FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT aentrelntimestamp
-FROM aentreln
-JOIN
-  (SELECT uuid,
-          relationshipid,
-          max(AEntRelnTimestamp) AS AEntRelnTimestamp
-   FROM aentreln
-   GROUP BY uuid,
-            relationshipid) USING (uuid,
-                                   relationshipid,
-                                   AEntRelnTimestamp)
-WHERE uuid = :uuid
-  AND relationshipid = :relationshipid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end
@@ -1538,25 +1492,12 @@ EOF
     cleanup_query(<<EOF
 INSERT INTO aentreln (UUID, RelationshipID, UserId, Deleted, AEntRelnTimestamp, versionnum, parenttimestamp)
 SELECT :uuid, :relationshipid, :userid, 'true', :aentrelntimestamp, v.versionnum,
-                                                                    parent.aentrelntimestamp
+                                                                    :parenttimestamp
 FROM
   (SELECT versionnum
    FROM VERSION
    WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v
-LEFT OUTER JOIN (SELECT aentrelntimestamp
-FROM aentreln
-JOIN
-  (SELECT uuid,
-          relationshipid,
-          max(AEntRelnTimestamp) AS AEntRelnTimestamp
-   FROM aentreln
-   GROUP BY uuid,
-            relationshipid) USING (uuid,
-                                   relationshipid,
-                                   AEntRelnTimestamp)
-WHERE uuid = :uuid
-  AND relationshipid = :relationshipid) parent ;
+   ORDER BY versionnum DESC LIMIT 1) v ;
 EOF
     )
   end

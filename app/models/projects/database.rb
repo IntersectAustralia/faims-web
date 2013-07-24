@@ -144,7 +144,8 @@ class Database
       params = {
           uuid:uuid,
           userid:userid,
-          aenttimestamp:timestamp
+          aenttimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
       }
 
       @db.execute(WebQuery.insert_arch_entity, params)
@@ -209,7 +210,8 @@ class Database
           uuid:uuid,
           userid:userid,
           aenttimestamp:timestamp,
-          timestamp: revert_timestamp
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
       }
 
       @db.execute(WebQuery.insert_arch_ent_at_timestamp, params)
@@ -254,7 +256,8 @@ class Database
       params = {
           userid:userid,
           deleted:'true',
-          uuid:uuid
+          uuid:uuid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
       }
       @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
       @project.db_mgr.make_dirt
@@ -267,7 +270,8 @@ class Database
       params = {
           userid:userid,
           deleted:nil,
-          uuid:uuid
+          uuid:uuid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
       }
       @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
       @project.db_mgr.make_dirt
@@ -364,7 +368,8 @@ class Database
       params = {
           relationshipid:relationshipid,
           userid:userid,
-          relntimestamp:timestamp
+          relntimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
       }
 
       @db.execute(WebQuery.insert_relationship, params)
@@ -427,7 +432,8 @@ class Database
           relationshipid:relid,
           userid:userid,
           relntimestamp:timestamp,
-          timestamp: revert_timestamp
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relid)
       }
 
       @db.execute(WebQuery.insert_rel_at_timestamp, params)
@@ -472,7 +478,8 @@ class Database
       params = {
           userid:userid,
           deleted:'true',
-          relationshipid:relationshipid
+          relationshipid:relationshipid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
       }
       @db.execute(WebQuery.delete_or_undelete_relationship, params)
       @project.db_mgr.make_dirt
@@ -485,7 +492,8 @@ class Database
       params = {
           userid:userid,
           deleted:nil,
-          relationshipid:relationshipid
+          relationshipid:relationshipid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
       }
       @db.execute(WebQuery.delete_or_undelete_relationship, params)
       @project.db_mgr.make_dirt
@@ -554,7 +562,8 @@ class Database
           relationshipid:relationshipid,
           userid:userid,
           verb:verb,
-          aentrelntimestamp:timestamp
+          aentrelntimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
       }
 
       @db.execute(WebQuery.insert_arch_entity_relationship, params)
@@ -573,7 +582,8 @@ class Database
           uuid:uuid,
           relationshipid:relationshipid,
           userid:userid,
-          aentrelntimestamp:timestamp
+          aentrelntimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
       }
 
       @db.execute(WebQuery.delete_arch_entity_relationship, params)
