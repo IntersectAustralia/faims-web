@@ -402,7 +402,7 @@ Feature: Manage projects
     Then I should see "New project created."
     And I should be on the projects page
     And I click on "Project 1"
-    Then I follow "Edit Vocabulary"
+    Then I click on "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
     Then I follow "Update"
