@@ -95,7 +95,6 @@ class ProjectsController < ApplicationController
     type = params[:type]
     offset = params[:offset]
     show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
-    p show_deleted
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
     session[:cur_offset] = offset
