@@ -180,8 +180,7 @@ Then /^I should see json for "([^"]*)" version (.*) db with version (.*)$/ do |n
 end
 
 When /^I click on "([^"]*)"$/ do |name|
-  project = Project.find_by_name(name)
-  visit ("/projects/" + project.id.to_s)
+  find(:xpath, "//a[contains(text(), \"#{name}\")]").click
 end
 
 Then /^I should see bad request page$/ do
@@ -590,4 +589,25 @@ And /^I should have setting "([^"]*)" for "([^"]*)" as "([^"]*)"$/ do |setting_n
   project = Project.find_by_name(name)
   settings = JSON.parse(File.read(project.get_path(:settings)).as_json)
   settings[setting_name].should == srid
+end
+
+And /^I have database "([^"]*)" for "([^"]*)"$/ do |db, project|
+  p = Project.find_by_name(project)
+  FileUtils.cp Rails.root.join("features/assets/#{db}"), p.get_path(:db)
+end
+
+Then /^I should see "([^"]*)" with "([^"]*)"$/ do |link, error|
+  page.should have_xpath("//a[contains(text(),\"#{link}\")]/div[contains(text(), \"#{error}\")]")
+end
+
+Then /^I history should have conflicts$/ do
+   page.should have_css(".box-warning")
+end
+
+Then /^I history should not have conflicts$/ do
+  page.should_not have_css(".box-warning")
+end
+
+And /^I follow link "([^"]*)"$/ do |link|
+  find(:xpath, "//input[@value=\"#{link}\"]").click
 end
