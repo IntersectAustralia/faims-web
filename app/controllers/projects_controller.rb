@@ -288,10 +288,12 @@ class ProjectsController < ApplicationController
     entity = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], entity[:userid], entity[:timestamp])
+    timestamp =  @project.db.current_timestamp
+
+    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], entity[:userid], entity[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], attribute[:userid], attribute[:attributeid], attribute[:timestamp])
+      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
@@ -433,10 +435,12 @@ class ProjectsController < ApplicationController
     rel = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    @project.db.revert_rel_to_timestamp(rel[:relationshipid], rel[:userid], rel[:timestamp])
+    timestamp = @project.db.current_timestamp
+
+    @project.db.revert_rel_to_timestamp(rel[:relationshipid], rel[:userid], rel[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], attribute[:userid], attribute[:attributeid], attribute[:timestamp])
+      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts

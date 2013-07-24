@@ -201,9 +201,8 @@ class Database
     changes
   end
 
-  def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp)
+  def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      timestamp = current_timestamp
       @db.execute(WebQuery.insert_version, timestamp)
 
       params = {
@@ -220,9 +219,8 @@ class Database
     end
   end
 
-  def revert_aentvalues_to_timestamp(uuid, userid, attributeid, revert_timestamp)
+  def revert_aentvalues_to_timestamp(uuid, userid, attributeid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      timestamp = current_timestamp
       @db.execute(WebQuery.insert_version, timestamp)
 
       params = {
@@ -423,9 +421,8 @@ class Database
     changes
   end
 
-  def revert_rel_to_timestamp(relid, userid, revert_timestamp)
+  def revert_rel_to_timestamp(relid, userid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      timestamp = current_timestamp
       @db.execute(WebQuery.insert_version, timestamp)
 
       params = {
@@ -442,9 +439,8 @@ class Database
     end
   end
 
-  def revert_relnvalues_to_timestamp(relid, userid, attributeid, revert_timestamp)
+  def revert_relnvalues_to_timestamp(relid, userid, attributeid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      timestamp = current_timestamp
       @db.execute(WebQuery.insert_version, timestamp)
 
       params = {
@@ -832,8 +828,6 @@ class Database
       return JSON.parse File.read(Rails.root.join('lib/assets/spatial_ref_list.json'))
     end
   end
-
-  private
 
   def current_timestamp
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
