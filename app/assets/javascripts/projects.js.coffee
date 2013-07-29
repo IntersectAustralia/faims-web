@@ -113,7 +113,7 @@ compare_input_checked_handler = ->
   )
   return
 
-delete_arch_ent_members = ->
+aent_rel_management = ->
   $('input#remove-member').each(
     -> $(this).click(
       ->
@@ -122,28 +122,65 @@ delete_arch_ent_members = ->
         return
     )
   )
-  return
 
-search_arch_ent_members = ->
   $('#search-member').click(
     ->
       window.location = $(this).attr('src')
       return
   )
-  return
 
-add_arch_ent_member = ->
+  $('input[name="rel_id"]').change(
+    ->
+      $relntypeid = $(this).siblings('#relntypeid')
+      $.ajax $relntypeid.attr('src'),
+        type: 'GET'
+        data: {relntypeid: $('#relntypeid').val()}
+        dataType: 'json'
+        success: (data, textStatus, jqXHR) ->
+          $('#verb').find('option').remove()
+          if data.length
+            $.each(data, ->
+              $('#verb').append('<option value="'+ this + '">' + this + '</option>')
+              return
+            )
+            return
+          else
+            return false
+      return
+  )
+
   $('#add-arch-ent').click(
     ->
       selected = $('input[type="radio"]:checked')
       verb = $('#verb').val()
       if selected.length == 0
-        alert('No Archaeological Entity is selected to be added')
+        alert('No arch entity is selected to be added')
         return false
       else
         $.ajax $(this).attr('src'),
           type: 'POST'
           data: {relationshipid: $('#relationshipid').val(), relntypeid: $('#relntypeid').val(), uuid: selected.val(), verb: verb}
+          dataType: 'json'
+          success: (data, textStatus, jqXHR) ->
+            if data.result == "success"
+              window.location = data.url
+              return
+            else
+              return false
+        return
+  )
+
+  $('#add-rel').click(
+    ->
+      selected = $('input[type="radio"]:checked')
+      verb = $('#verb').val()
+      if selected.length == 0
+        alert('No relationship is selected to be added')
+        return false
+      else
+        $.ajax $(this).attr('src'),
+          type: 'POST'
+          data: {relationshipid: selected.val(), uuid: $('#uuid').val(), verb: verb}
           dataType: 'json'
           success: (data, textStatus, jqXHR) ->
             if data.result == "success"
@@ -174,7 +211,7 @@ compare_records = ->
   )
   return
 
-delete_records = ->
+delete_undelete_records = ->
   $('#delete-record').one("click",
     ->
       $(this).click(
@@ -182,6 +219,14 @@ delete_records = ->
           return false
       )
       return
+  )
+  $('#undelete-record').one("click",
+  ->
+    $(this).click(
+      =>
+        return false
+    )
+    return
   )
   return
 
@@ -245,24 +290,18 @@ merge_record_management = ->
 
   $('#select-form input:radio').change(
     ->
-      siblings = $(this).parents('td').siblings()[0]
-      $sibling_checkbox = $(siblings).find('input:radio')
-      if($sibling_checkbox.length)
-        if($(this).is(':checked'))
-          if($sibling_checkbox.is(':checked'))
-            $sibling_checkbox.prop('checked', false)
-            $(this).parents('tr').find('td').removeClass('selected')
-            $(this).parents('td').addClass('selected')
-            return
-          return
-        else
-          if(!$sibling_checkbox.is(':checked'))
-            $(this).prop('checked', true)
-            return
-          return
+      isLeft = $(this).parents('td').hasClass('merge-left')
+      row = $(this).parents('.merge-row')
+      if isLeft
+        row.find('.merge-right').find('input:radio').prop('checked', false)
+        row.find('.merge-left').find('input:radio').prop('checked', true)
+        row.find('.merge-right').removeClass('selected')
+        row.find('.merge-left').addClass('selected')
       else
-        $(this).prop('checked', true)
-        return
+        row.find('.merge-right').find('input:radio').prop('checked', true)
+        row.find('.merge-left').find('input:radio').prop('checked', false)
+        row.find('.merge-right').addClass('selected')
+        row.find('.merge-left').removeClass('selected')
   )
 
 
@@ -270,29 +309,16 @@ merge_record_management = ->
     ->
       $form = $('<form method="post">')
       $form.attr('action',$(this).attr('href'))
-      $('#select-form').find('input:radio:checked').each(
+      $('#select-form').find('.merge-row').each (
         ->
-          li_sibling = $(this).parents('li').siblings()
-          if(li_sibling.length)
-            $(li_sibling).find('input').each(
-              ->
-                if $(this).attr('name') != undefined
-                  $form.append(this)
-                  return
-                return
-            )
-            return
+          if ($(this).find('.merge-left').find('input:radio:checked').length)
+            row = $(this).find('.merge-left')
           else
-            input_sibling = $(this).siblings('input')
-            $form.append(this)
-            if(input_sibling.length)
-              $(input_sibling).each(
-                ->
-                  $form.append(this)
-                  return
-              )
-              return
-
+            row = $(this).find('.merge-right')
+          row.find('input').each(
+            ->
+              $form.append(this)
+          )
           return
       )
       $('body').append($form)
@@ -311,17 +337,35 @@ ignore_error_records = ->
   )
 
 history_management = ->
-
-  $('input[name="timestamp"]:checked').parents('tr').addClass('selected')
-  $('input[name="timestamp"]').change(
+  $('input[type="radio"]:checked').each(
     ->
-      $('input[name="timestamp"]').each(
+      name = $(this).attr('name')
+      selector = 'input[type="radio"][name="' + name + '"]'
+      $(selector).parents('td').removeClass('selected')
+      $(this).parents('td').addClass('selected')
+  )
+  $('input[type="radio"]').change(
+    ->
+      name = $(this).attr('name')
+      selector = 'input[type="radio"][name="' + name + '"]'
+      $(selector).parents('td').removeClass('selected')
+      $(this).parents('td').addClass('selected')
+  )
+  $('.history-select-btn').click(
+    ->
+      $(this).parents('tr').find('input[type="radio"]').click()
+      return false
+  )
+  $('.history-form').submit(
+    ->
+      $('input[type="radio"]:not(:checked)').each(
         ->
-          $(this).parents('tr').removeClass('selected')
-          return
+          $(this).parents('td').find('input[type="hidden"]').remove()
       )
-      $(this).parents('tr').addClass('selected')
-      return
+  )
+  $('.history-resolve-btn').click(
+    ->
+      $('input[name="resolve"]').val('true')
   )
 
 vocab_management = ->
@@ -351,6 +395,24 @@ vocab_management = ->
         return
       return
   )
+
+  if ($('#attribute').val() != "")
+    $('#attribute').change()
+    $('#insert_vocab').click(
+      ->
+        value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
+        table = $('#vocab-content').find('table')
+        $(value).appendTo($(table))
+        return false
+    )
+
+    $('#update_vocab').click(
+      ->
+        $('#attribute_form').submit();
+        return false
+    )
+    return
+
   $('#insert_vocab').click(
     ->
       value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
@@ -361,24 +423,25 @@ vocab_management = ->
 
   $('#update_vocab').click(
     ->
-      self = this
-      $(this).attr('disabled','disabled')
-      $.ajax $(this).attr('href'),
-        type: 'put'
-        data: $('#attribute_form').serializeArray()
-        dataType: 'json'
-        success:(data, textStatus, jqXHR) ->
-          $('#vocab-content').empty()
-          $('<label>Vocab List</label>').appendTo($('#vocab-content'))
-          table = $('<table></table>').appendTo($('#vocab-content'))
-          $(data).each(
-            ->
-              value = '<tr><td><input type="hidden" name="vocab_id[]" value="'+this.vocab_id+'"/><input name="vocab_name[]"value="'+this.vocab_name+'"/></td></tr>'
-              $(value).appendTo($(table))
-              return
-          )
-          $(self).removeAttr('disabled')
-          return
+      $('#attribute_form').submit();
+      return false
+  )
+  return
+
+user_management = ->
+  $('#add_user').click(
+    ->
+      if $('#select_user').val() != ""
+        $('#user_form').submit()
+        return false
+      return false
+  )
+  return
+
+show_hide_deleted = ->
+  $('#show-hide-deleted').click(
+    ->
+      $('#show-hide-deleted-form').submit()
       return false
   )
   return
@@ -390,14 +453,14 @@ $(document).ready(
     show_archive_modal_dialog()
     compare_records()
     compare_input_checked_handler()
-    search_arch_ent_members()
-    add_arch_ent_member()
-    delete_arch_ent_members()
-    delete_records()
+    aent_rel_management()
+    delete_undelete_records()
     download_attached_file()
     ignore_error_records()
     merge_record_management()
     history_management()
     vocab_management()
+    user_management()
+    show_hide_deleted()
     return
 )

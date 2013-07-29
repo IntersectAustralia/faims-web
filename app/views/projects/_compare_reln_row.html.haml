@@ -1,28 +1,13 @@
 - if !group[key].nil?
-  %label.radio
-    - if (checked)
-      %input{:type => 'radio', :checked => 'checked'}
-    - else
-      %input{:type => 'radio'}
-    - if (val)
-      - if (checked)
-        .attrib
-          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-          %span.attribute-info
-            = attributeInfo[key]
-      - else
-        .attrib
-          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-          %span.attribute-info
-            = attributeInfo[key]
-    - else
-      - if (checked)
-        .attrib.error
-          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-          %span.attribute-info
-            = attributeInfo[key]
-      - else
-        .attrib.error
-          = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
-          %span.attribute-info
-            = attributeInfo[key]
+  - if (checked)
+    %input{:type => 'radio', :checked => 'checked'}
+    .attrib
+      = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
+      %span.attribute-info
+        = attributeInfo[key]
+  - else
+    %input{:type => 'radio'}
+    .attrib
+      = render :partial => 'compare_reln_row_content', :locals => { group: group, key: key, value: value }
+      %span.attribute-info
+        = attributeInfo[key]

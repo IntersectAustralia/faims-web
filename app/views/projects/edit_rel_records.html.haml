@@ -1,12 +1,18 @@
+- title @project.name + " - Relationship"
 - get_files(@attributes,8,4)
-%h1
-  %span= @project.name + " - Relationship"
 .well
-  - if session[:action].eql?('list_typed_rel_records')
-    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
-  - elsif session[:action].eql?('show_rel_records')
-    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s, :class => 'btn'
-  = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn btn-warning', :id => 'delete-record'
+  - if !session[:show].nil? and !session[:show].empty?
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_association_path(@project,session[:uuid])+"?offset=0", :class => 'btn'
+  - else
+    - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    - if session[:action].eql?('list_typed_rel_records')
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_rel_records_path(@project)+"?type="+session[:type]+"&offset="+session[:cur_offset].to_s+"&show_deleted="+ show_deleted, :class => 'btn'
+    - elsif session[:action].eql?('show_rel_records')
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_records_path(@project)+"?query="+session[:query]+"&offset="+session[:cur_offset].to_s+"&show_deleted="+ show_deleted, :class => 'btn'
+  - if !@deleted[1].nil?
+    = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,session[:relationshipid]), :class => 'btn btn-warning', :id => 'undelete-record'
+  - else
+    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_rel_records_path(@project,session[:relationshipid]), :class => 'btn btn-warning', :id => 'delete-record'
   = link_to "Show Relationship Member", show_rel_members_path(@project,session[:relationshipid]) + "?offset=0&relntypeid=" + @attributes[0][7].to_s, :class => 'btn'
   = link_to "Show History", show_rel_history_path(@project,session[:relationshipid]), :class => 'btn'
 .container
@@ -23,15 +29,16 @@
           - for attribute in val
             .row-fluid
               - if !@vocab_name[attribute[2]].empty?
-                = f.label :vocab_id, "Vocab:"
-                - if attribute[1].blank?
-                  = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, input_html: {name: 'attr[vocab_id][]'}
-                - else
-                  = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
-              .span6
+                .span3
+                  = f.label :vocab_id, "Vocab:"
+                  - if attribute[1].blank?
+                    = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, input_html: {name: 'attr[vocab_id][]'}
+                  - else
+                    = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
+              .span3
                 = f.label :freetext, "Freetext:"
                 = f.text_field :freetext, :value => attribute[4], name: 'attr[freetext][]', :class => "span12"
-              .span6
+              .span3
                 = f.label :certainty, "Certainty:"
                 = f.text_field :certainty, :value => attribute[5], name: 'attr[certainty][]', :class => "span12"
             - if attribute[10] == 1
@@ -47,7 +54,7 @@
             - if show_error_button
               = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn"
             = link_to "cancel", edit_rel_records_path(@project,session[:relationshipid]), :class => 'btn'
-- if @files.length > 0
+- if !@files.empty?
   .attached-files
     %h2 Attached Files
     %ul

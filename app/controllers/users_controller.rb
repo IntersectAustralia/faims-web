@@ -81,4 +81,37 @@ class UsersController < ApplicationController
     end
   end
 
+  def new
+    @user = User.new
+  end
+
+  def create
+    @user = User.new(params[:user])
+    if @user.valid?
+      @user.activate
+      @user.role = Role.find_by_name('user')
+      @user.save
+      flash[:notice] = "New user created."
+      redirect_to :users
+    else
+      flash[:error] = "Please correct the errors in this form."
+      render 'new'
+    end
+  end
+
+  def destroy
+    user = User.find(params[:id])
+    if user
+      if current_user.id == user.id
+        flash[:error] = "Cannot delete yourself."
+      else
+        user.destroy
+        flash[:notice] = "User deleted."
+      end
+    else
+      flash[:error] = "Cannot find user."
+    end
+    redirect_to :users
+  end
+
 end

@@ -17,15 +17,23 @@
         .container
           %a.brand{:href => root_path } FAIMS
           %ul.nav
+            %li= link_to "Users", users_path
             %li= link_to "Projects", projects_path
           = render 'layouts/user_menu'
 
     .container.main_content
-      -# %h1= yield :title
-      -# %hr
       - flash.each do |name, msg|
         - next if name == :timedout
-        %div{:class => "alert alert-#{name == :notice ? "success" : "error"}"}
+        - if name == :warning
+          - alert = "alert"
+        - elsif name == :notice
+          - alert = "alert alert-success"
+        - else
+          - alert = "alert alert-error"
+        %div{:class => "alert #{alert}"}
           %a.close{"data-dismiss" => "alert"} ×
           = msg
-      = yield
+      .container
+        %h1
+          %span.page-title= yield :title
+        = yield

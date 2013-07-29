@@ -1,59 +1,47 @@
+- title @project.name + " - Archaeological Entity History"
 - show_arch_ent_attributes_history(@project,@timestamps)
-%h1
-  %span= @project.name + " - Archaeological Entity Records"
-
 .content
-  %form{:method => 'post', :action =>  revert_arch_ent_to_timestamp_path(@project,@timestamps[0][0])}
+  %form{:method => 'post', :action =>  revert_arch_ent_to_timestamp_path(@project,@timestamps[0][0]), :class => 'history-form'}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %input{:type => 'hidden', :value => 'false', :name => 'resolve'}
     .records
       %table.table.inner
         %tr
-        - @attribute_keys.each do |names|
           %th
-            = names.capitalize
-        - checked = true
-        - @timestamps.each do |timestamp|
+          - @history_keys.each do |names|
+            %th
+              = names.capitalize
+        - @timestamps.each_with_index do |timestamp, row_index|
           %tr
-            - @attribute_keys.length.times do |i|
-              - value = @history[timestamp[1]][@attribute_keys[i]]
-              - if @has_changes[timestamp[1]][@attribute_keys[i]].nil?
-                %td.history
-                  - if (i == 0)
-                    %input{:type => 'radio', :name => 'timestamp', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
-                    - checked = false
-                  - if @attribute_keys[i].eql?('deleted')
-                    - if value
-                      = 'DELETED'
-                  - elsif @attribute_keys[i].eql?('edited by')
-                    - if value.nil?
-                      = 'Dummy User'
-                    - else
-                      = value
+            %td= link_to 'Select Row', '', :class => 'btn history-select-btn'
+            - @history_keys.each do |key|
+              - cell = @history_rows[timestamp[1]][key]
+              - if cell
+                - box_error = has_history_change(row_index, key) ? 'box-error' : nil
+                - if cell[:isforked]
+                  - box_error = 'box-warning'
+                %td{:class => "history #{box_error}"}
+                  %input{:type => 'radio', :name => 'data[' + key + '][selected]', :checked => row_index == 0 }
+                  - if cell[:attributeid]
+                    %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
+                    %input{type:'hidden', name: 'data[' + key + '][attributeid]', value:cell[:attributeid] }
+                    %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
+                    %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
+                    %span= cell[:value]
+                    %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
+                    - if cell[:deleted]
+                      %p.text-error= 'Deleted'
                   - else
-                    - if value.eql?('true')
-                      = 'DELETED'
-                    - else
-                      = value
+                    %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
+                    %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
+                    %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
+                    %span= cell[:geospatial] ? cell[:geospatial] : 'NULL'
+                    %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
+                    - if cell[:deleted]
+                      %p.text-error= 'Deleted'
               - else
-                %td.history.error
-                  - if (i == 0)
-                    %input{:type => 'radio', :name => 'history', :value=> timestamp[1], :checked => checked, :id => 'timestamp'}
-                    - checked = false
-                  - if @attribute_keys[i].eql?('deleted')
-                    - if value
-                      = 'DELETED'
-                    - elsif @attribute_keys[i].eql?('edited by')
-                      - if value.nil?
-                        = 'Dummy User'
-                      - else
-                        = value
-                  - else
-                    - if value.eql?('true')
-                      = 'DELETED'
-                    - else
-                      = value
-
+                %td{:class => "history #{box_error}"}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,@timestamps[0][0]), :class => 'btn'
-      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       %input{:type => 'submit', :value => 'Revert', :class => 'btn btn-inverse'}
-
+      %input{:type => 'submit', :value => 'Revert and Resolve Conflicts', :class => 'btn btn-inverse history-resolve-btn'}

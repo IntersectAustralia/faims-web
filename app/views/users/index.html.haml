@@ -1,4 +1,9 @@
 - title 'Listing Users'
+- if current_user.admin?
+  .well
+    %h3 User Actions
+    .btn-group
+      = link_to "Add User", new_user_path, :class => 'btn btn-inverse'
 %table#users.table.table-bordered.table-striped.table-condensed
   %tr
     %th First name
@@ -22,3 +27,5 @@
         = link_to "View Details", user, :id => "view_#{user.id}"
         - if can?(:update_role, User)
           = link_to 'Edit role', edit_role_user_path(user), :id => "edit_role_#{user.id}"
+        - if can?(:destroy, User) and current_user.id != user.id
+          = link_to 'Delete', user, :id => "delete_#{user.id}", :method => :delete

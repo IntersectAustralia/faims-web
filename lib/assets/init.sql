@@ -200,7 +200,7 @@ CREATE TABLE AEntReln (
 
 create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp);
 
-SELECT InitSpatialMetaData();
+--SELECT InitSpatialMetaData();
 
 SELECT AddGeometryColumn('ArchEntity', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
 SELECT AddGeometryColumn('Relationship', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');

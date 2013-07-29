@@ -7,10 +7,11 @@ class Ability
     alias_action :index, :show, :to => :read
 
     if user.admin?
-      can [:read, :update_role], User
+      can [:read, :update_role, :new, :create, :destroy], User
       can [:manage], Project
     else
       can [:read], User
+      can [:manage], Project
     end
 
     # Define abilities for the passed in user here. For example:

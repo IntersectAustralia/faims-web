@@ -65,7 +65,7 @@ module ProjectsHelper
       else
         if(@firstAttributeGroup[attributeKey].length.eql?(@secondAttributeGroup[attributeKey].length))
           @firstAttributeGroup[attributeKey].length.times do |i|
-            if(@firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
+            if(@firstAttributeGroup[attributeKey][i-1][4].eql?(@secondAttributeGroup[attributeKey][i-1][4]) &&
                 @firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
                 @firstAttributeGroup[attributeKey][i-1][6].eql?(@secondAttributeGroup[attributeKey][i-1][6]) &&
                 @firstAttributeGroup[attributeKey][i-1][7].eql?(@secondAttributeGroup[attributeKey][i-1][7]))
@@ -123,83 +123,106 @@ module ProjectsHelper
     end
   end
 
-  def show_arch_ent_attributes_history(project,timestamps)
-    @history = {}
-    @has_changes = {}
-    @attribute_keys = ['timestamp','edited by']
+  def has_history_change(row_index, key)
+    return true if row_index == @history_rows.size - 1
+    c1 = @history_rows[@timestamps[row_index][1]][key]
+    c2 = @history_rows[@timestamps[row_index + 1][1]][key]
+    return true if c1 == nil or c2 == nil
+    return c1[:value] != c2[:value] if c1[:attributeid]
+    return (c1[:geospatial] != c2[:geospatial]) | (c1[:deleted] != c2[:deleted])
+  end
+
+  def show_arch_ent_attributes_history(project, timestamps)
+    @history_rows = {}
+    @history_keys = ['Geospatial']
+
     timestamps.each do |timestamp|
-      attribute_history = {}
-      attributes = project.db.get_arch_ent_attributes_at_timestamp(timestamp[0],timestamp[1])
+      attributes = project.db.get_arch_ent_attributes_at_timestamp(timestamp[0], timestamp[1])
 
-      entity_deleted = false
-      attribute_history['timestamp'] = timestamp[1]
-      attribute_history['edited by'] = attributes[0][3]
+      # history row data
+      row = {}
 
+      # cell data
       attributes.each do |attribute|
-        attribute_history[attribute[1]] = attribute[9]
-        @attribute_keys.push(attribute[1])
-        entity_deleted = attribute[8].nil? ? false : true
+
+        # entity cell data
+        cell = {
+          uuid: attribute[0],
+          attributeid: nil,
+          timestamp: attribute[6],
+          user: attribute[3],
+          deleted: attribute[8],
+          geospatial: attribute[4],
+          userid: attribute[10],
+          isforked: attribute[12]
+        }
+        row['Geospatial'] = cell
+
+        # attribute cell data
+        cell = {
+          uuid: attribute[0],
+          attributeid: attribute[2],
+          timestamp: attribute[7],
+          user: attribute[5],
+          value: attribute[9],
+          userid: attribute[11],
+          isforked: attribute[13],
+          deleted: attribute[14]
+        }
+
+        row[attribute[1]] = cell
+
+        @history_keys.push(attribute[1]) unless @history_keys.include? attribute[1] # add key
       end
-      attribute_history['geospatial'] = attributes[0][4]
-      attribute_history['deleted'] = entity_deleted
-      @attribute_keys = @attribute_keys.uniq
-      @history[timestamp[1]] = attribute_history
-      changes = project.db.get_arch_ent_attributes_changes_at_timestamp(timestamp[0],timestamp[1])
-      attribute_changes = {}
-      changes.each do |change|
-        if change[1].eql?('EntityDeleted')
-          if change[2].eql?('true')
-             attribute_changes['deleted'] = true
-          end
-        elsif change[1].eql?('geospatialcolumn')
-          attribute_changes['geospatial'] = true
-        else
-          attribute_changes[change[1]] = true
-        end
-      end
-      @has_changes[timestamp[1]] = attribute_changes
+
+      @history_rows[timestamp[1]] = row
     end
-    @attribute_keys.push('geospatial')
-    @attribute_keys.push('deleted')
   end
 
   def show_rel_attributes_history(project,timestamps)
-    @history = {}
-    @has_changes = {}
-    @attribute_keys = ['timestamp','edited by']
+    @history_rows = {}
+    @history_keys = ['Geospatial']
+
     timestamps.each do |timestamp|
-      attribute_history = {}
-      attributes = project.db.get_rel_attributes_at_timestamp(timestamp[0],timestamp[1])
+      attributes = project.db.get_rel_attributes_at_timestamp(timestamp[0], timestamp[1])
 
-      entity_deleted = false
-      attribute_history['timestamp'] = timestamp[1]
-      attribute_history['edited by'] = attributes[0][4]
+      # history row data
+      row = {}
 
+      # cell data
       attributes.each do |attribute|
-        attribute_history[attribute[2]] = attribute[9]
-        @attribute_keys.push(attribute[2])
-        entity_deleted = attribute[8].nil? ? false : true
+
+        # rel cell data
+        cell = {
+            relationshipid: attribute[0],
+            attributeid: nil,
+            timestamp: attribute[6],
+            user: attribute[4],
+            deleted: attribute[8],
+            geospatial: attribute[3],
+            userid: attribute[10],
+            isforked: attribute[12]
+        }
+        row['Geospatial'] = cell
+
+        # attribute cell data
+        cell = {
+            relationshipid: attribute[0],
+            attributeid: attribute[1],
+            timestamp: attribute[7],
+            user: attribute[5],
+            value: attribute[9],
+            userid: attribute[11],
+            isforked: attribute[13],
+            deleted: attribute[14]
+        }
+
+        row[attribute[2]] = cell
+
+        @history_keys.push(attribute[2]) unless @history_keys.include? attribute[2] # add key
       end
-      attribute_history['geospatial'] = attributes[0][3]
-      attribute_history['deleted'] = entity_deleted
-      @attribute_keys = @attribute_keys.uniq
-      @history[timestamp[1]] = attribute_history
-      changes = project.db.get_rel_attributes_changes_at_timestamp(timestamp[0],timestamp[1])
-      attribute_changes = {}
-      changes.each do |change|
-        if change[1].eql?('RelationshipDeleted')
-          if change[2].eql?('true')
-            attribute_changes['deleted'] = true
-          end
-        elsif change[1].eql?('geospatialcolumn')
-          attribute_changes['geospatial'] = true
-        else
-          attribute_changes[change[1]] = true
-        end
-      end
-      @has_changes[timestamp[1]] = attribute_changes
+
+      @history_rows[timestamp[1]] = row
     end
-    @attribute_keys.push('geospatial')
-    @attribute_keys.push('deleted')
   end
 end

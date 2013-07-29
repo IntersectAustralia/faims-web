@@ -6,9 +6,11 @@ FaimsWeb::Application.routes.draw do
     put '/users/update', :to => 'user_registers#update'
     get '/users/edit_password', :to => 'user_registers#edit_password' #allow users to edit their own password
     put '/users/update_password', :to => 'user_registers#update_password' #allow users to edit their own password
+
+    get '/users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
   end
 
-  resources :users, :only => [:show] do
+  resources :users, :only => [:show, :new, :create, :destroy] do
 
     collection do
       get :index
@@ -27,14 +29,16 @@ FaimsWeb::Application.routes.draw do
 
   resources :projects
 
+  get 'users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
+
   get 'projects/:id/file_list', :to => 'file_manager#file_list', :as => 'project_file_list'
   get 'projects/:id/download_file', :to => 'file_manager#download_file', :as => 'download_project_file'
   post 'projects/:id/upload_file', :to => 'file_manager#upload_file', :as => 'upload_project_file'
   post 'projects/:id/create_dir', :to => 'file_manager#create_dir', :as => 'project_create_dir'
   match 'projects/:id/delete_file', :to => 'file_manager#delete_file', :as => 'delete_project_file'
 
-  get 'projects/:id/edit_project_setting', :to => 'projects#edit_project_setting', :as => 'edit_project_setting'
-  post 'projects/:id/edit_project_setting', :to => 'projects#update_project_setting', :as => 'update_project_setting'
+  get 'projects/:id/edit_project', :to => 'projects#edit_project', :as => 'edit_project'
+  post 'projects/:id/update_project', :to => 'projects#update_project', :as => 'update_project'
 
   get 'projects/:id/archive_project', :to => 'projects#archive_project', :as => 'archive_project'
   get 'projects/:id/download_project', :to => 'projects#download_project', :as => 'download_project'
@@ -47,6 +51,7 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/list_arch_ent_records/', :to => 'projects#list_arch_ent_records', :as => 'list_arch_ent_records'
   get 'projects/:id/list_typed_arch_ent_records/', :to => 'projects#list_typed_arch_ent_records', :as => 'list_typed_arch_ent_records'
   get 'projects/:id/delete_arch_ent_records/:uuid', :to => 'projects#delete_arch_ent_records', :as => 'delete_arch_ent_records'
+  get 'projects/:id/undelete_arch_ent_records/:uuid', :to => 'projects#undelete_arch_ent_records', :as => 'undelete_arch_ent_records'
   get 'projects/:id/edit_arch_ent_records/:uuid', :to => 'projects#edit_arch_ent_records', :as => 'edit_arch_ent_records'
   post 'projects/:id/edit_arch_ent_records/:uuid', :to => 'projects#update_arch_ent_records', :as => 'update_arch_ent_records'
   get 'projects/:id/show_arch_ent_history/:uuid', :to => 'projects#show_arch_ent_history', :as => 'show_arch_ent_history'
@@ -57,6 +62,7 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/list_rel_records/', :to => 'projects#list_rel_records', :as => 'list_rel_records'
   get 'projects/:id/list_typed_rel_records/', :to => 'projects#list_typed_rel_records', :as => 'list_typed_rel_records'
   get 'projects/:id/delete_rel_records/:relationshipid', :to => 'projects#delete_rel_records', :as => 'delete_rel_records'
+  get 'projects/:id/undelete_rel_records/:relationshipid', :to => 'projects#undelete_rel_records', :as => 'undelete_rel_records'
   get 'projects/:id/edit_rel_records/:relationshipid', :to => 'projects#edit_rel_records', :as => 'edit_rel_records'
   post 'projects/:id/edit_rel_records/:relationshipid', :to => 'projects#update_rel_records', :as => 'update_rel_records'
   get 'projects/:id/show_rel_history/:relid', :to => 'projects#show_rel_history', :as => 'show_rel_history'
@@ -67,6 +73,12 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/search_arch_ent_member/:relationshipid', :to => 'projects#search_arch_ent_member', :as => 'search_arch_ent_member'
   post 'projects/:id/add_arch_ent_member/', :to => 'projects#add_arch_ent_member', :as => 'add_arch_ent_member'
 
+  get 'projects/:id/show_rel_association/:uuid', :to => 'projects#show_rel_association', :as => 'show_rel_association'
+  get 'projects/:id/search_rel_association/:uuid', :to => 'projects#search_rel_association', :as => 'search_rel_association'
+  get 'projects/:id/get_verbs_for_rel_association', :to => 'projects#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
+  post 'projects/:id/add_rel_association/', :to => 'projects#add_rel_association', :as => 'add_rel_association'
+
+
   post 'projects/:id/add_entity_to_compare/', :to => 'projects#add_entity_to_compare', :as => 'add_entity_to_compare'
   post 'projects/:id/remove_entity_to_compare/', :to => 'projects#remove_entity_to_compare', :as => 'remove_entity_to_compare'
 
@@ -76,9 +88,12 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/compare_rel', :to => 'projects#compare_rel', :as => 'compare_rel'
   post 'projects/:id/merge_rel', :to => 'projects#merge_rel', :as => 'merge_rel'
 
-  get 'projects/:id/list_attributes_with_vocab/', :to => 'projects#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
+  get 'projects/:id/list_attributes_with_vocab', :to => 'projects#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
   get 'projects/:id/list_vocab_for_attribute/:attribute_id', :to => 'projects#list_vocab_for_attribute', :as => 'list_vocab_for_attribute'
-  put 'projects/:id/update_attributes_vocab', :to => 'projects#update_attributes_vocab', :as => 'update_attributes_vocab'
+  post 'projects/:id/update_attributes_vocab', :to => 'projects#update_attributes_vocab', :as => 'update_attributes_vocab'
+
+  get 'project/:id/edit_project_user' , :to => 'projects#edit_project_user', :as => 'edit_project_user'
+  post 'project/:id/update_project_user' , :to => 'projects#update_project_user', :as => 'update_project_user'
 
   get 'android/projects', :to => 'android#projects', :as => 'android_projects'
 

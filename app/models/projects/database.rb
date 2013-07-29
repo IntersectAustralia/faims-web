@@ -8,6 +8,19 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def get_list_of_users
+    users = @db.execute(WebQuery.get_list_of_users)
+    users
+  end
+
+  def update_list_of_users(user)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.update_list_of_users, user.id, user.first_name, user.last_name)
+      @project.db_mgr.make_dirt
+    end
+  end
+
   def is_arch_entity_dirty(uuid)
     result = @db.execute(WebQuery.is_arch_entity_dirty, uuid, uuid)
     return result.first.first > 0 if result and result.first and result.first.first
@@ -32,15 +45,31 @@ class Database
     nil
   end
 
-  def load_arch_entity(type, limit, offset)
-    uuids = type.eql?('all') ?
-      @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
-    uuids
+  def load_arch_entity(type, limit, offset, show_deleted)
+    if show_deleted
+      uuids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_arch_entities_include_deleted, limit, offset) : @db.execute(WebQuery.load_arch_entities_include_deleted, type, limit, offset)
+      uuids
+    else
+      uuids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
+      uuids
+    end
   end
 
-  def search_arch_entity(limit, offset, query)
-    uuids = @db.execute(WebQuery.search_arch_entity, query, query, query, limit, offset)
-    uuids
+  def search_arch_entity(limit, offset, query, show_deleted)
+    if show_deleted
+      uuids = @db.execute(WebQuery.search_arch_entity_include_deleted, query, query, query, limit, offset)
+      uuids
+    else
+      uuids = @db.execute(WebQuery.search_arch_entity, query, query, query, limit, offset)
+      uuids
+    end
+  end
+
+  def get_arch_entity_deleted_status(uuid)
+    deleted = @db.execute(WebQuery.get_arch_entity_deleted_status, uuid).first
+    deleted
   end
 
   def get_arch_entity_attributes(uuid)
@@ -63,20 +92,42 @@ class Database
     attributes
   end
 
-  def update_arch_entity_attribute(uuid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
+  def update_arch_entity_attribute(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id)
-      measure.length.times do |i|
-        if vocab_id.blank?
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id, attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime,parenttimestamp[0][0])
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      cache_timestamps = {}
+
+      (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id]
+          parenttimestamp = cache_timestamps[attribute_id]
         else
-          @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id, measure[i-1], freetext[i-1], certainty[i-1], currenttime,parenttimestamp[0][0])
+          parenttimestamp = @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id)
+
+          cache_timestamps[attribute_id] = parenttimestamp
         end
 
-        validate_aent_value(uuid, currenttime, attribute_id) unless ignore_errors
+        params = {
+            uuid:uuid,
+            userid:userid,
+            attributeid:attribute_id,
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            measure:measure[i],
+            freetext:freetext[i],
+            certainty:certainty[i],
+            valuetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
+        }
+
+        @db.execute(WebQuery.insert_arch_entity_attribute, params)
+
       end
+
+      validate_aent_value(uuid, timestamp, attribute_id) unless ignore_errors
+
       @project.db_mgr.make_dirt
     end
   end
@@ -85,17 +136,50 @@ class Database
     @db.execute(WebQuery.update_aent_value_as_dirty, isdirty, isdirtyreason, uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum)
   end
 
-  def insert_updated_arch_entity(uuid, vocab_id, attribute_id, measure, freetext, certainty)
+  def insert_updated_arch_entity(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_arch_entity, userid, currenttime, uuid)
-      vocab_id.length.times do |i|
-        parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_aentvalue, uuid, attribute_id[i-1])
-        @db.execute(WebQuery.insert_arch_entity_attribute, uuid, userid, vocab_id[i-1], attribute_id[i-1], measure[i-1], freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          aenttimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+      }
+
+      @db.execute(WebQuery.insert_arch_entity, params)
+
+      cache_timestamps = {}
+
+      (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id[i]]
+          parenttimestamp = cache_timestamps[attribute_id[i]]
+        else
+          parenttimestamp = @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id[i])
+
+          cache_timestamps[attribute_id[i]] = parenttimestamp
+        end
+
+
+        params = {
+            uuid:uuid,
+            userid:userid,
+            attributeid:attribute_id[i],
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            measure:measure[i],
+            freetext:freetext[i],
+            certainty:certainty[i],
+            valuetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
+        }
+
+        @db.execute(WebQuery.insert_arch_entity_attribute, params)
+
+        validate_aent_value(uuid, timestamp, attribute_id[i])
       end
-      
-      validate_aent_value(uuid, currenttime, attribute_id)
+
       @project.db_mgr.make_dirt
     end
   end
@@ -117,33 +201,114 @@ class Database
     changes
   end
 
-  def revert_arch_ent_to_timestamp(uuid, timestamp)
+  def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_arch_ent_at_timestamp, userid, currenttime, uuid, timestamp)
-      @db.execute(WebQuery.insert_arch_ent_attributes_at_timestamp, userid,currenttime, uuid, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          aenttimestamp:timestamp,
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+      }
+
+      @db.execute(WebQuery.insert_arch_ent_at_timestamp, params)
+
       @project.db_mgr.make_dirt
     end
   end
 
-  def delete_arch_entity(uuid)
+  def revert_aentvalues_to_timestamp(uuid, userid, attributeid, revert_timestamp, timestamp)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          attributeid:attributeid,
+          valuetimestamp:timestamp,
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attributeid)
+      }
+
+      @db.execute(WebQuery.insert_aentvalue_at_timestamp, params)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def resolve_arch_ent_conflicts(uuid)
+    @project.db_mgr.with_lock do
+
+      @db.execute(WebQuery.clear_arch_ent_fork, uuid)
+      @db.execute(WebQuery.clear_aentvalue_fork, uuid)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def delete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_arch_entity, userid, uuid)
+      params = {
+          userid:userid,
+          deleted:'true',
+          uuid:uuid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+      }
+      @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
       @project.db_mgr.make_dirt
     end
   end
 
-  def load_rel(type, limit, offset)
-    relationshipids = type.eql?('all') ?
-      @db.execute(WebQuery.load_all_relationships, limit, offset) : @db.execute(WebQuery.load_relationships, type, limit, offset)
-    relationshipids
+  def undelete_arch_entity(uuid, userid)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      params = {
+          userid:userid,
+          deleted:nil,
+          uuid:uuid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+      }
+      @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
+      @project.db_mgr.make_dirt
+    end
   end
 
-  def search_rel(limit, offset, query)
-    relationshipids = @db.execute(WebQuery.search_relationship, query, query, limit, offset)
-    relationshipids
+  def get_related_arch_entities(uuid)
+    params = {
+        uuid:uuid
+    }
+    related_arch_ents = @db.execute(WebQuery.get_related_arch_entities, params)
+    related_arch_ents
+  end
+
+  def load_rel(type, limit, offset, show_deleted)
+    if show_deleted
+      relationshipids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_relationships_include_deleted, limit, offset) : @db.execute(WebQuery.load_relationships_include_deleted, type, limit, offset)
+      relationshipids
+    else
+      relationshipids = type.eql?('all') ?
+          @db.execute(WebQuery.load_all_relationships, limit, offset) : @db.execute(WebQuery.load_relationships, type, limit, offset)
+      relationshipids
+    end
+  end
+
+  def search_rel(limit, offset, query, show_deleted)
+    if show_deleted
+      relationshipids = @db.execute(WebQuery.search_relationship_include_deleted, query, query, limit, offset)
+      relationshipids
+    else
+      relationshipids = @db.execute(WebQuery.search_relationship, query, query, limit, offset)
+      relationshipids
+    end
+  end
+
+  def get_rel_deleted_status(relationshipid)
+    deleted = @db.execute(WebQuery.get_rel_deleted_status, relationshipid).first
+    deleted
   end
 
   def get_rel_attributes(relationshipid)
@@ -151,20 +316,39 @@ class Database
     attributes
   end
 
-  def update_rel_attribute(relationshipid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
+  def update_rel_attribute(relationshipid, userid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id)
-      freetext.length.times do |i|
-        if vocab_id.blank?
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id,  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      cache_timestamps = {}
+
+      (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id]
+          parenttimestamp = cache_timestamps[attribute_id]
         else
-          @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id, vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
+          parenttimestamp = @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id)
+
+          cache_timestamps[attribute_id] = parenttimestamp
         end
+
+        params = {
+            relationshipid:relationshipid,
+            userid:userid,
+            attributeid:attribute_id,
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            freetext:freetext[i],
+            certainty:certainty[i],
+            relnvaluetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
+        }
+
+        @db.execute(WebQuery.insert_relationship_attribute, params)
       end
 
-      validate_reln_value(relationshipid, currenttime, attribute_id) unless ignore_errors
+      validate_reln_value(relationshipid, timestamp, attribute_id) unless ignore_errors
 
       @project.db_mgr.make_dirt
     end
@@ -174,17 +358,48 @@ class Database
     @db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
   end
 
-  def insert_updated_rel(relationshipid, vocab_id, attribute_id, freetext, certainty)
+  def insert_updated_rel(relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_relationship, userid, currenttime, relationshipid)
-      vocab_id.length.times do |i|
-        parenttimestamp = @db.execute(WebQuery.get_parent_timestamp_for_relnvalue, relationshipid, attribute_id[i-1])
-        @db.execute(WebQuery.insert_relationship_attribute, relationshipid, userid, attribute_id[i-1], vocab_id[i-1],  freetext[i-1], certainty[i-1], currenttime, parenttimestamp[0][0])
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          relationshipid:relationshipid,
+          userid:userid,
+          relntimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+      }
+
+      @db.execute(WebQuery.insert_relationship, params)
+
+      cache_timestamps = {}
+
+      (0..(freetext.length-1)).each do |i|
+
+        if cache_timestamps[attribute_id[i]]
+          parenttimestamp = cache_timestamps[attribute_id[i]]
+        else
+          parenttimestamp = @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id[i])
+
+          cache_timestamps[attribute_id[i]] = parenttimestamp
+        end
+
+        params = {
+            relationshipid:relationshipid,
+            userid:userid,
+            attributeid:attribute_id[i],
+            vocabid:vocab_id ? vocab_id[i] : nil,
+            freetext:freetext[i],
+            certainty:certainty[i],
+            relnvaluetimestamp:timestamp,
+            parenttimestamp:parenttimestamp
+        }
+
+        @db.execute(WebQuery.insert_relationship_attribute, params)
+
+        validate_reln_value(relationshipid, timestamp, attribute_id[i])
       end
-      
-      validate_reln_value(relationshipid, currenttime, attribute_id)
+
       @project.db_mgr.make_dirt
     end
   end
@@ -206,20 +421,77 @@ class Database
     changes
   end
 
-  def revert_rel_to_timestamp(relid, timestamp)
+  def revert_rel_to_timestamp(relid, userid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      currenttime = current_timestamp
-      @db.execute(WebQuery.insert_version, currenttime)
-      @db.execute(WebQuery.insert_rel_at_timestamp, userid, currenttime, relid, timestamp)
-      @db.execute(WebQuery.insert_rel_attributes_at_timestamp, userid,currenttime, relid, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          relationshipid:relid,
+          userid:userid,
+          relntimestamp:timestamp,
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relid)
+      }
+
+      @db.execute(WebQuery.insert_rel_at_timestamp, params)
+
       @project.db_mgr.make_dirt
     end
   end
 
-  def delete_relationship(relationshipid)
+  def revert_relnvalues_to_timestamp(relid, userid, attributeid, revert_timestamp, timestamp)
+    @project.db_mgr.with_lock do
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          relationshipid:relid,
+          userid:userid,
+          attributeid:attributeid,
+          relnvaluetimestamp:timestamp,
+          timestamp: revert_timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relid, attributeid)
+      }
+
+      @db.execute(WebQuery.insert_relnvalue_at_timestamp, params)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def resolve_rel_conflicts(relid)
+    @project.db_mgr.with_lock do
+
+      @db.execute(WebQuery.clear_rel_fork, relid)
+      @db.execute(WebQuery.clear_relnvalue_fork, relid)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def delete_relationship(relationshipid, userid)
     @project.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp)
-      @db.execute(WebQuery.delete_relationship, userid, relationshipid)
+      params = {
+          userid:userid,
+          deleted:'true',
+          relationshipid:relationshipid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+      }
+      @db.execute(WebQuery.delete_or_undelete_relationship, params)
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def undelete_relationship(relationshipid, userid)
+    @project.with_lock do
+      @db.execute(WebQuery.insert_version, current_timestamp)
+      params = {
+          userid:userid,
+          deleted:nil,
+          relationshipid:relationshipid,
+          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+      }
+      @db.execute(WebQuery.delete_or_undelete_relationship, params)
       @project.db_mgr.make_dirt
     end
   end
@@ -254,16 +526,64 @@ class Database
     verbs
   end
 
-  def add_arch_ent_member(relationshipid, uuid, verb)
+  def get_arch_ent_rel_associations(uuid, limit, offset)
+    params = {
+        uuid:uuid,
+        limit:limit,
+        offset:offset
+    }
+    rels = @db.execute(WebQuery.get_relationships_for_arch_ent, params)
+    rels
+  end
+
+  def get_non_arch_ent_rel_associations(uuid, query, limit, offset)
+    params = {
+        uuid:uuid,
+        limit:limit,
+        query:query,
+        offset:offset
+    }
+    rels = @db.execute(WebQuery.get_relationships_not_belong_to_arch_ent, params)
+    rels
+  end
+
+  def add_member(relationshipid,userid, uuid, verb)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_arch_entity_relationship, uuid, relationshipid, userid, verb)
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          relationshipid:relationshipid,
+          userid:userid,
+          verb:verb,
+          aentrelntimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
+      }
+
+      @db.execute(WebQuery.insert_arch_entity_relationship, params)
+
       @project.db_mgr.make_dirt
     end
   end
 
-  def delete_arch_ent_member(relationshipid, uuid)
+  def delete_member(relationshipid,userid, uuid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.delete_arch_entity_relationship, uuid, relationshipid, userid)
+
+      timestamp = current_timestamp
+      @db.execute(WebQuery.insert_version, timestamp)
+
+      params = {
+          uuid:uuid,
+          relationshipid:relationshipid,
+          userid:userid,
+          aentrelntimestamp:timestamp,
+          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
+      }
+
+      @db.execute(WebQuery.delete_arch_entity_relationship, params)
+
       @project.make_dirt
     end
   end
@@ -345,8 +665,8 @@ class Database
   def create_app_database_from_version(toDB, version)
     #@project.with_lock do
 
-      db = SpatialiteDB.new(toDB)
-      db.execute('select initspatialmetadata();')
+      generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+      FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB # clone template db
       
       @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
 
@@ -438,8 +758,26 @@ class Database
     nil
   end
 
+  def is_arch_entity_forked(uuid)
+    result = @db.get_first_value WebQuery.is_arch_entity_forked, uuid
+    return true if result and result > 0
+    result = @db.get_first_value WebQuery.is_aentvalue_forked, uuid
+    return true if result and result > 0
+    return false
+  end
+
+  def is_relationship_forked(relationshipid)
+    result = @db.get_first_value WebQuery.is_relationship_forked, relationshipid
+    return true if result and result > 0
+    result = @db.get_first_value WebQuery.is_relnvalue_forked, relationshipid
+    return true if result and result > 0
+    return false
+  end
+
   # static
   def self.generate_database(file, xml)
+    generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), file # clone template db
     db = SpatialiteDB.new(file)
     content = File.read(Rails.root.join('lib', 'assets', 'init.sql'))
     db.execute_batch(content)
@@ -447,6 +785,8 @@ class Database
     db.execute_batch(data_definition)
     gps_definition = XSLTParser.parse_data_schema(Rails.root.join('lib/assets/gps_schema.xml'))
     db.execute_batch(gps_definition)
+    admin_user = User.first
+    db.execute("INSERT into user (userid,fname,lname) VALUES (" + admin_user.id.to_s + ",'" + admin_user.first_name.to_s + "','" + admin_user.last_name.to_s + "');" ) if admin_user
   end
 
   def spatialite_db
@@ -465,25 +805,32 @@ class Database
     @db.path
   end
 
-  def self.get_spatial_ref_list
-    begin
-      temp = Tempfile.new('db')
-      db = SpatialiteDB.new(temp.path)
-      db.execute('select initspatialmetadata()')
-      result = db.execute("select srid || ' / ' || ref_sys_name, auth_srid from spatial_ref_sys;")
-    ensure
-      temp.unlink if temp
+  def self.generate_spatial_ref_list
+    temp = Tempfile.new('db')
+    db = SpatialiteDB.new(temp.path)
+    db.execute("SELECT InitSpatialMetaData();")
+    result = db.execute("select srid || ' / ' || ref_sys_name, auth_srid from spatial_ref_sys;")
+    FileUtils.rm Rails.root.join('lib/assets/spatial_ref_list.json') if File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')
+    File.open(Rails.root.join('lib/assets/spatial_ref_list.json'), 'w') do |f|
+      f.write(result.to_json)
     end
   end
 
-  private
+  def self.generate_template_db
+    FileUtils.rm Rails.root.join('lib/assets/template_db.sqlite3') if File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+    db = SpatialiteDB.new(Rails.root.join('lib/assets/template_db.sqlite3').to_s)
+    db.execute("SELECT InitSpatialMetaData();")
+  end
+
+  def self.get_spatial_ref_list
+    begin
+      generate_spatial_ref_list unless File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')
+      return JSON.parse File.read(Rails.root.join('lib/assets/spatial_ref_list.json'))
+    end
+  end
 
   def current_timestamp
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
-  end
-
-  def userid
-    0
   end
 
 end

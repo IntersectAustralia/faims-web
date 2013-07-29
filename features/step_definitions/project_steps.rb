@@ -26,7 +26,7 @@ And /^I have project "([^"]*)"$/ do |name|
 end
 
 Then /^I should see "([^"]*)" with error "([^"]*)"$/ do |field, error|
-  page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and text()=\"#{error}\"]")
+  page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and contains(text(),\"#{error}\")]")
 end
 
 Given /^I have projects$/ do |table|
@@ -180,8 +180,7 @@ Then /^I should see json for "([^"]*)" version (.*) db with version (.*)$/ do |n
 end
 
 When /^I click on "([^"]*)"$/ do |name|
-  project = Project.find_by_name(name)
-  visit ("/projects/" + project.id.to_s)
+  find(:xpath, "//a[contains(text(), \"#{name}\")]").click
 end
 
 Then /^I should see bad request page$/ do
@@ -507,6 +506,57 @@ When(/^I add "([^"]*)" to the vobulary list$/) do |value|
   all(:xpath, "//input[@name='vocab_name[]']").last.set value
 end
 
+When(/^Project "([^"]*)" should have the same file "([^"]*)"$/) do |project_name, file_name|
+  project = Project.find_by_name(project_name)
+  project_hash_sum = MD5Checksum.compute_checksum(project.get_path(:project_dir) + file_name)
+  file_hash_sum =  MD5Checksum.compute_checksum(File.expand_path("../../assets/" + file_name, __FILE__))
+  (project_hash_sum.eql?(file_hash_sum)).should be_true
+end
+
+When(/^I should have user for selection$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//select/option[text() = '#{value}']")
+    end
+  end
+end
+
+When(/^I select "([^"]*)" from the user list$/) do |name|
+  select name, :from => 'user_id'
+end
+
+When(/^I should have user for project$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//input[@value='#{value}']")
+    end
+  end
+end
+
+Then(/^I should see records$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//a[contains(text(),\"#{value}\")]")
+    end
+  end
+end
+
+When(/^I should not see records$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should_not have_xpath("//a[contains(text(),\"#{value}\")]")
+    end
+  end
+end
+
+When(/^I should see related arch entities$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should have_xpath("//a[contains(text(),\"#{value}\")]")
+    end
+  end
+end
+
 def check_project_archive_updated(project)
   begin
     tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
@@ -539,4 +589,25 @@ And /^I should have setting "([^"]*)" for "([^"]*)" as "([^"]*)"$/ do |setting_n
   project = Project.find_by_name(name)
   settings = JSON.parse(File.read(project.get_path(:settings)).as_json)
   settings[setting_name].should == srid
+end
+
+And /^I have database "([^"]*)" for "([^"]*)"$/ do |db, project|
+  p = Project.find_by_name(project)
+  FileUtils.cp Rails.root.join("features/assets/#{db}"), p.get_path(:db)
+end
+
+Then /^I should see "([^"]*)" with "([^"]*)"$/ do |link, error|
+  page.should have_xpath("//a[contains(text(),\"#{link}\")]/div[contains(text(), \"#{error}\")]")
+end
+
+Then /^I history should have conflicts$/ do
+   page.should have_css(".box-warning")
+end
+
+Then /^I history should not have conflicts$/ do
+  page.should_not have_css(".box-warning")
+end
+
+And /^I follow link "([^"]*)"$/ do |link|
+  find(:xpath, "//input[@value=\"#{link}\"]").click
 end

@@ -260,6 +260,23 @@ class Project < ActiveRecord::Base
     end
   end
 
+  def update_project_from(tmp_dir)
+    settings_mgr.with_lock do
+      begin
+        # copy files from temp directory to projects directory
+        FileHelper.copy_dir(tmp_dir, get_path(:project_dir))
+
+        # generate archive
+        settings_mgr.make_dirt
+      rescue Exception => e
+        raise e
+        FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
+      ensure
+        # ignore
+      end
+    end
+  end
+
   def create_project_from_compressed_file(tmp_dir)
     begin
       # copy files from temp directory to projects directory
@@ -307,14 +324,14 @@ class Project < ActiveRecord::Base
 
   def self.validate_validation_schema(schema)
     return nil if schema.blank?
-    return 'must be xml file' if schema.content_type != 'text/xml'
+    return 'must be xml file' unless schema.content_type =~ /xml/
     begin
       file = schema.tempfile
       result = XSDValidator.validate_validation_schema(file.path)
     rescue => e
-      result = nil
+      result = [e]
     end
-    return 'invalid xml' if result.nil? || !result.empty?
+    return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     begin
       DatabaseValidator.new(nil, schema.tempfile.path)
     rescue Exception => e
@@ -325,27 +342,27 @@ class Project < ActiveRecord::Base
 
   def self.validate_data_schema(schema)
     return "can't be blank" if schema.blank?
-    return 'must be xml file' if schema.content_type != 'text/xml'
+    return 'must be xml file' unless schema.content_type =~ /xml/
     begin
       file = schema.tempfile
       result = XSDValidator.validate_data_schema(file.path)
     rescue => e
-      result = nil
+      result = [e]
     end
-    return 'invalid xml' if result.nil? || !result.empty?
+    return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     return nil
   end
 
   def self.validate_ui_schema(schema)
     return "can't be blank" if schema.blank?
-    return 'must be xml file' if schema.content_type != 'text/xml'
+    return 'must be xml file' unless schema.content_type =~ /xml/
     begin
       file = schema.tempfile
       result = XSDValidator.validate_ui_schema(file.path)
     rescue => e
-      result = nil
+      result = [e]
     end
-    return 'invalid xml' if result.nil? || !result.empty?
+    return result.map { |x| "invalid xml at line #{x.line}" }.join("<br/>") if !result.empty?
     return nil
   end
 
@@ -358,17 +375,20 @@ class Project < ActiveRecord::Base
     return 'invalid file name' if !(arch16n.original_filename).eql?("faims_#{project_name.gsub(/\s+/, '_')}.properties")
     begin
       file = arch16n.tempfile
+      line_num = 0
+      error = ""
       File.open(file,'r').read.each_line do |line|
-        line.strip!
-        return 'invalid properties file' if line[0] == ?=
+        line_num += 1
+        next if line.blank?
         i = line.index('=')
-        return 'invalid properties file' if !i
-        return 'invalid properties file' if line[i + 1..-1].strip.blank?
+        error += "invalid properties file at line #{line_num}<br/>" if !i
+        error += "invalid properties file at line #{line_num}<br/>" if line[0..i] =~ /\s/
       end
     rescue
       return 'invalid properties file'
     end
-    return nil
+    return nil if error.empty?
+    return error
   end
 
   def self.validate_directory(dir)
@@ -626,27 +646,28 @@ class Project < ActiveRecord::Base
     tmp_dir = nil
     begin
       tar_file = params[:project][:project_file]
-      if !(tar_file.content_type =~ /bzip/)
-        return 'Unsupported format of file, please upload the correct file'
+
+      tmp_dir = Dir.mktmpdir + '/'
+      `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
+      project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
+      if !Project.checksum_uploaded_file(tmp_dir + 'project/')
+        return 'Wrong hash sum for the project'
+      elsif !Project.find_by_key(project_settings['key']).blank?
+        return 'This project already exists in the system'
       else
-        tmp_dir = Dir.mktmpdir + '/'
-        `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
-        project_settings = JSON.parse(File.read(tmp_dir + 'project/project.settings').as_json)
-        if !Project.checksum_uploaded_file(tmp_dir + 'project/')
-          return 'Wrong hash sum for the project'  
-        elsif !Project.find_by_key(project_settings['key']).blank?
-          return 'This project already exists in the system'
-        else
-          project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
-          project.transaction do
-            project.save
-            project.create_project_from_compressed_file(tmp_dir + 'project')
-          end
-          return project
+        project = Project.new(:name => project_settings['name'], :key => project_settings['key'])
+        begin
+          project.save
+          project.create_project_from_compressed_file(tmp_dir + 'project')
+        rescue
+          File.rm_rf project.get_path(:project_dir) if File.directory? project.get_path(:project_dir)
+          project.destroy
         end
+        return project
       end
+
     rescue Exception
-      return 'Uploaded project file is corrupted'
+      return 'Project failed to upload'
     ensure
       FileUtils.rm_rf tmp_dir if tmp_dir
     end

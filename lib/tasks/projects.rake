@@ -1,4 +1,5 @@
 require Rails.root.join('lib/tasks/test_project_creator')
+require Rails.root.join('app/models/projects/database')
 
 begin
   namespace :projects do
@@ -21,6 +22,11 @@ begin
       else
         Project.all.each { |p| Project.package_project(p.key) }
       end
+    end
+    desc 'Setup project assets'
+    task :setup => :environment do
+      Database.generate_spatial_ref_list
+      Database.generate_template_db
     end
     namespace :test do
       desc 'Generate test projects'

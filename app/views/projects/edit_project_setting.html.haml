@@ -1,5 +1,4 @@
-%h1
-  %span= @project_setting['name']
+- title @project_setting['name']
 .container
   = simple_form_for @project, :url => update_project_setting_path, :class =>"span12", :method => "post" do|f|
     %h4 Static Data

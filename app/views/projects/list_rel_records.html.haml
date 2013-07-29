@@ -1,5 +1,4 @@
-%h1
-  %span= @project.name + " - Relationship Records"
+- title @project.name + " - Relationship Records"
 .content
   %h2 Filter based on Relationship type
   %form{:action => list_typed_rel_records_path, :method => "get"}

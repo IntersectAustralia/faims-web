@@ -1,4 +1,4 @@
-%h2 Edit Account Details
+- title "Edit Account Details"
 = simple_form_for(resource, :as => resource_name, :url => users_update_path, :html => { :method => :put }) do |f|
   = render "shared/error_messages", :target => @user
   = render :partial => 'personal_details', :locals => {:f => f}

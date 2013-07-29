@@ -20,16 +20,25 @@ class ProjectsController < ApplicationController
   def create
     # create project if valid and schemas uploaded
 
+    unless SpatialiteDB.library_exists?
+      @spatial_list = Database.get_spatial_ref_list
+      flash.now[:error] = 'Cannot find library libspatialite. Please install library to create project.'
+      render 'new'
+      return
+    end
+
     valid = create_project
 
     if valid
 
-      @project.transaction do
+      begin
         @project.save
-
         @project.update_settings(params)
         @project.create_project_from(session[:tmpdir])
-
+      rescue
+        File.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
+        @project.destroy
+      ensure
         FileUtils.remove_entry_secure session[:tmpdir]
       end
 
@@ -47,6 +56,24 @@ class ProjectsController < ApplicationController
     session[:has_attached_files] = @project.has_attached_files
   end
 
+  def edit_project_user
+    @project = Project.find(params[:id])
+    @users = @project.db.get_list_of_users
+    @server_user = User.where('id NOT IN (?)', @users.transpose[0])
+  end
+
+  def update_project_user
+    @project = Project.find(params[:id])
+    user = User.find(params[:user_id])
+    @project.db.update_list_of_users(user)
+    @users = @project.db.get_list_of_users
+    @server_user = User.where('id NOT IN (?)', @users.transpose[0])
+    flash[:notice] = 'Successfully updated user'
+    render 'edit_project_user'
+  end
+
+  # Arch entity functionalities
+
   def list_arch_ent_records
     @project = Project.find(params[:id])
     @type = @project.db.get_arch_ent_types
@@ -58,6 +85,8 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
+    session.delete(:prev_id)
   end
 
   def list_typed_arch_ent_records
@@ -65,16 +94,20 @@ class ProjectsController < ApplicationController
     limit = 25
     type = params[:type]
     offset = params[:offset]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_arch_ent_records'
-    @uuid = @project.db.load_arch_entity(type,limit,offset)
+    @uuid = @project.db.load_arch_entity(type,limit,offset, show_deleted)
 
     @entity_dirty_map = {}
+    @entity_forked_map = {}
     @uuid.each do |row|
       @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+      @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
 
   end
@@ -89,6 +122,8 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
+    session.delete(:prev_id)
   end
 
   def show_arch_ent_records
@@ -96,16 +131,20 @@ class ProjectsController < ApplicationController
     limit = 25
     query = params[:query]
     offset = params[:offset]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:query] = query
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_arch_ent_records'
-    @uuid = @project.db.search_arch_entity(limit,offset,query)
+    @uuid = @project.db.search_arch_entity(limit,offset,query,show_deleted)
 
     @entity_dirty_map = {}
+    @entity_forked_map = {}
     @uuid.each do |row|
       @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
+      @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
   end
 
@@ -113,10 +152,33 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     session[:uuid] = uuid
+    if !session[:show].nil? and session[:show][-1].eql?('show_rel_associations')
+      session[:show].pop()
+    end
     @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
     for attribute in @attributes
       @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
+    end
+
+    if @project.db.is_arch_entity_forked(uuid)
+      flash.now[:warning] = "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
+    end
+
+    @deleted = @project.db.get_arch_entity_deleted_status(uuid)
+    @related_arch_ents = @project.db.get_related_arch_entities(uuid)
+    prev_id = params[:prev_id]
+    if prev_id.nil?
+      if !session[:prev_id].nil?
+        session[:prev_id].pop()
+      end
+    else
+      if session[:prev_id].nil?
+        session[:prev_id] = []
+      end
+      if !session[:prev_id][-1].eql?(prev_id)
+        session[:prev_id].push(prev_id)
+      end
     end
   end
 
@@ -136,14 +198,9 @@ class ProjectsController < ApplicationController
 
       ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      @project.db.update_arch_entity_attribute(uuid,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
+      @project.db.update_arch_entity_attribute(uuid,current_user.id,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
 
-      @attributes = @project.db.get_arch_entity_attributes(uuid)
-      @vocab_name = {}
-      for attribute in @attributes
-        @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])
-      end
-      render 'edit_arch_ent_records'
+      redirect_to edit_arch_ent_records_path(@project, uuid)
     end
 
   end
@@ -157,14 +214,63 @@ class ProjectsController < ApplicationController
     end
 
     uuid = params[:uuid]
-    @project.db.delete_arch_entity(uuid)
+    @project.db.delete_arch_entity(uuid,current_user.id)
 
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
     end
 
+  end
+
+  def undelete_arch_ent_records
+    @project = Project.find(params[:id])
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
+
+    uuid = params[:uuid]
+    @project.db.undelete_arch_entity(uuid,current_user.id)
+
+    flash[:notice] = 'Successfully restored archaeological entity record'
+    redirect_to edit_arch_ent_records_path(@project,uuid)
+
+  end
+
+  def compare_arch_ents
+    @project = Project.find(params[:id])
+    session[:values] = []
+    session[:identifiers] = []
+    session[:timestamps] = []
+    ids = params[:ids]
+    @identifiers = params[:identifiers]
+    @timestamps = params[:timestamps]
+    @first_uuid = ids[0]
+    @second_uuid = ids[1]
+  end
+
+  def merge_arch_ents
+    @project = Project.find(params[:id])
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
+    @project.db.delete_arch_entity(params[:deleted_id],current_user.id)
+
+    @project.db.insert_updated_arch_entity(params[:uuid],current_user.id, params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    if session[:type]
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
+      return
+    else
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
+      return
+    end
   end
 
   def show_arch_ent_history
@@ -175,11 +281,27 @@ class ProjectsController < ApplicationController
 
   def revert_arch_ent_to_timestamp
     @project = Project.find(params[:id])
-    uuid = params[:uuid]
-    timestamp = params[:timestamp]
-    @project.db.revert_arch_ent_to_timestamp(uuid, timestamp)
-    redirect_to edit_arch_ent_records_path(@project, uuid)
+
+    data = params[:data].map { |x, y| y }
+
+    entity = data.select { |x| x[:attributeid] == nil }.first
+    attributes = data.select { |x| x[:attributeid] != nil }
+
+    timestamp =  @project.db.current_timestamp
+
+    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], entity[:userid], entity[:timestamp], timestamp)
+
+    attributes.each do | attribute |
+      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
+    end
+
+    # clear conflicts
+    @project.db.resolve_arch_ent_conflicts(entity[:uuid]) if params[:resolve] == 'true'
+
+    redirect_to show_arch_ent_history_path(@project, params[:uuid])
   end
+
+  # Relationship functionalities
 
   def list_rel_records
     @project = Project.find(params[:id])
@@ -192,6 +314,7 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
   end
 
   def list_typed_rel_records
@@ -199,16 +322,20 @@ class ProjectsController < ApplicationController
     limit = 25
     type=params[:type]
     offset = params[:offset]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'list_typed_rel_records'
-    @relationshipid = @project.db.load_rel(type,limit,offset)
+    @relationshipid = @project.db.load_rel(type,limit,offset,show_deleted)
 
     @rel_dirty_map = {}
+    @rel_forked_map = {}
     @relationshipid.each do |row|
       @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+      @rel_forked_map[row[0]] = @project.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
   end
 
@@ -222,6 +349,7 @@ class ProjectsController < ApplicationController
     session.delete(:cur_offset)
     session.delete(:prev_offset)
     session.delete(:next_offset)
+    session.delete(:show_deleted)
   end
 
   def show_rel_records
@@ -230,17 +358,21 @@ class ProjectsController < ApplicationController
     query = params[:query]
     offset = params[:offset]
     relationshipid = params[:relationshipid]
+    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
+    session[:show_deleted] = show_deleted ? 'true' : nil
     session[:relationshipid] = relationshipid
     session[:query] = query
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
     session[:action] = 'show_rel_records'
-    @relationshipid = @project.db.search_rel(limit,offset,query)
+    @relationshipid = @project.db.search_rel(limit,offset,query,show_deleted)
 
     @rel_dirty_map = {}
+    @rel_forked_map = {}
     @relationshipid.each do |row|
       @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
+      @rel_forked_map[row[0]] = @project.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
   end
 
@@ -248,11 +380,22 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
+    if !session[:show].nil? and session[:show][-1].eql?('show_rel_members')
+      session[:show].pop()
+      p session[:show]
+    end
     @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
     for attribute in @attributes
       @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
     end
+
+    if @project.db.is_relationship_forked(relationshipid)
+      flash.now[:warning] = "This Relationship record contains conflicting data. Please click 'Show History' to resolve the conflicts."
+    end
+
+    @deleted = @project.db.get_rel_deleted_status(relationshipid)
+
   end
 
   def update_rel_records
@@ -270,14 +413,9 @@ class ProjectsController < ApplicationController
 
       ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      @project.db.update_rel_attribute(relationshipid,vocab_id,attribute_id, freetext, certainty, ignore_errors)
+      @project.db.update_rel_attribute(relationshipid,current_user.id,vocab_id,attribute_id, freetext, certainty, ignore_errors)
 
-      @attributes = @project.db.get_rel_attributes(relationshipid)
-      @vocab_name = {}
-      for attribute in @attributes
-        @vocab_name[attribute[2]] = @project.db.get_vocab(attribute[2])
-      end
-      render 'edit_rel_records'
+      redirect_to edit_rel_records_path(@project, relationshipid)
     end
 
   end
@@ -290,10 +428,24 @@ class ProjectsController < ApplicationController
 
   def revert_rel_to_timestamp
     @project = Project.find(params[:id])
-    relid = params[:relid]
-    timestamp = params[:timestamp]
-    @project.db.revert_rel_to_timestamp(relid, timestamp)
-    redirect_to edit_rel_records_path(@project, relid)
+
+    data = params[:data].map { |x, y| y }
+
+    rel = data.select { |x| x[:attributeid] == nil }.first
+    attributes = data.select { |x| x[:attributeid] != nil }
+
+    timestamp = @project.db.current_timestamp
+
+    @project.db.revert_rel_to_timestamp(rel[:relationshipid], rel[:userid], rel[:timestamp], timestamp)
+
+    attributes.each do | attribute |
+      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
+    end
+
+    # clear conflicts
+    @project.db.resolve_rel_conflicts(rel[:relationshipid]) if params[:resolve] == 'true'
+
+    redirect_to show_rel_history_path(@project, params[:relid])
   end
 
   def delete_rel_records
@@ -305,12 +457,27 @@ class ProjectsController < ApplicationController
     end
 
     relationshipid = params[:relationshipid]
-    @project.db.delete_relationship(relationshipid)
+    @project.db.delete_relationship(relationshipid,current_user.id)
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
     end
+  end
+
+  def undelete_rel_records
+    @project = Project.find(params[:id])
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
+
+    relationshipid = params[:relationshipid]
+    @project.db.undelete_relationship(relationshipid,current_user.id)
+    flash[:notice] = 'Successfully restored relationship record'
+    redirect_to edit_rel_records_path(@project,relationshipid)
   end
 
   def show_rel_members
@@ -322,7 +489,14 @@ class ProjectsController < ApplicationController
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
     session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:show] = 'show_rel_members'
+    if session[:show].nil?
+      session[:show] = []
+      session[:show].push('show_rel_members')
+    else
+      if !session[:show][-1].eql?('show_rel_members')
+        session[:show].push('show_rel_members')
+      end
+    end
     @uuid = @project.db.get_rel_arch_ent_members(params[:relationshipid], limit, offset)
   end
 
@@ -330,7 +504,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
-    @project.db.delete_arch_ent_member(relationshipid,uuid)
+    @project.db.delete_member(relationshipid,current_user.id,uuid)
     render :nothing => true
   end
 
@@ -356,9 +530,61 @@ class ProjectsController < ApplicationController
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
-    @project.db.add_arch_ent_member(params[:relationshipid],params[:uuid],params[:verb])
+    @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0&relntypeid='+params[:relntypeid]} }
+    end
+  end
+
+  def show_rel_association
+    @project = Project.find(params[:id])
+    session[:uuid] = params[:uuid]
+    limit = 25
+    offset = params[:offset]
+    session[:cur_offset] = offset
+    session[:prev_offset] = Integer(offset) - Integer(limit)
+    session[:next_offset] = Integer(offset) + Integer(limit)
+    if session[:show].nil?
+      session[:show] = []
+      session[:show].push('show_rel_associations')
+    else
+      if !session[:show][-1].eql?('show_rel_associations')
+        session[:show].push('show_rel_associations')
+      end
+    end
+    @relationships = @project.db.get_arch_ent_rel_associations(params[:uuid], limit, offset)
+  end
+
+  def search_rel_association
+    @project = Project.find(params[:id])
+    session[:uuid] = params[:uuid]
+    if params[:search_query].nil?
+      @uuid = nil
+      @status = 'init'
+      session.delete(:search_query)
+    else
+      limit = 25
+      offset = params[:offset]
+      session[:search_query] = params[:search_query]
+      session[:cur_offset] = offset
+      session[:prev_offset] = Integer(offset) - Integer(limit)
+      session[:next_offset] = Integer(offset) + Integer(limit)
+      @relationships = @project.db.get_non_arch_ent_rel_associations(params[:uuid],params[:search_query],limit,offset)
+    end
+  end
+
+  def get_verbs_for_rel_association
+    verbs = @project.db.get_verbs_for_relation(params[:relntypeid])
+    respond_to do |format|
+      format.json { render :json => verbs.to_json }
+    end
+  end
+
+  def add_rel_association
+    @project = Project.find(params[:id])
+    @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
+    respond_to do |format|
+      format.json { render :json => {:result => 'success', :url => show_rel_association_path(@project,params[:uuid])+'?offset=0'} }
     end
   end
 
@@ -398,37 +624,6 @@ class ProjectsController < ApplicationController
     render :nothing => true
   end
 
-  def compare_arch_ents
-    @project = Project.find(params[:id])
-    session[:values] = []
-    session[:identifiers] = []
-    session[:timestamps] = []
-    ids = params[:ids]
-    @identifiers = params[:identifiers]
-    @timestamps = params[:timestamps]
-    @first_uuid = ids[0]
-    @second_uuid = ids[1]
-  end
-
-  def merge_arch_ents
-    @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    end
-    @project.db.delete_arch_entity(params[:deleted_id])
-
-    @project.db.insert_updated_arch_entity(params[:uuid], params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
-    if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0')
-      return
-    else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0')
-      return
-    end
-  end
-
   def compare_rel
     @project = Project.find(params[:id])
     ids = params[:ids]
@@ -448,14 +643,15 @@ class ProjectsController < ApplicationController
       render 'show'
       return
     end
-    @project.db.delete_relationship(params[:deleted_id])
+    @project.db.delete_relationship(params[:deleted_id],current_user.id)
 
-    @project.db.insert_updated_rel(params[:rel_id], params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
+    @project.db.insert_updated_rel(params[:rel_id],current_user.id, params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0')
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
       return
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0')
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
       return
     end
   end
@@ -483,45 +679,80 @@ class ProjectsController < ApplicationController
 
   def update_attributes_vocab
     @project = Project.find(params[:id])
-    attribute_id = params[:attribute_id]
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as project is currently locked'
+      render 'show'
+      return
+    end
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
-    if !@project.db_mgr.locked?
-      @project.db.update_attributes_vocab(attribute_id, vocab_id, vocab_name)
-    end
-    vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
-    vocabularies = []
-    vocabs.each do |vocab|
-      vocabulary = {}
-      vocabulary['vocab_id'] = vocab[1]
-      vocabulary['vocab_name'] = vocab[2]
-      vocabularies.push(vocabulary)
-    end
-    respond_to do |format|
-      format.json { render :json => vocabularies.to_json }
-    end
+    @attribute_id = params[:attribute_id]
+    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name)
+    @attributes = @project.db.get_attributes_containing_vocab()
+    flash[:notice] = 'Successfully updated vocabulary'
+    render 'list_attributes_with_vocab'
   end
 
-  def edit_project_setting
+  def edit_project
     @project = Project.find(params[:id])
-    @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+    project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+    session[:name] = @project.name
+    session[:season] = project_setting['season']
+    session[:description] = project_setting['description']
+    session[:permit_no] = project_setting['permit_no']
+    session[:permit_holder] = project_setting['permit_holder']
+    session[:contact_address] = project_setting['contact_address']
+    session[:participant] = project_setting['participant']
+    session[:srid] = project_setting['srid']
+    create_tmp_dir
     @spatial_list = Database.get_spatial_ref_list
   end
 
-  def update_project_setting
+  def update_project
     if @project.settings_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
+      return
     end
-    if @project.update_attributes(:name => params[:project][:name])
-      @project.update_settings(params)
-      session[:name] = ''
-      flash[:notice] = 'Static data updated'
-      redirect_to :project
+    valid = validate_project_update
+    if valid
+      if @project.update_attributes(:name => params[:project][:name])
+        @project.update_settings(params)
+
+        @project.update_project_from(session[:tmpdir])
+
+        FileUtils.remove_entry_secure session[:tmpdir]
+
+        flash[:notice] = 'Successfully updated project'
+        redirect_to :project
+        return
+      else
+        session[:name] = params[:project][:name]
+        session[:season] = params[:project][:season]
+        session[:description] = params[:project][:description]
+        session[:permit_no] = params[:project][:permit_no]
+        session[:permit_holder] = params[:project][:permit_holder]
+        session[:contact_address] = params[:project][:contact_address]
+        session[:participant] = params[:project][:participant]
+        session[:srid] = params[:project][:srid]
+        @spatial_list = Database.get_spatial_ref_list
+        flash.now[:error] = 'Error updating project'
+        render 'edit_project'
+        return
+      end
     else
-      @project_setting = JSON.parse(File.read(@project.get_path(:settings)))
+      session[:name] = params[:project][:name]
+      session[:season] = params[:project][:season]
+      session[:description] = params[:project][:description]
+      session[:permit_no] = params[:project][:permit_no]
+      session[:permit_holder] = params[:project][:permit_holder]
+      session[:contact_address] = params[:project][:contact_address]
+      session[:participant] = params[:project][:participant]
+      session[:srid] = params[:project][:srid]
       @spatial_list = Database.get_spatial_ref_list
-      render 'edit_project_setting'
+      flash.now[:error] = 'Error updating project'
+      render 'edit_project'
+      return
     end
   end
 
@@ -578,6 +809,13 @@ class ProjectsController < ApplicationController
   end
 
   def upload_new_project
+    unless SpatialiteDB.library_exists?
+      @project = Project.new
+      flash.now[:error] = 'Cannot find library libspatialite. Please install library to upload project.'
+      render 'upload_project'
+      return
+    end
+
     if params[:project]
       project_or_error = Project.upload_project(params)
       if project_or_error.class == String
@@ -653,6 +891,82 @@ class ProjectsController < ApplicationController
         @project.errors.add(:ui_logic, error)
         valid = false
       else
+        create_temp_file(@project.get_name(:ui_logic), params[:project][:ui_logic])
+        session[:ui_logic] = true
+      end
+    end
+
+    # check if arch16n is valid
+    if !session[:arch16n]
+      error = Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
+      if error
+        @project.errors.add(:arch16n, error)
+        valid = false
+      else
+        if !params[:project][:arch16n].nil?
+          create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
+          session[:arch16n] = true
+        end
+      end
+    end
+
+    # check if validation schema is valid
+    if !session[:validation_schema]
+      error = Project.validate_validation_schema(params[:project][:validation_schema])
+      if error
+        @project.errors.add(:validation_schema, error)
+        valid = false
+      else
+        if !params[:project][:validation_schema].nil?
+          create_temp_file(@project.get_name(:validation_schema), params[:project][:validation_schema])
+          session[:validation_schema] = true
+        end
+      end
+    end
+
+    if valid
+      session[:season] = ''
+      session[:description] = ''
+      session[:permit_no] = ''
+      session[:permit_holder] = ''
+      session[:contact_address] = ''
+      session[:participant] = ''
+      session[:srid] = ''
+    else
+      session[:season] = params[:project][:season]
+      session[:description] = params[:project][:description]
+      session[:permit_no] = params[:project][:permit_no]
+      session[:permit_holder] = params[:project][:permit_holder]
+      session[:contact_address] = params[:project][:contact_address]
+      session[:participant] = params[:project][:participant]
+      session[:srid] = params[:project][:srid]
+    end
+
+    valid
+  end
+
+  def validate_project_update
+    # check if project is valid
+
+    valid = true
+
+    # check if ui schema is valid
+    if !session[:ui_schema]
+      if !params[:project][:ui_schema].blank?
+        error = Project.validate_ui_schema(params[:project][:ui_schema])
+        if error
+          @project.errors.add(:ui_schema, error)
+          valid = false
+        else
+          create_temp_file(@project.get_name(:ui_schema), params[:project][:ui_schema])
+          session[:ui_schema] = true
+        end
+      end
+    end
+
+    # check if arch16n is valid
+    if !session[:ui_logic]
+      if !params[:project][:ui_logic].nil?
         create_temp_file(@project.get_name(:ui_logic), params[:project][:ui_logic])
         session[:ui_logic] = true
       end

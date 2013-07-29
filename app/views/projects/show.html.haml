@@ -1,5 +1,4 @@
-%h1
-  %span= @project.name
+- title @project.name
 
 %input{:type => 'hidden', :value => check_archive_status_path(@project), :id=> 'check-archive'}
 %input{:type => 'hidden', :value => download_project_path(@project), :id=> 'download-project'}
@@ -7,8 +6,9 @@
 .well
   %h3 Project Actions
   .btn-group
-    = link_to "Edit Project Setting", edit_project_setting_path(@project), :class => 'btn'
+    = link_to "Edit Project", edit_project_path(@project), :class => 'btn'
     = link_to "Edit Vocabulary", list_attributes_with_vocab_path(@project), :class => 'btn'
+    = link_to "Edit Users", edit_project_user_path(@project), :class => 'btn'
   .btn-group
     = link_to "Upload Files", project_file_list_path(@project), :class => 'btn', :id => 'project-file-list-btn'
     = link_to "Download Project", archive_project_path(@project), :class => 'btn', :id => 'archive-project-btn'

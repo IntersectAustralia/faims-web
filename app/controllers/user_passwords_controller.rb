@@ -14,4 +14,8 @@ class UserPasswordsController < Devise::PasswordsController
     end
   end
 
+  def forgot_password
+    render :forgot_password
+  end
+
 end
