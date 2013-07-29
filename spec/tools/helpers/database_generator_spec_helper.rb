@@ -11,27 +11,31 @@ def fill_database(db, version = nil, index = nil)
 
   s = index ? index : 0
   n = s + 5
+  index = 0
   (s..n).each do |i|
     db.execute("INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, VersionNum) " +
-        "VALUES (cast('#{i}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
+        "VALUES (cast('#{index}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
       db.execute("INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, VersionNum) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
+          "SELECT cast('#{index}' as integer), '0', '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
+      index = index + 1
     end
   end
 
+  index = 0
   (s..n).each do |i|
     db.execute("INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, VersionNum) " +
-        "VALUES (cast('#{i}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
+        "VALUES (cast('#{index}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
       db.execute("INSERT INTO RelnValue (RelationshipID, userid, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, VersionNum) " +
-          "SELECT cast('#{i*n + j}' as integer), '0', '0', attributeId, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
+          "SELECT cast('#{index}' as integer), '0', '0', attributeId, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
           "FROM AttributeKey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
+      index = index + 1
     end
   end
 
