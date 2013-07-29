@@ -1763,7 +1763,10 @@ insert into archentity (
 		select uuid, i.aenttimestamp, 1 as isForked
 		  from main.archentity m join  import.archentity i using (uuid, parenttimestamp)
 		where m.aenttimestamp != i.aenttimestamp) a using (uuid, aenttimestamp)
-  where uuid || aenttimestamp not in (select uuid || aenttimestamp from archentity);
+  except
+  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+  from main.archentity;
+
 
 insert into aentvalue (
          uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
@@ -1773,7 +1776,10 @@ insert into aentvalue (
 		select uuid, attributeid, i.valuetimestamp, 1 as isForked
 		  from main.aentvalue m join  import.aentvalue i using (uuid, attributeid, parenttimestamp)
 		where m.valuetimestamp != i.valuetimestamp) a using (uuid, attributeid, valuetimestamp)
-  where uuid || valuetimestamp || attributeid not in (select uuid || valuetimestamp||attributeid from aentvalue);
+  except
+  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp
+  from main.aentvalue;
+
 
 insert into relationship (
          relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
@@ -1783,7 +1789,10 @@ insert into relationship (
 		select relationshipid, i.relntimestamp, 1 as isForked
 		  from main.relationship m join  import.relationship i using (relationshipid, parenttimestamp)
 		where m.relntimestamp != i.relntimestamp) a using (relationshipid, relntimestamp)
-  where relationshipid || relntimestamp not in (select relationshipid || relntimestamp from relationship);
+  except
+  select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+  from main.relationship;
+
 
 insert into relnvalue (
          relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
@@ -1793,7 +1802,10 @@ insert into relnvalue (
 		select relationshipid, attributeid, i.relnvaluetimestamp, 1 as isForked
 		  from main.relnvalue m join  import.relnvalue i using (relationshipid, attributeid, parenttimestamp)
 		where m.relnvaluetimestamp != i.relnvaluetimestamp) a using (relationshipid, attributeid, relnvaluetimestamp)
-  where relationshipid || relnvaluetimestamp || attributeid not in (select relationshipid || relnvaluetimestamp || attributeid from relnvalue);
+  except
+  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp
+  from main.relnvalue;
+
 
 insert into aentreln (
          uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
@@ -1803,7 +1815,10 @@ insert into aentreln (
 		select relationshipid, uuid, i.aentrelntimestamp, 1 as isForked
 		  from main.aentreln m join  import.aentreln i using (relationshipid, uuid, parenttimestamp)
 		where m.aentrelntimestamp != i.aentrelntimestamp) a using (relationshipid, uuid, aentrelntimestamp)
-   where uuid || relationshipid || aentrelntimestamp not in (select uuid || relationshipid || aentrelntimestamp from aentreln);
+  except
+  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp
+  from main.aentreln;
+
 
 update version set ismerged = 1 where versionnum = #{version};
 
