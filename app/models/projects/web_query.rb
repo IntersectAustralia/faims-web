@@ -302,7 +302,7 @@ EOF
 
   def self.insert_version
     cleanup_query(<<EOF
-insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, 0, 1 from version;
+insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, ?, 1 from version;
 EOF
     )
   end

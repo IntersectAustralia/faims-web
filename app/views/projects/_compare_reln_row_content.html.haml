@@ -6,7 +6,10 @@
       %td
         = ': '
       %td
-        = value[key][0][4]
+        - if value[key][0][4]
+          %span= value[key][0][4]
+        - else
+          %span.muted= 'NULL'
     - for attribute in group[key]
       %input{:type => 'hidden', :name => 'attribute_id[]', :value => attribute[2]}
       - if !attribute[6].blank?
