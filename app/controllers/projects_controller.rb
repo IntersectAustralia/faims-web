@@ -289,10 +289,10 @@ class ProjectsController < ApplicationController
 
     timestamp =  @project.db.current_timestamp
 
-    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], entity[:userid], entity[:timestamp], timestamp)
+    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], current_user.id, entity[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
+      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], current_user.id, attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
@@ -436,10 +436,10 @@ class ProjectsController < ApplicationController
 
     timestamp = @project.db.current_timestamp
 
-    @project.db.revert_rel_to_timestamp(rel[:relationshipid], rel[:userid], rel[:timestamp], timestamp)
+    @project.db.revert_rel_to_timestamp(rel[:relationshipid], current_user.id, rel[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
+      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], current_user.id, attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
