@@ -1,0 +1,4 @@
+web_server: bundle exec unicorn -p 3000 -c config/unicorn.rb -E production
+discovery_server: bundle exec rake discovery:start - e production
+merge_daemon: bundle exec rake merge_daemon:start - e production
+worker: bundle exec rake jobs:work - e production
