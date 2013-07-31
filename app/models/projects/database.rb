@@ -13,9 +13,9 @@ class Database
     users
   end
 
-  def update_list_of_users(user)
+  def update_list_of_users(user, userid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
       @db.execute(WebQuery.update_list_of_users, user.id, user.first_name, user.last_name)
       @project.db_mgr.make_dirt
     end
@@ -96,7 +96,7 @@ class Database
     @project.db_mgr.with_lock do
 
       timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       cache_timestamps = {}
 
@@ -114,10 +114,10 @@ class Database
             uuid:uuid,
             userid:userid,
             attributeid:attribute_id,
-            vocabid:vocab_id ? vocab_id[i] : nil,
-            measure:measure[i],
-            freetext:freetext[i],
-            certainty:certainty[i],
+            vocabid:clean(vocab_id ? vocab_id[i] : nil),
+            measure:clean(measure[i]),
+            freetext:clean(freetext[i]),
+            certainty:clean(certainty[i]),
             valuetimestamp:timestamp,
             parenttimestamp:parenttimestamp
         }
@@ -139,7 +139,7 @@ class Database
   def insert_updated_arch_entity(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
     @project.db_mgr.with_lock do
       timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           uuid:uuid,
@@ -167,10 +167,10 @@ class Database
             uuid:uuid,
             userid:userid,
             attributeid:attribute_id[i],
-            vocabid:vocab_id ? vocab_id[i] : nil,
-            measure:measure[i],
-            freetext:freetext[i],
-            certainty:certainty[i],
+            vocabid:clean(vocab_id ? vocab_id[i] : nil),
+            measure:clean(measure[i]),
+            freetext:clean(freetext[i]),
+            certainty:clean(certainty[i]),
             valuetimestamp:timestamp,
             parenttimestamp:parenttimestamp
         }
@@ -203,7 +203,7 @@ class Database
 
   def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           uuid:uuid,
@@ -221,7 +221,7 @@ class Database
 
   def revert_aentvalues_to_timestamp(uuid, userid, attributeid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           uuid:uuid,
@@ -250,7 +250,7 @@ class Database
 
   def delete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
       params = {
           userid:userid,
           deleted:'true',
@@ -264,7 +264,7 @@ class Database
 
   def undelete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
       params = {
           userid:userid,
           deleted:nil,
@@ -320,7 +320,7 @@ class Database
     @project.db_mgr.with_lock do
 
       timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       cache_timestamps = {}
 
@@ -338,9 +338,9 @@ class Database
             relationshipid:relationshipid,
             userid:userid,
             attributeid:attribute_id,
-            vocabid:vocab_id ? vocab_id[i] : nil,
-            freetext:freetext[i],
-            certainty:certainty[i],
+            vocabid:clean(vocab_id ? vocab_id[i] : nil),
+            freetext:clean(freetext[i]),
+            certainty:clean(certainty[i]),
             relnvaluetimestamp:timestamp,
             parenttimestamp:parenttimestamp
         }
@@ -361,7 +361,7 @@ class Database
   def insert_updated_rel(relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
     @project.db_mgr.with_lock do
       timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           relationshipid:relationshipid,
@@ -388,9 +388,9 @@ class Database
             relationshipid:relationshipid,
             userid:userid,
             attributeid:attribute_id[i],
-            vocabid:vocab_id ? vocab_id[i] : nil,
-            freetext:freetext[i],
-            certainty:certainty[i],
+            vocabid:clean(vocab_id ? vocab_id[i] : nil),
+            freetext:clean(freetext[i]),
+            certainty:clean(certainty[i]),
             relnvaluetimestamp:timestamp,
             parenttimestamp:parenttimestamp
         }
@@ -423,7 +423,7 @@ class Database
 
   def revert_rel_to_timestamp(relid, userid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           relationshipid:relid,
@@ -441,7 +441,7 @@ class Database
 
   def revert_relnvalues_to_timestamp(relid, userid, attributeid, revert_timestamp, timestamp)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           relationshipid:relid,
@@ -470,7 +470,7 @@ class Database
 
   def delete_relationship(relationshipid, userid)
     @project.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
       params = {
           userid:userid,
           deleted:'true',
@@ -484,7 +484,7 @@ class Database
 
   def undelete_relationship(relationshipid, userid)
     @project.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
       params = {
           userid:userid,
           deleted:nil,
@@ -547,17 +547,17 @@ class Database
     rels
   end
 
-  def add_member(relationshipid,userid, uuid, verb)
+  def add_member(relationshipid, userid, uuid, verb)
     @project.db_mgr.with_lock do
 
       timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           uuid:uuid,
           relationshipid:relationshipid,
           userid:userid,
-          verb:verb,
+          verb:clean(verb),
           aentrelntimestamp:timestamp,
           parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
       }
@@ -568,11 +568,11 @@ class Database
     end
   end
 
-  def delete_member(relationshipid,userid, uuid)
+  def delete_member(relationshipid, userid, uuid)
     @project.db_mgr.with_lock do
 
       timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp)
+      @db.execute(WebQuery.insert_version, timestamp, userid)
 
       params = {
           uuid:uuid,
@@ -642,9 +642,9 @@ class Database
     vocabs
   end
 
-  def update_attributes_vocab(attribute_id, vocab_id, vocab_name)
+  def update_attributes_vocab(attribute_id, vocab_id, vocab_name, userid)
     @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, current_timestamp)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
       vocab_id.length.times do |i|
         vocab_id[i-1] = vocab_id[i-1].blank? ? nil : vocab_id[i-1]
         if !vocab_name[i-1].blank?
@@ -831,6 +831,11 @@ class Database
 
   def current_timestamp
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
+  end
+
+  def clean(value)
+    return nil if value.blank?
+    value
   end
 
 end

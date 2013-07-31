@@ -39,7 +39,6 @@ class Project < ActiveRecord::Base
         db: { name: 'db.sqlite3', path: project_dir + 'db.sqlite3' },
         settings: { name: 'project.settings', path: project_dir + 'project.settings' },
         properties: { name: 'faims.properties', path: project_dir + 'faims.properties' },
-        project_properties: { name: "faims_#{n}.properties", path: project_dir + "faims_#{n}.properties" },
         files_dir: { name: 'files', path: project_dir + 'files/' },
         server_files_dir: { name: 'server', path: project_dir + 'files/server/' },
         app_files_dir: { name: 'app', path: project_dir + 'files/app/' },
@@ -105,7 +104,6 @@ class Project < ActiveRecord::Base
     mgr.add_file(get_path(:ui_logic))
     mgr.add_file(get_path(:settings))
     mgr.add_file(get_path(:properties))
-    mgr.add_file(get_path(:project_properties))
     mgr
   end
 
@@ -372,7 +370,6 @@ class Project < ActiveRecord::Base
 
   def self.validate_arch16n(arch16n, project_name)
     return nil if arch16n.blank?
-    return 'invalid file name' if !(arch16n.original_filename).eql?("faims_#{project_name.gsub(/\s+/, '_')}.properties")
     begin
       file = arch16n.tempfile
       line_num = 0

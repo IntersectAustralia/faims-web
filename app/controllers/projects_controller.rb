@@ -65,7 +65,7 @@ class ProjectsController < ApplicationController
   def update_project_user
     @project = Project.find(params[:id])
     user = User.find(params[:user_id])
-    @project.db.update_list_of_users(user)
+    @project.db.update_list_of_users(user, current_user.id)
     @users = @project.db.get_list_of_users
     @server_user = User.where('id NOT IN (?)', @users.transpose[0])
     flash[:notice] = 'Successfully updated user'
@@ -289,10 +289,10 @@ class ProjectsController < ApplicationController
 
     timestamp =  @project.db.current_timestamp
 
-    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], entity[:userid], entity[:timestamp], timestamp)
+    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], current_user.id, entity[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
+      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], current_user.id, attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
@@ -436,10 +436,10 @@ class ProjectsController < ApplicationController
 
     timestamp = @project.db.current_timestamp
 
-    @project.db.revert_rel_to_timestamp(rel[:relationshipid], rel[:userid], rel[:timestamp], timestamp)
+    @project.db.revert_rel_to_timestamp(rel[:relationshipid], current_user.id, rel[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], attribute[:userid], attribute[:attributeid], attribute[:timestamp], timestamp)
+      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], current_user.id, attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
@@ -687,7 +687,7 @@ class ProjectsController < ApplicationController
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
     @attribute_id = params[:attribute_id]
-    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name)
+    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, current_user.id)
     @attributes = @project.db.get_attributes_containing_vocab()
     flash[:notice] = 'Successfully updated vocabulary'
     render 'list_attributes_with_vocab'
@@ -904,7 +904,7 @@ class ProjectsController < ApplicationController
         valid = false
       else
         if !params[:project][:arch16n].nil?
-          create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
+          create_temp_file(@project.get_name(:properties), params[:project][:arch16n])
           session[:arch16n] = true
         end
       end
@@ -980,7 +980,7 @@ class ProjectsController < ApplicationController
         valid = false
       else
         if !params[:project][:arch16n].nil?
-          create_temp_file(@project.get_name(:project_properties), params[:project][:arch16n])
+          create_temp_file(@project.get_name(:properties), params[:project][:arch16n])
           session[:arch16n] = true
         end
       end

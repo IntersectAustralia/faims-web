@@ -302,7 +302,7 @@ EOF
 
   def self.insert_version
     cleanup_query(<<EOF
-insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, 0, 1 from version;
+insert into version (versionnum, uploadtimestamp, userid, ismerged) select count(*) + 1, ?, ?, 1 from version;
 EOF
     )
   end
@@ -461,7 +461,7 @@ EOF
 
   def self.get_arch_ent_attributes_at_timestamp
     cleanup_query(<<EOF
-select uuid, attributename, attributeid, group_concat(afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)), group_concat(vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(
+select uuid, attributename, attributeid, group_concat(DISTINCT afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)), group_concat(DISTINCT vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(
                                                                                              measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
@@ -1194,7 +1194,7 @@ EOF
 
   def self.get_rel_attributes_at_timestamp
     cleanup_query(<<EOF
-select relationshipid, attributeid, attributename, astext(transform(GeoSpatialColumn,?)), group_concat(rfname || ' ' || rlname) as ruser,group_concat(vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+select relationshipid, attributeid, attributename, astext(transform(GeoSpatialColumn,?)), group_concat(DISTINCT rfname || ' ' || rlname) as ruser,group_concat(DISTINCT vfname || ' ' || vlname) as rvuser, relntimestamp, relnvaluetimestamp, max(deleted), group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                         vocabname  || ' (' || freetext || ')',
                                                                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
                                                                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',

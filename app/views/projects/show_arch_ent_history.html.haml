@@ -27,7 +27,10 @@
                     %input{type:'hidden', name: 'data[' + key + '][attributeid]', value:cell[:attributeid] }
                     %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
                     %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
-                    %span= cell[:value]
+                    - if cell[:value]
+                      %span= cell[:value]
+                    - else
+                      %span.muted= 'NULL'
                     %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
                     - if cell[:deleted]
                       %p.text-error= 'Deleted'
@@ -35,7 +38,10 @@
                     %input{type:'hidden', name: 'data[' + key + '][uuid]', value:cell[:uuid] }
                     %input{type:'hidden', name: 'data[' + key + '][timestamp]', value:cell[:timestamp] }
                     %input{type:'hidden', name: 'data[' + key + '][userid]', value:cell[:userid] }
-                    %span= cell[:geospatial] ? cell[:geospatial] : 'NULL'
+                    - if cell[:geospatial]
+                      %span= cell[:geospatial]
+                    - else
+                      %span.muted= 'NULL'
                     %p.muted="Last Edit by: #{cell[:user]} at #{cell[:timestamp]}"
                     - if cell[:deleted]
                       %p.text-error= 'Deleted'
