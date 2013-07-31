@@ -82,7 +82,6 @@ describe Project do
   it 'Archiving settings with project properties' do
     begin
       project = make_project('Project 1')
-      FileHelper.touch_file(project.get_path(:project_properties))
       project.generate_archives
       tmp_dir = Dir.mktmpdir
       `tar zxf #{project.get_path(:settings_archive)} -C #{tmp_dir}`
@@ -91,7 +90,6 @@ describe Project do
       entries.include?(project.get_name(:ui_logic)).should be_true
       entries.include?(project.get_name(:settings)).should be_true
       entries.include?(project.get_name(:properties)).should be_true
-      entries.include?(project.get_name(:project_properties)).should be_true
     rescue Exception => e
       raise e
     ensure

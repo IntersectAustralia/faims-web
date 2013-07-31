@@ -109,18 +109,17 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field       | value                      | error                   |
-    | Data Schema |                            | can't be blank          |
-    | Data Schema | garbage                    | must be xml file        |
-    | Data Schema | data_schema_error1.xml     | invalid xml at line   |
-    | UI Schema   |                            | can't be blank          |
-    | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml at line      |
-    | Validation Schema   | garbage                | must be xml file       |
-    | Validation Schema   | data_schema_error1.xml | invalid xml at line  |
-    | UI Logic    |                            | can't be blank          |
-    | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file at line |
+    | field             | value                      | error                           |
+    | Data Schema       |                            | can't be blank                  |
+    | Data Schema       | garbage                    | must be xml file                |
+    | Data Schema       | data_schema_error1.xml     | invalid xml at line             |
+    | UI Schema         |                            | can't be blank                  |
+    | UI Schema         | garbage                    | must be xml file                |
+    | UI Schema         | ui_schema_error1.xml       | invalid xml at line             |
+    | Validation Schema | garbage                    | must be xml file                |
+    | Validation Schema | data_schema_error1.xml     | invalid xml at line             |
+    | UI Logic          |                            | can't be blank                  |
+    | Arch16n           | faims_Project_2.properties | invalid properties file at line |
 
   Scenario: Upload Project
     Given I am on the home page
@@ -189,8 +188,8 @@ Feature: Manage projects
     And I press "Update"
     And I should have setting "<setting>" for "Project 1" as "<setting_value>"
   Examples:
-    | field        | value     | setting | setting_value |
-    | Project SRID | EPSG:4326 - WGS 84          | srid | 4326 |
+    | field        | value              | setting | setting_value |
+    | Project SRID | EPSG:4326 - WGS 84 | srid    | 4326          |
 
   Scenario Outline: Edit static data fails with errors
     Given I am on the home page
@@ -241,7 +240,7 @@ Feature: Manage projects
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Update"
     Then I should see "Successfully updated project"
-    And Project "Project 1" should have the same file "faims_Project_1.properties"
+    And Project "Project 1" should have the same file "faims.properties"
 
   Scenario Outline: Edit project and upload incorrect file
     Given I am on the home page
@@ -257,13 +256,12 @@ Feature: Manage projects
     And I press "Update"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field       | value                      | error                   |
-    | UI Schema   | garbage                    | must be xml file        |
-    | UI Schema   | ui_schema_error1.xml       | invalid xml at line   |
-    | Validation Schema   | garbage                | must be xml file    |
-    | Validation Schema   | data_schema_error1.xml | invalid xml at line |
-    | Arch16n     | faims_error.properties     | invalid file name       |
-    | Arch16n     | faims_Project_2.properties | invalid properties file at line|
+    | field             | value                      | error                           |
+    | UI Schema         | garbage                    | must be xml file                |
+    | UI Schema         | ui_schema_error1.xml       | invalid xml at line             |
+    | Validation Schema | garbage                    | must be xml file                |
+    | Validation Schema | data_schema_error1.xml     | invalid xml at line             |
+    | Arch16n           | faims_Project_2.properties | invalid properties file at line |
 
   Scenario: Pull a list of projects
     Given I have projects
@@ -380,10 +378,10 @@ Feature: Manage projects
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see vocabularies
-    | name  |
-    | Green |
-    | Pink  |
-    | Blue  |
+      | name  |
+      | Green |
+      | Pink  |
+      | Blue  |
 
   @javascript
   Scenario: Update Vocabulary
@@ -408,10 +406,10 @@ Feature: Manage projects
     Then I follow "Update"
     And I should see "Successfully updated vocabulary"
     And I should see vocabularies
-      | name  |
-      | Red   |
-      | Pink  |
-      | Blue  |
+      | name |
+      | Red  |
+      | Pink |
+      | Blue |
 
   @javascript
   Scenario: Insert Vocabulary
@@ -482,7 +480,7 @@ Feature: Manage projects
     And I should see "Successfully updated user"
     And I should have user for project
       | first_name | last_name |
-      | Fred       | Bloggs     |
+      | Fred       | Bloggs    |
       | User1      | Last1     |
 
   Scenario: Show arch entity list not include the deleted value
@@ -599,10 +597,10 @@ Feature: Manage projects
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     Then I should see records
-      | name                        |
-      | relationship: AboveBelow 1  |
-      | relationship: AboveBelow 2  |
-      | relationship: AboveBelow 3  |
+      | name                       |
+      | relationship: AboveBelow 1 |
+      | relationship: AboveBelow 2 |
+      | relationship: AboveBelow 3 |
 
   @javascript
   Scenario: Show relationship list include the deleted value
@@ -621,11 +619,11 @@ Feature: Manage projects
     And I enter "" and submit the form
     And I follow "Show Deleted"
     Then I should see records
-      | name                        |
-      | relationship: AboveBelow 1  |
-      | relationship: AboveBelow 2  |
-      | relationship: AboveBelow 3  |
-      | relationship: AboveBelow 4  |
+      | name                       |
+      | relationship: AboveBelow 1 |
+      | relationship: AboveBelow 2 |
+      | relationship: AboveBelow 3 |
+      | relationship: AboveBelow 4 |
 
   Scenario: Delete relationship
     Given I am on the home page
@@ -644,9 +642,9 @@ Feature: Manage projects
     Then I select the first record
     And I follow "Delete"
     Then I should not see records
-      | name            |
-      | relationship: AboveBelow 2  |
-      | relationship: AboveBelow 4  |
+      | name                       |
+      | relationship: AboveBelow 2 |
+      | relationship: AboveBelow 4 |
 
   @javascript
   Scenario: Restore relationship
@@ -677,11 +675,11 @@ Feature: Manage projects
     And I wait
     Then I follow "Hide Deleted"
     And I should not see records
-      | name                        |
-      | relationship: AboveBelow 4  |
+      | name                       |
+      | relationship: AboveBelow 4 |
     But I should see records
-      | name            |
-      | relationship: AboveBelow 2  |
+      | name                       |
+      | relationship: AboveBelow 2 |
 
   Scenario: See related arch entities
     Given I am on the home page
@@ -708,55 +706,55 @@ Feature: Manage projects
       | small Below AboveBelow: Small 4 |
 
   Scenario: Update arch entity attribute causes validation error    s
-    # TODO
+# TODO
 
   Scenario: Update arch entity attribute clears validation error
-    # TODO
+# TODO
 
   Scenario: Update arch entity attribute with multiple values causes validation error
-    # TODO
+# TODO
 
   Scenario: Update arch entity attribute with multiple values clears validation error
-    # TODO
+# TODO
 
   Scenario: Show arch entity with validation errors as dirty
-    # TODO
+# TODO
 
   Scenario: Show arch entity with validation errors as normal after validation errors cleared
-    # TODO
+# TODO
 
   Scenario: Update relationship attribute causes validation error
-    # TODO
+# TODO
 
   Scenario: Update relationship attribute clears validation error
-    # TODO
+# TODO
 
   Scenario: Update relationship attribute with multiple values causes validation error
-    # TODO
+# TODO
 
   Scenario: Update relationship attribute with multiple values clears validation error
-    # TODO
+# TODO
 
   Scenario: Show relationship with validation errors as dirty
-    # TODO
+# TODO
 
   Scenario: Show relationship with validation errors as normal after validation errors cleared
-    # TODO
+# TODO
 
   Scenario: Show relationship association for arch ent
-    # TODO
+# TODO
 
   Scenario: Remove relationship association from arch ent
-    # TODO
+# TODO
 
   Scenario: Add relationship association to arch ent
-    # TODO
+# TODO
 
   Scenario: Show arch ent member for relationship
-    # TODO
+# TODO
 
   Scenario: Remove arch ent member from relationship
-    # TODO
+# TODO
 
   Scenario: Add arch ent member to relationship
-    # TODO
+# TODO
