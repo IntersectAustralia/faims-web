@@ -611,3 +611,18 @@ end
 And /^I follow link "([^"]*)"$/ do |link|
   find(:xpath, "//input[@value=\"#{link}\"]").click
 end
+
+And /^I add "([^"]*)" to "([^"]*)"$/ do |email, name|
+  user = User.find_by_email(email)
+  project = Project.find_by_name(name)
+  project.db.update_list_of_users(user, User.first.id)
+end
+
+And /^I update attribute "([^"]*)" with "([^"]*)"$/ do |name, value|
+  find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/div/label[contains(text(), 'Freetext')]/following-sibling::input").set value
+  find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/input[@value='Update']").click
+end
+
+Then /^I see attribute "([^"]*)" with "([^"]*)"$/ do |name, value|
+  find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/div/label[contains(text(), 'Freetext')]/following-sibling::input").value.should == value
+end

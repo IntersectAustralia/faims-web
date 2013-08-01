@@ -237,13 +237,13 @@ class Project < ActiveRecord::Base
     end
   end
 
-  def create_project_from(tmp_dir)
+  def create_project_from(tmp_dir, user = nil)
     begin      
       # copy files from temp directory to projects directory
       FileHelper.copy_dir(tmp_dir, get_path(:project_dir))
 
       # generate database
-      Database.generate_database(get_path(:db), get_path(:data_schema))
+      Database.generate_database(get_path(:db), get_path(:data_schema), user)
 
       # create default faims properties
       FileHelper.touch_file(get_path(:properties))
@@ -251,8 +251,8 @@ class Project < ActiveRecord::Base
       # generate archive
       generate_archives
     rescue Exception => e
-      raise e
       FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
+      raise e
     ensure
       # ignore
     end
@@ -267,8 +267,8 @@ class Project < ActiveRecord::Base
         # generate archive
         settings_mgr.make_dirt
       rescue Exception => e
-        raise e
         FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
+        raise e
       ensure
         # ignore
       end
@@ -283,8 +283,8 @@ class Project < ActiveRecord::Base
       # generate archive
       generate_archives
     rescue Exception => e
-      raise e
       FileUtils.rm_rf get_path(:project_dir) if File.directory? get_path(:project_dir) # cleanup directory
+      raise e
     ensure
       # ignore
     end

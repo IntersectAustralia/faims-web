@@ -200,7 +200,8 @@ class Param
 		begin
 			return db.execute(@value, id, timestamp).first.first if @type == 'query'
 			return fields[value]
-		rescue Exception => e
+    rescue Exception => e
+      puts e.to_s
 			raise e
 		end
 	end
@@ -240,7 +241,6 @@ class EvalValidator < AttributeValidator
 			return f.readlines.join
     rescue Exception => e
       puts e.to_s
-      puts e.backtrace
 			return 'Error in evaluator'
 		end	
 	end
@@ -260,7 +260,7 @@ class BlankValidator < AttributeValidator
 			return nil
 		rescue Exception => e
       puts e.to_s
-      puts e.backtrace
+      #puts e.backtrace
       return 'Error in blank checker'
 		end	
 	end
@@ -283,7 +283,7 @@ class TypeValidator < AttributeValidator
 			return nil
 		rescue Exception => e
       puts e.to_s
-      puts e.backtrace
+      #puts e.backtrace
       return 'Error in type checker'
 		end	
 	end
@@ -324,7 +324,7 @@ class QueryValidator < AttributeValidator
 			return result[0][1]
 		rescue Exception => e
       puts e.to_s
-      puts e.backtrace
+      #puts e.backtrace
       return 'Error in query checker'
 		end	
 	end

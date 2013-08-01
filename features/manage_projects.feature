@@ -456,12 +456,11 @@ Feature: Manage projects
     And I should be on the projects page
     And I click on "Project 1"
     And I wait
-    Then I follow "Edit User"
+    Then I follow "Edit Users"
     And I should have user for selection
       | name        |
       | User1 Last1 |
       | User2 Last2 |
-
 
   @javascript
   Scenario: Adding users to the project
@@ -470,6 +469,7 @@ Feature: Manage projects
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I have project "Project 1"
+    And I add "georgina@intersect.org.au" to "Project 1"
     Then I follow "Show Projects"
     And I should be on the projects page
     And I click on "Project 1"

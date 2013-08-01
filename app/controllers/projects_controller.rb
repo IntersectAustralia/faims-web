@@ -5,6 +5,29 @@ class ProjectsController < ApplicationController
   before_filter :authenticate_user!
   load_and_authorize_resource
 
+  before_filter :authenticate_project_user, only: [:update_project_user,
+                                                   :update_arch_ent_records,
+                                                   :delete_arch_ent_records,
+                                                   :undelete_arch_ent_records,
+                                                   :merge_arch_ents,
+                                                   :revert_arch_ent_to_timestamp,
+                                                   :update_rel_records,
+                                                   :revert_rel_to_timestamp,
+                                                   :delete_rel_records,
+                                                   :undelete_rel_records,
+                                                   :remove_arch_ent_member,
+                                                   :add_arch_ent_member,
+                                                   :add_rel_association,
+                                                   :update_attributes_vocab]
+
+  def authenticate_project_user
+    @project = Project.find(params[:id])
+    redirect_to :projects unless @project
+    userids = @project.db.get_list_of_users.map { |x| x.first }
+    flash[:error] = "Only project users can edit the database. Please get a project user to add you to the project."
+    redirect_to :projects unless userids.include? current_user.id
+  end
+
   def index
 
   end
@@ -34,9 +57,9 @@ class ProjectsController < ApplicationController
       begin
         @project.save
         @project.update_settings(params)
-        @project.create_project_from(session[:tmpdir])
+        @project.create_project_from(session[:tmpdir], current_user)
       rescue
-        File.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
+        FileUtils.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
         @project.destroy
       ensure
         FileUtils.remove_entry_secure session[:tmpdir]
@@ -59,7 +82,8 @@ class ProjectsController < ApplicationController
   def edit_project_user
     @project = Project.find(params[:id])
     @users = @project.db.get_list_of_users
-    @server_user = User.where('id NOT IN (?)', @users.transpose[0])
+    user_transpose = @users.transpose
+    @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose[0].include? x.id }
   end
 
   def update_project_user
@@ -67,7 +91,8 @@ class ProjectsController < ApplicationController
     user = User.find(params[:user_id])
     @project.db.update_list_of_users(user, current_user.id)
     @users = @project.db.get_list_of_users
-    @server_user = User.where('id NOT IN (?)', @users.transpose[0])
+    user_transpose = @users.transpose
+    @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose[0].include? x.id }
     flash[:notice] = 'Successfully updated user'
     render 'edit_project_user'
   end

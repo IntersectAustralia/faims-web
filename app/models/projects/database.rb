@@ -775,7 +775,7 @@ class Database
   end
 
   # static
-  def self.generate_database(file, xml)
+  def self.generate_database(file, xml, admin_user = nil)
     generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
     FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), file # clone template db
     db = SpatialiteDB.new(file)
@@ -785,7 +785,6 @@ class Database
     db.execute_batch(data_definition)
     gps_definition = XSLTParser.parse_data_schema(Rails.root.join('lib/assets/gps_schema.xml'))
     db.execute_batch(gps_definition)
-    admin_user = User.first
     db.execute("INSERT into user (userid,fname,lname) VALUES (" + admin_user.id.to_s + ",'" + admin_user.first_name.to_s + "','" + admin_user.last_name.to_s + "');" ) if admin_user
   end
 
