@@ -24,8 +24,10 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     redirect_to :projects unless @project
     userids = @project.db.get_list_of_users.map { |x| x.first }
-    flash[:error] = "Only project users can edit the database. Please get a project user to add you to the project."
-    redirect_to :projects unless userids.include? current_user.id
+    unless userids.include? current_user.id
+      flash[:error] = "Only project users can edit the database. Please get a project user to add you to the project."
+      redirect_to :projects
+    end
   end
 
   def index
