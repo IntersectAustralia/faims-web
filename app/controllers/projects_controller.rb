@@ -278,6 +278,11 @@ class ProjectsController < ApplicationController
     @timestamps = params[:timestamps]
     @first_uuid = ids[0]
     @second_uuid = ids[1]
+
+    unless @project.db.is_arch_ent_same_type(@first_uuid, @second_uuid)
+      flash[:error] = "Cannot compare Archaeological Entities of different types"
+      redirect_to @project
+    end
   end
 
   def merge_arch_ents
@@ -287,6 +292,7 @@ class ProjectsController < ApplicationController
       render 'show'
       return
     end
+
     @project.db.delete_arch_entity(params[:deleted_id],current_user.id)
 
     @project.db.insert_updated_arch_entity(params[:uuid],current_user.id, params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
@@ -661,6 +667,11 @@ class ProjectsController < ApplicationController
     @timestamps = params[:timestamps]
     @first_rel_id = ids[0]
     @second_rel_id = ids[1]
+
+    unless @project.db.is_rel_same_type(@first_rel_id, @second_rel_id)
+      flash[:error] = "Cannot compare Relationships of different types"
+      redirect_to @project
+    end
   end
 
   def merge_rel

@@ -8,6 +8,16 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def is_arch_ent_same_type(entity1, entity2)
+     return @db.get_first_value(WebQuery.get_arch_entity_type, entity1) ==
+         @db.get_first_value(WebQuery.get_arch_entity_type, entity2)
+  end
+
+  def is_rel_same_type(rel1, rel2)
+    return @db.get_first_value(WebQuery.get_relationship_type, rel1) ==
+        @db.get_first_value(WebQuery.get_relationship_type, rel2)
+  end
+
   def get_list_of_users
     users = @db.execute(WebQuery.get_list_of_users)
     users
