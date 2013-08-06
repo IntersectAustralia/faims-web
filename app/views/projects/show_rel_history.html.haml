@@ -1,4 +1,5 @@
 - title @project.name + " - Relationship History"
+= breadcrumbs
 - show_rel_attributes_history(@project,@timestamps)
 .content
   %form{:method => 'post', :action =>  revert_rel_to_timestamp_path(@project,@timestamps[0][0]), :class => 'history-form'}

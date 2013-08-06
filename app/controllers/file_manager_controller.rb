@@ -3,7 +3,20 @@ class FileManagerController < ApplicationController
   before_filter :authenticate_user!
   load_and_authorize_resource :project
 
+  def crumbs
+    project = Project.find(params[:id]) if params[:id]
+    @crumbs =
+      {
+          :pages_home => {title: 'Home', url: pages_home_path},
+          :projects_index => {title: 'Projects', url: projects_path},
+          :projects_show => {title: project ? project.name : nil, url: project ? project_path(project) : nil},
+          :projects_files => {title: 'Files', url: project ? project_file_list_path(project) : nil},
+      }
+  end
+
   def file_list
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_files]
+
     @project = Project.find_by_id(params[:id])
     @dir = FileHelper.get_file_list_by_dir(@project.get_path(:data_files_dir), '.')
 

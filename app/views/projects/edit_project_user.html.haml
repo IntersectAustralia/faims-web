@@ -1,8 +1,9 @@
 - title @project.name + " - Users"
+= breadcrumbs
 .content
   %form{:id => 'user_form', :action => update_project_user_path(@project), :method => 'post'}
     %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-    %label User
+    %label Select User:
     .input-append
       %select{:name => 'user_id', :id => 'select_user'}
         %option

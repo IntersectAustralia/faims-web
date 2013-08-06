@@ -39,5 +39,20 @@ module ApplicationHelper
     html.html_safe
   end
 
+  def breadcrumbs
+    return unless @crumbs
+    return unless @page_crumbs
+    html = '<ul class="breadcrumb">'
+    @page_crumbs.each_with_index do |c, i|
+      crumb = @crumbs[c]
+      if i != @page_crumbs.size - 1
+        html << "<li><a href=\"#{crumb[:url]}\">#{crumb[:title]}</a> <span class=\"divider\">/</span></li>"
+      else
+        html << "<li class=\"active\">#{crumb[:title]}</li>"
+      end
+    end
+    html << '</ul>'
+    html.html_safe
+  end
 
 end

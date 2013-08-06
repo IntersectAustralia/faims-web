@@ -20,6 +20,42 @@ class ProjectsController < ApplicationController
                                                    :add_rel_association,
                                                    :update_attributes_vocab]
 
+  def crumbs
+    project = Project.find(params[:id]) if params[:id]
+    uuid = params[:uuid]
+    relationshipid = params[:relationshipid]
+    @crumbs =
+      {
+          :pages_home => {title: 'Home', url: pages_home_path},
+          :projects_index => {title: 'Projects', url: projects_path},
+          :projects_create => {title: 'Create', url: new_project_path},
+          :projects_upload => {title: 'Upload', url: upload_project_path},
+          :projects_show => {title: project ? project.name : nil, url: project ? project_path(project) : nil},
+          :projects_edit => {title: 'Edit', url: project ? edit_project_path(project) : nil},
+          :projects_vocabulary => {title: 'Vocabulary', url: project ? list_attributes_with_vocab_path(project) : nil},
+          :projects_users => {title: 'Users', url: project ? edit_project_user_path(project) : nil},
+          :projects_files => {title: 'Files', url: project ? project_file_list_path(project) : nil},
+
+          :projects_search_arch_ent => {title: 'Search Entity', url: project ? search_arch_ent_records_path(project) : nil},
+          :projects_list_arch_ent => {title: 'List Entity', url: project ? list_arch_ent_records_path(project) : nil},
+          :projects_show_arch_ent => {title: 'Entity', url: project ? show_arch_ent_records_path(project) : nil},
+          :projects_compare_arch_ent => {title: 'Compare', url: project ? compare_arch_ents_path(project) : nil},
+          :projects_edit_arch_ent => {title: 'Edit', url: (project and uuid) ? edit_arch_ent_records_path(project, uuid) : nil},
+          :projects_show_arch_ent_history => {title: 'History', url: (project and uuid) ? show_arch_ent_history_path(project, uuid) : nil},
+          :projects_show_arch_ent_associations => {title: 'Associations', url: (project and uuid) ? show_rel_association_path(project, uuid) : nil},
+          :projects_search_arch_ent_associations => {title: 'Search Association', url: (project and uuid) ? search_rel_association_path(project, uuid) : nil},
+
+          :projects_search_rel => {title: 'Search Relationship', url: project ? search_rel_records_path(project) : nil},
+          :projects_list_rel => {title: 'List Relationship', url: project ? list_rel_records_path(project) : nil},
+          :projects_show_rel => {title: 'Relationship', url: project ? show_rel_records_path(project) : nil},
+          :projects_compare_rel => {title: 'Compare', url: project ? compare_rel_path(project) : nil},
+          :projects_edit_rel => {title: 'Edit', url: (project and relationshipid) ? edit_rel_records_path(project, relationshipid) : nil},
+          :projects_show_rel_history => {title: 'History', url: (project and relationshipid) ? show_rel_history_path(project, relationshipid) : nil},
+          :projects_show_rel_associations => {title: 'Associations', url: (project and relationshipid) ? show_rel_association_path(project, relationshipid) : nil},
+          :projects_search_rel_associations => {title: 'Search Association', url: (project and relationshipid) ? search_rel_association_path(project, relationshipid) : nil},
+      }
+  end
+
   def authenticate_project_user
     @project = Project.find(params[:id])
     redirect_to :projects unless @project
@@ -31,10 +67,12 @@ class ProjectsController < ApplicationController
   end
 
   def index
-
+    @page_crumbs = [:pages_home, :projects_index]
   end
 
   def new
+    @page_crumbs = [:pages_home, :projects_index, :projects_create]
+
     @project = Project.new
     @spatial_list = Database.get_spatial_ref_list
 
@@ -43,6 +81,8 @@ class ProjectsController < ApplicationController
   end
 
   def create
+    @page_crumbs = [:pages_home, :projects_index, :projects_create]
+
     # create project if valid and schemas uploaded
 
     unless SpatialiteDB.library_exists?
@@ -77,11 +117,15 @@ class ProjectsController < ApplicationController
   end
 
   def show
+    @page_crumbs = [:pages_home, :projects_index, :projects_show]
+
     @project = Project.find(params[:id])
     session[:has_attached_files] = @project.has_attached_files
   end
 
   def edit_project_user
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_users]
+
     @project = Project.find(params[:id])
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
@@ -89,6 +133,8 @@ class ProjectsController < ApplicationController
   end
 
   def update_project_user
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_users]
+
     @project = Project.find(params[:id])
     user = User.find(params[:user_id])
     @project.db.update_list_of_users(user, current_user.id)
@@ -102,6 +148,8 @@ class ProjectsController < ApplicationController
   # Arch entity functionalities
 
   def list_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent]
+
     @project = Project.find(params[:id])
     @type = @project.db.get_arch_ent_types
     session.delete(:values)
@@ -117,6 +165,8 @@ class ProjectsController < ApplicationController
   end
 
   def list_typed_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent]
+
     @project = Project.find(params[:id])
     limit = 25
     type = params[:type]
@@ -140,6 +190,8 @@ class ProjectsController < ApplicationController
   end
 
   def search_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_arch_ent]
+
     @project = Project.find(params[:id])
     session.delete(:values)
     session.delete(:type)
@@ -154,6 +206,8 @@ class ProjectsController < ApplicationController
   end
 
   def show_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent]
+
     @project = Project.find(params[:id])
     limit = 25
     query = params[:query]
@@ -176,6 +230,8 @@ class ProjectsController < ApplicationController
   end
 
   def edit_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent]
+
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     session[:uuid] = uuid
@@ -269,6 +325,8 @@ class ProjectsController < ApplicationController
   end
 
   def compare_arch_ents
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent, :projects_compare_arch_ent]
+
     @project = Project.find(params[:id])
     session[:values] = []
     session[:identifiers] = []
@@ -307,6 +365,8 @@ class ProjectsController < ApplicationController
   end
 
   def show_arch_ent_history
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent, :projects_show_arch_ent_history]
+
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     @timestamps = @project.db.get_arch_ent_history(uuid)
@@ -337,6 +397,8 @@ class ProjectsController < ApplicationController
   # Relationship functionalities
 
   def list_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel]
+
     @project = Project.find(params[:id])
     @type = @project.db.get_rel_types
     session.delete(:values)
@@ -351,6 +413,8 @@ class ProjectsController < ApplicationController
   end
 
   def list_typed_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel]
+
     @project = Project.find(params[:id])
     limit = 25
     type=params[:type]
@@ -373,6 +437,8 @@ class ProjectsController < ApplicationController
   end
 
   def search_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_rel]
+
     @project = Project.find(params[:id])
     session.delete(:values)
     session.delete(:type)
@@ -386,6 +452,8 @@ class ProjectsController < ApplicationController
   end
 
   def show_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_show_rel]
+
     @project = Project.find(params[:id])
     limit = 25
     query = params[:query]
@@ -410,6 +478,8 @@ class ProjectsController < ApplicationController
   end
 
   def edit_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_show_rel, :projects_edit_rel]
+
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
@@ -454,6 +524,8 @@ class ProjectsController < ApplicationController
   end
 
   def show_rel_history
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_show_rel, :projects_edit_rel, :projects_show_rel_history]
+
     @project = Project.find(params[:id])
     relid = params[:relid]
     @timestamps = @project.db.get_rel_history(relid)
@@ -514,6 +586,8 @@ class ProjectsController < ApplicationController
   end
 
   def show_rel_members
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_show_rel, :projects_edit_rel, :projects_show_rel_associations]
+
     @project = Project.find(params[:id])
     session[:relationshipid] = params[:relationshipid]
     limit = 25
@@ -542,6 +616,8 @@ class ProjectsController < ApplicationController
   end
 
   def search_arch_ent_member
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_show_rel, :projects_edit_rel, :projects_search_rel_associations]
+
     @project = Project.find(params[:id])
     session[:relationshipid] = params[:relationshipid]
     session[:relntypeid] = params[:relntypeid]
@@ -570,13 +646,15 @@ class ProjectsController < ApplicationController
   end
 
   def show_rel_association
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent, :projects_show_arch_ent_associations]
+
     @project = Project.find(params[:id])
     session[:uuid] = params[:uuid]
     limit = 25
     offset = params[:offset]
     session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
+    session[:prev_offset] = Integer(offset) - Integer(limit) if offset and limit
+    session[:next_offset] = Integer(offset) + Integer(limit) if offset and limit
     if session[:show].nil?
       session[:show] = []
       session[:show].push('show_rel_associations')
@@ -589,6 +667,9 @@ class ProjectsController < ApplicationController
   end
 
   def search_rel_association
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent, :projects_show_arch_ent_associations,
+      :projects_search_arch_ent_associations]
+
     @project = Project.find(params[:id])
     session[:uuid] = params[:uuid]
     if params[:search_query].nil?
@@ -658,6 +739,8 @@ class ProjectsController < ApplicationController
   end
 
   def compare_rel
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_compare_rel]
+
     @project = Project.find(params[:id])
     ids = params[:ids]
     session[:values] = []
@@ -695,6 +778,8 @@ class ProjectsController < ApplicationController
   end
 
   def list_attributes_with_vocab
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_vocabulary]
+
     @project = Project.find(params[:id])
     @attributes = @project.db.get_attributes_containing_vocab()
   end
@@ -716,6 +801,8 @@ class ProjectsController < ApplicationController
   end
 
   def update_attributes_vocab
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_vocabulary]
+
     @project = Project.find(params[:id])
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
@@ -732,6 +819,8 @@ class ProjectsController < ApplicationController
   end
 
   def edit_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_edit]
+
     @project = Project.find(params[:id])
     project_setting = JSON.parse(File.read(@project.get_path(:settings)))
     session[:name] = @project.name
@@ -747,6 +836,8 @@ class ProjectsController < ApplicationController
   end
 
   def update_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_edit]
+
     if @project.settings_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
@@ -843,10 +934,14 @@ class ProjectsController < ApplicationController
   end
 
   def upload_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_upload]
+
     @project = Project.new
   end
 
   def upload_new_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_upload]
+
     unless SpatialiteDB.library_exists?
       @project = Project.new
       flash.now[:error] = 'Cannot find library libspatialite. Please install library to upload project.'
