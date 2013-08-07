@@ -215,7 +215,7 @@ create view latestNonDeletedArchent as
   where deleted is null;
 
 drop view if exists latestNonDeletedAentValue;
-create view if not exists latestNonDeletedAentValue as
+create view latestNonDeletedAentValue as
   select *
   from aentvalue
   JOIN (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
