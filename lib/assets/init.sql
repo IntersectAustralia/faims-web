@@ -205,7 +205,7 @@ create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp)
 SELECT AddGeometryColumn('ArchEntity', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
 SELECT AddGeometryColumn('Relationship', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
 
-drop view latestNonDeletedArchent;
+drop view if exists latestNonDeletedArchent;
 create view latestNonDeletedArchent as
   select *, substr(uuid,7) as epoch
   from archentity
@@ -214,7 +214,7 @@ create view latestNonDeletedArchent as
          group by uuid) USING (uuid, aenttimestamp)
   where deleted is null;
 
-drop view latestNonDeletedAentValue;
+drop view if exists latestNonDeletedAentValue;
 create view if not exists latestNonDeletedAentValue as
   select *
   from aentvalue
@@ -223,7 +223,7 @@ create view if not exists latestNonDeletedAentValue as
         group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
   where deleted is null;
 
-drop view latestNonDeletedRelationship;
+drop view if exists latestNonDeletedRelationship;
 create view latestNonDeletedRelationship as
     select *
     from relationship
@@ -232,7 +232,7 @@ create view latestNonDeletedRelationship as
           group by relationshipid) USING (relationshipid, relntimestamp)
     where deleted is null;
 
-drop view latestNonDeletedRelnValue;
+drop view if exists latestNonDeletedRelnValue;
 create view latestNonDeletedRelnValue as
   select *
   from relnvalue
