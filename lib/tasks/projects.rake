@@ -23,6 +23,16 @@ begin
         Project.all.each { |p| Project.package_project(p.key) }
       end
     end
+    desc 'Clear locks from all projects'
+    task :clear_lock => :environment do
+      Project.all.each do |p|
+        p.db_mgr.clear_lock
+        p.settings_mgr.clear_lock
+        p.data_mgr.clear_lock
+        p.app_mgr.clear_lock
+        p.package_mgr.clear_lock
+      end
+    end
     desc 'Setup project assets'
     task :setup => :environment do
       Database.generate_spatial_ref_list

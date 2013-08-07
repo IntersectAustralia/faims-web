@@ -80,5 +80,15 @@ module FaimsWeb
     config.server_projects_directory = Rails.root.join("projects").to_s
 
     config.server_uploads_directory = Rails.root.join("uploads").to_s
+
+    config.after_initialize do
+      Project.all.each do |p|
+        p.db_mgr.clear_lock
+        p.settings_mgr.clear_lock
+        p.data_mgr.clear_lock
+        p.app_mgr.clear_lock
+        p.package_mgr.clear_lock
+      end
+    end
   end
 end
