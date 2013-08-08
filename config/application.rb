@@ -1,6 +1,7 @@
 require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
+require 'rake'
 
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
@@ -82,13 +83,8 @@ module FaimsWeb
     config.server_uploads_directory = Rails.root.join("uploads").to_s
 
     config.after_initialize do
-      Project.all.each do |p|
-        p.db_mgr.clear_lock
-        p.settings_mgr.clear_lock
-        p.data_mgr.clear_lock
-        p.app_mgr.clear_lock
-        p.package_mgr.clear_lock
-      end
+      FaimsWeb::Application.load_tasks
+      Rake::Task['projects:clear_lock'].invoke
     end
   end
 end
