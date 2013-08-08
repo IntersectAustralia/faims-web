@@ -7,10 +7,11 @@ class Project < ActiveRecord::Base
 
   SRID = 4326
 
-  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :validation_schema, :srid
+  attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address,
+                :participant, :validation_schema, :srid, :copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data
 
-  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :contact_address, :participant, :vocab_id, :type,
-    :validation_schema, :srid
+  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address, :participant, :vocab_id, :type,
+    :validation_schema, :srid,:copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data
 
   validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
@@ -228,9 +229,15 @@ class Project < ActiveRecord::Base
                     :description => params[:project][:description],
                     :permit_no => params[:project][:permit_no],
                     :permit_holder => params[:project][:permit_holder],
+                    :permit_issued_by => params[:project][:permit_issued_by],
+                    :permit_type => params[:project][:permit_type],
                     :contact_address => params[:project][:contact_address],
                     :participant => params[:project][:participant],
-                    :srid => params[:project][:srid]
+                    :srid => params[:project][:srid],
+                    :copyright_holder => params[:project][:copyright_holder],
+                    :client_sponsor => params[:project][:client_sponsor],
+                    :land_owner => params[:project][:land_owner],
+                    :has_sensitive_data => params[:project][:has_sensitive_data]
                    }.to_json)
         settings_mgr.make_dirt
       end
