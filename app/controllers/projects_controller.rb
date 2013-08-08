@@ -91,7 +91,19 @@ class ProjectsController < ApplicationController
 
     @project = Project.new
     @spatial_list = Database.get_spatial_ref_list
-
+    session[:season] = ''
+    session[:description] = ''
+    session[:permit_no] = ''
+    session[:permit_holder] = ''
+    session[:contact_address] = ''
+    session[:participant] = ''
+    session[:srid] = ''
+    session[:permit_issued_by] = ''
+    session[:permit_type] = ''
+    session[:copyright_holder] = ''
+    session[:client_sponsor] = ''
+    session[:land_owner] = ''
+    session[:has_sensitive_data] = ''
     # make temp directory and store its path in session
     create_tmp_dir
   end
@@ -847,6 +859,12 @@ class ProjectsController < ApplicationController
     session[:contact_address] = project_setting['contact_address']
     session[:participant] = project_setting['participant']
     session[:srid] = project_setting['srid']
+    session[:permit_issued_by] = project_setting['permit_issued_by']
+    session[:permit_type] = project_setting['permit_type']
+    session[:copyright_holder] = project_setting['copyright_holder']
+    session[:client_sponsor] = project_setting['client_sponsor']
+    session[:land_owner] = project_setting['land_owner']
+    session[:has_sensitive_data] = project_setting['has_sensitive_data']
     create_tmp_dir
     @spatial_list = Database.get_spatial_ref_list
   end
@@ -1081,6 +1099,13 @@ class ProjectsController < ApplicationController
       session[:contact_address] = ''
       session[:participant] = ''
       session[:srid] = ''
+      session[:permit_issued_by] = ''
+      session[:permit_type] = ''
+      session[:copyright_holder] = ''
+      session[:client_sponsor] = ''
+      session[:land_owner] = ''
+      session[:has_sensitive_data] = ''
+
     else
       session[:season] = params[:project][:season]
       session[:description] = params[:project][:description]
@@ -1089,6 +1114,12 @@ class ProjectsController < ApplicationController
       session[:contact_address] = params[:project][:contact_address]
       session[:participant] = params[:project][:participant]
       session[:srid] = params[:project][:srid]
+      session[:permit_issued_by] = params[:project][:permit_issued_by]
+      session[:permit_type] = params[:project][:permit_type]
+      session[:copyright_holder] = params[:project][:copyright_holder]
+      session[:client_sponsor] = params[:project][:client_sponsor]
+      session[:land_owner] = params[:project][:land_owner]
+      session[:has_sensitive_data] = params[:project][:has_sensitive_data]
     end
 
     valid
@@ -1157,6 +1188,12 @@ class ProjectsController < ApplicationController
       session[:contact_address] = ''
       session[:participant] = ''
       session[:srid] = ''
+      session[:permit_issued_by] = ''
+      session[:permit_type] = ''
+      session[:copyright_holder] = ''
+      session[:client_sponsor] = ''
+      session[:land_owner] = ''
+      session[:has_sensitive_data] = ''
     else
       session[:season] = params[:project][:season]
       session[:description] = params[:project][:description]
@@ -1165,6 +1202,12 @@ class ProjectsController < ApplicationController
       session[:contact_address] = params[:project][:contact_address]
       session[:participant] = params[:project][:participant]
       session[:srid] = params[:project][:srid]
+      session[:permit_issued_by] = params[:project][:permit_issued_by]
+      session[:permit_type] = params[:project][:permit_type]
+      session[:copyright_holder] = params[:project][:copyright_holder]
+      session[:client_sponsor] = params[:project][:client_sponsor]
+      session[:land_owner] = params[:project][:land_owner]
+      session[:has_sensitive_data] = params[:project][:has_sensitive_data]
     end
 
     valid
