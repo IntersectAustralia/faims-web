@@ -12,42 +12,42 @@
             = f.error :name
             %p
             = f.label :season, 'Project SRID:'
-            = f.select :srid, @spatial_list, :selected => (session[:srid].blank? ? Project::SRID : session[:srid]), :class => "input-block-level"
+            = f.select :srid, @spatial_list, :selected => (@srid.blank? ? Project::SRID : @srid), :class => "input-block-level"
             %p
             = f.label :season, 'Project Year:'
-            = f.text_field :season, :value => session[:season], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :season, :value => @season, :class => "input-block-level", :placeholder => "instruction here..."
             %p
             = f.label :description, 'Project Description:'
-            = f.text_area :description, :size => '40x5', :class => 'project-textarea span12', :value => session[:description], :placeholder => "instruction here..."
+            = f.text_area :description, :size => '40x5', :class => 'project-textarea span12', :value => @description, :placeholder => "instruction here..."
             %p
             = f.label :permit_no, 'Permit No:'
-            = f.text_field :permit_no, :value => session[:permit_no], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :permit_no, :value => @permit_no, :class => "input-block-level", :placeholder => "instruction here..."
             %p
             = f.label :permit_holder, 'Permit Holder:'
-            = f.text_area :permit_holder, :size => '40x5', :class => 'project-textarea span12', :value => session[:permit_holder], :placeholder => "e.g. Doe, John; Smith, Jane"
+            = f.text_area :permit_holder, :size => '40x5', :class => 'project-textarea span12', :value => @permit_holder, :placeholder => "e.g. Doe, John; Smith, Jane"
             %p
             = f.label :permit_issued_by, 'Permit Issued by:'
-            = f.text_field :permit_issued_by, :value => session[:permit_issued_by], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :permit_issued_by, :value => @permit_issued_by, :class => "input-block-level", :placeholder => "instruction here..."
             %p
             = f.label :permit_type, 'Permit Type:'
-            = f.text_field :permit_type, :value => session[:permit_type], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :permit_type, :value => @permit_type, :class => "input-block-level", :placeholder => "instruction here..."
             %p
             = f.label :contact_address, 'Contact and Address:'
-            = f.text_area :contact_address, :size => '40x5', :class => 'project-textarea span12', :value => session[:contact_address], :placeholder => "instruction here..."
+            = f.text_area :contact_address, :size => '40x5', :class => 'project-textarea span12', :value => @contact_address, :placeholder => "instruction here..."
             %p
             = f.label :participant, 'Participants:'
-            = f.text_area :participant, :size => '40x5', :class => 'project-textarea span12', :value => session[:participant], :placeholder => "instruction here..."
+            = f.text_area :participant, :size => '40x5', :class => 'project-textarea span12', :value => @participant, :placeholder => "instruction here..."
             %p
             = f.label :copyright_holder, 'Copyright Holder:'
-            = f.text_field :copyright_holder, :value => session[:copyright_holder], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :copyright_holder, :value => @copyright_holder, :class => "input-block-level", :placeholder => "instruction here..."
             %p
             = f.label :client_sponsor, 'Client/Sponsor:'
-            = f.text_field :client_sponsor, :value => session[:client_sponsor], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :client_sponsor, :value => @client_sponsor, :class => "input-block-level", :placeholder => "instruction here..."
             %p
             = f.label :land_owner, 'Land Owner:'
-            = f.text_field :land_owner, :value => session[:land_owner], :class => "input-block-level", :placeholder => "instruction here..."
+            = f.text_field :land_owner, :value => @land_owner, :class => "input-block-level", :placeholder => "instruction here..."
             %p
-            = f.input :has_sensitive_data, :checked => session[:has_sensitive_data], :as => :radio_buttons, :label => 'Will this Project contain sensitive data?'
+            = f.input :has_sensitive_data, :checked => @has_sensitive_data, :as => :radio_buttons, :label => 'Will this Project contain sensitive data?'
       .upload.span6
         .well
           %h4 Upload Data Definition Schema

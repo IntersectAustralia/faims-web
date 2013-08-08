@@ -91,19 +91,6 @@ class ProjectsController < ApplicationController
 
     @project = Project.new
     @spatial_list = Database.get_spatial_ref_list
-    session[:season] = ''
-    session[:description] = ''
-    session[:permit_no] = ''
-    session[:permit_holder] = ''
-    session[:contact_address] = ''
-    session[:participant] = ''
-    session[:srid] = ''
-    session[:permit_issued_by] = ''
-    session[:permit_type] = ''
-    session[:copyright_holder] = ''
-    session[:client_sponsor] = ''
-    session[:land_owner] = ''
-    session[:has_sensitive_data] = ''
     # make temp directory and store its path in session
     create_tmp_dir
   end
@@ -851,20 +838,20 @@ class ProjectsController < ApplicationController
 
     @project = Project.find(params[:id])
     project_setting = JSON.parse(File.read(@project.get_path(:settings)))
-    session[:name] = @project.name
-    session[:season] = project_setting['season']
-    session[:description] = project_setting['description']
-    session[:permit_no] = project_setting['permit_no']
-    session[:permit_holder] = project_setting['permit_holder']
-    session[:contact_address] = project_setting['contact_address']
-    session[:participant] = project_setting['participant']
-    session[:srid] = project_setting['srid']
-    session[:permit_issued_by] = project_setting['permit_issued_by']
-    session[:permit_type] = project_setting['permit_type']
-    session[:copyright_holder] = project_setting['copyright_holder']
-    session[:client_sponsor] = project_setting['client_sponsor']
-    session[:land_owner] = project_setting['land_owner']
-    session[:has_sensitive_data] = project_setting['has_sensitive_data']
+    @name = @project.name
+    @season = project_setting['season']
+    @description = project_setting['description']
+    @permit_no = project_setting['permit_no']
+    @permit_holder = project_setting['permit_holder']
+    @contact_address = project_setting['contact_address']
+    @participant = project_setting['participant']
+    @srid = project_setting['srid']
+    @permit_issued_by = project_setting['permit_issued_by']
+    @permit_type = project_setting['permit_type']
+    @copyright_holder = project_setting['copyright_holder']
+    @client_sponsor = project_setting['client_sponsor']
+    @land_owner = project_setting['land_owner']
+    @has_sensitive_data = project_setting['has_sensitive_data']
     create_tmp_dir
     @spatial_list = Database.get_spatial_ref_list
   end
@@ -890,28 +877,14 @@ class ProjectsController < ApplicationController
         redirect_to :project
         return
       else
-        session[:name] = params[:project][:name]
-        session[:season] = params[:project][:season]
-        session[:description] = params[:project][:description]
-        session[:permit_no] = params[:project][:permit_no]
-        session[:permit_holder] = params[:project][:permit_holder]
-        session[:contact_address] = params[:project][:contact_address]
-        session[:participant] = params[:project][:participant]
-        session[:srid] = params[:project][:srid]
+        @name = params[:project][:name]
+        parse_parameter_for_project(params)
         @spatial_list = Database.get_spatial_ref_list
         flash.now[:error] = 'Error updating project'
         render 'edit_project'
         return
       end
     else
-      session[:name] = params[:project][:name]
-      session[:season] = params[:project][:season]
-      session[:description] = params[:project][:description]
-      session[:permit_no] = params[:project][:permit_no]
-      session[:permit_holder] = params[:project][:permit_holder]
-      session[:contact_address] = params[:project][:contact_address]
-      session[:participant] = params[:project][:participant]
-      session[:srid] = params[:project][:srid]
       @spatial_list = Database.get_spatial_ref_list
       flash.now[:error] = 'Error updating project'
       render 'edit_project'
@@ -1091,35 +1064,8 @@ class ProjectsController < ApplicationController
       end
     end
 
-    if valid
-      session[:season] = ''
-      session[:description] = ''
-      session[:permit_no] = ''
-      session[:permit_holder] = ''
-      session[:contact_address] = ''
-      session[:participant] = ''
-      session[:srid] = ''
-      session[:permit_issued_by] = ''
-      session[:permit_type] = ''
-      session[:copyright_holder] = ''
-      session[:client_sponsor] = ''
-      session[:land_owner] = ''
-      session[:has_sensitive_data] = ''
-
-    else
-      session[:season] = params[:project][:season]
-      session[:description] = params[:project][:description]
-      session[:permit_no] = params[:project][:permit_no]
-      session[:permit_holder] = params[:project][:permit_holder]
-      session[:contact_address] = params[:project][:contact_address]
-      session[:participant] = params[:project][:participant]
-      session[:srid] = params[:project][:srid]
-      session[:permit_issued_by] = params[:project][:permit_issued_by]
-      session[:permit_type] = params[:project][:permit_type]
-      session[:copyright_holder] = params[:project][:copyright_holder]
-      session[:client_sponsor] = params[:project][:client_sponsor]
-      session[:land_owner] = params[:project][:land_owner]
-      session[:has_sensitive_data] = params[:project][:has_sensitive_data]
+    if !valid
+      parse_parameter_for_project(params)
     end
 
     valid
@@ -1180,34 +1126,9 @@ class ProjectsController < ApplicationController
       end
     end
 
-    if valid
-      session[:season] = ''
-      session[:description] = ''
-      session[:permit_no] = ''
-      session[:permit_holder] = ''
-      session[:contact_address] = ''
-      session[:participant] = ''
-      session[:srid] = ''
-      session[:permit_issued_by] = ''
-      session[:permit_type] = ''
-      session[:copyright_holder] = ''
-      session[:client_sponsor] = ''
-      session[:land_owner] = ''
-      session[:has_sensitive_data] = ''
-    else
-      session[:season] = params[:project][:season]
-      session[:description] = params[:project][:description]
-      session[:permit_no] = params[:project][:permit_no]
-      session[:permit_holder] = params[:project][:permit_holder]
-      session[:contact_address] = params[:project][:contact_address]
-      session[:participant] = params[:project][:participant]
-      session[:srid] = params[:project][:srid]
-      session[:permit_issued_by] = params[:project][:permit_issued_by]
-      session[:permit_type] = params[:project][:permit_type]
-      session[:copyright_holder] = params[:project][:copyright_holder]
-      session[:client_sponsor] = params[:project][:client_sponsor]
-      session[:land_owner] = params[:project][:land_owner]
-      session[:has_sensitive_data] = params[:project][:has_sensitive_data]
+    if !valid
+      @name = params[:project][:name]
+      parse_parameter_for_project(params)
     end
 
     valid
@@ -1220,6 +1141,24 @@ class ProjectsController < ApplicationController
         temp_file.write(upload_file.read)
       end
     end
+  end
+
+  private
+
+  def parse_parameter_for_project(params)
+    @season = params[:project][:season]
+    @description = params[:project][:description]
+    @permit_no = params[:project][:permit_no]
+    @permit_holder = params[:project][:permit_holder]
+    @contact_address = params[:project][:contact_address]
+    @participant = params[:project][:participant]
+    @srid = params[:project][:srid]
+    @permit_issued_by = params[:project][:permit_issued_by]
+    @permit_type = params[:project][:permit_type]
+    @copyright_holder = params[:project][:copyright_holder]
+    @client_sponsor = params[:project][:client_sponsor]
+    @land_owner = params[:project][:land_owner]
+    @has_sensitive_data = params[:project][:has_sensitive_data]
   end
 
 end
