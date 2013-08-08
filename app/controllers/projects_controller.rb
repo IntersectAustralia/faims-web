@@ -33,8 +33,6 @@ class ProjectsController < ApplicationController
     list_arch_ent = session[:action].eql?('list_typed_arch_ent_records')
     list_rel = session[:action].eql?('list_typed_rel_records')
 
-    p session
-
     query_params = '?'
     query_params << "type=#{type}&" if type
     query_params << "query=#{query}&" if query
