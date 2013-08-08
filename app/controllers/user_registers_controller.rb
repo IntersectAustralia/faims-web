@@ -21,7 +21,7 @@ class UserRegistersController < Devise::RegistrationsController
   end
 
   def edit
-    @page_crumbs = [:users_index, :users_show, :users_edit_details]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_details]
     super
   end
 
@@ -66,14 +66,14 @@ class UserRegistersController < Devise::RegistrationsController
   end
 
   def edit_password
-    @page_crumbs = [:users_index, :users_show, :users_edit_password]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
 
     respond_with resource
   end
 
   # Mostly the same as the devise 'update' method, just call a different method on the model
   def update_password
-    @page_crumbs = [:users_index, :users_show, :users_edit_password]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
 
     if resource.update_password(params[resource_name])
       set_flash_message :notice, :password_updated if is_navigational_format?

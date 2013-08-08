@@ -17,13 +17,13 @@ class UsersController < ApplicationController
   end
 
   def index
-    @page_crumbs = [:users_index]
+    @page_crumbs = [:pages_home, :users_index]
 
     @users = User.all
   end
 
   def show
-    @page_crumbs = [:users_index, :users_show]
+    @page_crumbs = [:pages_home, :users_index, :users_show]
   end
 
   def admin
@@ -60,7 +60,7 @@ class UsersController < ApplicationController
   end
 
   def edit_role
-    @page_crumbs = [:users_index, :users_show, :users_edit_role]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
 
     if @user == current_user
       flash.now[:alert] = "You are changing the role of the user you are logged in as."
@@ -100,13 +100,13 @@ class UsersController < ApplicationController
   end
 
   def new
-    @page_crumbs = [:users_index, :users_add]
+    @page_crumbs = [:pages_home, :users_index, :users_add]
 
     @user = User.new
   end
 
   def create
-    @page_crumbs = [:users_index, :users_add]
+    @page_crumbs = [:pages_home, :users_index, :users_add]
 
     @user = User.new(params[:user])
     if @user.valid?
