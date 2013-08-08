@@ -170,7 +170,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     limit = 25
     type = params[:type]
-    offset = params[:offset]
+    offset = params[:offset] ? params[:offset] : '0'
     show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
@@ -211,7 +211,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     limit = 25
     query = params[:query]
-    offset = params[:offset]
+    offset = params[:offset] ? params[:offset] : '0'
     show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:query] = query
@@ -418,7 +418,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     limit = 25
     type=params[:type]
-    offset = params[:offset]
+    offset = params[:offset] ? params[:offset] : '0'
     show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:type] = type
@@ -457,7 +457,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     limit = 25
     query = params[:query]
-    offset = params[:offset]
+    offset = params[:offset] ? params[:offset] : '0'
     relationshipid = params[:relationshipid]
     show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
     session[:show_deleted] = show_deleted ? 'true' : nil
@@ -591,7 +591,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     session[:relationshipid] = params[:relationshipid]
     limit = 25
-    offset = params[:offset]
+    offset = params[:offset] ? params[:offset] : '0'
     session[:relntypeid] = params[:relntypeid]
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit)
@@ -627,7 +627,7 @@ class ProjectsController < ApplicationController
       session.delete(:search_query)
     else
       limit = 25
-      offset = params[:offset]
+      offset = params[:offset] ? params[:offset] : '0'
       session[:search_query] = params[:search_query]
       session[:cur_offset] = offset
       session[:prev_offset] = Integer(offset) - Integer(limit)
@@ -651,7 +651,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     session[:uuid] = params[:uuid]
     limit = 25
-    offset = params[:offset]
+    offset = params[:offset] ? params[:offset] : '0'
     session[:cur_offset] = offset
     session[:prev_offset] = Integer(offset) - Integer(limit) if offset and limit
     session[:next_offset] = Integer(offset) + Integer(limit) if offset and limit
@@ -678,7 +678,7 @@ class ProjectsController < ApplicationController
       session.delete(:search_query)
     else
       limit = 25
-      offset = params[:offset]
+      offset = params[:offset] ? params[:offset] : '0'
       session[:search_query] = params[:search_query]
       session[:cur_offset] = offset
       session[:prev_offset] = Integer(offset) - Integer(limit)
