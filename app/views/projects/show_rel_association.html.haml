@@ -2,24 +2,13 @@
 = breadcrumbs
 .content
   - if !@relationships.nil? and !@relationships.empty?
-    - prev_id = @relationships[0][0]
-    - id_array = []
-    - array = []
-    - for relationship in @relationships
-      - if prev_id != relationship[0]
-        - id_array << array
-        - array = []
-        - prev_id = relationship[0]
-      - array << relationship
-    - id_array << array
     .records
-      - for id_group in id_array
+      - for relationships in @relationships
         %ul.inner
-          %input{:type => 'button',:id => 'remove-member', :class => 'remove-member ui-icon ui-icon-circle-minus', :src=> remove_arch_ent_member_path(@project)+'?relationshipid='+id_group[0][0].to_s+'&uuid='+session[:uuid].to_s}
-          - for ids in id_group
-            %li
-              %a{:href => edit_rel_records_path(@project,ids[0])}
-                =ids[2].to_s + ": " + ids[3].to_s
+          %input{:type => 'button',:id => 'remove-member', :class => 'remove-member ui-icon ui-icon-circle-minus', :src=> remove_arch_ent_member_path(@project)+'?relationshipid='+relationships[0].to_s+'&uuid='+session[:uuid].to_s}
+          %li
+            %a{:href => edit_rel_records_path(@project,relationships[0])}
+              =relationships[1].to_s
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'

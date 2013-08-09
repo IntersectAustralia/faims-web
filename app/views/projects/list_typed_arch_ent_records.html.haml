@@ -12,9 +12,9 @@
         - session[:values].length.times do |i|
           %input{:type => 'hidden', :value => session[:values][i-1], :name => 'ids[]', :id => session[:values][i-1]}
           %input{:type => 'hidden', :value => session[:identifiers][i-1], :name => 'identifiers[]', :id => session[:values][i-1]}
-          %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamp[]', :id => session[:values][i-1]}
+          %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamps[]', :id => session[:values][i-1]}
       %p
-        = render :partial => 'edit_arch_ent_record', :locals => { uuid_array: @id_array, values: session[:values]}
+        = render :partial => 'edit_arch_ent_record', :locals => {values: session[:values]}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_arch_ent_records_path(@project), :class => 'btn'
       = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn btn-inverse'

@@ -25,7 +25,7 @@ describe 'Web Database Queries' do
   it 'Search Entities' do
     lambda {
       query = nil
-      result = run_query(WebQuery.search_arch_entity, query, query, query, @limit, @offset)
+      result = run_query(WebQuery.search_arch_entity, query, @limit, @offset)
       result
     }.should_not raise_error
   end
@@ -80,7 +80,7 @@ describe 'Web Database Queries' do
   it 'Search Relationships' do
     lambda {
       query = nil
-      result = run_query(WebQuery.search_relationship, query, query, @limit, @offset)
+      result = run_query(WebQuery.search_relationship, query, @limit, @offset)
       result
     }.should_not raise_error
   end
@@ -121,7 +121,7 @@ describe 'Web Database Queries' do
   it 'Get Entities not in Relationship' do
     lambda {
       query = nil
-      result = run_query(WebQuery.get_arch_entities_not_in_relationship, query, query, query, random_relationship_id, @limit, @offset)
+      result = run_query(WebQuery.get_arch_entities_not_in_relationship, query, random_relationship_id, @limit, @offset)
       result
     }.should_not raise_error
   end
@@ -297,11 +297,7 @@ describe 'Web Database Queries' do
   end
 
   it 'Load all arch entities with multi-value attributes' do
-    expected = [[1000011365058835006, "Simple", "location", "Loc A, Loc B, Loc C", 37392, "34768", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "name", "Ballsun-Stanton, Brian", nil, "17136", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "timestamp", "2013-04-04 17:59:58", nil, "29344", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "value", "743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398", nil, "27616", "2013-05-09 02:39:18", nil]]
-
+    expected = [[1000011365058823906, "Indigo (72.0% certain), 170587 (100.0% certain) | 814526 (100.0% certain) | 893327 (100.0% certain) | 794183 (100.0% certain) | 399373 (100.0% certain) | 339043 (100.0% certain) | 401755 (100.0% certain) | 854547 (100.0% certain) | 17597 (100.0% certain) | 476048 (100.0% certain) | 612170 (100.0% certain) | 459104 (100.0% certain) | 345945 (100.0% certain) | 151826 (100.0% certain) | 26099 (100.0% certain) | 756435 (100.0% certain) | 324373 (100.0% certain) | 969578 (100.0% certain) | 690870 (100.0% certain) | 200269 (100.0% certain), 2013-04-04 17:59:58 (99.0% certain), Loc B (37.0% certain) | Loc C (28.0% certain)", nil, "2013-04-30 02:39:06"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -316,9 +312,7 @@ describe 'Web Database Queries' do
   end
 
   it 'Load all relationships with multi-value attributes' do
-    expected = [[1000011365058823908, "Similar", "location", "Loc B, Loc C, Loc D", 37776, "34768", "2013-04-30 02:37:53", nil],
-                [1000011365058823908, "Similar", "name", "Jellyfish", nil, "17136", "2013-04-30 02:37:53", nil],
-                [1000011365058823908, "Similar", "timestamp", "2013-04-30 02:31:46", nil, "29344", "2013-04-30 02:37:53", nil]]
+    expected =  [[1000011365058823908, "Jellyfish (100.0% certain), 2013-04-30 02:31:46 (100.0% certain), Loc B (100.0% certain) | Loc C (100.0% certain) | Loc D (100.0% certain)", nil, "2013-04-30 02:37:53"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -333,10 +327,7 @@ describe 'Web Database Queries' do
   end
 
   it 'Load typed arch entitites with multi-value attributes' do
-    expected = [[1000011365058835006, "Simple", "location", "Loc A, Loc B, Loc C", 37392, "34768", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "name", "Ballsun-Stanton, Brian", nil, "17136", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "timestamp", "2013-04-04 17:59:58", nil, "29344", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "value", "743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398", nil, "27616", "2013-05-09 02:39:18", nil]]
+    expected = [[1000011365058823906, "Indigo (72.0% certain), 170587 (100.0% certain) | 814526 (100.0% certain) | 893327 (100.0% certain) | 794183 (100.0% certain) | 399373 (100.0% certain) | 339043 (100.0% certain) | 401755 (100.0% certain) | 854547 (100.0% certain) | 17597 (100.0% certain) | 476048 (100.0% certain) | 612170 (100.0% certain) | 459104 (100.0% certain) | 345945 (100.0% certain) | 151826 (100.0% certain) | 26099 (100.0% certain) | 756435 (100.0% certain) | 324373 (100.0% certain) | 969578 (100.0% certain) | 690870 (100.0% certain) | 200269 (100.0% certain), 2013-04-04 17:59:58 (99.0% certain), Loc B (37.0% certain) | Loc C (28.0% certain)", nil, "2013-04-30 02:39:06"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -351,9 +342,7 @@ describe 'Web Database Queries' do
   end
 
   it 'Load typed relationships with multi-value attributes' do
-    expected = [[1000011365058823908, "Similar", "location", "Loc B, Loc C, Loc D", 37776, "34768", "2013-04-30 02:37:53", nil],
-                [1000011365058823908, "Similar", "name", "Jellyfish", nil, "17136", "2013-04-30 02:37:53", nil],
-                [1000011365058823908, "Similar", "timestamp", "2013-04-30 02:31:46", nil, "29344", "2013-04-30 02:37:53", nil]]
+    expected = [[1000011365058823908, "Jellyfish (100.0% certain), 2013-04-30 02:31:46 (100.0% certain), Loc B (100.0% certain) | Loc C (100.0% certain) | Loc D (100.0% certain)", nil, "2013-04-30 02:37:53"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -368,16 +357,12 @@ describe 'Web Database Queries' do
   end
 
   it 'Search arch entities with multi-value attributes' do
-    expected = [[1000011365058835006, "Simple", "location", "Loc A, Loc B, Loc C", 37392, "34768", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "name", "Ballsun-Stanton, Brian", nil, "17136", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "timestamp", "2013-04-04 17:59:58", nil, "29344", "2013-05-09 02:39:18", nil],
-                [1000011365058835006, "Simple", "value", "743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398", nil, "27616", "2013-05-09 02:39:18", nil]]
-
+    expected = [[1000011365058835006, "Ballsun-Stanton (100.0% certain) | Brian (100.0% certain), 743895 (100.0% certain) | 965129 (100.0% certain) | 662605 (100.0% certain) | 133500 (100.0% certain) | 835655 (100.0% certain) | 809098 (100.0% certain) | 918434 (100.0% certain) | 121551 (100.0% certain) | 303306 (100.0% certain) | 862096 (100.0% certain) | 810461 (100.0% certain) | 427823 (100.0% certain) | 610287 (100.0% certain) | 412728 (100.0% certain) | 146620 (100.0% certain) | 747748 (100.0% certain) | 17115 (100.0% certain) | 548408 (100.0% certain) | 235159 (100.0% certain) | 736398 (100.0% certain), 2013-04-04 17:59:58 (66.0% certain), Loc A (35.0% certain) | Loc B (49.0% certain) | Loc C (56.0% certain)", nil, "2013-05-09 02:39:18"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
       db = SpatialiteDB.new(temp_file.path)
-      results = db.execute(WebQuery.search_arch_entity, 'all','all','all','1','0')
+      results = db.execute(WebQuery.search_arch_entity, 'all','1','0')
     rescue Exception => e
       raise e
     ensure
@@ -387,15 +372,13 @@ describe 'Web Database Queries' do
   end
 
   it 'Search relationships with multi-value attributes' do
-    expected = [[1000011365058823908, "Similar", "location", "Loc B, Loc C, Loc D", 37776, "34768", "2013-04-30 02:37:53", nil],
-                [1000011365058823908, "Similar", "name", "Jellyfish", nil, "17136", "2013-04-30 02:37:53", nil],
-                [1000011365058823908, "Similar", "timestamp", "2013-04-30 02:31:46", nil, "29344", "2013-04-30 02:37:53", nil]]
+    expected = [[1000011365058823908, "Jellyfish (100.0% certain), 2013-04-30 02:31:46 (100.0% certain), Loc B (100.0% certain) | Loc C (100.0% certain) | Loc D (100.0% certain)", nil, "2013-04-30 02:37:53"]]
 
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
       db = SpatialiteDB.new(temp_file.path)
-      results = db.execute(WebQuery.search_relationship, 'jelly','jelly','1','0')
+      results = db.execute(WebQuery.search_relationship, 'jelly','1','0')
     rescue Exception => e
       raise e
     ensure
@@ -405,14 +388,7 @@ describe 'Web Database Queries' do
   end
 
   it 'Search arch entities in relationship with multi-value attributes' do
-    expected = [[1000011365058824906,"Simple","location","Loc B",37008,"34768","2013-05-06 04:12:15",nil],
-                [1000011365058824906,"Simple","name","George",nil,"17136","2013-05-06 04:12:15",nil],
-                [1000011365058824906,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-06 04:12:15",nil],
-                [1000011365058824906,"Simple","value","192085, 299389, 459881, 870754, 552986, 51695, 36604, 797887, 895371, 989115, 122847, 879369, 407630, 917785, 84160, 868460, 852297, 953002, 908303, 376222",nil,"27616","2013-05-06 04:12:15",nil],
-                [1000011365058825006,"Simple","location","Loc B, Loc D",37776,"34768","2013-05-06 04:12:15",nil],
-                [1000011365058825006,"Simple","name","Charles",nil,"17136","2013-05-06 04:12:15",nil],
-                [1000011365058825006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-06 04:12:15",nil],
-                [1000011365058825006,"Simple","value","78730, 751081, 348180, 288063, 911309, 799634, 796203, 241568, 464467, 985003, 164923, 331021, 828669, 752685, 586776, 906705, 182690, 136131, 573983, 855194",nil,"27616","2013-05-06 04:12:15",nil]]
+    expected = [[1000011365058824906, "George (47.0% certain), 192085 (100.0% certain) | 299389 (100.0% certain) | 459881 (100.0% certain) | 870754 (100.0% certain) | 552986 (100.0% certain) | 51695 (100.0% certain) | 36604 (100.0% certain) | 797887 (100.0% certain) | 895371 (100.0% certain) | 989115 (100.0% certain) | 122847 (100.0% certain) | 879369 (100.0% certain) | 407630 (100.0% certain) | 917785 (100.0% certain) | 84160 (100.0% certain) | 868460 (100.0% certain) | 852297 (100.0% certain) | 953002 (100.0% certain) | 908303 (100.0% certain) | 376222 (100.0% certain), 2013-04-04 17:59:58 (21.0% certain), Loc B (68.0% certain)"], [1000011365058825006, "Charles (76.0% certain), 78730 (100.0% certain) | 751081 (100.0% certain) | 348180 (100.0% certain) | 288063 (100.0% certain) | 911309 (100.0% certain) | 799634 (100.0% certain) | 796203 (100.0% certain) | 241568 (100.0% certain) | 464467 (100.0% certain) | 985003 (100.0% certain) | 164923 (100.0% certain) | 331021 (100.0% certain) | 828669 (100.0% certain) | 752685 (100.0% certain) | 586776 (100.0% certain) | 906705 (100.0% certain) | 182690 (100.0% certain) | 136131 (100.0% certain) | 573983 (100.0% certain) | 855194 (100.0% certain), 2013-04-04 17:59:58 (20.0% certain), Loc B (91.0% certain) | Loc D (87.0% certain)"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -427,15 +403,12 @@ describe 'Web Database Queries' do
   end
 
   it 'Search arch entities not in relationship with multi-value attributes' do
-    expected = [[1000011365058835006,"Simple","location","Loc A, Loc B, Loc C",37392,"34768","2013-05-09 02:39:18",nil],
-                [1000011365058835006,"Simple","name","Ballsun-Stanton, Brian",nil,"17136","2013-05-09 02:39:18",nil],
-                [1000011365058835006,"Simple","timestamp","2013-04-04 17:59:58",nil,"29344","2013-05-09 02:39:18",nil],
-                [1000011365058835006,"Simple","value","743895, 965129, 662605, 133500, 835655, 809098, 918434, 121551, 303306, 862096, 810461, 427823, 610287, 412728, 146620, 747748, 17115, 548408, 235159, 736398",nil,"27616","2013-05-09 02:39:18",nil]]
+    expected = [[1000011365058835006, "Ballsun-Stanton (100.0% certain) | Brian (100.0% certain), 743895 (100.0% certain) | 965129 (100.0% certain) | 662605 (100.0% certain) | 133500 (100.0% certain) | 835655 (100.0% certain) | 809098 (100.0% certain) | 918434 (100.0% certain) | 121551 (100.0% certain) | 303306 (100.0% certain) | 862096 (100.0% certain) | 810461 (100.0% certain) | 427823 (100.0% certain) | 610287 (100.0% certain) | 412728 (100.0% certain) | 146620 (100.0% certain) | 747748 (100.0% certain) | 17115 (100.0% certain) | 548408 (100.0% certain) | 235159 (100.0% certain) | 736398 (100.0% certain), 2013-04-04 17:59:58 (66.0% certain), Loc A (35.0% certain) | Loc B (49.0% certain) | Loc C (56.0% certain)"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
       db = SpatialiteDB.new(temp_file.path)
-      results = db.execute(WebQuery.get_arch_entities_not_in_relationship, 'all','all','all','1','0','1000011365058824909')
+      results = db.execute(WebQuery.get_arch_entities_not_in_relationship, '1000011365058824909','all','1','0')
     rescue Exception => e
       raise e
     ensure

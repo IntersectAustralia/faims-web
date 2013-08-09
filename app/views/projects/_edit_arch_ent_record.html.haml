@@ -1,33 +1,27 @@
-- for uuid_group in uuid_array
+- for uuids in @uuid
   %ul.inner
-    %input{:type => 'hidden', :id=> 'timestamp', :value => uuid_group[0][6] }
-    - if values and values.include?(uuid_group[0][0].to_s)
-      %input{:type => 'checkbox', :value=> uuid_group[0][0],:checked => 'checked'}
-        - identifier = []
-        - for uuids in uuid_group
-          - identifier.push(uuids[3].to_s)
-          %li
-            %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-              =uuids[2].to_s + ": " + uuids[3].to_s
+    %input{:type => 'hidden', :id=> 'timestamp', :value => uuids[3] }
+    - if values and values.include?(uuids[0].to_s)
+      %input{:type => 'checkbox', :value=> uuids[0],:checked => 'checked'}
+        %li
+          %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+            =uuids[1].to_s
+          - if @entity_dirty_map[uuids[0]]
+            .label.label-important='review'
+          - if @entity_forked_map[uuids[0]]
+            .label.label-warning='conflict'
+      - if !uuids[2].nil?
+        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
+      %input{:type => 'hidden', :id => 'identifier', :value=> uuids[1].to_s}
+    - else
+      %input{:type => 'checkbox', :value=> uuids[0]}
+        %li
+          %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
+            =uuids[1].to_s
             - if @entity_dirty_map[uuids[0]]
               .label.label-important='review'
             - if @entity_forked_map[uuids[0]]
               .label.label-warning='conflict'
-      - if !uuid_group[0][7].nil?
+      - if !uuids[2].nil?
         = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
-      %input{:type => 'hidden', :id => 'identifier', :value=> identifier * ", "}
-    - else
-      %input{:type => 'checkbox', :value=> uuid_group[0][0]}
-        - identifier = []
-        - for uuids in uuid_group
-          - identifier.push(uuids[3].to_s)
-          %li
-            %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
-              =uuids[2].to_s + ": " + uuids[3].to_s
-              - if @entity_dirty_map[uuids[0]]
-                .label.label-important='review'
-              - if @entity_forked_map[uuids[0]]
-                .label.label-warning='conflict'
-        - if !uuid_group[0][7].nil?
-          = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
-        %input{:type => 'hidden',:id => 'identifier', :value=> identifier * ", "}
+      %input{:type => 'hidden',:id => 'identifier', :value=> uuids[1].to_s}

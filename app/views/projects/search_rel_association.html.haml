@@ -16,26 +16,15 @@
               %input{:type => 'text', :name => 'search_query'}
             %input{:type => 'submit', :value => "Search", :class => 'btn'}
         - if !@relationships.nil? and !@relationships.empty?
-          - prev_id = @relationships[0][0]
-          - id_array = []
-          - array = []
-          - for id in @relationships
-            - if prev_id != id[0]
-              - id_array << array
-              - array = []
-              - prev_id = id[0]
-            - array << id
-          - id_array << array
           %form
             .records
-              - for id_group in id_array
+              - for relationships in @relationships
                 %ul.inner
-                  %input{:type => 'radio', :name=> 'rel_id',:value => id_group[0][0]}
-                  %input{:type => 'hidden', :id => 'relntypeid',:value => id_group[0][2], :src => get_verbs_for_rel_association_path(@project)}
-                  - for ids in id_group
-                    %li
-                      %span
-                        =ids[3].to_s + ": " + ids[4].to_s
+                  %input{:type => 'radio', :name=> 'rel_id',:value => relationships[0]}
+                  %input{:type => 'hidden', :id => 'relntypeid',:value => relationships[2], :src => get_verbs_for_rel_association_path(@project)}
+                  %li
+                    %span
+                      =relationships[1].to_s
           .footer.search
             - if (session[:prev_offset] >= 0)
               %form{:action => search_rel_association_path, :method => "get"}

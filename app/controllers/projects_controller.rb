@@ -201,7 +201,6 @@ class ProjectsController < ApplicationController
       @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
       @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
-
   end
 
   def search_arch_ent_records

@@ -21,7 +21,7 @@ Feature: Invalid project user
     And I add "user1@intersect.org.au" to "Project 1"
     And I click on "List Archaeological Entity Records"
     And I follow link "Filter"
-    And I click on "entity: Small 1"
+    And I click on "Small 1"
     And I update attribute "name" with "Test"
     Then I see attribute "name" with "Test"
 
@@ -37,7 +37,7 @@ Feature: Invalid project user
     And I click on "Project 1"
     And I click on "List Archaeological Entity Records"
     And I follow link "Filter"
-    And I click on "entity: Small 1"
+    And I click on "Small 1"
     And I update attribute "name" with "Test"
     Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
 
@@ -54,7 +54,7 @@ Feature: Invalid project user
     And I add "user1@intersect.org.au" to "Project 1"
     And I click on "List Relationship Records"
     And I follow link "Filter"
-    And I click on "relationship: AboveBelow 1"
+    And I click on "AboveBelow 1"
     And I update attribute "name" with "Test"
     Then I see attribute "name" with "Test"
 
@@ -70,7 +70,7 @@ Feature: Invalid project user
     And I click on "Project 1"
     And I click on "List Relationship Records"
     And I follow link "Filter"
-    And I click on "relationship: AboveBelow 1"
+    And I click on "AboveBelow 1"
     And I update attribute "name" with "Test"
     Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
 
