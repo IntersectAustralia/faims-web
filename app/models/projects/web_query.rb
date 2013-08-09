@@ -29,6 +29,30 @@ EOF
     )
   end
 
+  def self.total_arch_entities
+    cleanup_query(<<EOF
+select count(*)
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+  from latestNonDeletedArchEntIdentifiers
+  where aenttypeid = :type
+  group by uuid, attributeid
+  order by epoch);
+EOF
+    )
+  end
+
   def self.load_arch_entities_include_deleted
     cleanup_query(<<EOF
 select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
@@ -52,6 +76,30 @@ from (
 group by uuid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_arch_entities_include_deleted
+    cleanup_query(<<EOF
+select count(*)
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+  from latestAllArchEntIdentifiers
+  where aenttypeid = :type
+  group by uuid, attributeid
+  order by epoch);
 EOF
     )
   end
@@ -82,6 +130,29 @@ EOF
     )
   end
 
+  def self.total_all_arch_entities
+    cleanup_query(<<EOF
+select count(*)
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+  from latestNonDeletedArchEntIdentifiers
+  group by uuid, attributeid
+  order by epoch);
+EOF
+    )
+  end
+
   def self.load_all_arch_entities_include_deleted
     cleanup_query(<<EOF
 select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
@@ -104,6 +175,29 @@ from (
 group by uuid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_all_arch_entities_include_deleted
+    cleanup_query(<<EOF
+select count(*)
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+  from latestAllArchEntIdentifiers
+  group by uuid, attributeid
+  order by epoch);
 EOF
     )
   end
@@ -140,6 +234,35 @@ EOF
     )
   end
 
+  def self.total_search_arch_entity
+    cleanup_query(<<EOF
+select count(*)
+from ( select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+      from latestNonDeletedArchEntIdentifiers
+     where uuid IN (select uuid
+                      FROM latestNonDeletedAentValue
+                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                     WHERE (freetext LIKE '%'||:query||'%'
+                        OR measure LIKE '%'||:query||'%'
+                        OR vocabname LIKE '%'||:query||'%')
+                     order by uuid)
+       group by uuid, attributeid
+       order by epoch);
+EOF
+    )
+  end
+
   def self.search_arch_entity_include_deleted
     cleanup_query(<<EOF
 select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
@@ -170,6 +293,37 @@ from ( select uuid, aenttypename, attributename, group_concat(coalesce(measure  
 group by uuid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_search_arch_entity_include_deleted
+    cleanup_query(<<EOF
+select count(*)
+from ( select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+      from latestAllArchEntIdentifiers
+     where uuid IN (select uuid
+                      FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+                                            from aentvalue
+                                        group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                     WHERE (freetext LIKE '%'||:query||'%'
+                        OR measure LIKE '%'||:query||'%'
+                        OR vocabname LIKE '%'||:query||'%')
+                     order by uuid)
+       group by uuid, attributeid
+       order by epoch);
 EOF
     )
   end
@@ -676,6 +830,23 @@ EOF
     )
   end
 
+  def self.total_relationships
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+      from latestNonDeletedRelnIdentifiers
+      where relntypeid = :type
+      group by relationshipid, attributeid
+);
+EOF
+    )
+  end
+
   def self.load_relationships_include_deleted
     cleanup_query(<<EOF
 select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
@@ -692,6 +863,23 @@ from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetex
 group by relationshipid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_relationships_include_deleted
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+      from latestAllRelationshipIdentifiers
+      where relntypeid = :type
+      group by relationshipid, attributeid
+);
 EOF
     )
   end
@@ -715,6 +903,22 @@ EOF
     )
   end
 
+  def self.total_all_relationships
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+      from latestNonDeletedRelnIdentifiers
+      group by relationshipid, attributeid
+);
+EOF
+    )
+  end
+
   def self.load_all_relationships_include_deleted
     cleanup_query(<<EOF
 select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
@@ -730,6 +934,22 @@ from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetex
 group by relationshipid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_all_relationships_include_deleted
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+        from latestAllRelationshipIdentifiers
+    group by relationshipid, attributeid
+);
 EOF
     )
   end
@@ -761,6 +981,30 @@ EOF
     )
   end
 
+  def self.total_search_relationship
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+      from latestNonDeletedRelnIdentifiers
+      where relationshipid in (select distinct relationshipid
+                               from latestNonDeletedRelnvalue
+                               LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                               where (freetext LIKE '%'||:query||'%'
+                                            OR vocabname LIKE '%'||:query||'%')
+                               order by relationshipid
+                                 )
+      group by relationshipid, attributeid
+
+);
+EOF
+    )
+  end
+
   def self.search_relationship_include_deleted
     cleanup_query(<<EOF
 select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
@@ -786,6 +1030,32 @@ from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetex
 group by relationshipid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_search_relationship_include_deleted
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+        from latestAllRelationshipIdentifiers
+          where relationshipid in (select distinct relationshipid
+                               from relnvalue join (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+                                                      from relnvalue
+                                                      group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
+                               LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                               where (freetext LIKE '%'||:query||'%'
+                                            OR vocabname LIKE '%'||:query||'%')
+                               order by relationshipid
+                                 )
+    group by relationshipid, attributeid
+
+);
 EOF
     )
   end
@@ -1161,6 +1431,34 @@ EOF
     )
   end
 
+  def self.total_arch_entities_in_relationship
+    cleanup_query(<<EOF
+select count(*)
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid
+  from latestNonDeletedArchEntIdentifiers
+  where uuid in ( select uuid
+                    from latestNonDeletedAentReln
+                   where relationshipid = :relationshipid
+                 )
+
+  group by uuid, attributeid
+  order by epoch);
+EOF
+    )
+  end
+
   def self.get_arch_entities_not_in_relationship
     cleanup_query(<<EOF
 select uuid, group_concat(response, ', ') as response
@@ -1197,6 +1495,43 @@ from (
 group by uuid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_arch_entities_not_in_relationship
+    cleanup_query(<<EOF
+select count(*)
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid
+  from latestNonDeletedArchEntIdentifiers
+  where uuid not in ( select uuid
+                    from latestNonDeletedAentReln
+                   where relationshipid = :relationshipid
+                 )
+  and uuid in (select uuid
+                      FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+                                            from aentvalue
+                                        group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                     WHERE (freetext LIKE '%'||:query||'%'
+                        OR measure LIKE '%'||:query||'%'
+                        OR vocabname LIKE '%'||:query||'%')
+                     order by uuid)
+
+  group by uuid, attributeid
+  order by epoch);
 EOF
     )
   end
@@ -1267,6 +1602,27 @@ EOF
     )
   end
 
+  def self.total_relationships_for_arch_ent
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response
+      from latestNonDeletedRelnIdentifiers
+      where relationshipid in (select relationshipid
+                                 from latestNonDeletedAentReln
+                                where uuid = :uuid
+                               )
+      group by relationshipid, attributeid
+
+);
+EOF
+    )
+  end
+
   def self.get_relationships_not_belong_to_arch_ent
     cleanup_query(<<EOF
 select relationshipid, group_concat(response, ', ') as response,relntypeid
@@ -1293,6 +1649,33 @@ from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetex
 group by relationshipid
 limit :limit
 offset :offset;
+EOF
+    )
+  end
+
+  def self.total_relationships_not_belong_to_arch_ent
+    cleanup_query(<<EOF
+select count(*)
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, relntypeid
+      from latestNonDeletedRelnIdentifiers
+      where relationshipid in (select distinct relationshipid
+                               from latestNonDeletedRelnvalue
+                               LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+                               where (freetext LIKE '%'||:query||'%'
+                                            OR vocabname LIKE '%'||:query||'%')
+                               order by relationshipid
+                                 )
+      and relationshipid not in (select relationshipid
+                                 from latestNonDeletedAentReln
+                                where uuid = :uuid
+                               )
+      group by relationshipid, attributeid
+);
 EOF
     )
   end

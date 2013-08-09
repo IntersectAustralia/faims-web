@@ -9,6 +9,8 @@
           %li
             %a{:href => edit_rel_records_path(@project,relationships[0])}
               =relationships[1].to_s
+      .footer.search
+        = render :partial => 'pagination'
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
@@ -17,14 +19,3 @@
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project,session[:uuid]), :class => 'btn'
--if !@uuid.nil? and !@uuid.empty?
-  .footer.search
-    - if (session[:prev_offset] >= 0)
-      %form{:action => show_rel_members_path, :method => "get"}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
-        %input{:type => 'submit', :value => "Previous", :class => 'btn'}
-    %form{:action => show_rel_members_path, :method => "get"}
-      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
-      %input{:type => 'submit', :value => "Next", :class => 'btn'}

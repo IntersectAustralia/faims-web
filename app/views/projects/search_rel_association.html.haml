@@ -26,17 +26,7 @@
                     %span
                       =relationships[1].to_s
           .footer.search
-            - if (session[:prev_offset] >= 0)
-              %form{:action => search_rel_association_path, :method => "get"}
-                %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-                %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
-                %input{:type => 'hidden', :value => session[:search_query], :name => 'search_query'}
-                %input{:type => 'submit', :value => "Previous", :class => 'btn'}
-            %form{:action => search_rel_association_path, :method => "get"}
-              %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-              %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
-              %input{:type => 'hidden', :value => session[:search_query], :name => 'search_query'}
-              %input{:type => 'submit', :value => "Next", :class => 'btn'}
+            = render :partial => 'pagination'
         -else
           - if @status.eql?('init')
             %p Please enter keywords to search for a particular relationship or leave the search empty to show all relationships

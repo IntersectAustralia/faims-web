@@ -25,3 +25,5 @@
       - if !relationshipids[2].nil?
         = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_rel_records_path(@project,relationshipids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
       %input{:type => 'hidden',:id => 'identifier', :value=> relationshipids[1].to_s}
+.footer
+  = render :partial => 'pagination'
