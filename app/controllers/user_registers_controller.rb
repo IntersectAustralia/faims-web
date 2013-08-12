@@ -5,12 +5,14 @@ class UserRegistersController < Devise::RegistrationsController
 
   def crumbs
     user = User.find(params[:id]) if params[:id]
+
     @crumbs =
         {
             :pages_home => {title: 'Home', url: pages_home_path},
 
             :users_index => {title: 'Users', url: users_path },
             :users_show => {title: 'Details', url: user ? user_path(user) : nil },
+            :users_current_show => {title: 'Details', url: current_user ? user_path(current_user) : nil },
             :users_edit_password => {title: 'Edit Password', url: user ? users_edit_password_path(user) : nil },
             :users_edit_details => {title: 'Edit Details', url: user ? users_edit_path(user) : nil },
         }
@@ -21,7 +23,7 @@ class UserRegistersController < Devise::RegistrationsController
   end
 
   def edit
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_details]
+    @page_crumbs = [:pages_home, :users_index, :users_current_show, :users_edit_details]
     super
   end
 
@@ -66,14 +68,14 @@ class UserRegistersController < Devise::RegistrationsController
   end
 
   def edit_password
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
+    @page_crumbs = [:pages_home, :users_index, :users_current_show, :users_edit_password]
 
     respond_with resource
   end
 
   # Mostly the same as the devise 'update' method, just call a different method on the model
   def update_password
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
+    @page_crumbs = [:pages_home, :users_index, :users_current_show, :users_edit_password]
 
     if resource.update_password(params[resource_name])
       set_flash_message :notice, :password_updated if is_navigational_format?
