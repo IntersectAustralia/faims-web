@@ -25,12 +25,14 @@ begin
     end
     desc 'Clear locks from all projects'
     task :clear_lock => :environment do
-      Project.all.each do |p|
-        p.db_mgr.clear_lock
-        p.settings_mgr.clear_lock
-        p.data_mgr.clear_lock
-        p.app_mgr.clear_lock
-        p.package_mgr.clear_lock
+      if ActiveRecord::Base.connection.table_exists? 'projects'
+        Project.all.each do |p|
+          p.db_mgr.clear_lock
+          p.settings_mgr.clear_lock
+          p.data_mgr.clear_lock
+          p.app_mgr.clear_lock
+          p.package_mgr.clear_lock
+        end
       end
     end
     desc 'Setup project assets'
