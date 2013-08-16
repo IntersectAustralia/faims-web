@@ -3,11 +3,27 @@ class UsersController < ApplicationController
   before_filter :authenticate_user!
   load_and_authorize_resource
 
+  def crumbs
+    user = User.find(params[:id]) if params[:id]
+    @crumbs =
+        {
+            :pages_home => {title: 'Home', url: pages_home_path},
+
+            :users_index => {title: 'Users', url: users_path },
+            :users_add => {title: 'Add', url: new_user_path },
+            :users_show => {title: 'Details', url: user ? user_path(user) : nil },
+            :users_edit_role => {title: 'Edit Role', url: user ? edit_role_user_path(user) : nil },
+        }
+  end
+
   def index
+    @page_crumbs = [:pages_home, :users_index]
+
     @users = User.all
   end
 
   def show
+    @page_crumbs = [:pages_home, :users_index, :users_show]
   end
 
   def admin
@@ -44,6 +60,8 @@ class UsersController < ApplicationController
   end
 
   def edit_role
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+
     if @user == current_user
       flash.now[:alert] = "You are changing the role of the user you are logged in as."
     elsif @user.rejected?
@@ -82,10 +100,14 @@ class UsersController < ApplicationController
   end
 
   def new
+    @page_crumbs = [:pages_home, :users_index, :users_add]
+
     @user = User.new
   end
 
   def create
+    @page_crumbs = [:pages_home, :users_index, :users_add]
+
     @user = User.new(params[:user])
     if @user.valid?
       @user.activate

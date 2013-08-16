@@ -6,5 +6,18 @@ class ApplicationController < ActionController::Base
     redirect_to root_url
   end
 
+  before_filter :crumbs
+
+  def crumbs
+    @crumbs =
+      {
+          :pages_home => {title: 'Home', url: pages_home_path},
+      }
+  end
+
+  def project_name
+
+  end
+
 
 end

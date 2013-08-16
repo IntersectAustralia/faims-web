@@ -1,4 +1,5 @@
 - title @project.name + " - Relationship Records"
+= breadcrumbs
 - if (!@relationshipid.empty?)
   - group_ids(@relationshipid)
 .content
@@ -23,25 +24,9 @@
         = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
       %form{:action => show_rel_records_path, :method => "get", :id => 'show-hide-deleted-form'}
         %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'hidden', :value => session[:cur_offset], :name => 'offset'}
         %input{:type => 'hidden', :value => session[:query], :name => 'query'}
         - if session[:show_deleted].nil?
           %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
   -else
     %p No Records Found
     = link_to "Back", search_rel_records_path(@project), :class => 'btn'
--if !@relationshipid.empty?
-  .footer
-    - if (session[:prev_offset] >= 0)
-      %form{:action => show_rel_records_path, :method => "get"}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'hidden', :value => session[:prev_offset], :name => 'offset'}
-        %input{:type => 'hidden', :value => session[:type], :name => 'type'}
-        %input{:type => 'hidden', :value => session[:show_deleted], :name => 'show_deleted'}
-        %input{:type => 'submit', :value => "Previous", :class => 'btn'}
-    %form{:action => show_rel_records_path, :method => "get"}
-      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-      %input{:type => 'hidden', :value => session[:next_offset], :name => 'offset'}
-      %input{:type => 'hidden', :value => session[:type], :name => 'type'}
-      %input{:type => 'hidden', :value => session[:show_deleted], :name => 'show_deleted'}
-      %input{:type => 'submit', :value => "Next", :class => 'btn'}

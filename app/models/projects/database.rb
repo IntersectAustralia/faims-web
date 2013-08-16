@@ -3,6 +3,8 @@ require Rails.root.join('app/models/projects/web_query')
 
 class Database
 
+  LIMIT = 25
+
   def initialize(project)
     @project = project
     @db = SpatialiteDB.new(@project.get_path(:db))
@@ -56,25 +58,51 @@ class Database
   end
 
   def load_arch_entity(type, limit, offset, show_deleted)
-    if show_deleted
-      uuids = type.eql?('all') ?
-          @db.execute(WebQuery.load_all_arch_entities_include_deleted, limit, offset) : @db.execute(WebQuery.load_arch_entities_include_deleted, type, limit, offset)
-      uuids
+    if type.eql?('all')
+      params = {
+          limit:limit,
+          offset:offset
+      }
+      uuids = show_deleted ? @db.execute(WebQuery.load_all_arch_entities_include_deleted, params) : @db.execute(WebQuery.load_all_arch_entities, params)
     else
-      uuids = type.eql?('all') ?
-          @db.execute(WebQuery.load_all_arch_entities, limit, offset) : @db.execute(WebQuery.load_arch_entities, type, limit, offset)
-      uuids
+      params = {
+          type:type,
+          limit:limit,
+          offset:offset
+      }
+      uuids = show_deleted ? @db.execute(WebQuery.load_arch_entities_include_deleted, params) : @db.execute(WebQuery.load_arch_entities, params)
     end
+    uuids
+  end
+
+  def total_arch_entity(type, show_deleted)
+    if type.eql?('all')
+      total = show_deleted ? @db.get_first_value(WebQuery.total_all_arch_entities_include_deleted) : @db.get_first_value(WebQuery.total_all_arch_entities)
+    else
+      params = {
+          type:type
+      }
+      total = show_deleted ? @db.get_first_value(WebQuery.total_arch_entities_include_deleted, params) : @db.get_first_value(WebQuery.total_arch_entities, params)
+    end
+    total
   end
 
   def search_arch_entity(limit, offset, query, show_deleted)
-    if show_deleted
-      uuids = @db.execute(WebQuery.search_arch_entity_include_deleted, query, query, query, limit, offset)
-      uuids
-    else
-      uuids = @db.execute(WebQuery.search_arch_entity, query, query, query, limit, offset)
-      uuids
-    end
+    params = {
+        query:query,
+        limit:limit,
+        offset:offset
+    }
+    uuids = show_deleted ? @db.execute(WebQuery.search_arch_entity_include_deleted, params) :  @db.execute(WebQuery.search_arch_entity, params)
+    uuids
+  end
+
+  def total_search_arch_entity(query, show_deleted)
+    params = {
+        query:query
+    }
+    total = show_deleted ? @db.get_first_value(WebQuery.total_search_arch_entity_include_deleted, params) :  @db.get_first_value(WebQuery.total_search_arch_entity, params)
+    total
   end
 
   def get_arch_entity_deleted_status(uuid)
@@ -295,25 +323,51 @@ class Database
   end
 
   def load_rel(type, limit, offset, show_deleted)
-    if show_deleted
-      relationshipids = type.eql?('all') ?
-          @db.execute(WebQuery.load_all_relationships_include_deleted, limit, offset) : @db.execute(WebQuery.load_relationships_include_deleted, type, limit, offset)
-      relationshipids
+    if type.eql?('all')
+      params = {
+          limit:limit,
+          offset:offset
+      }
+      relationshipids = show_deleted ? @db.execute(WebQuery.load_all_relationships_include_deleted, params) : @db.execute(WebQuery.load_all_relationships, params)
     else
-      relationshipids = type.eql?('all') ?
-          @db.execute(WebQuery.load_all_relationships, limit, offset) : @db.execute(WebQuery.load_relationships, type, limit, offset)
-      relationshipids
+      params = {
+          type:type,
+          limit:limit,
+          offset:offset
+      }
+      relationshipids = show_deleted ? @db.execute(WebQuery.load_relationships_include_deleted, params) : @db.execute(WebQuery.load_relationships, params)
     end
+    relationshipids
+  end
+
+  def total_rel(type, show_deleted)
+    if type.eql?('all')
+      total = show_deleted ? @db.get_first_value(WebQuery.total_all_relationships_include_deleted) : @db.get_first_value(WebQuery.total_all_relationships)
+    else
+      params = {
+          type:type
+      }
+      total = show_deleted ? @db.get_first_value(WebQuery.total_relationships_include_deleted, params) : @db.get_first_value(WebQuery.total_relationships, params)
+    end
+    total
   end
 
   def search_rel(limit, offset, query, show_deleted)
-    if show_deleted
-      relationshipids = @db.execute(WebQuery.search_relationship_include_deleted, query, query, limit, offset)
-      relationshipids
-    else
-      relationshipids = @db.execute(WebQuery.search_relationship, query, query, limit, offset)
-      relationshipids
-    end
+    params = {
+        query:query,
+        limit:limit,
+        offset:offset
+    }
+    relationshipids = show_deleted ? @db.execute(WebQuery.search_relationship_include_deleted, params): @db.execute(WebQuery.search_relationship, params)
+    relationshipids
+  end
+
+  def total_search_rel(query, show_deleted)
+    params = {
+        query:query
+    }
+    total = show_deleted ? @db.get_first_value(WebQuery.total_search_relationship_include_deleted, params): @db.get_first_value(WebQuery.total_search_relationship, params)
+    total
   end
 
   def get_rel_deleted_status(relationshipid)
@@ -522,13 +576,41 @@ class Database
   end
 
   def get_rel_arch_ent_members(relationshipid, limit, offset)
-    uuids = @db.execute(WebQuery.get_arch_entities_in_relationship, relationshipid, limit, offset)
+    params = {
+        relationshipid:relationshipid,
+        limit:limit,
+        offset:offset
+    }
+    uuids = @db.execute(WebQuery.get_arch_entities_in_relationship, params)
     uuids
   end
 
+  def total_rel_arch_ent_members(relationshipid)
+    params = {
+        relationshipid:relationshipid
+    }
+    total = @db.get_first_value(WebQuery.total_arch_entities_in_relationship, params)
+    total
+  end
+
   def get_non_member_arch_ent(relationshipid, query, limit, offset)
-    uuids = @db.execute(WebQuery.get_arch_entities_not_in_relationship, query, query, query, limit, offset,relationshipid)
+    params = {
+        query:query,
+        relationshipid:relationshipid,
+        limit:limit,
+        offset:offset
+    }
+    uuids = @db.execute(WebQuery.get_arch_entities_not_in_relationship, params)
     uuids
+  end
+
+  def total_non_member_arch_ent(relationshipid, query)
+    params = {
+        query:query,
+        relationshipid:relationshipid
+    }
+    total = @db.get_first_value(WebQuery.total_arch_entities_not_in_relationship, params)
+    total
   end
 
   def get_verbs_for_relation(relntypeid)
@@ -546,6 +628,14 @@ class Database
     rels
   end
 
+  def total_arch_ent_rel_associations(uuid)
+    params = {
+        uuid:uuid
+    }
+    total = @db.get_first_value(WebQuery.total_relationships_for_arch_ent, params)
+    total
+  end
+
   def get_non_arch_ent_rel_associations(uuid, query, limit, offset)
     params = {
         uuid:uuid,
@@ -555,6 +645,15 @@ class Database
     }
     rels = @db.execute(WebQuery.get_relationships_not_belong_to_arch_ent, params)
     rels
+  end
+
+  def total_non_arch_ent_rel_associations(uuid, query)
+    params = {
+        uuid:uuid,
+        query:query
+    }
+    total = @db.get_first_value(WebQuery.total_relationships_not_belong_to_arch_ent, params)
+    total
   end
 
   def add_member(relationshipid, userid, uuid, verb)

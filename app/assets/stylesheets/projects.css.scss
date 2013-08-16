@@ -15,3 +15,9 @@
 .page-title {
   line-height: 120% !important;
 }
+
+label.required:after {
+  color: #e32;
+  content: '*';
+  display:inline;
+}

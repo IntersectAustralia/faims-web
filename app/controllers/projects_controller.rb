@@ -20,6 +20,56 @@ class ProjectsController < ApplicationController
                                                    :add_rel_association,
                                                    :update_attributes_vocab]
 
+  def crumbs
+    project = Project.find(params[:id]) if params[:id]
+    uuid = params[:uuid]
+    relationshipid = params[:relationshipid]
+
+    #TODO fix paths to use url params instead of session params
+    type = session[:type]
+    query = session[:query]
+
+    list_arch_ent = session[:action].eql?('list_typed_arch_ent_records')
+    list_rel = session[:action].eql?('list_typed_rel_records')
+
+    query_params = '?'
+    query_params << "type=#{type}&" if type
+    query_params << "query=#{query}&" if query
+
+    @crumbs =
+      {
+          :pages_home => {title: 'Home', url: pages_home_path},
+          :projects_index => {title: 'Projects', url: projects_path},
+          :projects_create => {title: 'Create', url: new_project_path},
+          :projects_upload => {title: 'Upload', url: upload_project_path},
+          :projects_show => {title: project ? project.name : nil, url: project ? project_path(project) : nil},
+          :projects_edit => {title: 'Edit', url: project ? edit_project_path(project) : nil},
+          :projects_vocabulary => {title: 'Vocabulary', url: project ? list_attributes_with_vocab_path(project) : nil},
+          :projects_users => {title: 'Users', url: project ? edit_project_user_path(project) : nil},
+          :projects_files => {title: 'Files', url: project ? project_file_list_path(project) : nil},
+
+          :projects_search_or_list_arch_ent => !list_arch_ent ? {title: 'Search Entity', url: project ? search_arch_ent_records_path(project) : nil} : {title: 'List Entity', url: project ? list_arch_ent_records_path(project) : nil},
+          :projects_search_arch_ent => {title: 'Search Entity', url: project ? search_arch_ent_records_path(project) : nil},
+          :projects_list_arch_ent => {title: 'List Entity', url: project ? list_arch_ent_records_path(project) : nil},
+          :projects_show_arch_ent => {title: 'Entities', url: project ? (query ? show_arch_ent_records_path(project) : list_typed_arch_ent_records_path(project)) + query_params : nil},
+          :projects_compare_arch_ent => {title: 'Compare', url: project ? compare_arch_ents_path(project) : nil},
+          :projects_edit_arch_ent => {title: 'Edit', url: (project and uuid) ? edit_arch_ent_records_path(project, uuid) : nil},
+          :projects_show_arch_ent_history => {title: 'History', url: (project and uuid) ? show_arch_ent_history_path(project, uuid) : nil},
+          :projects_show_arch_ent_associations => {title: 'Associations', url: (project and uuid) ? show_rel_association_path(project, uuid) : nil},
+          :projects_search_arch_ent_associations => {title: 'Search Association', url: (project and uuid) ? search_rel_association_path(project, uuid) : nil},
+
+          :projects_search_or_list_rel => !list_rel ? {title: 'Search Relationship', url: project ? search_rel_records_path(project) : nil} : {title: 'List Relationship', url: project ? list_rel_records_path(project) : nil},
+          :projects_search_rel => {title: 'Search Relationship', url: project ? search_rel_records_path(project) : nil},
+          :projects_list_rel => {title: 'List Relationship', url: project ? list_rel_records_path(project) : nil},
+          :projects_show_rel => {title: 'Relationships', url: project ? (query ? show_rel_records_path(project) : list_typed_rel_records_path(project)) + query_params : nil},
+          :projects_compare_rel => {title: 'Compare', url: project ? compare_rel_path(project) : nil},
+          :projects_edit_rel => {title: 'Edit', url: (project and relationshipid) ? edit_rel_records_path(project, relationshipid) : nil},
+          :projects_show_rel_history => {title: 'History', url: (project and relationshipid) ? show_rel_history_path(project, relationshipid) : nil},
+          :projects_show_rel_associations => {title: 'Associations', url: (project and relationshipid) ? show_rel_association_path(project, relationshipid) : nil},
+          :projects_search_rel_associations => {title: 'Search Association', url: (project and relationshipid) ? search_arch_ent_member_path(project, relationshipid) : nil},
+      }
+  end
+
   def authenticate_project_user
     @project = Project.find(params[:id])
     redirect_to :projects unless @project
@@ -31,18 +81,21 @@ class ProjectsController < ApplicationController
   end
 
   def index
-
+    @page_crumbs = [:pages_home, :projects_index]
   end
 
   def new
+    @page_crumbs = [:pages_home, :projects_index, :projects_create]
+
     @project = Project.new
     @spatial_list = Database.get_spatial_ref_list
-
     # make temp directory and store its path in session
     create_tmp_dir
   end
 
   def create
+    @page_crumbs = [:pages_home, :projects_index, :projects_create]
+
     # create project if valid and schemas uploaded
 
     unless SpatialiteDB.library_exists?
@@ -77,11 +130,15 @@ class ProjectsController < ApplicationController
   end
 
   def show
+    @page_crumbs = [:pages_home, :projects_index, :projects_show]
+
     @project = Project.find(params[:id])
     session[:has_attached_files] = @project.has_attached_files
   end
 
   def edit_project_user
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_users]
+
     @project = Project.find(params[:id])
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
@@ -89,6 +146,8 @@ class ProjectsController < ApplicationController
   end
 
   def update_project_user
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_users]
+
     @project = Project.find(params[:id])
     user = User.find(params[:user_id])
     @project.db.update_list_of_users(user, current_user.id)
@@ -102,6 +161,8 @@ class ProjectsController < ApplicationController
   # Arch entity functionalities
 
   def list_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent]
+
     @project = Project.find(params[:id])
     @type = @project.db.get_arch_ent_types
     session.delete(:values)
@@ -109,26 +170,26 @@ class ProjectsController < ApplicationController
     session.delete(:query)
     session.delete(:action)
     session.delete(:show)
-    session.delete(:cur_offset)
-    session.delete(:prev_offset)
-    session.delete(:next_offset)
     session.delete(:show_deleted)
     session.delete(:prev_id)
   end
 
   def list_typed_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_arch_ent, :projects_show_arch_ent]
+
     @project = Project.find(params[:id])
-    limit = 25
+
+    @limit = Database::LIMIT
+    @offset = params[:offset] ? params[:offset] : '0'
+
     type = params[:type]
-    offset = params[:offset]
-    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
-    session[:show_deleted] = show_deleted ? 'true' : nil
-    session[:type] = type
-    session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:action] = 'list_typed_arch_ent_records'
-    @uuid = @project.db.load_arch_entity(type,limit,offset, show_deleted)
+    show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
+    @uuid = @project.db.load_arch_entity(type, @limit, @offset, show_deleted)
+    @total = @project.db.total_arch_entity(type, show_deleted)
+
+    query_params = ''
+    query_params << "?type=#{type}" if type
+    @base_url = list_typed_arch_ent_records_path(@project) + query_params
 
     @entity_dirty_map = {}
     @entity_forked_map = {}
@@ -137,35 +198,41 @@ class ProjectsController < ApplicationController
       @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
 
+    # TODO these need to be query params
+    session[:type] = type
+    session[:show_deleted] = show_deleted ? 'true' : nil
+    session[:action] = 'list_typed_arch_ent_records'
   end
 
   def search_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_arch_ent]
+
     @project = Project.find(params[:id])
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
     session.delete(:action)
     session.delete(:show)
-    session.delete(:cur_offset)
-    session.delete(:prev_offset)
-    session.delete(:next_offset)
     session.delete(:show_deleted)
     session.delete(:prev_id)
   end
 
   def show_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_arch_ent, :projects_show_arch_ent]
+
     @project = Project.find(params[:id])
-    limit = 25
+
+    @limit = Database::LIMIT
+    @offset = params[:offset] ? params[:offset] : '0'
+
     query = params[:query]
-    offset = params[:offset]
-    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
-    session[:show_deleted] = show_deleted ? 'true' : nil
-    session[:query] = query
-    session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:action] = 'show_arch_ent_records'
-    @uuid = @project.db.search_arch_entity(limit,offset,query,show_deleted)
+    show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
+    @uuid = @project.db.search_arch_entity(@limit, @offset, query, show_deleted)
+    @total = @project.db.total_search_arch_entity(query, show_deleted)
+
+    query_params = ''
+    query_params << "?query=#{query}" if query
+    @base_url = show_arch_ent_records_path(@project) + query_params
 
     @entity_dirty_map = {}
     @entity_forked_map = {}
@@ -173,9 +240,16 @@ class ProjectsController < ApplicationController
       @entity_dirty_map[row[0]] = @project.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
       @entity_forked_map[row[0]] = @project.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
+
+    # TODO these need to be query params
+    session[:query] = query
+    session[:show_deleted] = show_deleted ? 'true' : nil
+    session[:action] = 'show_arch_ent_records'
   end
 
   def edit_arch_ent_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent]
+
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     session[:uuid] = uuid
@@ -245,9 +319,9 @@ class ProjectsController < ApplicationController
 
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
     end
 
   end
@@ -269,6 +343,8 @@ class ProjectsController < ApplicationController
   end
 
   def compare_arch_ents
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_arch_ent, :projects_show_arch_ent, :projects_compare_arch_ent]
+
     @project = Project.find(params[:id])
     session[:values] = []
     session[:identifiers] = []
@@ -298,15 +374,17 @@ class ProjectsController < ApplicationController
     @project.db.insert_updated_arch_entity(params[:uuid],current_user.id, params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
       return
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
       return
     end
   end
 
   def show_arch_ent_history
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent, :projects_show_arch_ent_history]
+
     @project = Project.find(params[:id])
     uuid = params[:uuid]
     @timestamps = @project.db.get_arch_ent_history(uuid)
@@ -337,6 +415,8 @@ class ProjectsController < ApplicationController
   # Relationship functionalities
 
   def list_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel]
+
     @project = Project.find(params[:id])
     @type = @project.db.get_rel_types
     session.delete(:values)
@@ -344,25 +424,25 @@ class ProjectsController < ApplicationController
     session.delete(:query)
     session.delete(:action)
     session.delete(:show)
-    session.delete(:cur_offset)
-    session.delete(:prev_offset)
-    session.delete(:next_offset)
     session.delete(:show_deleted)
   end
 
   def list_typed_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_list_rel, :projects_show_rel]
+
     @project = Project.find(params[:id])
-    limit = 25
-    type=params[:type]
-    offset = params[:offset]
-    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
-    session[:show_deleted] = show_deleted ? 'true' : nil
-    session[:type] = type
-    session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:action] = 'list_typed_rel_records'
-    @relationshipid = @project.db.load_rel(type,limit,offset,show_deleted)
+
+    @limit = Database::LIMIT
+    @offset = params[:offset] ? params[:offset] : '0'
+
+    type = params[:type]
+    show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
+    @relationshipid = @project.db.load_rel(type, @limit, @offset, show_deleted)
+    @total = @project.db.total_rel(type, show_deleted)
+
+    query_params = ''
+    query_params << "?type=#{type}" if type
+    @base_url = list_typed_rel_records_path(@project) + query_params
 
     @rel_dirty_map = {}
     @rel_forked_map = {}
@@ -370,36 +450,41 @@ class ProjectsController < ApplicationController
       @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
       @rel_forked_map[row[0]] = @project.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
+
+    # TODO these need to be query params
+    session[:type] = type
+    session[:show_deleted] = show_deleted ? 'true' : nil
+    session[:action] = 'list_typed_rel_records'
   end
 
   def search_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_rel]
+
     @project = Project.find(params[:id])
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
     session.delete(:action)
     session.delete(:show)
-    session.delete(:cur_offset)
-    session.delete(:prev_offset)
-    session.delete(:next_offset)
     session.delete(:show_deleted)
   end
 
   def show_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_rel, :projects_show_rel]
+
     @project = Project.find(params[:id])
-    limit = 25
+
+    @limit = Database::LIMIT
+    @offset = params[:offset] ? params[:offset] : '0'
+
     query = params[:query]
-    offset = params[:offset]
-    relationshipid = params[:relationshipid]
-    show_deleted = params[:show_deleted].nil? ||params[:show_deleted].empty? ? false : true
-    session[:show_deleted] = show_deleted ? 'true' : nil
-    session[:relationshipid] = relationshipid
-    session[:query] = query
-    session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
-    session[:action] = 'show_rel_records'
-    @relationshipid = @project.db.search_rel(limit,offset,query,show_deleted)
+    show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
+    @relationshipid = @project.db.search_rel(@limit, @offset, query, show_deleted)
+    @total = @project.db.total_search_rel(query, show_deleted)
+
+    query_params = ''
+    query_params << "?query=#{query}" if query
+    @base_url = show_rel_records_path(@project) + query_params
 
     @rel_dirty_map = {}
     @rel_forked_map = {}
@@ -407,9 +492,16 @@ class ProjectsController < ApplicationController
       @rel_dirty_map[row[0]] = @project.db.is_relationship_dirty(row[0]) unless @rel_dirty_map[row[0]]
       @rel_forked_map[row[0]] = @project.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
+
+    # TODO these need to be query params
+    session[:query] = query
+    session[:show_deleted] = show_deleted ? 'true' : nil
+    session[:action] = 'show_rel_records'
   end
 
   def edit_rel_records
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_rel, :projects_show_rel, :projects_edit_rel]
+
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     session[:relationshipid] = relationshipid
@@ -454,6 +546,8 @@ class ProjectsController < ApplicationController
   end
 
   def show_rel_history
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_rel, :projects_show_rel, :projects_edit_rel, :projects_show_rel_history]
+
     @project = Project.find(params[:id])
     relid = params[:relid]
     @timestamps = @project.db.get_rel_history(relid)
@@ -493,9 +587,9 @@ class ProjectsController < ApplicationController
     @project.db.delete_relationship(relationshipid,current_user.id)
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
     end
   end
 
@@ -514,14 +608,29 @@ class ProjectsController < ApplicationController
   end
 
   def show_rel_members
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_rel, :projects_show_rel, :projects_edit_rel, :projects_show_rel_associations]
+
     @project = Project.find(params[:id])
-    session[:relationshipid] = params[:relationshipid]
-    limit = 25
-    offset = params[:offset]
-    session[:relntypeid] = params[:relntypeid]
-    session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
+
+    @limit = Database::LIMIT
+    @offset = params[:offset] ? params[:offset] : '0'
+
+    relationshipid = params[:relationshipid]
+    relntypeid = params[:relntypeid]
+
+    @uuid = @project.db.get_rel_arch_ent_members(relationshipid, @limit, @offset)
+    @total = @project.db.total_rel_arch_ent_members(relationshipid)
+
+    query_params = '?'
+    query_params << "relationshipid=#{relationshipid}&" if relationshipid
+    query_params << "relntypeid=#{relntypeid}&" if relntypeid
+    @base_url = show_rel_members_path(@project) + query_params
+
+    # TODO these need to be query params
+    session[:relationshipid] = relationshipid
+    session[:relntypeid] = relntypeid
+
+    # TODO this seems unneccessary ...
     if session[:show].nil?
       session[:show] = []
       session[:show].push('show_rel_members')
@@ -530,7 +639,6 @@ class ProjectsController < ApplicationController
         session[:show].push('show_rel_members')
       end
     end
-    @uuid = @project.db.get_rel_arch_ent_members(params[:relationshipid], limit, offset)
   end
 
   def remove_arch_ent_member
@@ -542,41 +650,71 @@ class ProjectsController < ApplicationController
   end
 
   def search_arch_ent_member
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_rel, :projects_show_rel, :projects_edit_rel, :projects_search_rel_associations]
+
     @project = Project.find(params[:id])
-    session[:relationshipid] = params[:relationshipid]
-    session[:relntypeid] = params[:relntypeid]
+
+    relationshipid = params[:relationshipid]
+    relntypeid = params[:relntypeid]
+
     if params[:search_query].nil?
       @uuid = nil
       @status = 'init'
       session.delete(:search_query)
     else
-      limit = 25
-      offset = params[:offset]
+      @limit = Database::LIMIT
+      @offset = params[:offset] ? params[:offset] : '0'
+
       session[:search_query] = params[:search_query]
-      session[:cur_offset] = offset
-      session[:prev_offset] = Integer(offset) - Integer(limit)
-      session[:next_offset] = Integer(offset) + Integer(limit)
-      @uuid = @project.db.get_non_member_arch_ent(params[:relationshipid],params[:search_query],limit,offset)
+
+      @uuid = @project.db.get_non_member_arch_ent(relationshipid, params[:search_query], @limit, @offset)
+      @total = @project.db.total_non_member_arch_ent(relationshipid, params[:search_query])
+
+      query_params = '?'
+      query_params << "relationshipid=#{relationshipid}&" if relationshipid
+      query_params << "relntypeid=#{relntypeid}&" if relntypeid
+      query_params << "search_query=#{params[:search_query]}&" if params[:search_query]
+      @base_url = search_arch_ent_member_path(@project) + query_params
+
+
     end
-    @verb = @project.db.get_verbs_for_relation(params[:relntypeid])
+    @verb = @project.db.get_verbs_for_relation(relntypeid)
+
+    # TODO these need to be query params
+    session[:relationshipid] = relationshipid
+    session[:relntypeid] = relntypeid
   end
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
     @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
     respond_to do |format|
-      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?offset=0&relntypeid='+params[:relntypeid]} }
+      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?relntypeid='+params[:relntypeid]} }
     end
   end
 
   def show_rel_association
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent, :projects_show_arch_ent_associations]
+
     @project = Project.find(params[:id])
+
+    @limit = Database::LIMIT
+    @offset = params[:offset] ? params[:offset] : '0'
+
+    uuid = params[:uuid]
+
+    @relationships = @project.db.get_arch_ent_rel_associations(uuid, @limit, @offset)
+
+    @total = @project.db.total_arch_ent_rel_associations(uuid)
+
+    query_params = ''
+    query_params << "?uuid=#{uuid}" if uuid
+    @base_url = show_rel_association_path(@project) + query_params
+
+    # TODO these need to be query params
     session[:uuid] = params[:uuid]
-    limit = 25
-    offset = params[:offset]
-    session[:cur_offset] = offset
-    session[:prev_offset] = Integer(offset) - Integer(limit)
-    session[:next_offset] = Integer(offset) + Integer(limit)
+
+    # TODO this seems unneccessary ...
     if session[:show].nil?
       session[:show] = []
       session[:show].push('show_rel_associations')
@@ -585,25 +723,38 @@ class ProjectsController < ApplicationController
         session[:show].push('show_rel_associations')
       end
     end
-    @relationships = @project.db.get_arch_ent_rel_associations(params[:uuid], limit, offset)
   end
 
   def search_rel_association
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_arch_ent, :projects_show_arch_ent, :projects_edit_arch_ent, :projects_show_arch_ent_associations,
+      :projects_search_arch_ent_associations]
+
     @project = Project.find(params[:id])
-    session[:uuid] = params[:uuid]
+
+    uuid = params[:uuid]
+
     if params[:search_query].nil?
       @uuid = nil
       @status = 'init'
       session.delete(:search_query)
     else
-      limit = 25
-      offset = params[:offset]
+      @limit = Database::LIMIT
+      @offset = params[:offset] ? params[:offset] : '0'
+
       session[:search_query] = params[:search_query]
-      session[:cur_offset] = offset
-      session[:prev_offset] = Integer(offset) - Integer(limit)
-      session[:next_offset] = Integer(offset) + Integer(limit)
-      @relationships = @project.db.get_non_arch_ent_rel_associations(params[:uuid],params[:search_query],limit,offset)
+
+      @relationships = @project.db.get_non_arch_ent_rel_associations(uuid, params[:search_query], @limit, @offset)
+
+      @total = @project.db.total_non_arch_ent_rel_associations(uuid, params[:search_query])
+
+      query_params = '?'
+      query_params << "uuid=#{uuid}&" if uuid
+      query_params << "search_query=#{params[:search_query]}&" if params[:search_query]
+      @base_url = search_rel_association_path(@project) + query_params
     end
+
+    # TODO these need to be query params
+    session[:uuid] = params[:uuid]
   end
 
   def get_verbs_for_rel_association
@@ -617,10 +768,11 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
     respond_to do |format|
-      format.json { render :json => {:result => 'success', :url => show_rel_association_path(@project,params[:uuid])+'?offset=0'} }
+      format.json { render :json => {:result => 'success', :url => show_rel_association_path(@project,params[:uuid])} }
     end
   end
 
+  # TODO compare should use query params
   def add_entity_to_compare
     if !session[:values]
       session[:values] = []
@@ -658,6 +810,8 @@ class ProjectsController < ApplicationController
   end
 
   def compare_rel
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_rel, :projects_compare_rel]
+
     @project = Project.find(params[:id])
     ids = params[:ids]
     session[:values] = []
@@ -686,15 +840,17 @@ class ProjectsController < ApplicationController
     @project.db.insert_updated_rel(params[:rel_id],current_user.id, params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
       return
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&offset=0&show_deleted=' + show_deleted)
+      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
       return
     end
   end
 
   def list_attributes_with_vocab
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_vocabulary]
+
     @project = Project.find(params[:id])
     @attributes = @project.db.get_attributes_containing_vocab()
   end
@@ -716,6 +872,8 @@ class ProjectsController < ApplicationController
   end
 
   def update_attributes_vocab
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_vocabulary]
+
     @project = Project.find(params[:id])
     if @project.db_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
@@ -732,21 +890,31 @@ class ProjectsController < ApplicationController
   end
 
   def edit_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_edit]
+
     @project = Project.find(params[:id])
     project_setting = JSON.parse(File.read(@project.get_path(:settings)))
-    session[:name] = @project.name
-    session[:season] = project_setting['season']
-    session[:description] = project_setting['description']
-    session[:permit_no] = project_setting['permit_no']
-    session[:permit_holder] = project_setting['permit_holder']
-    session[:contact_address] = project_setting['contact_address']
-    session[:participant] = project_setting['participant']
-    session[:srid] = project_setting['srid']
+    @name = @project.name
+    @season = project_setting['season']
+    @description = project_setting['description']
+    @permit_no = project_setting['permit_no']
+    @permit_holder = project_setting['permit_holder']
+    @contact_address = project_setting['contact_address']
+    @participant = project_setting['participant']
+    @srid = project_setting['srid']
+    @permit_issued_by = project_setting['permit_issued_by']
+    @permit_type = project_setting['permit_type']
+    @copyright_holder = project_setting['copyright_holder']
+    @client_sponsor = project_setting['client_sponsor']
+    @land_owner = project_setting['land_owner']
+    @has_sensitive_data = project_setting['has_sensitive_data']
     create_tmp_dir
     @spatial_list = Database.get_spatial_ref_list
   end
 
   def update_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_edit]
+
     if @project.settings_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
       render 'show'
@@ -765,28 +933,14 @@ class ProjectsController < ApplicationController
         redirect_to :project
         return
       else
-        session[:name] = params[:project][:name]
-        session[:season] = params[:project][:season]
-        session[:description] = params[:project][:description]
-        session[:permit_no] = params[:project][:permit_no]
-        session[:permit_holder] = params[:project][:permit_holder]
-        session[:contact_address] = params[:project][:contact_address]
-        session[:participant] = params[:project][:participant]
-        session[:srid] = params[:project][:srid]
+        @name = params[:project][:name]
+        parse_parameter_for_project(params)
         @spatial_list = Database.get_spatial_ref_list
         flash.now[:error] = 'Error updating project'
         render 'edit_project'
         return
       end
     else
-      session[:name] = params[:project][:name]
-      session[:season] = params[:project][:season]
-      session[:description] = params[:project][:description]
-      session[:permit_no] = params[:project][:permit_no]
-      session[:permit_holder] = params[:project][:permit_holder]
-      session[:contact_address] = params[:project][:contact_address]
-      session[:participant] = params[:project][:participant]
-      session[:srid] = params[:project][:srid]
       @spatial_list = Database.get_spatial_ref_list
       flash.now[:error] = 'Error updating project'
       render 'edit_project'
@@ -843,10 +997,14 @@ class ProjectsController < ApplicationController
   end
 
   def upload_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_upload]
+
     @project = Project.new
   end
 
   def upload_new_project
+    @page_crumbs = [:pages_home, :projects_index, :projects_upload]
+
     unless SpatialiteDB.library_exists?
       @project = Project.new
       flash.now[:error] = 'Cannot find library libspatialite. Please install library to upload project.'
@@ -962,22 +1120,8 @@ class ProjectsController < ApplicationController
       end
     end
 
-    if valid
-      session[:season] = ''
-      session[:description] = ''
-      session[:permit_no] = ''
-      session[:permit_holder] = ''
-      session[:contact_address] = ''
-      session[:participant] = ''
-      session[:srid] = ''
-    else
-      session[:season] = params[:project][:season]
-      session[:description] = params[:project][:description]
-      session[:permit_no] = params[:project][:permit_no]
-      session[:permit_holder] = params[:project][:permit_holder]
-      session[:contact_address] = params[:project][:contact_address]
-      session[:participant] = params[:project][:participant]
-      session[:srid] = params[:project][:srid]
+    if !valid
+      parse_parameter_for_project(params)
     end
 
     valid
@@ -1038,22 +1182,9 @@ class ProjectsController < ApplicationController
       end
     end
 
-    if valid
-      session[:season] = ''
-      session[:description] = ''
-      session[:permit_no] = ''
-      session[:permit_holder] = ''
-      session[:contact_address] = ''
-      session[:participant] = ''
-      session[:srid] = ''
-    else
-      session[:season] = params[:project][:season]
-      session[:description] = params[:project][:description]
-      session[:permit_no] = params[:project][:permit_no]
-      session[:permit_holder] = params[:project][:permit_holder]
-      session[:contact_address] = params[:project][:contact_address]
-      session[:participant] = params[:project][:participant]
-      session[:srid] = params[:project][:srid]
+    if !valid
+      @name = params[:project][:name]
+      parse_parameter_for_project(params)
     end
 
     valid
@@ -1066,6 +1197,24 @@ class ProjectsController < ApplicationController
         temp_file.write(upload_file.read)
       end
     end
+  end
+
+  private
+
+  def parse_parameter_for_project(params)
+    @season = params[:project][:season]
+    @description = params[:project][:description]
+    @permit_no = params[:project][:permit_no]
+    @permit_holder = params[:project][:permit_holder]
+    @contact_address = params[:project][:contact_address]
+    @participant = params[:project][:participant]
+    @srid = params[:project][:srid]
+    @permit_issued_by = params[:project][:permit_issued_by]
+    @permit_type = params[:project][:permit_type]
+    @copyright_holder = params[:project][:copyright_holder]
+    @client_sponsor = params[:project][:client_sponsor]
+    @land_owner = params[:project][:land_owner]
+    @has_sensitive_data = params[:project][:has_sensitive_data]
   end
 
 end

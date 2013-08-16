@@ -1,4 +1,5 @@
 - title 'User Management'
+= breadcrumbs
 - if can?(:read, User)
   = link_to "List Approved Users", users_path, :class => "button"
 - if can?(:access_requests, User)

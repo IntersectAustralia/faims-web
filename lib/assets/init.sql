@@ -223,6 +223,36 @@ create view if not exists latestNonDeletedAentValue as
         group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
   where deleted is null;
 
+drop view if exists latestNonDeletedArchEntIdentifiers;
+create view if not exists latestNonDeletedArchEntIdentifiers as
+  select *
+  from latestNonDeletedAentValue
+  JOIN latestNonDeletedArchent USING (uuid)
+  JOIN aenttype using (aenttypeid)
+  JOIN idealaent using (aenttypeid, attributeid)
+  join attributekey using (attributeid)
+  left outer join vocabulary using (attributeid, vocabid)
+ WHERE isIdentifier = 'true';
+
+
+drop view if exists latestAllArchEntIdentifiers;
+create view if not exists latestAllArchEntIdentifiers as
+  select *, substr(uuid,7) as epoch
+  from archentity
+  JOIN (select uuid, max(aenttimestamp) as aenttimestamp
+          from archentity
+         group by uuid) USING (uuid, aenttimestamp)
+  join aentvalue using (uuid)
+  JOIN (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+        from aentvalue
+        group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+  JOIN aenttype using (aenttypeid)
+  JOIN idealaent using (aenttypeid, attributeid)
+  join attributekey using (attributeid)
+  left outer join vocabulary using (attributeid, vocabid)
+ WHERE isIdentifier = 'true';
+
+
 drop view if exists latestNonDeletedRelationship;
 create view latestNonDeletedRelationship as
     select *
@@ -239,4 +269,37 @@ create view latestNonDeletedRelnValue as
   JOIN (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
         from relnvalue
         group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
+  where deleted is null;
+
+
+drop view if exists latestNonDeletedRelnIdentifiers;
+create view latestNonDeletedRelnIdentifiers as
+  select *
+  from latestNonDeletedRelationship
+  join relntype using (relntypeid)
+  join idealreln using (relntypeid)
+  JOIN latestNonDeletedRelnValue using (relationshipid, attributeid)
+  join attributekey using (attributeid)
+  left outer join vocabulary using (attributeid, vocabid)
+ WHERE isIdentifier = 'true';
+
+
+drop view if exists latestAllRelationshipIdentifiers;
+create view latestAllRelationshipIdentifiers as
+  select *
+  from  relationship JOIN (select relationshipid, max(relntimestamp) as relntimestamp
+              from relationship
+              group by relationshipid
+              ) USING (relationshipid, relntimestamp)
+        join idealreln using (relntypeid)
+        join relnvalue using (relationshipid, attributeid)
+        JOIN (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+              from relnvalue
+              group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
+        LEFT OUTER JOIN vocabulary using (attributeid, vocabid);
+
+drop view if exists latestNonDeletedAentReln;
+create view latestNonDeletedAentReln as
+  select * from
+  aentreln join (select uuid, relationshipid, max(aentrelntimestamp) as aentrelntimestamp from aentreln group by uuid, relationshipid) using (uuid, relationshipid, aentrelntimestamp)
   where deleted is null;

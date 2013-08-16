@@ -498,10 +498,10 @@ Feature: Manage projects
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
     Then I should see records
-      | name            |
-      | entity: Small 2 |
-      | entity: Small 3 |
-      | entity: Small 4 |
+      | name    |
+      | Small 2 |
+      | Small 3 |
+      | Small 4 |
 
   @javascript
   Scenario: Show arch entity list include the deleted value
@@ -520,11 +520,11 @@ Feature: Manage projects
     And I enter "" and submit the form
     And I follow "Show Deleted"
     Then I should see records
-      | name            |
-      | entity: Small 1 |
-      | entity: Small 2 |
-      | entity: Small 3 |
-      | entity: Small 4 |
+      | name    |
+      | Small 1 |
+      | Small 2 |
+      | Small 3 |
+      | Small 4 |
 
   Scenario: Delete arch entity
     Given I am on the home page
@@ -540,12 +540,12 @@ Feature: Manage projects
     And I wait
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
-    Then I select the first record
+    Then I follow "Small 3"
     And I follow "Delete"
     Then I should not see records
-      | name            |
-      | entity: Small 1 |
-      | entity: Small 3 |
+      | name    |
+      | Small 1 |
+      | Small 3 |
 
   @javascript
   Scenario: Restore arch entity
@@ -562,13 +562,13 @@ Feature: Manage projects
     And I wait
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
-    Then I select the first record
+    Then I follow "Small 3"
     And I wait
     Then I follow "Delete"
     And I wait
     Then I follow "Show Deleted"
     And I wait
-    Then I select the first record
+    Then I follow "Small 3"
     And I wait
     Then I follow "Restore"
     And I should see "Successfully restored archaeological entity record"
@@ -576,11 +576,11 @@ Feature: Manage projects
     And I wait
     Then I follow "Hide Deleted"
     And I should not see records
-      | name            |
-      | entity: Small 1 |
+      | name    |
+      | Small 1 |
     But I should see records
-      | name            |
-      | entity: Small 3 |
+      | name    |
+      | Small 3 |
 
   Scenario: Show relationship list not include the deleted value
     Given I am on the home page
@@ -597,10 +597,10 @@ Feature: Manage projects
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     Then I should see records
-      | name                       |
-      | relationship: AboveBelow 1 |
-      | relationship: AboveBelow 2 |
-      | relationship: AboveBelow 3 |
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+      | AboveBelow 3 |
 
   @javascript
   Scenario: Show relationship list include the deleted value
@@ -619,11 +619,11 @@ Feature: Manage projects
     And I enter "" and submit the form
     And I follow "Show Deleted"
     Then I should see records
-      | name                       |
-      | relationship: AboveBelow 1 |
-      | relationship: AboveBelow 2 |
-      | relationship: AboveBelow 3 |
-      | relationship: AboveBelow 4 |
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+      | AboveBelow 3 |
+      | AboveBelow 4 |
 
   Scenario: Delete relationship
     Given I am on the home page
@@ -639,12 +639,12 @@ Feature: Manage projects
     And I wait
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
-    Then I select the first record
+    Then I follow "AboveBelow 2"
     And I follow "Delete"
     Then I should not see records
-      | name                       |
-      | relationship: AboveBelow 2 |
-      | relationship: AboveBelow 4 |
+      | name         |
+      | AboveBelow 2 |
+      | AboveBelow 4 |
 
   @javascript
   Scenario: Restore relationship
@@ -661,13 +661,13 @@ Feature: Manage projects
     And I wait
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
-    Then I select the first record
+    Then I follow "AboveBelow 2"
     And I wait
     Then I follow "Delete"
     And I wait
     Then I follow "Show Deleted"
     And I wait
-    Then I select the first record
+    Then I follow "AboveBelow 2"
     And I wait
     Then I follow "Restore"
     And I should see "Successfully restored relationship record"
@@ -675,11 +675,11 @@ Feature: Manage projects
     And I wait
     Then I follow "Hide Deleted"
     And I should not see records
-      | name                       |
-      | relationship: AboveBelow 4 |
+      | name         |
+      | AboveBelow 4 |
     But I should see records
-      | name                       |
-      | relationship: AboveBelow 2 |
+      | name         |
+      | AboveBelow 2 |
 
   Scenario: See related arch entities
     Given I am on the home page
@@ -695,7 +695,7 @@ Feature: Manage projects
     And I wait
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
-    Then I follow "entity: Small 2"
+    Then I follow "Small 2"
     And I wait
     Then I follow "small Below AboveBelow: Small 3"
     And I wait

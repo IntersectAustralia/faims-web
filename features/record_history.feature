@@ -20,8 +20,8 @@ Feature: View and Revert record history
     And I click on "Project 1"
     And I click on "List Archaeological Entity Records"
     And I follow link "Filter"
-    Then I should see "entity: Small 1" with "conflict"
-    And I click on "entity: Small 1"
+    Then I should see "Small 1" with "conflict"
+    And I click on "Small 1"
     Then I should see "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     And I click on "Show History"
     Then I history should have conflicts
