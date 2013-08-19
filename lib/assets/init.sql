@@ -205,6 +205,10 @@ create index aentrelnindex on aentreln (uuid, relationshipid, AEntRelnTimestamp)
 SELECT AddGeometryColumn('ArchEntity', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
 SELECT AddGeometryColumn('Relationship', 'GeoSpatialColumn',   4326, 'GEOMETRYCOLLECTION', 'XY');
 
+-- create spatial indexes
+SELECT CreateSpatialIndex('ArchEntity', 'GeoSpatialColumn');
+SELECT CreateSpatialIndex('Relationship', 'GeoSpatialColumn');
+
 drop view if exists latestNonDeletedArchent;
 create view latestNonDeletedArchent as
   select *, substr(uuid,7) as epoch
