@@ -79,3 +79,37 @@
 .ui-dialog-titlebar-close {
   visibility: hidden;
 }
+
+.logo {
+  height: 40px;
+  width: 40px;
+  padding-right: 10px;
+}
+
+
+.footer {
+  bottom: 0; left: 0; right: 0;
+  text-align: center;
+  border-top: 1px solid #e5e5e5;
+  background-color: #f5f5f5;
+  margin: 0 auto;
+  position: fixed;
+  font-weight: normal;
+  font-size: 0.813em;
+  color: #666666;
+  text-decoration: none;
+}
+
+.footer p { margin: 0; }
+
+.footer .logo {
+  margin: 3px 6px 0 0;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  display: -moz-inline-stack;
+  display: inline-block;
+  zoom: 1;
+  vertical-align: top;
+  background: url(/images/intersect_logo.png) center;
+}
