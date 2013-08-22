@@ -54,6 +54,8 @@ class MergeDaemon
 
         puts 'Finished merging database'
       end
+
+      !sorted_files.empty?
     ensure
       FileUtils.rm_rf db_file_path if db_file_path
     end

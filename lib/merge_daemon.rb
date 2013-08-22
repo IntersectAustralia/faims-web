@@ -6,14 +6,14 @@ loop do
 
   begin
 
-    MergeDaemon.do_merge
+    sleep 1 unless MergeDaemon.do_merge
 
   rescue SystemExit, Interrupt
     puts 'Merge daemon killed'
     exit(0)
   rescue Exception => e
     puts 'Error merging database'
-    puts e
+    puts e.to_s
   end
 
 end
