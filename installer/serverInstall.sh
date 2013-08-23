@@ -1,7 +1,11 @@
-#!n/bin/bash
-
+#!/bin/bash
 
 set -e 
+
+#if [ -a /var/lib/dpkg/lock ]; then
+#	echo "Something else is already using apt-get. Please wait for other things to install and try again. "
+#	exit 1;
+#fi
 
 if [[ $EUID -ne 0 ]]; then
    clear
@@ -15,7 +19,7 @@ fi
 
 
 # echo -e "Installing prgress bars. Go get a coffee, this install will take a while."
-apt-get -y install software-properties-common pv 
+apt-get -y install software-properties-common pv || { echo "apt-getting failed. exiting..."; exit 1; }
 
 if ! ls /etc/apt/sources.list.d/faims-mobile-web-*.list 2> /dev/null 1> /dev/null
 	then add-apt-repository ppa:faims/mobile-web -y
@@ -23,12 +27,17 @@ if ! ls /etc/apt/sources.list.d/faims-mobile-web-*.list 2> /dev/null 1> /dev/nul
 fi
 
 # echo -e "Updating Package List."
-apt-get update && apt-get upgrade -y && apt-get build-dep spatialite -y && apt-get install unzip build-essential g++ gawk libreadline6-dev bison pkg-config git-core wget curl expat libexpat1-dev zlib1g-dev libyaml-dev libxslt1-dev libgdbm-dev libncurses5-dev libffi-dev d-shlibs dh-autoreconf libblas3gf libepsilon-dev liblapack3gf libogdi3.2-dev python-all python-all-dev python-central python-dev python-numpy python2.7-dev gdal-bin libgdal-doc libproj-dev libproj0 libgdal-dev libgeos-dev libgeos++-dev libfreexl-dev tcl tcl-dev libreadosm-dev sqlite3>=3.7.17 -y || { echo "apt-getting failed. exiting..."; exit 1; }
+apt-get update 
+apt-get upgrade -y 
+apt-get install unzip build-essential g++ gawk libreadline6-dev bison pkg-config git-core wget curl expat libexpat1-dev zlib1g-dev libyaml-dev libxslt1-dev libgdbm-dev libncurses5-dev libffi-dev d-shlibs dh-autoreconf libblas3gf libepsilon-dev liblapack3gf libogdi3.2-dev python-all python-all-dev python-central python-dev python-numpy python2.7-dev libproj-dev libproj0 libgeos-dev libgeos++-dev libfreexl-dev tcl tcl-dev libreadosm-dev sqlite3 gdal-bin -y 
+apt-get build-dep libspatialite-dev -y
+
+echo "select sqlite_version();" | sqlite3 :memory: -line | grep 3.7.17 || { echo "sqlite3 wrong version. exiting." ; exit 1; }
 
 echo "Downloading other files"
 
-wget --quiet http://www.fedarch.org/libspatialite-4.1.1.tar.gz http://www.fedarch.org/spatialite-tools-4.1.1.tar.gz -P /tmp/ || { echo "downloads failed. exiting." ; exit 1; }
-wget --quiet http://www.fedarch.org/master.zip -P /opt/ || { echo "downloads failed. exiting." ; exit 1; }
+wget http://www.fedarch.org/libspatialite-4.1.1.tar.gz http://www.fedarch.org/spatialite-tools-4.1.1.tar.gz -P /tmp/ || { echo "downloads failed. exiting." ; exit 1; }
+wget http://www.fedarch.org/master.zip -P /opt/ || { echo "downloads failed. exiting." ; exit 1; }
 # echo -e "Upgrading System Packages."
 
 
@@ -72,8 +81,12 @@ make | pv -p -s 8195 -e > /tmp/compile5.log
 make install | pv -p -s 1501 -e > /tmp/compile6.log
 
 
+ldconfig
+
+
+
 # echo -e "Installing RVM. All instructions in the following text have been taken care of."
-\curl -# -L https://get.rvm.io | bash -s stable --ruby=1.9.3-p286 --autolibs=3 
+\curl -# -L https://get.rvm.io | bash -s stable --ruby=1.9.3-p286 --autolibs=3 > /tmp/rvm 2> /tmp/rvmerror
 
 # echo -e "Setting up correct groups and profiles."
 
@@ -117,7 +130,7 @@ cd /opt/faims-web/
 bundle install 
 
 # echo -e "Setting up Server. This will take a while."
-rake db:create db:migrate db:seed assets:precompile projects:setup projects:clean RAILS_ENV=production 
+rake db:drop db:create db:migrate db:seed projects:clean projects:setup assets:precompile RAILS_ENV=production 
 
 # chmod -R a+wx /opt/faims-web
 
