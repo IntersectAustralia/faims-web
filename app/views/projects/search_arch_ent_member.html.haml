@@ -25,7 +25,7 @@
                   %li
                     %span
                       =uuids[1].to_s
-          .footer.search
+          .paging.search
             = render :partial => 'pagination'
         -else
           - if @status.eql?('init')

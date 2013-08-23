@@ -9,7 +9,7 @@
           %li
             %a{:href => edit_rel_records_path(@project,relationships[0])}
               =relationships[1].to_s
-      .footer.search
+      .paging.search
         = render :partial => 'pagination'
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}
     .form-actions

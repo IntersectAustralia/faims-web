@@ -9,7 +9,7 @@
           %li
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
               =uuids[1].to_s
-      .footer.search
+      .paging.search
         = render :partial => 'pagination'
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_arch_ent_member_path(@project,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
     .form-actions
