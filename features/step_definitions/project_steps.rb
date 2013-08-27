@@ -470,12 +470,25 @@ And(/^I select the first record$/) do
   first('.inner > li > a').click
 end
 
-Then /^I should see attached files/ do |table|
+Then /^I should see attached files$/ do |table|
   table.hashes.each do |hash|
     hash.values.each do |value|
-      page.should have_content(value)
+      page.should have_xpath("//a[contains(text(), \"#{value}\")]")
     end
   end
+end
+
+Then /^I should see non attached files$/ do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should_not have_xpath("//p[contains(text(), \"#{value}\")]")
+    end
+  end
+end
+
+Then /^I remove all files for "([^"]*)"$/ do |name|
+   p = Project.find_by_name(name)
+   FileUtils.rm_rf p.get_path(:files_dir)
 end
 
 Then(/^I click file with name "([^"]*)"$/) do |name|
