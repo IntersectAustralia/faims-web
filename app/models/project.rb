@@ -95,12 +95,12 @@ class Project < ActiveRecord::Base
   # project archives
 
   def db_mgr
-    mgr = FileManager.new('db', get_path(:project_dir))
+    mgr = FileManager.new('db', get_path(:project_dir), 'zcf', get_path(:db_archive))
     mgr
   end
 
   def settings_mgr
-    mgr = FileManager.new('settings', get_path(:project_dir))
+    mgr = FileManager.new('settings', get_path(:project_dir), 'zcf', get_path(:settings_archive))
     mgr.add_file(get_path(:ui_schema))
     mgr.add_file(get_path(:ui_logic))
     mgr.add_file(get_path(:settings))
@@ -109,19 +109,19 @@ class Project < ActiveRecord::Base
   end
 
   def app_mgr
-    mgr = FileManager.new('app', get_path(:project_dir))
+    mgr = FileManager.new('app', get_path(:project_dir), 'zcf', get_path(:app_files_archive))
     mgr.add_dir(get_path(:app_files_dir))
     mgr
   end
 
   def data_mgr
-    mgr = FileManager.new('data', get_path(:project_dir))
+    mgr = FileManager.new('data', get_path(:project_dir), 'zcf', get_path(:data_files_archive))
     mgr.add_dir(get_path(:data_files_dir))
     mgr
   end
 
   def package_mgr
-    mgr = FileManager.new('project', get_path(:project_dir))
+    mgr = FileManager.new('project', get_path(:project_dir), 'zcf', get_path(:package_archive))
     mgr
   end
 
@@ -131,26 +131,36 @@ class Project < ActiveRecord::Base
   end
 
   def settings_archive_info
-    settings_mgr.update_archive('zcf', get_path(:settings_archive))
+    settings_mgr.update_archive
 
-    info = {
-        :file => get_path(:settings_archive),
-        :size => File.size(get_path(:settings_archive)),
-        :md5 => MD5Checksum.compute_checksum(get_path(:settings_archive))
-    }
+    info = nil
+
+    settings_mgr.with_lock do
+      info = {
+          :file => get_path(:settings_archive),
+          :size => File.size(get_path(:settings_archive)),
+          :md5 => MD5Checksum.compute_checksum(get_path(:settings_archive))
+      }
+    end
+
     v = db.current_version.to_i
     info = info.merge({ :version => v.to_s }) if v > 0
     info
   end
 
   def db_archive_info
-    db_mgr.update_archive('zcf', get_path(:db_archive))
+    db_mgr.update_archive
 
-    info = {
-        :file => get_path(:db_archive),
-        :size => File.size(get_path(:db_archive)),
-        :md5 => MD5Checksum.compute_checksum(get_path(:db_archive))
-    }
+    info = nil
+
+    db_mgr.with_lock do
+      info = {
+          :file => get_path(:db_archive),
+          :size => File.size(get_path(:db_archive)),
+          :md5 => MD5Checksum.compute_checksum(get_path(:db_archive))
+      }
+    end
+
     v = db.current_version.to_i
     info = info.merge({ :version => v.to_s }) if v > 0
     info
@@ -172,11 +182,13 @@ class Project < ActiveRecord::Base
       # create temporary archive of database
       temp_path = db_version_file_path(version_num, db.current_version)
       archive_database_version(version_num, temp_path) unless File.exists? temp_path
+
       info = {
         :file => temp_path,
         :size => File.size(temp_path),
         :md5 => MD5Checksum.compute_checksum(temp_path)
       }
+
       v = db.current_version.to_i
       info = info.merge({ :version => v.to_s }) if v > 0
       info
@@ -187,9 +199,9 @@ class Project < ActiveRecord::Base
   end
 
   def update_android_archives
-    settings_mgr.update_archive('zcf', get_path(:settings_archive))
-    app_mgr.update_archive('zcf', get_path(:app_files_archive))
-    data_mgr.update_archive('zcf', get_path(:data_files_archive))
+    settings_mgr.update_archive
+    app_mgr.update_archive
+    data_mgr.update_archive
     archive_database
   end
 
@@ -203,11 +215,9 @@ class Project < ActiveRecord::Base
   end
 
   def update_archives
-    #db_mgr.update_archive('zcf', get_path(:db_archive))
-    settings_mgr.update_archive('zcf', get_path(:settings_archive))
-    app_mgr.update_archive('zcf', get_path(:app_files_archive))
-    data_mgr.update_archive('zcf', get_path(:data_files_archive))
-    #package_mgr.update_archive('zcf', get_path(:package_archive))
+    settings_mgr.update_archive
+    app_mgr.update_archive
+    data_mgr.update_archive
 
     # TODO create db file manager for archiving database
     archive_database
@@ -457,7 +467,7 @@ class Project < ActiveRecord::Base
        file_archive_info(get_path(:app_files_dir), non_locking_app_file_list(exclude_files))
       end
     else
-      app_mgr.update_archive('zcf', get_path(:app_files_archive))
+      app_mgr.update_archive
 
       app_mgr.with_lock do
         {
@@ -508,7 +518,7 @@ class Project < ActiveRecord::Base
         file_archive_info(get_path(:data_files_dir), non_locking_data_file_list(exclude_files))
       end
     else
-      data_mgr.update_archive('zcf', get_path(:data_files_archive))
+      data_mgr.update_archive
 
       data_mgr.with_lock do
         {

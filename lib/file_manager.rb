@@ -1,11 +1,13 @@
 class FileManager
 
-	def initialize(name, base_dir)
+	def initialize(name, base_dir, args, archive)
 		@name = name.gsub(/\s+/, '_')
 		@base_dir = base_dir
 		@dirty_file = @base_dir + '.dirty_' + @name
 		@lock_file = @base_dir + '.lock_' + @name
 		@files = []
+    @args = args
+    @archive = archive
 	end
 
 	def add_dir(full_dir_path)
@@ -22,7 +24,8 @@ class FileManager
 	end
 
 	def dirty?
-		File.exists? @dirty_file
+		return true if File.exists? @dirty_file
+    !@files.empty? and !File.exists? @archive
 	end
 
 	def make_dirt
@@ -68,13 +71,13 @@ class FileManager
 		@files.map { |f| f[:dir] + '/' + File.basename(f[:file]) }
 	end
 
-	def update_archive(args, path)
+	def update_archive
     if @files.empty?
       clean_dirt
       return true
     end
 		return true unless dirty?
-    FileUtils.rm path if File.exists? path
+    FileUtils.rm @archive if File.exists? @archive
     tmp_dir = Dir.mktmpdir
     with_lock do
       @files.each do |f|
@@ -85,7 +88,7 @@ class FileManager
         FileUtils.cp_r(f[:file], file)
       end
       files = FileHelper.get_file_list(tmp_dir)
-      TarHelper.tar(args, path, files, tmp_dir)
+      TarHelper.tar(@args, @archive, files, tmp_dir)
       clean_dirt
     end
 	ensure
