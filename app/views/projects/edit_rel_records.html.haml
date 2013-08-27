@@ -64,5 +64,9 @@
           %form{:method => 'GET', :action => download_attached_file_path(@project), :id => 'download-attached-file'}
             %input{:type => 'hidden', :name => 'path', :value => path}
             %input{:type => 'hidden', :name => 'name', :value => name}
-            %a{:href => '#'}
-              = name
+            - if File.exists? @project.get_path(:project_dir) + path
+              %a{:href => '#'}
+                = name
+            - else
+              %p
+                = name

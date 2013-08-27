@@ -15,26 +15,26 @@ module ProjectsHelper
   end
   
   def get_files(attributes,type_index, value_index)
-    contained_files = []
-    counts = Hash.new(0)
     @files = {}
     for attribute in attributes
       if attribute[type_index].to_s.downcase.eql?("file")
         path = attribute[value_index]
         name = File.basename(path)[File.basename(path).to_s.index('_')+1..-1]
-        contained_files.each do |contained_file|
-          p contained_file
-          counts[contained_file] += 1
-        end
-        if(contained_files.include?(name))
-          file_name = File.basename(path,'.*')[File.basename(path,'*').to_s.index('_')+1..-1] + '(' + counts[name].to_s + ')' + File.extname(path)
-        else
-          file_name = name
-        end
-        @files[path] = file_name
-        contained_files.push(name)
+        @files[path] = name
       end
     end
+
+    name_dup = {}
+    @files.each do |path, name|
+      count = name_dup[name] = name_dup[name] ? name_dup[name] + 1 : 0
+      @files[path] = count == 0 ? name : duplicate_name(name, count)
+    end
+  end
+
+  def duplicate_name(name, count)
+    index = name.rindex('.')
+    return name unless index
+    name[0..index-1] + " (#{count})" + name[index..-1]
   end
 
   def compare_arch_entities(first_uuid,second_uuid,first_timestamp, second_timestamp, project)
