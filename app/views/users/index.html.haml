@@ -29,4 +29,4 @@
         - if can?(:update_role, User)
           = link_to 'Edit role', edit_role_user_path(user), :id => "edit_role_#{user.id}"
         - if can?(:destroy, User) and current_user.id != user.id
-          = link_to 'Delete', user, :id => "delete_#{user.id}", :method => :delete
+          = link_to 'Delete', user, :id => "delete_#{user.id}", :method => :delete, :confirm => "Are you sure you want to delete user #{user.first_name} #{user.last_name}?"
