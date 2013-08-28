@@ -195,7 +195,8 @@ class ProjectsController < ApplicationController
     @total = @project.db.total_arch_entity(type, show_deleted)
 
     query_params = ''
-    query_params << "?type=#{type}" if type
+    query_params << "?type=#{type}&" if type
+    query_params << "show_deleted=#{show_deleted}" if show_deleted
     @base_url = list_typed_arch_ent_records_path(@project) + query_params
 
     @entity_dirty_map = {}
@@ -238,7 +239,8 @@ class ProjectsController < ApplicationController
     @total = @project.db.total_search_arch_entity(query, show_deleted)
 
     query_params = ''
-    query_params << "?query=#{query}" if query
+    query_params << "?query=#{query}&" if query
+    query_params << "show_deleted=#{show_deleted}" if show_deleted
     @base_url = show_arch_ent_records_path(@project) + query_params
 
     @entity_dirty_map = {}
@@ -448,7 +450,8 @@ class ProjectsController < ApplicationController
     @total = @project.db.total_rel(type, show_deleted)
 
     query_params = ''
-    query_params << "?type=#{type}" if type
+    query_params << "?type=#{type}&" if type
+    query_params << "show_deleted=#{show_deleted}" if show_deleted
     @base_url = list_typed_rel_records_path(@project) + query_params
 
     @rel_dirty_map = {}
@@ -490,7 +493,8 @@ class ProjectsController < ApplicationController
     @total = @project.db.total_search_rel(query, show_deleted)
 
     query_params = ''
-    query_params << "?query=#{query}" if query
+    query_params << "?query=#{query}&" if query
+    query_params << "show_deleted=#{show_deleted}" if show_deleted
     @base_url = show_rel_records_path(@project) + query_params
 
     @rel_dirty_map = {}
