@@ -15,18 +15,17 @@
           %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamp[]', :id => session[:values][i-1]}
       %p
       = render :partial => 'edit_arch_ent_record', :locals => { uuid_array: @id_array, values: session[:values]}
-    .form-actions
-      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project), :class => 'btn'
-      = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn btn-inverse'
-      - if session[:show_deleted].nil?
-        = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
-      - else
-        = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
-      %form{:action => show_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}
-        %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
-        %input{:type => 'hidden', :value => session[:query], :name => 'query'}
-        - if session[:show_deleted].nil?
-          %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
   -else
     %p No Records Found
+  .form-actions
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project), :class => 'btn'
+    = link_to "Compare" ,compare_arch_ents_path(@project), :id => 'compare-button', :class => 'btn btn-inverse'
+    - if session[:show_deleted].nil?
+      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
+    - else
+      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+    %form{:action => show_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :value => session[:query], :name => 'query'}
+      - if session[:show_deleted].nil?
+        %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
