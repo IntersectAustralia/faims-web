@@ -5,9 +5,9 @@ Feature: Manage projects
 
   Background:
     And I have role "superuser"
-    And I have a user "georgina@intersect.org.au" with role "superuser"
+    And I have a user "faimsadmin@intersect.org.au" with role "superuser"
     And I am on the login page
-    And I am logged in as "georgina@intersect.org.au"
+    And I am logged in as "faimsadmin@intersect.org.au"
     And I should see "Logged in successfully."
     And I have a projects dir
 
@@ -520,7 +520,7 @@ Feature: Manage projects
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I have project "Project 1"
-    And I add "georgina@intersect.org.au" to "Project 1"
+    And I add "faimsadmin@intersect.org.au" to "Project 1"
     Then I follow "Show Projects"
     And I should be on the projects page
     And I click on "Project 1"

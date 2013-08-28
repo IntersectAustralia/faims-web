@@ -5,9 +5,9 @@ Feature: Project file manager
 
   Background:
     And I have role "superuser"
-    And I have a user "georgina@intersect.org.au" with role "superuser"
+    And I have a user "faimsadmin@intersect.org.au" with role "superuser"
     And I am on the login page
-    And I am logged in as "georgina@intersect.org.au"
+    And I am logged in as "faimsadmin@intersect.org.au"
     And I should see "Logged in successfully."
     And I have a projects dir
 

@@ -6,8 +6,8 @@ Feature: Manage users
   Background:
     Given I am the admin
       | first_name | last_name | email                     |
-      | Georgina   | Edwards   | georgina@intersect.org.au |
-    And I am logged in as "georgina@intersect.org.au"
+      | Georgina   | Edwards   | faimsadmin@intersect.org.au |
+    And I am logged in as "faimsadmin@intersect.org.au"
 
   Scenario: View users list
     Given I have users
@@ -90,4 +90,4 @@ Feature: Manage users
 
   Scenario: Cannot delete current user
     Given I follow "Show Users"
-    And I cannot delete user "georgina@intersect.org.au"
+    And I cannot delete user "faimsadmin@intersect.org.au"

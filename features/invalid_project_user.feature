@@ -5,7 +5,7 @@ Feature: Invalid project user
 
   Background:
     And I have role "superuser"
-    And I have a user "georgina@intersect.org.au" with role "superuser"
+    And I have a user "faimsadmin@intersect.org.au" with role "superuser"
     And I have a projects dir
 
   Scenario: Project user can edit entity records
