@@ -1,6 +1,7 @@
 - title @project.name + " - Relationship History"
 = breadcrumbs
 - show_rel_attributes_history(@project,@timestamps)
+- has_conflict = nil
 .content
   %form{:method => 'post', :action =>  revert_rel_to_timestamp_path(@project,@timestamps[0][0]), :class => 'history-form'}
     %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
@@ -21,6 +22,7 @@
                 - box_error = has_history_change(row_index, key) ? 'box-error' : nil
                 - if cell[:isforked]
                   - box_error = 'box-warning'
+                  - has_conflict = true
                 %td{:class => "history #{box_error}"}
                   %input{:type => 'radio', :name => 'data[' + key + '][selected]', :checked => row_index == 0 }
                   - if cell[:attributeid]
@@ -51,4 +53,5 @@
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_rel_records_path(@project,@timestamps[0][0]), :class => 'btn'
       %input{:type => 'submit', :value => 'Revert', :class => 'btn btn-inverse'}
-      %input{:type => 'submit', :value => 'Revert and Resolve Conflicts', :class => 'btn btn-inverse history-resolve-btn'}
+      - if has_conflict
+        %input{:type => 'submit', :value => 'Revert and Resolve Conflicts', :class => 'btn btn-inverse history-resolve-btn'}
