@@ -6,7 +6,8 @@ vacuum;
 CREATE TABLE User (
 	UserID					INTEGER PRIMARY KEY,
 	FName               	TEXT NOT NULL,
-	LName               	TEXT NOT NULL
+	LName               	TEXT NOT NULL,
+	Email                 TEXT NOT NULL
  );
 
 

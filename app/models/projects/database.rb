@@ -10,6 +10,10 @@ class Database
     @db = SpatialiteDB.new(@project.get_path(:db))
   end
 
+  def get_project_user_id(email)
+    return @db.get_first_value(WebQuery.get_project_user_id, email)
+  end
+
   def is_arch_ent_same_type(entity1, entity2)
      return @db.get_first_value(WebQuery.get_arch_entity_type, entity1) ==
          @db.get_first_value(WebQuery.get_arch_entity_type, entity2)
@@ -28,7 +32,7 @@ class Database
   def update_list_of_users(user, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp, userid)
-      @db.execute(WebQuery.update_list_of_users, user.id, user.first_name, user.last_name)
+      @db.execute(WebQuery.update_list_of_users, user.first_name, user.last_name, user.email)
       @project.db_mgr.make_dirt
     end
   end
@@ -892,7 +896,7 @@ class Database
     db.execute_batch(content)
     data_definition = XSLTParser.parse_data_schema(xml)
     db.execute_batch(data_definition)
-    db.execute("INSERT into user (userid,fname,lname) VALUES (" + admin_user.id.to_s + ",'" + admin_user.first_name.to_s + "','" + admin_user.last_name.to_s + "');" ) if admin_user
+    db.execute("INSERT into user (fname,lname,email) VALUES ('#{admin_user.first_name}','#{admin_user.last_name}','#{admin_user.email}');" ) if admin_user
   end
 
   def spatialite_db

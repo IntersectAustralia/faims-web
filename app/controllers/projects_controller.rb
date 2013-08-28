@@ -73,8 +73,8 @@ class ProjectsController < ApplicationController
   def authenticate_project_user
     @project = Project.find(params[:id])
     redirect_to :projects unless @project
-    userids = @project.db.get_list_of_users.map { |x| x.first }
-    unless userids.include? current_user.id
+    user_emails = @project.db.get_list_of_users.map { |x| x.last }
+    unless user_emails.include? current_user.email
       flash[:error] = "Only project users can edit the database. Please get a project user to add you to the project."
       redirect_to :projects
     end
@@ -109,18 +109,25 @@ class ProjectsController < ApplicationController
 
     if valid
 
+      has_exception = nil
       begin
         @project.save
         @project.update_settings(params)
         @project.create_project_from(session[:tmpdir], current_user)
-      rescue
+      rescue Exception => e
+        has_exception = e
         FileUtils.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
         @project.destroy
       ensure
         FileUtils.remove_entry_secure session[:tmpdir]
       end
 
-      flash[:notice] = t 'projects.new.success'
+      if has_exception.nil?
+        flash[:notice] = t 'projects.new.success'
+      else
+        flash[:error] = "Failed to create project."
+      end
+
       redirect_to :projects
     else
       @spatial_list = Database.get_spatial_ref_list
@@ -142,7 +149,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
-    @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose[0].include? x.id }
+    @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose.last.include? x.email }
   end
 
   def update_project_user
@@ -150,10 +157,10 @@ class ProjectsController < ApplicationController
 
     @project = Project.find(params[:id])
     user = User.find(params[:user_id])
-    @project.db.update_list_of_users(user, current_user.id)
+    @project.db.update_list_of_users(user, @project.db.get_project_user_id(current_user.email))
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
-    @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose[0].include? x.id }
+    @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose.last.include? x.email }
     flash[:notice] = 'Successfully updated user'
     render 'edit_project_user'
   end
@@ -299,7 +306,7 @@ class ProjectsController < ApplicationController
 
       ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      @project.db.update_arch_entity_attribute(uuid,current_user.id,vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
+      @project.db.update_arch_entity_attribute(uuid,@project.db.get_project_user_id(current_user.email),vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
 
       redirect_to edit_arch_ent_records_path(@project, uuid)
     end
@@ -315,7 +322,7 @@ class ProjectsController < ApplicationController
     end
 
     uuid = params[:uuid]
-    @project.db.delete_arch_entity(uuid,current_user.id)
+    @project.db.delete_arch_entity(uuid,@project.db.get_project_user_id(current_user.email))
 
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
@@ -335,7 +342,7 @@ class ProjectsController < ApplicationController
     end
 
     uuid = params[:uuid]
-    @project.db.undelete_arch_entity(uuid,current_user.id)
+    @project.db.undelete_arch_entity(uuid,@project.db.get_project_user_id(current_user.email))
 
     flash[:notice] = 'Successfully restored archaeological entity record'
     redirect_to edit_arch_ent_records_path(@project,uuid)
@@ -369,9 +376,9 @@ class ProjectsController < ApplicationController
       return
     end
 
-    @project.db.delete_arch_entity(params[:deleted_id],current_user.id)
+    @project.db.delete_arch_entity(params[:deleted_id],@project.db.get_project_user_id(current_user.email))
 
-    @project.db.insert_updated_arch_entity(params[:uuid],current_user.id, params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
+    @project.db.insert_updated_arch_entity(params[:uuid],@project.db.get_project_user_id(current_user.email), params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
       redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
@@ -400,10 +407,10 @@ class ProjectsController < ApplicationController
 
     timestamp =  @project.db.current_timestamp
 
-    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], current_user.id, entity[:timestamp], timestamp)
+    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], @project.db.get_project_user_id(current_user.email), entity[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], current_user.id, attribute[:attributeid], attribute[:timestamp], timestamp)
+      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], @project.db.get_project_user_id(current_user.email), attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
@@ -538,7 +545,7 @@ class ProjectsController < ApplicationController
 
       ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      @project.db.update_rel_attribute(relationshipid,current_user.id,vocab_id,attribute_id, freetext, certainty, ignore_errors)
+      @project.db.update_rel_attribute(relationshipid,@project.db.get_project_user_id(current_user.email),vocab_id,attribute_id, freetext, certainty, ignore_errors)
 
       redirect_to edit_rel_records_path(@project, relationshipid)
     end
@@ -563,10 +570,10 @@ class ProjectsController < ApplicationController
 
     timestamp = @project.db.current_timestamp
 
-    @project.db.revert_rel_to_timestamp(rel[:relationshipid], current_user.id, rel[:timestamp], timestamp)
+    @project.db.revert_rel_to_timestamp(rel[:relationshipid], @project.db.get_project_user_id(current_user.email), rel[:timestamp], timestamp)
 
     attributes.each do | attribute |
-      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], current_user.id, attribute[:attributeid], attribute[:timestamp], timestamp)
+      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], @project.db.get_project_user_id(current_user.email), attribute[:attributeid], attribute[:timestamp], timestamp)
     end
 
     # clear conflicts
@@ -584,7 +591,7 @@ class ProjectsController < ApplicationController
     end
 
     relationshipid = params[:relationshipid]
-    @project.db.delete_relationship(relationshipid,current_user.id)
+    @project.db.delete_relationship(relationshipid,@project.db.get_project_user_id(current_user.email))
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
@@ -602,7 +609,7 @@ class ProjectsController < ApplicationController
     end
 
     relationshipid = params[:relationshipid]
-    @project.db.undelete_relationship(relationshipid,current_user.id)
+    @project.db.undelete_relationship(relationshipid,@project.db.get_project_user_id(current_user.email))
     flash[:notice] = 'Successfully restored relationship record'
     redirect_to edit_rel_records_path(@project,relationshipid)
   end
@@ -645,7 +652,7 @@ class ProjectsController < ApplicationController
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
-    @project.db.delete_member(relationshipid,current_user.id,uuid)
+    @project.db.delete_member(relationshipid,@project.db.get_project_user_id(current_user.email),uuid)
     render :nothing => true
   end
 
@@ -687,7 +694,7 @@ class ProjectsController < ApplicationController
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
-    @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
+    @project.db.add_member(params[:relationshipid],@project.db.get_project_user_id(current_user.email),params[:uuid],params[:verb])
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?relntypeid='+params[:relntypeid]} }
     end
@@ -766,7 +773,7 @@ class ProjectsController < ApplicationController
 
   def add_rel_association
     @project = Project.find(params[:id])
-    @project.db.add_member(params[:relationshipid],current_user.id,params[:uuid],params[:verb])
+    @project.db.add_member(params[:relationshipid],@project.db.get_project_user_id(current_user.email),params[:uuid],params[:verb])
     respond_to do |format|
       format.json { render :json => {:result => 'success', :url => show_rel_association_path(@project,params[:uuid])} }
     end
@@ -835,9 +842,9 @@ class ProjectsController < ApplicationController
       render 'show'
       return
     end
-    @project.db.delete_relationship(params[:deleted_id],current_user.id)
+    @project.db.delete_relationship(params[:deleted_id],@project.db.get_project_user_id(current_user.email))
 
-    @project.db.insert_updated_rel(params[:rel_id],current_user.id, params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
+    @project.db.insert_updated_rel(params[:rel_id],@project.db.get_project_user_id(current_user.email), params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
     if session[:type]
       redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
@@ -883,7 +890,7 @@ class ProjectsController < ApplicationController
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
     @attribute_id = params[:attribute_id]
-    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, current_user.id)
+    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, @project.db.get_project_user_id(current_user.email))
     @attributes = @project.db.get_attributes_containing_vocab()
     flash[:notice] = 'Successfully updated vocabulary'
     render 'list_attributes_with_vocab'

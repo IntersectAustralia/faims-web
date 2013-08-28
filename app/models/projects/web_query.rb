@@ -1961,14 +1961,14 @@ EOF
 
   def self.get_list_of_users
     cleanup_query(<<EOF
-    select userid, fname, lname from user;
+    select userid, fname, lname, email from user;
 EOF
     )
   end
 
   def self.update_list_of_users
     cleanup_query(<<EOF
-    insert into user (userid, fname, lname) values (?,?,?);
+    insert into user (fname, lname, email) values (?,?,?);
 EOF
     )
   end
@@ -2025,6 +2025,13 @@ EOF
   def self.clear_relnvalue_fork
     cleanup_query(<<EOF
     update relnvalue set isforked = NULL where relationshipid = ?;
+EOF
+    )
+  end
+
+  def self.get_project_user_id
+    cleanup_query(<<EOF
+    select userid from user where email = ?
 EOF
     )
   end

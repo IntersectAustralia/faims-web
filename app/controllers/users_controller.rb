@@ -113,6 +113,7 @@ class UsersController < ApplicationController
       @user.activate
       @user.role = Role.find_by_name('user')
       @user.save
+
       flash[:notice] = "New user created."
       redirect_to :users
     else
