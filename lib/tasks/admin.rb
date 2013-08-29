@@ -6,6 +6,7 @@ def set_admin_password
     count = count + 1
     input = STDIN.gets.chomp
     admin = User.find_by_email('faimsadmin@intersect.org.au')
+    admin = User.new(first_name:'Faims', last_name:'Admin') unless admin
     admin.password = admin.password_confirmation = input
     if admin.valid?
       admin.save
