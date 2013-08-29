@@ -1,0 +1,9 @@
+- title "Edit Account Details"
+= breadcrumbs
+= simple_form_for(@user, :url => update_details_user_path(@user), :html => { :method => :put }) do |f|
+  = render "shared/error_messages", :target => @user
+  = f.input :first_name , :label => "First Name:"
+  = f.input :last_name  , :label => "Last Name:"
+  .form-actions
+    = link_to "<i class='icon-arrow-left'></i> Cancel".html_safe, user_path(@user), :class => "btn"
+    = f.submit "Update", :class => "btn btn-inverse"

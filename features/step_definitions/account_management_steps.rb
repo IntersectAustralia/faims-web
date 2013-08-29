@@ -6,7 +6,11 @@ end
 
 Given /^I have users$/ do |table|
   table.hashes.each do |hash|
-    FactoryGirl.create(:user, hash.merge(:status => 'A'))
+    r = Role.create(name: 'user')
+    u = User.new(hash.merge({password: "Pas$w0rd", password_confirmation: "Pas$w0rd"}))
+    u.activate
+    u.role = r
+    u.save!
   end
 end
 

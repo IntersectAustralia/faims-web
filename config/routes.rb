@@ -19,6 +19,10 @@ FaimsWeb::Application.routes.draw do
     member do
       get :edit_role
       put :update_role
+      get :edit_details
+      put :update_details
+      get :change_password
+      put :save_password
     end
   end
 

@@ -3,11 +3,16 @@ class Ability
 
   def initialize(user)
     # alias edit_role to update_role so that they don't have to be declared separately
-    alias_action :edit_role, :to => :update_role
+    alias_action :edit_role, :to => :update_user
+    alias_action :update_role, :to => :update_user
+    alias_action :edit_details, :to => :update_user
+    alias_action :update_details, :to => :update_user
+    alias_action :change_password, :to => :update_user
+    alias_action :save_password, :to => :update_user
     alias_action :index, :show, :to => :read
 
     if user.admin?
-      can [:read, :update_role, :new, :create, :destroy], User
+      can [:read, :update_user, :new, :create, :destroy], User
       can [:manage], Project
     else
       can [:read], User

@@ -137,4 +137,46 @@ class UsersController < ApplicationController
     redirect_to :users
   end
 
+  def edit_details
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+
+    @user = User.find(params[:id])
+  end
+
+  def update_details
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+
+    @user = User.find(params[:id])
+    @user.assign_attributes(params[:user])
+    if @user.valid?
+      @user.save
+      flash[:notice] = "Account details have been successfully updated."
+      redirect_to users_path
+    else
+      flash[:error] = "Please correct the errors in this form."
+      render 'edit_details'
+    end
+  end
+
+  def change_password
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+
+    @user = User.find(params[:id])
+  end
+
+  def save_password
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+
+    @user = User.find(params[:id])
+    @user.assign_attributes(params[:user])
+    if @user.valid?
+      @user.save
+      flash[:notice] = "Password has been updated."
+      redirect_to users_path
+    else
+      flash[:error] = "Please correct the errors in this form."
+      render 'change_password'
+    end
+  end
+
 end
