@@ -83,8 +83,8 @@ module FaimsWeb
     config.server_uploads_directory = Rails.root.join("uploads").to_s
 
     config.after_initialize do
-      FaimsWeb::Application.load_tasks
-      Rake::Task['projects:clear_lock'].invoke
+      require 'find'
+      Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ }
     end
   end
 end

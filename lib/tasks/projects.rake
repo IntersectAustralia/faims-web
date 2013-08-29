@@ -25,16 +25,9 @@ begin
     end
     desc 'Clear locks from all projects'
     task :clear_lock => :environment do
-      if ActiveRecord::Base.connection.table_exists? 'projects'
-        Project.all.each do |p|
-          p.db_mgr.clear_lock
-          p.settings_mgr.clear_lock
-          p.data_mgr.clear_lock
-          p.app_mgr.clear_lock
-          p.package_mgr.clear_lock
-        end
-      end
-    end
+    	require 'find'
+		Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ }
+	end
     desc 'Setup project assets'
     task :setup => :environment do
       Database.generate_spatial_ref_list
