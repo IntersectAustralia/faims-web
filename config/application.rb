@@ -84,7 +84,7 @@ module FaimsWeb
 
     config.after_initialize do
       require 'find'
-      Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ }
+      Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('projects')
     end
   end
 end
