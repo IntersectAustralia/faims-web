@@ -61,6 +61,14 @@ class Database
     nil
   end
 
+  def get_entity_identifier(uuid)
+    @db.get_first_value(WebQuery.get_entity_identifier, uuid)
+  end
+
+  def get_rel_identifier(relationshipid)
+    @db.get_first_value(WebQuery.get_rel_identifier, relationshipid)
+  end
+
   def load_arch_entity(type, limit, offset, show_deleted)
     if type.eql?('all')
       params = {

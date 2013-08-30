@@ -1972,6 +1972,49 @@ EOF
     )
   end
 
+  def self.get_entity_identifier
+    cleanup_query(<<EOF
+select group_concat(response, ', ') as response
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+  from latestNonDeletedArchEntIdentifiers
+  where uuid = ?
+  group by uuid, attributeid
+  order by epoch)
+group by uuid
+EOF
+    )
+  end
+
+  def self.get_rel_identifier
+    cleanup_query(<<EOF
+select group_concat(response, ', ') as response
+from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                             vocabname  || ' (' || freetext || ')',
+                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                             vocabname,
+                                             freetext), ' | ') as response, deleted, relntimestamp
+      from latestNonDeletedRelnIdentifiers
+      where relationshipid = ?
+      group by relationshipid, attributeid
+)
+group by relationshipid
+EOF
+    )
+  end
+
   private
 
   def self.cleanup_query(query)
