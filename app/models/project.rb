@@ -499,7 +499,6 @@ class Project < ActiveRecord::Base
     file_list.select { |f| !exclude_files.include? f }
   end
 
-  # NOTE this function behaves differently to add_app_file
   def add_data_file(file, path)
     file_path = File.join(get_path(:data_files_dir), path)
     return 'File already exists' if File.exists? file_path
@@ -510,6 +509,20 @@ class Project < ActiveRecord::Base
       data_mgr.make_dirt
     end
     nil
+  end
+
+  def add_batch_file(file)
+    begin
+      success = nil
+      data_mgr.with_lock do
+        success = `tar zxf #{file.path} -C #{get_path(:data_files_dir)}; echo $?`.strip
+        data_mgr.make_dirt
+      end
+      return nil if success == '0'
+      return 'Could not upload file. Please ensure file is a valid archive.'
+    rescue
+      return 'Could not upload file. Please ensure file is a valid archive.'
+    end
   end
 
   def data_file_archive_info(exclude_files = nil)

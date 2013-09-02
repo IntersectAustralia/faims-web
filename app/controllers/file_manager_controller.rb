@@ -112,4 +112,20 @@ class FileManagerController < ApplicationController
     end
   end
 
+  def batch_upload_file
+    @project = Project.find_by_id(params[:id])
+
+    if params[:project].nil? or params[:project][:file].nil?
+      redirect_to :action => 'file_list', :error => 'Please select a file to upload'
+    else
+      file = params[:project][:file]
+      error = @project.add_batch_file(file.tempfile)
+      if error
+        redirect_to :action => 'file_list', :error => error
+      else
+        redirect_to :action => 'file_list', :notice => 'File upload success'
+      end
+    end
+  end
+
 end

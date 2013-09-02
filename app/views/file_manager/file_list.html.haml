@@ -1,5 +1,12 @@
 - title 'Project Files'
 = breadcrumbs
+= simple_form_for @project, :url => batch_upload_file_path, :method => "post", :multipart => true do |f|
+  .well
+    %h3 Batch Upload
+    .btn-group
+      = f.file_field :file
+      .clear
+      = f.submit "Upload", :class => "btn btn-inverse", confirm: "Uploading a batch archive will overwrite files if any exist. Are you sure you want to upload?"
 - if @dir.nil? or @dir.empty?
   ='No files found'
 - else

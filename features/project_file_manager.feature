@@ -80,8 +80,8 @@ Feature: Project file manager
       | data | file1.tar.gz  |
       | data | file2.sqlite3 |
     Then I should see project files
-      | dir  | file          |
-      | data | file3.txt     |
+      | dir  | file      |
+      | data | file3.txt |
 
   @javascript
   Scenario: Delete project directories
@@ -107,12 +107,12 @@ Feature: Project file manager
     Given I have project "Project 1"
     And I am on upload data files page for Project 1
     And I upload project files
-      | dir  | file          |
-      | data | file1.tar.gz  |
-      | data | file1.tar.gz  |
+      | dir  | file         |
+      | data | file1.tar.gz |
+      | data | file1.tar.gz |
     Then I should see project files
-      | dir  | file          |
-      | data | file1.tar.gz  |
+      | dir  | file         |
+      | data | file1.tar.gz |
     And I should see "File already exists"
 
   @javascript
@@ -120,12 +120,12 @@ Feature: Project file manager
     Given I have project "Project 1"
     And I am on upload data files page for Project 1
     And I create project directories
-      | dir   | child_dir |
-      | data  | test1     |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
+      | data | test1     |
     Then I should see project directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     And I should see "Directory already exists"
 
   @javascript
@@ -133,23 +133,35 @@ Feature: Project file manager
     Given I have project "Project 1"
     And I am on upload data files page for Project 1
     And I create project directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     And I upload project files
       | dir   | file          |
       | test1 | file2.sqlite3 |
     And I delete project directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     Then I should see project files
       | dir   | file          |
       | test1 | file2.sqlite3 |
     And I should see "Cannot delete directory with files"
 
-  @javascript
-  Scenario: Cannot delete root directory
+  Scenario: I upload batch file
     Given I have project "Project 1"
     And I am on upload data files page for Project 1
+    And I pick file "batch.tar.gz" for "project_file"
+    And I press "Upload"
+    And I should see project files
+      | dir   | file  |
+      | test1 | test3 |
+      | data  | test2 |
+
+  Scenario: I upload batch file
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And I pick file "file3.txt" for "project_file"
+    And I press "Upload"
+    And I should see "Could not upload file. Please ensure file is a valid archive."
 
 
 
