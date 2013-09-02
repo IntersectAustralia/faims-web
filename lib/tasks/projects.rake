@@ -26,8 +26,8 @@ begin
     desc 'Clear locks from all projects'
     task :clear_lock => :environment do
     	require 'find'
-		Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('projects')
-	end
+		  Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('projects')
+	  end
     desc 'Setup project assets'
     task :setup => :environment do
       Database.generate_spatial_ref_list

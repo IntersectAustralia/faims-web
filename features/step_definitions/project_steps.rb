@@ -639,3 +639,64 @@ end
 Then /^I see attribute "([^"]*)" with "([^"]*)"$/ do |name, value|
   find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/div/label[contains(text(), 'Freetext')]/following-sibling::input").value.should == value
 end
+
+And /^I click "([^"]*)" for "([^"]*)"$/ do |button, dir|
+  find(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/a[contains(text(), '#{button}')]").click
+end
+
+And /^I attach project file "([^"]*)" for "([^"]*)"$/ do |file, dir|
+  all(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/div/form/div/following-sibling::div/input[1]").first.set Rails.root.join("features/assets/#{file}")
+  all(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/div/form/div/following-sibling::div/input[2]").first.click
+end
+
+Then /^I upload project files$/ do |table|
+  table.hashes.each do |hash|
+    step "I click \"upload file\" for \"#{hash[:dir]}\""
+    step "I attach project file \"#{hash[:file]}\" for \"#{hash[:dir]}\""
+  end
+end
+
+Then /^I should see project files$/ do |table|
+  table.hashes.each do |hash|
+    page.should have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/li/a[contains(text(), '#{hash[:file]}')]")
+  end
+end
+
+And /^I enter directory "([^"]*)" for "([^"]*)"$/ do |child_dir, dir|
+  all(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/div/form/div/following-sibling::div/input[1]").last.set child_dir
+  all(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/div/form/div/following-sibling::div/input[2]").last.click
+end
+
+Then /^I create project directories$/ do |table|
+  table.hashes.each do |hash|
+    step "I click \"create directory\" for \"#{hash[:dir]}\""
+    step "I enter directory \"#{hash[:child_dir]}\" for \"#{hash[:dir]}\""
+  end
+end
+
+Then /^I should see project directories$/ do |table|
+  table.hashes.each do |hash|
+    page.should have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='#{hash[:child_dir]}']")
+  end
+end
+
+And /^I delete project file "([^"]*)" for "([^"]*)"$/ do |file, dir|
+  all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a")
+  all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").first.click
+end
+
+Then /^I delete project files$/ do |table|
+  table.hashes.each do |hash|
+    step "I delete project file \"#{hash[:file]}\" for \"#{hash[:dir]}\""
+  end
+end
+
+And /^I delete project directory "([^"]*)" for "([^"]*)"$/ do |child_dir, dir|
+  find(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='#{child_dir}']/../following-sibling::span/a").click
+end
+
+Then /^I delete project directories$/ do |table|
+  table.hashes.each do |hash|
+    step "I delete project directory \"#{hash[:child_dir]}\" for \"#{hash[:dir]}\""
+  end
+end
