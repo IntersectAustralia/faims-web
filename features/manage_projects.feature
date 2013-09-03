@@ -756,7 +756,7 @@ Feature: Manage projects
       | small Below AboveBelow: Small 3 |
       | small Below AboveBelow: Small 4 |
 
-  Scenario: Update arch entity attribute causes validation error    s
+  Scenario: Update arch entity attribute causes validation error
 # TODO
 
   Scenario: Update arch entity attribute clears validation error
