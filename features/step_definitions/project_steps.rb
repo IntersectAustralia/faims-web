@@ -688,6 +688,7 @@ end
 Then /^I delete project files$/ do |table|
   table.hashes.each do |hash|
     step "I delete project file \"#{hash[:file]}\" for \"#{hash[:dir]}\""
+    step 'I confirm'
   end
 end
 
@@ -698,6 +699,7 @@ end
 Then /^I delete project directories$/ do |table|
   table.hashes.each do |hash|
     step "I delete project directory \"#{hash[:child_dir]}\" for \"#{hash[:dir]}\""
+    step 'I confirm'
   end
 end
 

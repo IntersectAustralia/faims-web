@@ -22,7 +22,7 @@
                     = f.text_field 'dir', :placeholder => "Directory Name..."
                     = f.submit 'Submit', :class => 'btn create-submit-btn btn-primary'
                     = link_to 'Cancel', '', :class => 'btn create-cancel-btn'
-            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_file_path({path: File.join(name)}), :class => "btn btn-warning")
+            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_file_path({path: File.join(name)}), :class => "btn btn-warning", confirm: "Are you sure you want to delete directory?")
 
       - else
         %h3
@@ -45,7 +45,7 @@
                     = f.text_field 'dir', :placeholder => "Directory Name..."
                     = f.submit 'Submit', :class => 'btn create-submit-btn btn-primary'
                     = link_to 'Cancel', '', :class => 'btn create-cancel-btn'
-            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_file_path({path: File.join(name)}), :class => "btn btn-warning")
+            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_file_path({path: File.join(name)}), :class => "btn btn-warning", confirm: "Are you sure you want to delete directory?")
         .clear
     %ul.dir-body
       - files.each do |file|
@@ -53,5 +53,5 @@
           = render :partial => 'dir_list', :locals => {dir:file}
         - else
           %li.inline= link_to(File.basename(file), download_project_file_path({path: File.join(name, file)}))
-          = link_to(raw('<i class="delete-icon icon-remove-sign"></i>'), delete_project_file_path({path: File.join(name, file)}))
+          = link_to(raw('<i class="delete-icon icon-remove-sign"></i>'), delete_project_file_path({path: File.join(name, file)}), confirm: "Are you sure you want to delete file?")
           .clear
