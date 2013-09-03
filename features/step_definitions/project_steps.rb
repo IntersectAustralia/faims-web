@@ -700,3 +700,7 @@ Then /^I delete project directories$/ do |table|
     step "I delete project directory \"#{hash[:child_dir]}\" for \"#{hash[:dir]}\""
   end
 end
+
+And /^I confirm$/ do
+  page.driver.browser.switch_to.alert.accept
+end

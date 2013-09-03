@@ -592,7 +592,6 @@ Feature: Manage projects
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
-    And I follow "Delete"
     Then I should not see records
       | name    |
       | Small 1 |
@@ -616,6 +615,7 @@ Feature: Manage projects
     Then I follow "Small 3"
     And I wait
     Then I follow "Delete"
+    And I confirm
     And I wait
     Then I follow "Show Deleted"
     And I wait
@@ -715,6 +715,7 @@ Feature: Manage projects
     Then I follow "AboveBelow 2"
     And I wait
     Then I follow "Delete"
+    And I confirm
     And I wait
     Then I follow "Show Deleted"
     And I wait

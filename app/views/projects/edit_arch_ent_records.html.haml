@@ -16,7 +16,7 @@
   - if !@deleted[1].nil?
     = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn btn-warning', :id => 'undelete-record'
   - else
-    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn btn-warning', :id => 'delete-record'
+    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project,session[:uuid]), :class => 'btn btn-warning', :id => 'delete-record', confirm: "Are you sure you want to delete this record?"
   = link_to "Show Relationship Association", show_rel_association_path(@project,session[:uuid]) + "?offset=0", :class => 'btn'
   = link_to "Show History", show_arch_ent_history_path(@project,session[:uuid]), :class => 'btn'
   - if !@related_arch_ents.empty?

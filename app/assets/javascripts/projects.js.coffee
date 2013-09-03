@@ -211,25 +211,6 @@ compare_records = ->
   )
   return
 
-delete_undelete_records = ->
-  $('#delete-record').one("click",
-    ->
-      $(this).click(
-        =>
-          return false
-      )
-      return
-  )
-  $('#undelete-record').one("click",
-  ->
-    $(this).click(
-      =>
-        return false
-    )
-    return
-  )
-  return
-
 download_attached_file = ->
   $('form[id*=download-attached-file]').each(
     ->
@@ -454,7 +435,6 @@ $(document).ready(
     compare_records()
     compare_input_checked_handler()
     aent_rel_management()
-    delete_undelete_records()
     download_attached_file()
     ignore_error_records()
     merge_record_management()
