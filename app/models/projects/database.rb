@@ -545,7 +545,7 @@ class Database
   end
 
   def delete_relationship(relationshipid, userid)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp, userid)
       params = {
           userid:userid,
@@ -559,7 +559,7 @@ class Database
   end
 
   def undelete_relationship(relationshipid, userid)
-    @project.with_lock do
+    @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp, userid)
       params = {
           userid:userid,
@@ -705,7 +705,7 @@ class Database
 
       @db.execute(WebQuery.delete_arch_entity_relationship, params)
 
-      @project.make_dirt
+      @project.db_mgr.make_dirt
     end
   end
 
@@ -777,21 +777,15 @@ class Database
   end
 
   def create_app_database(toDB)
-    #@project.with_lock do
     fromDB = @project.get_path(:db)
     FileUtils.cp(fromDB,toDB)
-    #end
   end
 
   def create_app_database_from_version(toDB, version)
-    #@project.with_lock do
-
-      generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
-      FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB # clone template db
+    generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB # clone template db
       
-      @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
-
-    #end
+    @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
   end
 
   def validate_reln_value(relationshipid, relnvaluetimestamp, attributeid)

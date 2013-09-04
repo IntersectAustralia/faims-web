@@ -180,7 +180,18 @@ Then /^I should see json for "([^"]*)" version (.*) db with version (.*)$/ do |n
 end
 
 When /^I click on "([^"]*)"$/ do |name|
-  find(:xpath, "//a[contains(text(), \"#{name}\")]").click
+  if all(:xpath, "//input[@value = \"#{name}\"]").size > 0
+    find(:xpath, "//input[@value = \"#{name}\"]").click
+  else
+    (1..3).each do
+      if all(:xpath, "//a[contains(text(), \"#{name}\")]").size == 0
+        sleep(1)
+      else
+        find(:xpath, "//a[contains(text(), \"#{name}\")]").click
+        break
+      end
+    end
+  end
 end
 
 Then /^I should see bad request page$/ do
@@ -467,7 +478,15 @@ And(/^I enter "([^"]*)" and submit the form$/) do |keywords|
 end
 
 And(/^I select the first record$/) do
-  first('.inner > li > a').click
+  if all('.inner > li > a').size > 0
+    first('.inner > li > a').click
+  else
+    first('.inner > input').click
+  end
+end
+
+And(/^I delete the first record$/) do
+  first('#remove-member > a').click
 end
 
 Then /^I should see attached files$/ do |table|
@@ -501,6 +520,7 @@ end
 
 When(/^I select "([^"]*)" for the attribute$/) do |name|
   select name, :from => 'attribute_id'
+  sleep(1)
 end
 
 Then(/^I should see vocabularies$/) do |table|
@@ -513,10 +533,12 @@ end
 
 When(/^I modify vocabulary "([^"]*)" with "([^"]*)"$/) do |original, value|
   find(:xpath, "//input[@value='#{original}']").set value
+  sleep(1)
 end
 
-When(/^I add "([^"]*)" to the vobulary list$/) do |value|
+When(/^I add "([^"]*)" to the vocabulary list$/) do |value|
   all(:xpath, "//input[@name='vocab_name[]']").last.set value
+  sleep(1)
 end
 
 When(/^Project "([^"]*)" should have the same file "([^"]*)"$/) do |project_name, file_name|
@@ -566,6 +588,14 @@ When(/^I should see related arch entities$/) do |table|
   table.hashes.each do |hash|
     hash.values.each do |value|
       page.should have_xpath("//a[contains(text(),\"#{value}\")]")
+    end
+  end
+end
+
+When(/^I should not see related arch entities$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should_not have_xpath("//a[contains(text(),\"#{value}\")]")
     end
   end
 end

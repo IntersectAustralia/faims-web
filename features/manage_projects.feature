@@ -102,9 +102,7 @@ Feature: Manage projects
     Then I should be on the projects page
     And I follow "Create Project"
     Then I should be on the new projects page
-    And I wait
     And I fill in "Project Name" with "Project 2"
-    And I wait
     And I pick file "<value>" for "<field>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
@@ -125,7 +123,6 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "project.tar.bz2" for "Project File"
     And I press "Upload"
@@ -137,7 +134,6 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "project.tar.bz2" for "Project File"
     And I press "Upload"
@@ -151,7 +147,6 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "project_corrupted1.tar.bz2" for "Project File"
     And I press "Upload"
@@ -161,7 +156,6 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "project_corrupted2.tar.bz2" for "Project File"
     And I press "Upload"
@@ -171,7 +165,6 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "project.tar" for "Project File"
     And I press "Upload"
@@ -182,7 +175,7 @@ Feature: Manage projects
     And I have project "Project 1"
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I click on "Project 1"
+    And I follow "Project 1"
     Then I follow "Edit Project"
     And I fill in "<field>" with "<value>"
     And I press "Update"
@@ -196,7 +189,7 @@ Feature: Manage projects
     And I have project "Project 1"
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I click on "Project 1"
+    And I follow "Project 1"
     Then I follow "Edit Project"
     And I fill in "<field>" with "<value>"
     And I press "Update"
@@ -211,7 +204,7 @@ Feature: Manage projects
     And I have project "Project 1"
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I click on "Project 1"
+    And I follow "Project 1"
     Then I follow "Edit Project"
     And I press "Update"
     Then I should see "Successfully updated project"
@@ -221,7 +214,7 @@ Feature: Manage projects
     And I have project "Project 1"
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I click on "Project 1"
+    And I follow "Project 1"
     Then I follow "Edit Project"
     And I pick file "ui_schema.xml" for "UI Schema"
     And I pick file "validation_schema.xml" for "Validation Schema"
@@ -235,7 +228,7 @@ Feature: Manage projects
     And I have project "Project 1"
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I click on "Project 1"
+    And I follow "Project 1"
     Then I follow "Edit Project"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Update"
@@ -248,11 +241,8 @@ Feature: Manage projects
     And I follow "Show Projects"
     Then I should be on the projects page
     And I click on "Project 2"
-    And I wait
     Then I follow "Edit Project"
-    And I wait
     And I pick file "<value>" for "<field>"
-    And I wait
     And I press "Update"
     Then I should see "<field>" with error "<error>"
   Examples:
@@ -276,7 +266,7 @@ Feature: Manage projects
     Given I have project "Project 1"
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I click on "Project 1"
+    And I follow "Project 1"
     And I follow "Download Project"
     Then I automatically archive project package "Project 1"
     Then I automatically download project package "Project 1"
@@ -286,7 +276,6 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Test.tar.bz2" for "Project File"
     And I press "Upload"
@@ -297,15 +286,14 @@ Feature: Manage projects
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
-      | name                                  |
-      | Screenshot_2013-04-09-10-32-04.png    |
+      | name                                   |
+      | Screenshot_2013-04-09-10-32-04.png     |
       | Screenshot_2013-04-09-10-32-04 (1).png |
 
   Scenario: See attached files for arch ent if some files don't exist
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Test.tar.bz2" for "Project File"
     And I press "Upload"
@@ -316,13 +304,13 @@ Feature: Manage projects
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
-      | name                                  |
-      | Screenshot_2013-04-09-10-32-04.png    |
+      | name                                   |
+      | Screenshot_2013-04-09-10-32-04.png     |
       | Screenshot_2013-04-09-10-32-04 (1).png |
     Then I remove all files for "Sync Test"
     Then I should see non attached files
-      | name                                  |
-      | Screenshot_2013-04-09-10-32-04.png    |
+      | name                                   |
+      | Screenshot_2013-04-09-10-32-04.png     |
       | Screenshot_2013-04-09-10-32-04 (1).png |
 
 
@@ -348,20 +336,18 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Test.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
     And I click on "Sync Test"
-    And I wait
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
-      | name                                  |
-      | Screenshot_2013-04-29-16-38-51.png    |
+      | name                                   |
+      | Screenshot_2013-04-29-16-38-51.png     |
       | Screenshot_2013-04-29-16-38-51 (1).png |
     Then I remove all files for "Sync Test"
 
@@ -369,25 +355,23 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Test.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
     And I click on "Sync Test"
-    And I wait
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
-      | name                                  |
-      | Screenshot_2013-04-29-16-38-51.png    |
+      | name                                   |
+      | Screenshot_2013-04-29-16-38-51.png     |
       | Screenshot_2013-04-29-16-38-51 (1).png |
     Then I remove all files for "Sync Test"
     Then I should see non attached files
-      | name                                  |
-      | Screenshot_2013-04-29-16-38-51.png    |
+      | name                                   |
+      | Screenshot_2013-04-29-16-38-51.png     |
       | Screenshot_2013-04-29-16-38-51 (1).png |
 
 #  @javascript
@@ -424,8 +408,7 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "New project created."
     And I should be on the projects page
-    And I click on "Project 1"
-    And I wait
+    And I follow "Project 1"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see vocabularies
@@ -450,11 +433,11 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "New project created."
     And I should be on the projects page
-    And I click on "Project 1"
-    Then I click on "Edit Vocabulary"
+    And I follow "Project 1"
+    Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
-    Then I follow "Update"
+    Then I click on "Update"
     And I should see "Successfully updated vocabulary"
     And I should see vocabularies
       | name |
@@ -469,7 +452,6 @@ Feature: Manage projects
     Then I should be on the projects page
     And I follow "Create Project"
     Then I should be on the new projects page
-    And I wait
     And I fill in "Name" with "Project 1"
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
@@ -479,15 +461,12 @@ Feature: Manage projects
     And I press "Submit"
     Then I should see "New project created."
     And I should be on the projects page
-    And I click on "Project 1"
-    And I wait
+    And I follow "Project 1"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
-    And I wait
-    Then I follow "Insert"
-    And I wait
-    And I add "Red" to the vobulary list
-    Then I follow "Update"
+    Then I click on "Insert"
+    And I add "Red" to the vocabulary list
+    Then I click on "Update"
     And I should see "Successfully updated vocabulary"
     And I should see vocabularies
       | name  |
@@ -505,8 +484,7 @@ Feature: Manage projects
     And I have project "Project 1"
     Then I follow "Show Projects"
     And I should be on the projects page
-    And I click on "Project 1"
-    And I wait
+    And I follow "Project 1"
     Then I follow "Edit Users"
     And I should have user for selection
       | name        |
@@ -523,11 +501,10 @@ Feature: Manage projects
     And I add "faimsadmin@intersect.org.au" to "Project 1"
     Then I follow "Show Projects"
     And I should be on the projects page
-    And I click on "Project 1"
-    And I wait
+    And I follow "Project 1"
     Then I follow "Edit User"
     And I select "User1 Last1" from the user list
-    Then I follow "Add"
+    Then I click on "Add"
     And I should see "Successfully updated user"
     And I should have user for project
       | first_name | last_name |
@@ -538,14 +515,12 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
     Then I should see records
@@ -559,17 +534,15 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
-    And I follow "Show Deleted"
+    And I click on "Show Deleted"
     Then I should see records
       | name    |
       | Small 1 |
@@ -577,21 +550,22 @@ Feature: Manage projects
       | Small 3 |
       | Small 4 |
 
+  @javascript
   Scenario: Delete arch entity
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
+    And I click on "Delete"
+    And I confirm
     Then I should not see records
       | name    |
       | Small 1 |
@@ -602,30 +576,23 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
-    And I wait
-    Then I follow "Delete"
+    Then I click on "Delete"
     And I confirm
-    And I wait
-    Then I follow "Show Deleted"
-    And I wait
+    Then I click on "Show Deleted"
     Then I follow "Small 3"
-    And I wait
-    Then I follow "Restore"
+    Then I click on "Restore"
     And I should see "Successfully restored archaeological entity record"
     Then I follow "Back"
-    And I wait
-    Then I follow "Hide Deleted"
+    Then I click on "Hide Deleted"
     And I should not see records
       | name    |
       | Small 1 |
@@ -637,14 +604,12 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     Then I should see records
@@ -658,17 +623,15 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
-    And I follow "Show Deleted"
+    And I click on "Show Deleted"
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -676,22 +639,22 @@ Feature: Manage projects
       | AboveBelow 3 |
       | AboveBelow 4 |
 
+  @javascript
   Scenario: Delete relationship
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     Then I follow "AboveBelow 2"
-    And I follow "Delete"
+    And I click on "Delete"
+    And I confirm
     Then I should not see records
       | name         |
       | AboveBelow 2 |
@@ -702,30 +665,23 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Relationship Records"
     And I enter "" and submit the form
     Then I follow "AboveBelow 2"
-    And I wait
-    Then I follow "Delete"
+    Then I click on "Delete"
     And I confirm
-    And I wait
-    Then I follow "Show Deleted"
-    And I wait
+    Then I click on "Show Deleted"
     Then I follow "AboveBelow 2"
-    And I wait
-    Then I follow "Restore"
+    Then I click on "Restore"
     And I should see "Successfully restored relationship record"
     Then I follow "Back"
-    And I wait
-    Then I follow "Hide Deleted"
+    Then I click on "Hide Deleted"
     And I should not see records
       | name         |
       | AboveBelow 4 |
@@ -737,20 +693,16 @@ Feature: Manage projects
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
-    And I wait
     And I follow "Upload Project"
     And I pick file "Sync_Example.tar.bz2" for "Project File"
     And I press "Upload"
     Then I should see "Project has been successfully uploaded"
     And I should be on the projects page
-    And I click on "Sync Example"
-    And I wait
+    And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 2"
-    And I wait
     Then I follow "small Below AboveBelow: Small 3"
-    And I wait
     Then I follow "Back"
     And I should see related arch entities
       | name                            |
@@ -794,19 +746,156 @@ Feature: Manage projects
 # TODO
 
   Scenario: Show relationship association for arch ent
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    Then I follow "Small 2"
+    And I follow "Show Relationship Association"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
 
+  @javascript
   Scenario: Remove relationship association from arch ent
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    Then I follow "Small 2"
+    And I follow "Show Relationship Association"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    Then I delete the first record
+    And I confirm
+    Then I should see records
+      | name         |
+      | AboveBelow 2 |
+    And I should not see records
+      | name         |
+      | AboveBelow 1 |
 
+  @javascript
   Scenario: Add relationship association to arch ent
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    Then I follow "Small 2"
+    And I follow "Show Relationship Association"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I press "Add Member"
+    And I click on "Search"
+    And I select the first record
+    And I press "Add Member"
+    Then I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+      | AboveBelow 3 |
 
   Scenario: Show arch ent member for relationship
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Relationship Records"
+    And I press "Filter"
+    Then I follow "AboveBelow 1"
+    And I follow "Show Relationship Member"
+    And I wait
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
 
+  @javascript
   Scenario: Remove arch ent member from relationship
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Relationship Records"
+    And I press "Filter"
+    Then I follow "AboveBelow 1"
+    And I follow "Show Relationship Member"
+    And I wait
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    Then I delete the first record
+    And I confirm
+    Then I should see records
+      | name    |
+      | Small 4 |
+    And I should not see records
+      | name    |
+      | Small 2 |
 
+  @javascript
   Scenario: Add arch ent member to relationship
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Relationship Records"
+    And I press "Filter"
+    Then I follow "AboveBelow 1"
+    And I follow "Show Relationship Member"
+    And I wait
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    And I press "Add Member"
+    And I click on "Search"
+    And I select the first record
+    And I press "Add Member"
+    Then I should see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+      | Small 4 |

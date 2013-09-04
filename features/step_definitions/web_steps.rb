@@ -60,7 +60,14 @@ When /^(?:|I )press "([^"]*)"$/ do |button|
 end
 
 When /^(?:|I )follow "([^"]*)"$/ do |link|
-  first(:css, "a:contains('#{link}')").click
+  (1..3).each do
+    if all(:css, "a:contains('#{link}')").size == 0
+      sleep(1)
+    else
+      first(:css, "a:contains('#{link}')").click
+      break
+    end
+  end
 end
 
 When /^(?:|I )fill in "([^"]*)" with "([^"]*)"$/ do |field, value|

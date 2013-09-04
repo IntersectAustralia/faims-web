@@ -5,8 +5,8 @@
     .records
       - for relationships in @relationships
         %ul.inner
-          %input{:type => 'button',:id => 'remove-member', :class => 'remove-member ui-icon ui-icon-circle-minus', :src=> remove_arch_ent_member_path(@project)+'?relationshipid='+relationships[0].to_s+'&uuid='+session[:uuid].to_s}
           %li
+            #remove-member.pull-left= link_to "<i class='ui-icon ui-icon-circle-minus'></i>".html_safe, remove_arch_ent_member_path(@project)+'?relationshipid='+relationships[0].to_s+'&uuid='+session[:uuid].to_s
             %a{:href => edit_rel_records_path(@project,relationships[0])}
               =relationships[1].to_s
       .paging.search

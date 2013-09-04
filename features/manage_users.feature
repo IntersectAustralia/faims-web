@@ -26,7 +26,7 @@ Feature: Manage users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I follow "Show Users"
-    And I follow "Add User"
+    And I click on "Add User"
     And I fill in "First Name" with "User3"
     And I fill in "Last Name" with "Last3"
     And I fill in "Email" with "user3@intersect.org.au"
@@ -45,8 +45,7 @@ Feature: Manage users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I follow "Show Users"
-    And I follow "Add User"
-    And I wait
+    And I click on "Add User"
     And I fill in "<field>" with "<value>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
@@ -65,8 +64,7 @@ Feature: Manage users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I follow "Show Users"
-    And I follow "Add User"
-    And I wait
+    And I click on "Add User"
     And I fill in "<field1>" with "<value1>"
     And I fill in "<field2>" with "<value2>"
     And I press "Submit"
@@ -77,6 +75,7 @@ Feature: Manage users
     | Password | Password Confirmation | dd       | dd       | is too short (minimum is 6 characters)                                                                                             |
     | Password | Password Confirmation | dddddddd | dddddddd | must be between 6 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one symbol |
 
+  @javascript
   Scenario: Delete user
     Given I have users
       | first_name | last_name | email                  |
@@ -84,6 +83,7 @@ Feature: Manage users
       | User2      | Last2     | user2@intersect.org.au |
     And I follow "Show Users"
     And I delete user "user2@intersect.org.au"
+    And I confirm
     Then I should see users
       | first_name | last_name | email                  |
       | User1      | Last1     | user1@intersect.org.au |

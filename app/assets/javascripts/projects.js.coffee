@@ -114,12 +114,13 @@ compare_input_checked_handler = ->
   return
 
 aent_rel_management = ->
-  $('input#remove-member').each(
+  $('#remove-member').each(
     -> $(this).click(
       ->
-        $.post $(this).attr('src')
-        $(this).parent().remove()
-        return
+        if confirm("Are you sure you want to delete association?")
+          $.post $(this).find('a').attr('href')
+          $(this).parent('li').remove()
+        return false
     )
   )
 
