@@ -1,5 +1,10 @@
 class AndroidController < ApplicationController
 
+  ANDROID_USER = 'faimsandroidapp'
+  ANDROID_TOKEN = 'YiQIeV39sdhb2ltRmOyGN'
+
+  http_basic_authenticate_with name: ANDROID_USER, password: ANDROID_TOKEN
+
   before_filter :check_valid_project
   skip_before_filter :check_valid_project, :only => [:projects]
 

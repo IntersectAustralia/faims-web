@@ -711,8 +711,14 @@ Then /^I should see project directories$/ do |table|
 end
 
 And /^I delete project file "([^"]*)" for "([^"]*)"$/ do |file, dir|
-  all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a")
-  all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").first.click
+  (1..3).each do
+    if all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").size == 0
+      sleep(1)
+    else
+      all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").first.click
+      break
+    end
+  end
 end
 
 Then /^I delete project files$/ do |table|
@@ -735,4 +741,21 @@ end
 
 And /^I confirm$/ do
   page.driver.browser.switch_to.alert.accept
+end
+
+And /^I perform HTTP authentication$/ do
+  username = AndroidController::ANDROID_USER
+  password = AndroidController::ANDROID_TOKEN
+  if page.driver.respond_to?(:basic_auth)
+    #puts 'Responds to basic_auth'
+    page.driver.basic_auth(username, password)
+  elsif page.driver.respond_to?(:basic_authorize)
+    #puts 'Responds to basic_authorize'
+    page.driver.basic_authorize(username, password)
+  elsif page.driver.respond_to?(:browser) && page.driver.browser.respond_to?(:basic_authorize)
+    #puts 'Responds to browser_basic_authorize'
+    page.driver.browser.basic_authorize(username, password)
+  else
+    raise "I don't know how to log in!"
+  end
 end
