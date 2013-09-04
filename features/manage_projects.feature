@@ -253,15 +253,6 @@ Feature: Manage projects
     | Validation Schema | data_schema_error1.xml     | invalid xml at line             |
     | Arch16n           | faims_Project_2.properties | invalid properties file at line |
 
-  Scenario: Pull a list of projects
-    Given I have projects
-      | name      |
-      | Project 1 |
-      | Project 2 |
-      | Project 3 |
-    And I am on the android projects page
-    Then I should see json for projects
-
   Scenario: Download package
     Given I have project "Project 1"
     And I follow "Show Projects"

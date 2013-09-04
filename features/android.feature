@@ -424,3 +424,12 @@ Feature: Android
   Scenario: Cannot upload data files if project doesn't exist
     Given I have project "Project 1"
     And I upload app files "test_files.tar.gz" to Project 2 fails
+
+  Scenario: Pull a list of projects
+    Given I have projects
+      | name      |
+      | Project 1 |
+      | Project 2 |
+      | Project 3 |
+    And I requested the android projects page
+    Then I should see json for projects
