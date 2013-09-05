@@ -437,6 +437,7 @@ class Project < ActiveRecord::Base
   end
 
   def server_file_upload(file)
+    # don't need to lock server files as server files cannot be downloaded
     TarHelper.untar('xfz', file.path, get_path(:server_files_dir))
   end
 

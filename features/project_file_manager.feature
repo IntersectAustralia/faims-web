@@ -82,6 +82,10 @@ Feature: Project file manager
     Then I should see project files
       | dir  | file      |
       | data | file3.txt |
+    And I should not see project files
+      | dir  | file          |
+      | data | file1.tar.gz  |
+      | data | file2.sqlite3 |
 
   @javascript
   Scenario: Delete project directories
@@ -101,6 +105,10 @@ Feature: Project file manager
       | dir   | child_dir |
       | data  | test1     |
       | test1 | test2     |
+    Then I should not see project directories
+      | dir   | child_dir |
+      | test2 | test3     |
+      | data  | test4     |
 
   @javascript
   Scenario: Cannot add project file if file already exists
@@ -116,6 +124,19 @@ Feature: Project file manager
     And I should see "File already exists"
 
   @javascript
+  Scenario: Cannot add project file if files locked
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And files are locked for "Project 1"
+    And I upload project files
+      | dir  | file         |
+      | data | file1.tar.gz |
+    Then I should not see project files
+      | dir  | file         |
+      | data | file1.tar.gz |
+    And I should see "Could not upload file. Files are currently locked"
+
+  @javascript
   Scenario: Cannot add directory if directory already exists
     Given I have project "Project 1"
     And I am on upload data files page for Project 1
@@ -127,6 +148,19 @@ Feature: Project file manager
       | dir  | child_dir |
       | data | test1     |
     And I should see "Directory already exists"
+
+  @javascript
+  Scenario: Cannot add directory if directory if files are locked
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And files are locked for "Project 1"
+    And I create project directories
+      | dir  | child_dir |
+      | data | test1     |
+    Then I should not see project directories
+      | dir  | child_dir |
+      | data | test1     |
+    And I should see "Could not create directory. Files are currently locked"
 
   @javascript
   Scenario: Cannot delete dir if dir files in directory
@@ -144,7 +178,42 @@ Feature: Project file manager
     Then I should see project files
       | dir   | file          |
       | test1 | file2.sqlite3 |
+    Then I should see project directories
+      | dir   | child_dir |
+      | data  | test1     |
     And I should see "Cannot delete directory with files"
+
+  @javascript
+  Scenario: Cannot delete file if files are locked
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And I upload project files
+      | dir  | file          |
+      | data | file1.tar.gz  |
+    And files are locked for "Project 1"
+    And I delete project files
+      | dir  | file          |
+      | data | file1.tar.gz  |
+    Then I should see project files
+      | dir  | file          |
+      | data | file1.tar.gz  |
+    And I should see "Could not delete file. Files are currently locked"
+
+  @javascript
+  Scenario: Cannot delete directory if files are locked
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And I create project directories
+      | dir   | child_dir |
+      | data  | test1     |
+    And files are locked for "Project 1"
+    And I delete project directories
+      | dir   | child_dir |
+      | data  | test1     |
+    Then I should see project directories
+      | dir   | child_dir |
+      | data  | test1     |
+    And I should see "Could not delete directory. Files are currently locked"
 
   Scenario: I upload batch file
     Given I have project "Project 1"
@@ -156,12 +225,28 @@ Feature: Project file manager
       | test1 | test3 |
       | data  | test2 |
 
-  Scenario: I upload batch file
+  Scenario: Cannot upload batch file if archive is invalid
     Given I have project "Project 1"
     And I am on upload data files page for Project 1
     And I pick file "file3.txt" for "project_file"
     And I press "Upload"
     And I should see "Could not upload file. Please ensure file is a valid archive."
+    Then I should not see project files
+      | dir   | file  |
+      | test1 | test3 |
+      | data  | test2 |
+
+  Scenario: Cannot upload batch file if files are locked
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And files are locked for "Project 1"
+    And I pick file "batch.tar.gz" for "project_file"
+    And I press "Upload"
+    And I should see "Could not upload archive. Files are currently locked"
+    Then I should not see project files
+      | dir   | file  |
+      | test1 | test3 |
+      | data  | test2 |
 
 
 

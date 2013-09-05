@@ -692,6 +692,12 @@ Then /^I should see project files$/ do |table|
   end
 end
 
+Then /^I should not see project files$/ do |table|
+  table.hashes.each do |hash|
+    page.should_not have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/li/a[contains(text(), '#{hash[:file]}')]")
+  end
+end
+
 And /^I enter directory "([^"]*)" for "([^"]*)"$/ do |child_dir, dir|
   all(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/div/form/div/following-sibling::div/input[1]").last.set child_dir
   all(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/div/form/div/following-sibling::div/input[2]").last.click
@@ -707,6 +713,12 @@ end
 Then /^I should see project directories$/ do |table|
   table.hashes.each do |hash|
     page.should have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='#{hash[:child_dir]}']")
+  end
+end
+
+Then /^I should not see project directories$/ do |table|
+  table.hashes.each do |hash|
+    page.should_not have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='#{hash[:child_dir]}']")
   end
 end
 
@@ -758,4 +770,9 @@ And /^I perform HTTP authentication$/ do
   else
     raise "I don't know how to log in!"
   end
+end
+
+And /^files are locked for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  project.data_mgr.wait_for_lock
 end

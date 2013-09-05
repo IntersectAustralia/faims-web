@@ -56,6 +56,8 @@ class FileManagerController < ApplicationController
 
     if params[:file_manager].nil? or params[:file_manager][:file].nil?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
+    elsif @project.data_mgr.locked?
+      redirect_to :action => 'file_list', :error => 'Could not upload file. Files are currently locked'
     else
       file = params[:file_manager][:file]
       error = @project.add_data_file(file.tempfile, File.join(params[:path], file.original_filename))
@@ -73,6 +75,8 @@ class FileManagerController < ApplicationController
 
     if params[:file_manager].nil? or !Project.validate_directory(params[:file_manager][:dir].strip)
       redirect_to :action => 'file_list', :error => 'Please enter a valid directory name'
+    elsif @project.data_mgr.locked?
+      redirect_to :action => 'file_list', :error => 'Could not create directory. Files are currently locked'
     else
       dir = params[:file_manager][:dir].strip
 
@@ -97,6 +101,12 @@ class FileManagerController < ApplicationController
         redirect_to :action => 'file_list', :error => 'File does not exist'
       elsif File.directory? file and FileHelper.get_file_list(file).size > 0
         redirect_to :action => 'file_list', :error => 'Cannot delete directory with files'
+      elsif @project.data_mgr.locked?
+        if File.directory? file
+          redirect_to :action => 'file_list', :error => 'Could not delete directory. Files are currently locked'
+        else
+          redirect_to :action => 'file_list', :error => 'Could not delete file. Files are currently locked'
+        end
       else
         file = File.join(@project.get_path(:data_files_dir), params[:path])
         @project.data_mgr.with_lock do
@@ -117,6 +127,8 @@ class FileManagerController < ApplicationController
 
     if params[:project].nil? or params[:project][:file].nil?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
+    elsif @project.data_mgr.locked?
+      redirect_to :action => 'file_list', :error => 'Could not upload archive. Files are currently locked'
     else
       file = params[:project][:file]
       error = @project.add_batch_file(file.tempfile)
