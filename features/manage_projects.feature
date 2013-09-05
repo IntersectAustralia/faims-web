@@ -502,6 +502,29 @@ Feature: Manage projects
       | Fred       | Bloggs    |
       | User1      | Last1     |
 
+  @javascript
+  Scenario: Cannot add user to project if database is locked
+    Given I have users
+      | first_name | last_name | email                  |
+      | User1      | Last1     | user1@intersect.org.au |
+      | User2      | Last2     | user2@intersect.org.au |
+    And I have project "Project 1"
+    And I add "faimsadmin@intersect.org.au" to "Project 1"
+    Then I follow "Show Projects"
+    And I should be on the projects page
+    And I follow "Project 1"
+    Then I follow "Edit User"
+    And database is locked for "Project 1"
+    And I select "User1 Last1" from the user list
+    Then I click on "Add"
+    And I should see "Could not process request as database is currently locked"
+    And I should have user for project
+      | first_name | last_name |
+      | Fred       | Bloggs    |
+    And I should not have user for project
+      | first_name | last_name |
+      | User1      | Last1     |
+
   Scenario: Show arch entity list not include the deleted value
     Given I am on the home page
     And I follow "Show Projects"

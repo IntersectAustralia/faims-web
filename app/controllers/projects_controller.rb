@@ -2,6 +2,8 @@ require Rails.root.join('app/models/projects/database')
 
 class ProjectsController < ApplicationController
 
+  WAIT_FOR_DB_TIMEOUT = 10
+
   before_filter :authenticate_user!
   load_and_authorize_resource
 
@@ -80,6 +82,20 @@ class ProjectsController < ApplicationController
     end
   end
 
+  def wait_for_db
+    (1..WAIT_FOR_DB_TIMEOUT).each do
+      break unless @project.db_mgr.locked?
+      sleep(1)
+    end
+
+    if @project.db_mgr.locked?
+      flash.now[:error] = 'Could not process request as database is currently locked'
+      return false
+    end
+
+    return true
+  end
+
   def index
     @page_crumbs = [:pages_home, :projects_index]
   end
@@ -147,6 +163,7 @@ class ProjectsController < ApplicationController
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_users]
 
     @project = Project.find(params[:id])
+
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
     @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose.last.include? x.email }
@@ -156,12 +173,19 @@ class ProjectsController < ApplicationController
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_users]
 
     @project = Project.find(params[:id])
+
     user = User.find(params[:user_id])
-    @project.db.update_list_of_users(user, @project.db.get_project_user_id(current_user.email))
+
+    if wait_for_db
+      @project.db.update_list_of_users(user, @project.db.get_project_user_id(current_user.email))
+
+      return redirect_to :edit_project_user, notice: 'Successfully updated user'
+    end
+
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
     @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose.last.include? x.email }
-    flash[:notice] = 'Successfully updated user'
+
     render 'edit_project_user'
   end
 

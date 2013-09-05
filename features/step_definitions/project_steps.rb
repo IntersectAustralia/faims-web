@@ -568,6 +568,14 @@ When(/^I should have user for project$/) do |table|
   end
 end
 
+When(/^I should not have user for project$/) do |table|
+  table.hashes.each do |hash|
+    hash.values.each do |value|
+      page.should_not have_xpath("//input[@value='#{value}']")
+    end
+  end
+end
+
 Then(/^I should see records$/) do |table|
   table.hashes.each do |hash|
     hash.values.each do |value|
@@ -775,4 +783,9 @@ end
 And /^files are locked for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   project.data_mgr.wait_for_lock
+end
+
+And /^database is locked for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  project.db_mgr.wait_for_lock
 end
