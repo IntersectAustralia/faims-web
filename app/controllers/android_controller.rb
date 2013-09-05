@@ -32,7 +32,9 @@ class AndroidController < ApplicationController
 
   def settings_download
     project = Project.find_by_key(params[:key])
-    send_file project.get_path(:settings_archive)
+    project.settings_mgr.with_lock do
+      send_file project.get_path(:settings_archive)
+    end
   end
 
   def db_archive
@@ -78,7 +80,6 @@ class AndroidController < ApplicationController
     md5 = params[:md5]
 
     if project.check_sum(file, md5)
-
       project.store_database(file, user)
 
       render :json => {message: 'successfully uploaded database'}.to_json, :status => 200
@@ -107,14 +108,14 @@ class AndroidController < ApplicationController
   end
 
   # not used
-  def server_file_download
-    file = params[:file]
-
-    return render :json => {message: 'bad request'}.to_json, :status => 400 if file == nil
-    return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
-
-    send_file file
-  end
+  #def server_file_download
+  #  file = params[:file]
+  #
+  #  return render :json => {message: 'bad request'}.to_json, :status => 400 if file == nil
+  #  return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
+  #
+  #  send_file file
+  #end
 
   def server_file_upload
     file = params[:file]
