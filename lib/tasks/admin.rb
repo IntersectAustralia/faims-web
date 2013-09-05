@@ -8,8 +8,9 @@ def set_admin_password
     admin = User.find_by_email('faimsadmin@intersect.org.au')
     unless admin
    	  admin = User.new(first_name:'Faims', last_name:'Admin', email: 'faimsadmin@intersect.org.au')
-	  admin.activate
-	end
+      admin.role = Role.find_by_name('superuser')
+	    admin.activate
+	  end
     admin.password = admin.password_confirmation = input
     if admin.valid?
       admin.save
