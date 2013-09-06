@@ -86,6 +86,7 @@ Feature: Project file manager
       | dir  | file          |
       | data | file1.tar.gz  |
       | data | file2.sqlite3 |
+    And I should see "Deleted file"
 
   @javascript
   Scenario: Delete project directories
@@ -95,20 +96,65 @@ Feature: Project file manager
       | dir   | child_dir |
       | data  | test1     |
       | test1 | test2     |
-      | test2 | test3     |
       | data  | test4     |
+      | data  | test5     |
+      | test5 | test6     |
+      | test6 | test7     |
     And I delete project directories
       | dir   | child_dir |
-      | test2 | test3     |
+      | data  | test1     |
       | data  | test4     |
+      | test5 | test6     |
     Then I should see project directories
+      | dir   | child_dir |
+      | data  | test5     |
+    Then I should not see project directories
+      | dir   | child_dir |
+      | data  | test1     |
+      | data  | test4     |
+      | test5 | test6     |
+    And I should see "Deleted directory"
+
+  @javascript
+  Scenario: Delete root directory
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And I create project directories
       | dir   | child_dir |
       | data  | test1     |
       | test1 | test2     |
+      | data  | test4     |
+      | data  | test5     |
+      | test5 | test6     |
+      | test6 | test7     |
+    And I delete root directory
     Then I should not see project directories
       | dir   | child_dir |
-      | test2 | test3     |
+      | data  | test1     |
       | data  | test4     |
+      | data  | test5     |
+    And I should see "Deleted directory"
+
+  @javascript
+  Scenario: Can delete dir if files in directory
+    Given I have project "Project 1"
+    And I am on upload data files page for Project 1
+    And I create project directories
+      | dir  | child_dir |
+      | data | test1     |
+    And I upload project files
+      | dir   | file          |
+      | test1 | file2.sqlite3 |
+    And I delete project directories
+      | dir  | child_dir |
+      | data | test1     |
+    Then I should not see project files
+      | dir   | file          |
+      | test1 | file2.sqlite3 |
+    Then I should not see project directories
+      | dir   | child_dir |
+      | data  | test1     |
+    And I should see "Deleted directory"
 
   @javascript
   Scenario: Cannot add project file if file already exists
@@ -161,27 +207,6 @@ Feature: Project file manager
       | dir  | child_dir |
       | data | test1     |
     And I should see "Could not create directory. Files are currently locked"
-
-  @javascript
-  Scenario: Cannot delete dir if dir files in directory
-    Given I have project "Project 1"
-    And I am on upload data files page for Project 1
-    And I create project directories
-      | dir  | child_dir |
-      | data | test1     |
-    And I upload project files
-      | dir   | file          |
-      | test1 | file2.sqlite3 |
-    And I delete project directories
-      | dir  | child_dir |
-      | data | test1     |
-    Then I should see project files
-      | dir   | file          |
-      | test1 | file2.sqlite3 |
-    Then I should see project directories
-      | dir   | child_dir |
-      | data  | test1     |
-    And I should see "Cannot delete directory with files"
 
   @javascript
   Scenario: Cannot delete file if files are locked

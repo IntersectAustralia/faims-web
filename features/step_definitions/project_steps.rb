@@ -744,6 +744,18 @@ And /^I delete project file "([^"]*)" for "([^"]*)"$/ do |file, dir|
   end
 end
 
+And /^I delete root directory$/ do
+  (1..3).each do
+    if all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").size == 0
+      sleep(1)
+    else
+      all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").first.click
+      break
+    end
+  end
+  step 'I confirm'
+end
+
 Then /^I delete project files$/ do |table|
   table.hashes.each do |hash|
     step "I delete project file \"#{hash[:file]}\" for \"#{hash[:dir]}\""

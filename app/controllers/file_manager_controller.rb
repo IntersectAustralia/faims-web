@@ -30,7 +30,7 @@ class FileManagerController < ApplicationController
   def download_file
     @project = Project.find_by_id(params[:id])
 
-    if params[:path].nil?
+    if params[:path].blank?
       redirect_to :action => 'file_list', :error => 'Please select file to download'
     else
       file = File.join(@project.get_path(:data_files_dir), params[:path])
@@ -54,7 +54,7 @@ class FileManagerController < ApplicationController
   def upload_file
     @project = Project.find_by_id(params[:id])
 
-    if params[:file_manager].nil? or params[:file_manager][:file].nil?
+    if params[:file_manager].blank? or params[:file_manager][:file].blank?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
     elsif @project.data_mgr.locked?
       redirect_to :action => 'file_list', :error => 'Could not upload file. Files are currently locked'
@@ -73,13 +73,12 @@ class FileManagerController < ApplicationController
   def create_dir
     @project = Project.find_by_id(params[:id])
 
-    if params[:file_manager].nil? or !Project.validate_directory(params[:file_manager][:dir].strip)
+    if params[:file_manager].blank? or !Project.validate_directory(params[:file_manager][:dir].strip)
       redirect_to :action => 'file_list', :error => 'Please enter a valid directory name'
     elsif @project.data_mgr.locked?
       redirect_to :action => 'file_list', :error => 'Could not create directory. Files are currently locked'
     else
       dir = params[:file_manager][:dir].strip
-
       error = @project.create_data_dir(File.join(File.join(params[:path], dir)))
 
       if error
@@ -93,14 +92,12 @@ class FileManagerController < ApplicationController
   def delete_file
     @project = Project.find_by_id(params[:id])
 
-    if params[:path].nil? or params[:path] == '.'
+    if params[:path].blank?
       redirect_to :action => 'file_list', :error => 'Please select file to delete'
     else
       file = File.join(@project.get_path(:data_files_dir), params[:path])
-      if !File.exists? file
-        redirect_to :action => 'file_list', :error => 'File does not exist'
-      elsif File.directory? file and FileHelper.get_file_list(file).size > 0
-        redirect_to :action => 'file_list', :error => 'Cannot delete directory with files'
+      if !File.exists? file and !File.directory? file
+        redirect_to :action => 'file_list', :error => 'Could not find anything to delete'
       elsif @project.data_mgr.locked?
         if File.directory? file
           redirect_to :action => 'file_list', :error => 'Could not delete directory. Files are currently locked'
@@ -108,9 +105,12 @@ class FileManagerController < ApplicationController
           redirect_to :action => 'file_list', :error => 'Could not delete file. Files are currently locked'
         end
       else
-        file = File.join(@project.get_path(:data_files_dir), params[:path])
         @project.data_mgr.with_lock do
-          if File.directory? file
+          if params[:path] == '.'
+            FileUtils.rm_rf @project.get_path(:data_files_dir)
+            FileUtils.mkdir @project.get_path(:data_files_dir)
+            redirect_to :action => 'file_list', :notice => 'Deleted directory'
+          elsif File.directory? file
             FileUtils.rm_rf file
             redirect_to :action => 'file_list', :notice => 'Deleted directory'
           else
@@ -125,7 +125,7 @@ class FileManagerController < ApplicationController
   def batch_upload_file
     @project = Project.find_by_id(params[:id])
 
-    if params[:project].nil? or params[:project][:file].nil?
+    if params[:project].blank? or params[:project][:file].blank?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
     elsif @project.data_mgr.locked?
       redirect_to :action => 'file_list', :error => 'Could not upload archive. Files are currently locked'
