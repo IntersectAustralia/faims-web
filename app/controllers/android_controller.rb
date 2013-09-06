@@ -108,14 +108,14 @@ class AndroidController < ApplicationController
   end
 
   # not used
-  #def server_file_download
-  #  file = params[:file]
-  #
-  #  return render :json => {message: 'bad request'}.to_json, :status => 400 if file == nil
-  #  return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
-  #
-  #  send_file file
-  #end
+  def server_file_download
+    file = params[:file]
+
+    return render :json => {message: 'bad request'}.to_json, :status => 400 if file == nil
+    return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
+
+    send_file file
+  end
 
   def server_file_upload
     file = params[:file]

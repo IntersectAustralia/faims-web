@@ -524,20 +524,23 @@ When(/^I select "([^"]*)" for the attribute$/) do |name|
 end
 
 Then(/^I should see vocabularies$/) do |table|
+  attribute_id = find(:css, '#attribute')[:value]
   table.hashes.each do |hash|
     hash.values.each do |value|
-      page.should have_xpath("//input[@value='#{value}']")
+      page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_name[]'][value='#{value}']")
     end
   end
 end
 
 When(/^I modify vocabulary "([^"]*)" with "([^"]*)"$/) do |original, value|
-  find(:xpath, "//input[@value='#{original}']").set value
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id} input[name='vocab_name[]'][value='#{original}']").set value
   sleep(1)
 end
 
 When(/^I add "([^"]*)" to the vocabulary list$/) do |value|
-  all(:xpath, "//input[@name='vocab_name[]']").last.set value
+  attribute_id = find(:css, '#attribute')[:value]
+  all(:css, ".vocab-list-#{attribute_id} input[name='vocab_name[]']").last.set value
   sleep(1)
 end
 

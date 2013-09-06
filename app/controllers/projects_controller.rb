@@ -887,22 +887,18 @@ class ProjectsController < ApplicationController
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_vocabulary]
 
     @project = Project.find(params[:id])
-    @attributes = @project.db.get_attributes_containing_vocab()
-  end
 
-  def list_vocab_for_attribute
-    @project = Project.find(params[:id])
-    attribute_id = params[:attribute_id]
-    vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
-    vocabularies = []
-    vocabs.each do |vocab|
-      vocabulary = {}
-      vocabulary['vocab_id'] = vocab[1]
-      vocabulary['vocab_name'] = vocab[2]
-      vocabularies.push(vocabulary)
-    end
-    respond_to do |format|
-      format.json { render :json => vocabularies.to_json }
+    @attribute_id = params[:attribute_id]
+
+    @attribute_vocabs = {}
+
+    @attributes = @project.db.get_attributes_containing_vocab
+    @attributes.each do |attribute|
+      attribute_id = attribute.first
+
+      vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
+
+      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2]} }
     end
   end
 
@@ -910,17 +906,35 @@ class ProjectsController < ApplicationController
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_vocabulary]
 
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    end
+
+    @attribute_id = params[:attribute_id]
+
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
-    @attribute_id = params[:attribute_id]
-    @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, @project.db.get_project_user_id(current_user.email))
-    @attributes = @project.db.get_attributes_containing_vocab()
-    flash[:notice] = 'Successfully updated vocabulary'
+
+    if wait_for_db
+      @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Successfully updated vocabulary'
+
+      return redirect_to list_attributes_with_vocab_path(@project, {attribute_id:@attribute_id})
+    end
+
+    @attribute_vocabs = {}
+
+    @attributes = @project.db.get_attributes_containing_vocab
+    @attributes.each do |attribute|
+      attribute_id = attribute.first
+
+      if attribute_id.to_s == @attribute_id.to_s
+        vocabs = (1..vocab_id.size).to_a.zip(vocab_id, vocab_name)
+      else
+        vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
+      end
+
+      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2]} }
+    end
+
     render 'list_attributes_with_vocab'
   end
 

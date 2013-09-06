@@ -351,63 +351,47 @@ history_management = ->
   )
 
 vocab_management = ->
+  select_vocabs = ->
+    value = $('#attribute').val()
+
+    $('.vocab-list').removeClass('show')
+    $('.vocab-list').addClass('hide')
+    $('.vocab-list-' + value).removeClass('hide')
+    $('.vocab-list-' + value).addClass('show')
+
+    if (value == "")
+      $('#insert_vocab').addClass('hide')
+      $('#update_vocab').addClass('hide')
+    else
+      $('#insert_vocab').removeClass('hide')
+      $('#update_vocab').removeClass('hide')
+
   $('#attribute').change(
     ->
-      value = $(this).val()
-      selected = $(this).find('option:selected');
-      url = selected.data('url')
-      $('#vocab-content').empty()
-      if (value == "")
-        $('#update_vocab').addClass('hidden')
-        $('#insert_vocab').addClass('hidden')
-        return
-      else
-        $('#update_vocab').removeClass('hidden')
-        $('#insert_vocab').removeClass('hidden')
-        $.get url, (data) ->
-          $('<label>Vocab List</label>').appendTo($('#vocab-content'))
-          table = $('<table></table>').appendTo($('#vocab-content'))
-          $(data).each(
-            ->
-              value = '<tr><td><input type="hidden" name="vocab_id[]" value="'+this.vocab_id+'"/><input name="vocab_name[]"value="'+this.vocab_name+'"/></td></tr>'
-              $(value).appendTo($(table))
-              return
-          )
-          return
-        return
+      select_vocabs()
+
+      # remove newly inserted vocabs
+      $('.vocab-new').remove()
+
       return
   )
 
-  if ($('#attribute').val() != "")
-    $('#attribute').change()
-    $('#insert_vocab').click(
-      ->
-        value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
-        table = $('#vocab-content').find('table')
-        $(value).appendTo($(table))
-        return false
-    )
-
-    $('#update_vocab').click(
-      ->
-        $('#attribute_form').submit();
-        return false
-    )
-    return
-
   $('#insert_vocab').click(
     ->
-      value = '<tr><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
-      table = $('#vocab-content').find('table')
+      value = '<tr class="vocab-new"><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
+      table = $('#vocab-content').find('.vocab-list.show')
       $(value).appendTo($(table))
       return false
   )
 
   $('#update_vocab').click(
     ->
+      $('.vocab-list.hide').remove()
       $('#attribute_form').submit();
       return false
   )
+
+  select_vocabs()
   return
 
 user_management = ->
