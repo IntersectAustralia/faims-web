@@ -640,6 +640,7 @@ Feature: Manage projects
     Then I follow "Small 3"
     And I click on "Delete"
     And I confirm
+    Then I should see "Deleted Archaeological Entity"
     Then I should not see records
       | name    |
       | Small 1 |
@@ -664,7 +665,7 @@ Feature: Manage projects
     Then I click on "Show Deleted"
     Then I follow "Small 3"
     Then I click on "Restore"
-    And I should see "Successfully restored archaeological entity record"
+    And I should see "Restored Archaeological Entity"
     Then I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records
@@ -729,6 +730,7 @@ Feature: Manage projects
     Then I follow "AboveBelow 2"
     And I click on "Delete"
     And I confirm
+    Then I should see "Deleted Relationship"
     Then I should not see records
       | name         |
       | AboveBelow 2 |
@@ -753,7 +755,7 @@ Feature: Manage projects
     Then I click on "Show Deleted"
     Then I follow "AboveBelow 2"
     Then I click on "Restore"
-    And I should see "Successfully restored relationship record"
+    And I should see "Restored Relationship"
     Then I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records

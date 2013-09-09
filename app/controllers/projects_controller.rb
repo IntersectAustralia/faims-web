@@ -341,38 +341,39 @@ class ProjectsController < ApplicationController
 
   def delete_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    end
 
-    uuid = params[:uuid]
-    @project.db.delete_arch_entity(uuid,@project.db.get_project_user_id(current_user.email))
+    if wait_for_db
+      uuid = params[:uuid]
+      @project.db.delete_arch_entity(uuid, @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Deleted Archaeological Entity'
+    end
 
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
+    args = { id: @project.id, show_deleted: show_deleted }.merge message
     if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
+      args.merge!({ action: :list_typed_arch_ent_records, type: session[:type] })
+      redirect_to args
     else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
+      args.merge!({ action: :show_arch_ent_records, query: session[:query] })
+      redirect_to args
     end
-
   end
 
   def undelete_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
+
+    if wait_for_db
+      uuid = params[:uuid]
+      @project.db.undelete_arch_entity(uuid, @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Restored Archaeological Entity'
     end
 
-    uuid = params[:uuid]
-    @project.db.undelete_arch_entity(uuid,@project.db.get_project_user_id(current_user.email))
-
-    flash[:notice] = 'Successfully restored archaeological entity record'
-    redirect_to edit_arch_ent_records_path(@project,uuid)
-
+    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
+    args = { action: :edit_arch_ent_records, id: @project.id, uuid: uuid }.merge message
+    redirect_to args
   end
 
   def compare_arch_ents
@@ -612,34 +613,39 @@ class ProjectsController < ApplicationController
 
   def delete_rel_records
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
+
+    if wait_for_db
+      relationshipid = params[:relationshipid]
+      @project.db.delete_relationship(relationshipid, @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Deleted Relationship'
     end
 
-    relationshipid = params[:relationshipid]
-    @project.db.delete_relationship(relationshipid,@project.db.get_project_user_id(current_user.email))
     show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
+    args = { id: @project.id, show_deleted: show_deleted }.merge message
     if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
+      args.merge!({ action: :list_typed_rel_records, type: session[:type] })
+      redirect_to args
     else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
+      args.merge!({ action: :show_rel_records, query: session[:query] })
+      redirect_to args
     end
   end
 
   def undelete_rel_records
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
+
+    if wait_for_db
+      relationshipid = params[:relationshipid]
+      @project.db.undelete_relationship(relationshipid, @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Restored Relationship'
     end
 
-    relationshipid = params[:relationshipid]
-    @project.db.undelete_relationship(relationshipid,@project.db.get_project_user_id(current_user.email))
-    flash[:notice] = 'Successfully restored relationship record'
-    redirect_to edit_rel_records_path(@project,relationshipid)
+    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
+    args = { action: :edit_rel_records, id: @project.id, relationshipid: relationshipid }.merge message
+    redirect_to args
   end
 
   def show_rel_members
