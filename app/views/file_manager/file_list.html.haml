@@ -4,6 +4,7 @@
   .well
     %h3 Batch Upload
     .btn-group
+      = f.label :file, 'File format (tar.gz)'
       = f.file_field :file
       .clear
       = f.submit "Upload", :class => "btn btn-inverse", confirm: "Uploading a batch archive will overwrite files if any exist. Are you sure you want to upload?"
