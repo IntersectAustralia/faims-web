@@ -70,8 +70,8 @@ FaimsWeb::Application.routes.draw do
   get 'projects/:id/undelete_rel_records/:relationshipid', :to => 'projects#undelete_rel_records', :as => 'undelete_rel_records'
   get 'projects/:id/edit_rel_records/:relationshipid', :to => 'projects#edit_rel_records', :as => 'edit_rel_records'
   post 'projects/:id/edit_rel_records/:relationshipid', :to => 'projects#update_rel_records', :as => 'update_rel_records'
-  get 'projects/:id/show_rel_history/:relid', :to => 'projects#show_rel_history', :as => 'show_rel_history'
-  post 'projects/:id/revert_rel_to_timestamp/:relid', :to => 'projects#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
+  get 'projects/:id/show_rel_history/:relationshipid', :to => 'projects#show_rel_history', :as => 'show_rel_history'
+  post 'projects/:id/revert_rel_to_timestamp/:relationshipid', :to => 'projects#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
 
   get 'projects/:id/show_rel_members/:relationshipid', :to => 'projects#show_rel_members', :as => 'show_rel_members'
   post 'projects/:id/remove_arch_ent_member/', :to => 'projects#remove_arch_ent_member', :as => 'remove_arch_ent_member'

@@ -289,3 +289,14 @@ end
 And /^I wait$/ do
   sleep(1)
 end
+
+And /^I wait for page$/ do
+  (1..3).each do
+    begin
+      page.find('html')
+      break
+    rescue
+      sleep(1)
+    end
+  end
+end

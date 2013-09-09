@@ -251,51 +251,53 @@ class Database
     changes
   end
 
-  def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp, timestamp)
+  def revert_arch_ent(uuid, revert_timestamp, attributes, resolve, userid)
     @project.db_mgr.with_lock do
+      timestamp = current_timestamp
+
       @db.execute(WebQuery.insert_version, timestamp, userid)
 
-      params = {
-          uuid:uuid,
-          userid:userid,
-          aenttimestamp:timestamp,
-          timestamp: revert_timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
-      }
+      revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp, timestamp)
 
-      @db.execute(WebQuery.insert_arch_ent_at_timestamp, params)
+      attributes.each do | attribute |
+        revert_aentvalues_to_timestamp(attribute[:uuid], userid, attribute[:attributeid], attribute[:timestamp], timestamp)
+      end
+
+      # clear conflicts
+      resolve_arch_ent_conflicts(uuid) if resolve
 
       @project.db_mgr.make_dirt
     end
+  end
+
+  def revert_arch_ent_to_timestamp(uuid, userid, revert_timestamp, timestamp)
+    params = {
+        uuid:uuid,
+        userid:userid,
+        aenttimestamp:timestamp,
+        timestamp: revert_timestamp,
+        parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+    }
+
+    @db.execute(WebQuery.insert_arch_ent_at_timestamp, params)
   end
 
   def revert_aentvalues_to_timestamp(uuid, userid, attributeid, revert_timestamp, timestamp)
-    @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, timestamp, userid)
+    params = {
+        uuid:uuid,
+        userid:userid,
+        attributeid:attributeid,
+        valuetimestamp:timestamp,
+        timestamp: revert_timestamp,
+        parenttimestamp: @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attributeid)
+    }
 
-      params = {
-          uuid:uuid,
-          userid:userid,
-          attributeid:attributeid,
-          valuetimestamp:timestamp,
-          timestamp: revert_timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attributeid)
-      }
-
-      @db.execute(WebQuery.insert_aentvalue_at_timestamp, params)
-
-      @project.db_mgr.make_dirt
-    end
+    @db.execute(WebQuery.insert_aentvalue_at_timestamp, params)
   end
 
   def resolve_arch_ent_conflicts(uuid)
-    @project.db_mgr.with_lock do
-
-      @db.execute(WebQuery.clear_arch_ent_fork, uuid)
-      @db.execute(WebQuery.clear_aentvalue_fork, uuid)
-
-      @project.db_mgr.make_dirt
-    end
+    @db.execute(WebQuery.clear_arch_ent_fork, uuid)
+    @db.execute(WebQuery.clear_aentvalue_fork, uuid)
   end
 
   def delete_arch_entity(uuid, userid)
@@ -497,51 +499,53 @@ class Database
     changes
   end
 
-  def revert_rel_to_timestamp(relid, userid, revert_timestamp, timestamp)
+  def revert_rel(relid, revert_timestamp, attributes, resolve, userid)
     @project.db_mgr.with_lock do
+      timestamp = @project.db.current_timestamp
+
       @db.execute(WebQuery.insert_version, timestamp, userid)
 
-      params = {
-          relationshipid:relid,
-          userid:userid,
-          relntimestamp:timestamp,
-          timestamp: revert_timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relid)
-      }
+      revert_rel_to_timestamp(relid, userid, revert_timestamp, timestamp)
 
-      @db.execute(WebQuery.insert_rel_at_timestamp, params)
+      attributes.each do | attribute |
+        revert_relnvalues_to_timestamp(attribute[:relationshipid], userid, attribute[:attributeid], attribute[:timestamp], timestamp)
+      end
+
+      # clear conflicts
+      resolve_rel_conflicts(relid) if resolve
 
       @project.db_mgr.make_dirt
     end
+  end
+
+  def revert_rel_to_timestamp(relid, userid, revert_timestamp, timestamp)
+    params = {
+        relationshipid:relid,
+        userid:userid,
+        relntimestamp:timestamp,
+        timestamp: revert_timestamp,
+        parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relid)
+    }
+
+    @db.execute(WebQuery.insert_rel_at_timestamp, params)
   end
 
   def revert_relnvalues_to_timestamp(relid, userid, attributeid, revert_timestamp, timestamp)
-    @project.db_mgr.with_lock do
-      @db.execute(WebQuery.insert_version, timestamp, userid)
+    params = {
+        relationshipid:relid,
+        userid:userid,
+        attributeid:attributeid,
+        relnvaluetimestamp:timestamp,
+        timestamp: revert_timestamp,
+        parenttimestamp: @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relid, attributeid)
+    }
 
-      params = {
-          relationshipid:relid,
-          userid:userid,
-          attributeid:attributeid,
-          relnvaluetimestamp:timestamp,
-          timestamp: revert_timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relid, attributeid)
-      }
-
-      @db.execute(WebQuery.insert_relnvalue_at_timestamp, params)
-
-      @project.db_mgr.make_dirt
-    end
+    @db.execute(WebQuery.insert_relnvalue_at_timestamp, params)
   end
 
   def resolve_rel_conflicts(relid)
-    @project.db_mgr.with_lock do
-
-      @db.execute(WebQuery.clear_rel_fork, relid)
-      @db.execute(WebQuery.clear_relnvalue_fork, relid)
-
-      @project.db_mgr.make_dirt
-    end
+    @db.execute(WebQuery.clear_rel_fork, relid)
+    @db.execute(WebQuery.clear_relnvalue_fork, relid)
   end
 
   def delete_relationship(relationshipid, userid)

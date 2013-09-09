@@ -89,7 +89,7 @@ class ProjectsController < ApplicationController
     end
 
     if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as database is currently locked'
+      flash[:error] = 'Could not process request as database is currently locked'
       return false
     end
 
@@ -179,13 +179,15 @@ class ProjectsController < ApplicationController
     if wait_for_db
       @project.db.update_list_of_users(user, @project.db.get_project_user_id(current_user.email))
 
-      return redirect_to :edit_project_user, notice: 'Successfully updated user'
+      flash[:notice] = 'Successfully updated user'
+      return redirect_to :edit_project_user
     end
 
     @users = @project.db.get_list_of_users
     user_transpose = @users.transpose
     @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose.last.include? x.email }
 
+    flash.now[:error] = flash[:error]
     render 'edit_project_user'
   end
 
@@ -342,38 +344,38 @@ class ProjectsController < ApplicationController
   def delete_arch_ent_records
     @project = Project.find(params[:id])
 
+    uuid = params[:uuid]
+
     if wait_for_db
-      uuid = params[:uuid]
       @project.db.delete_arch_entity(uuid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Deleted Archaeological Entity'
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        return redirect_to action: :list_typed_arch_ent_records, id: @project.id, type: session[:type], show_deleted: show_deleted
+      else
+        return redirect_to action: :show_arch_ent_records, id: @project.id, query: session[:query], show_deleted: show_deleted
+      end
     end
 
-    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
-    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
-    args = { id: @project.id, show_deleted: show_deleted }.merge message
-    if session[:type]
-      args.merge!({ action: :list_typed_arch_ent_records, type: session[:type] })
-      redirect_to args
-    else
-      args.merge!({ action: :show_arch_ent_records, query: session[:query] })
-      redirect_to args
-    end
+    redirect_to action: :edit_arch_ent_records, id: @project.id, uuid: uuid
   end
 
   def undelete_arch_ent_records
     @project = Project.find(params[:id])
 
+    uuid = params[:uuid]
+
     if wait_for_db
-      uuid = params[:uuid]
       @project.db.undelete_arch_entity(uuid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Restored Archaeological Entity'
+
+      return redirect_to action: :edit_arch_ent_records, id: @project.id, uuid: uuid
     end
 
-    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
-    args = { action: :edit_arch_ent_records, id: @project.id, uuid: uuid }.merge message
-    redirect_to args
+    redirect_to action: :edit_arch_ent_records, id: @project.id, uuid: uuid
   end
 
   def compare_arch_ents
@@ -432,18 +434,13 @@ class ProjectsController < ApplicationController
     entity = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    timestamp =  @project.db.current_timestamp
+    if wait_for_db
+      @project.db.revert_arch_ent(entity[:uuid], entity[:timestamp], attributes, params[:resolve] == 'true', @project.db.get_project_user_id(current_user.email))
 
-    @project.db.revert_arch_ent_to_timestamp(entity[:uuid], @project.db.get_project_user_id(current_user.email), entity[:timestamp], timestamp)
-
-    attributes.each do | attribute |
-      @project.db.revert_aentvalues_to_timestamp(attribute[:uuid], @project.db.get_project_user_id(current_user.email), attribute[:attributeid], attribute[:timestamp], timestamp)
+      flash[:notice] = 'Reverted Archaeological Entity'
     end
 
-    # clear conflicts
-    @project.db.resolve_arch_ent_conflicts(entity[:uuid]) if params[:resolve] == 'true'
-
-    redirect_to show_arch_ent_history_path(@project, params[:uuid])
+    redirect_to action: :show_arch_ent_history, id: @project.id, uuid: params[:uuid]
   end
 
   # Relationship functionalities
@@ -556,7 +553,6 @@ class ProjectsController < ApplicationController
     end
 
     @deleted = @project.db.get_rel_deleted_status(relationshipid)
-
   end
 
   def update_rel_records
@@ -585,8 +581,8 @@ class ProjectsController < ApplicationController
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_search_or_list_rel, :projects_show_rel, :projects_edit_rel, :projects_show_rel_history]
 
     @project = Project.find(params[:id])
-    relid = params[:relid]
-    @timestamps = @project.db.get_rel_history(relid)
+    relationshipid = params[:relationshipid]
+    @timestamps = @project.db.get_rel_history(relationshipid)
   end
 
   def revert_rel_to_timestamp
@@ -597,55 +593,50 @@ class ProjectsController < ApplicationController
     rel = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    timestamp = @project.db.current_timestamp
+    if wait_for_db
+      @project.db.revert_rel(rel[:relationshipid], rel[:timestamp], attributes, params[:resolve] == 'true', @project.db.get_project_user_id(current_user.email))
 
-    @project.db.revert_rel_to_timestamp(rel[:relationshipid], @project.db.get_project_user_id(current_user.email), rel[:timestamp], timestamp)
-
-    attributes.each do | attribute |
-      @project.db.revert_relnvalues_to_timestamp(attribute[:relationshipid], @project.db.get_project_user_id(current_user.email), attribute[:attributeid], attribute[:timestamp], timestamp)
+      flash[:notice] = 'Reverted Relationship'
     end
 
-    # clear conflicts
-    @project.db.resolve_rel_conflicts(rel[:relationshipid]) if params[:resolve] == 'true'
-
-    redirect_to show_rel_history_path(@project, params[:relid])
+    redirect_to action: :show_rel_history, id: @project.id, relationshipid: params[:relationshipid]
   end
 
   def delete_rel_records
     @project = Project.find(params[:id])
 
+    relationshipid = params[:relationshipid]
+
     if wait_for_db
-      relationshipid = params[:relationshipid]
       @project.db.delete_relationship(relationshipid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Deleted Relationship'
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        return redirect_to action: :list_typed_rel_records, id: @project.id, type: session[:type], show_deleted: show_deleted
+      else
+        return redirect_to action: :show_rel_records, id: @project.id, query: session[:query], show_deleted: show_deleted
+      end
     end
 
-    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
-    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
-    args = { id: @project.id, show_deleted: show_deleted }.merge message
-    if session[:type]
-      args.merge!({ action: :list_typed_rel_records, type: session[:type] })
-      redirect_to args
-    else
-      args.merge!({ action: :show_rel_records, query: session[:query] })
-      redirect_to args
-    end
+     redirect_to action: :edit_rel_records, id: @project.id, relationshipid: relationshipid
   end
 
   def undelete_rel_records
     @project = Project.find(params[:id])
 
+    relationshipid = params[:relationshipid]
+
     if wait_for_db
-      relationshipid = params[:relationshipid]
       @project.db.undelete_relationship(relationshipid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Restored Relationship'
+
+      return redirect_to action: :edit_rel_records, id: @project.id, relationshipid: relationshipid
     end
 
-    message = flash[:notice] ? {notice:flash[:notice]} : {error:flash[:error]}
-    args = { action: :edit_rel_records, id: @project.id, relationshipid: relationshipid }.merge message
-    redirect_to args
+    redirect_to action: :edit_rel_records, id: @project.id, relationshipid: relationshipid
   end
 
   def show_rel_members
@@ -941,6 +932,7 @@ class ProjectsController < ApplicationController
       @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2]} }
     end
 
+    flash.now[:error] = flash[:error]
     render 'list_attributes_with_vocab'
   end
 

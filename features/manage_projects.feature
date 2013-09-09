@@ -647,6 +647,30 @@ Feature: Manage projects
       | Small 3 |
 
   @javascript
+  Scenario: Cannot delete arch entity if database locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    Then I follow "Small 3"
+    And database is locked for "Sync Example"
+    And I click on "Delete"
+    And I confirm
+    And I wait for page
+    Then I should see "Could not process request as database is currently locked"
+    And I follow "Back"
+    Then I should see records
+      | name    |
+      | Small 3 |
+
+  @javascript
   Scenario: Restore arch entity
     Given I am on the home page
     And I follow "Show Projects"
@@ -673,6 +697,35 @@ Feature: Manage projects
       | Small 1 |
     But I should see records
       | name    |
+      | Small 3 |
+
+  @javascript
+  Scenario: Cannot restore arch entity if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    Then I follow "Small 3"
+    Then I click on "Delete"
+    And I confirm
+    Then I click on "Show Deleted"
+    Then I follow "Small 3"
+    And database is locked for "Sync Example"
+    Then I click on "Restore"
+    And I wait for page
+    And I should see "Could not process request as database is currently locked"
+    And I follow "Back"
+    Then I click on "Hide Deleted"
+    And I should not see records
+      | name    |
+      | Small 1 |
       | Small 3 |
 
   Scenario: Show relationship list not include the deleted value
@@ -737,6 +790,30 @@ Feature: Manage projects
       | AboveBelow 4 |
 
   @javascript
+  Scenario: Cannot delete relationship if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    Then I follow "AboveBelow 2"
+    And database is locked for "Sync Example"
+    And I click on "Delete"
+    And I confirm
+    And I wait for page
+    Then I should see "Could not process request as database is currently locked"
+    And I follow "Back"
+    Then I should see records
+      | name         |
+      | AboveBelow 2 |
+
+  @javascript
   Scenario: Restore relationship
     Given I am on the home page
     And I follow "Show Projects"
@@ -764,6 +841,35 @@ Feature: Manage projects
     But I should see records
       | name         |
       | AboveBelow 2 |
+
+  @javascript
+  Scenario: Cannot restore relationship if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "Search Relationship Records"
+    And I enter "" and submit the form
+    Then I follow "AboveBelow 2"
+    Then I click on "Delete"
+    And I confirm
+    Then I click on "Show Deleted"
+    Then I follow "AboveBelow 2"
+    And database is locked for "Sync Example"
+    Then I click on "Restore"
+    And I wait for page
+    And I should see "Could not process request as database is currently locked"
+    Then I follow "Back"
+    Then I click on "Hide Deleted"
+    And I should not see records
+      | name         |
+      | AboveBelow 2 |
+      | AboveBelow 4 |
 
   Scenario: See related arch entities
     Given I am on the home page
