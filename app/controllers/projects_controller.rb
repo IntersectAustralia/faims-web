@@ -895,7 +895,7 @@ class ProjectsController < ApplicationController
 
       vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
 
-      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2]} }
+      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4]} }
     end
   end
 
@@ -908,9 +908,11 @@ class ProjectsController < ApplicationController
 
     vocab_id = params[:vocab_id]
     vocab_name = params[:vocab_name]
+    vocab_description = params[:vocab_description]
+    picture_url = params[:picture_url]
 
     if wait_for_db
-      @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, @project.db.get_project_user_id(current_user.email))
+      @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, vocab_description, picture_url, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Successfully updated vocabulary'
 
@@ -924,12 +926,12 @@ class ProjectsController < ApplicationController
       attribute_id = attribute.first
 
       if attribute_id.to_s == @attribute_id.to_s
-        vocabs = (1..vocab_id.size).to_a.zip(vocab_id, vocab_name)
+        vocabs = (1..vocab_id.size).to_a.zip(vocab_id, vocab_name, vocab_description, picture_url)
       else
         vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
       end
 
-      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2]} }
+      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4]} }
     end
 
     flash.now[:error] = flash[:error]

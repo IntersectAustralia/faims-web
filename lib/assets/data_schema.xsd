@@ -17,14 +17,12 @@
                       <xs:complexType>
                         <xs:sequence>
                           <xs:element name="term" maxOccurs="unbounded" minOccurs="0">
-                            <xs:complexType>
-                              <xs:simpleContent>
-                                <xs:extension base="xs:string">
-                                  <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
-                                  <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
-
-                                </xs:extension>
-                              </xs:simpleContent>
+                            <xs:complexType mixed="true">
+                              <xs:sequence>
+                                <xs:element type="xs:string" name="description" minOccurs="0"/>
+                              </xs:sequence>
+                              <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
+                              <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
                             </xs:complexType>
                           </xs:element>
                         </xs:sequence>
@@ -56,14 +54,12 @@
                       <xs:complexType>
                         <xs:sequence>
                           <xs:element name="term" maxOccurs="unbounded" minOccurs="0">
-                            <xs:complexType>
-                              <xs:simpleContent>
-                                <xs:extension base="xs:string">
-                                  <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
-                                  <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
-
-                                </xs:extension>
-                              </xs:simpleContent>
+                            <xs:complexType mixed="true">
+                              <xs:sequence>
+                                <xs:element type="xs:string" name="description" minOccurs="0"/>
+                              </xs:sequence>
+                              <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
+                              <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
                             </xs:complexType>
                           </xs:element>
                         </xs:sequence>

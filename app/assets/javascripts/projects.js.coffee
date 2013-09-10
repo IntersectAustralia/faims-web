@@ -378,7 +378,8 @@ vocab_management = ->
 
   $('#insert_vocab').click(
     ->
-      value = '<tr class="vocab-new"><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td></tr>'
+      value = '<tr class="vocab-new"><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td>'
+      value += '<td><input name="vocab_description[]"/></td><td><input name="picture_url[]"/></td></tr>'
       table = $('#vocab-content').find('.vocab-list.show')
       $(value).appendTo($(table))
       return false

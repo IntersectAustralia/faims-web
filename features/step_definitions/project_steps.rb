@@ -526,9 +526,9 @@ end
 Then(/^I should see vocabularies$/) do |table|
   attribute_id = find(:css, '#attribute')[:value]
   table.hashes.each do |hash|
-    hash.values.each do |value|
-      page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_name[]'][value='#{value}']")
-    end
+    page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_name[]'][value='#{hash[:name]}']")
+    page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_description[]'][value='#{hash[:description]}']")
+    page.should have_css(".vocab-list-#{attribute_id} input[name='picture_url[]'][value='#{hash[:picture_url]}']")
   end
 end
 
@@ -541,6 +541,17 @@ end
 When(/^I add "([^"]*)" to the vocabulary list$/) do |value|
   attribute_id = find(:css, '#attribute')[:value]
   all(:css, ".vocab-list-#{attribute_id} input[name='vocab_name[]']").last.set value
+  sleep(1)
+end
+
+When(/^I add "([^"]*)" as description to the vocabulary list$/) do |value|
+  attribute_id = find(:css, '#attribute')[:value]
+  all(:css, ".vocab-list-#{attribute_id} input[name='vocab_description[]']").last.set value
+  sleep(1)
+end
+When(/^I add "([^"]*)" as picture url to the vocabulary list$/) do |value|
+  attribute_id = find(:css, '#attribute')[:value]
+  all(:css, ".vocab-list-#{attribute_id} input[name='picture_url[]']").last.set value
   sleep(1)
 end
 

@@ -23,8 +23,8 @@ VALUES('<xsl:value-of select="substring(generate-id(key('properties',@name)),4)"
             <ul>
               <xsl:for-each select="lookup/term">
                 <li>
-INSERT INTO Vocabulary (vocabId, attributeid, vocabname <xsl:if test="@pictureURL != ''">, pictureURL</xsl:if>)
-VALUES('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of select="substring(generate-id(key('properties',../../@name)),4)"/>', '<xsl:value-of select="."/>' <xsl:if test="@pictureURL != ''">, '<xsl:value-of select="@pictureURL"/>'</xsl:if>);
+INSERT INTO Vocabulary (vocabId, attributeid, vocabname <xsl:if test="@pictureURL != ''">, pictureURL</xsl:if>, vocabdescription)
+VALUES('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of select="substring(generate-id(key('properties',../../@name)),4)"/>', '<xsl:value-of select="normalize-space(./text())"/>' <xsl:if test="@pictureURL != ''">, '<xsl:value-of select="@pictureURL"/>'</xsl:if>, '<xsl:value-of select="normalize-space(description)"/>');
                 </li>
               </xsl:for-each>
             </ul>
