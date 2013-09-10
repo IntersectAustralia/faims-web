@@ -130,18 +130,18 @@ aent_rel_management = ->
       return
   )
 
-  $('input[name="rel_id"]').change(
+  $('input[name="relationshipid"]').change(
     ->
-      $relntypeid = $(this).siblings('#relntypeid')
-      $.ajax $relntypeid.attr('src'),
+      typeid = $(this).siblings('input[name="typeid"]')
+      $.ajax typeid.attr('src'),
         type: 'GET'
-        data: {relntypeid: $('#relntypeid').val()}
+        data: {relntypeid: typeid.val()}
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
           $('#verb').find('option').remove()
           if data.length
             $.each(data, ->
-              $('#verb').append('<option value="'+ this + '">' + this + '</option>')
+              $('#select-verb').append('<option value="'+ this + '">' + this + '</option>')
               return
             )
             return
@@ -153,42 +153,26 @@ aent_rel_management = ->
   $('#add-arch-ent').click(
     ->
       selected = $('input[type="radio"]:checked')
-      verb = $('#verb').val()
+      verb = $('#select-verb').val()
       if selected.length == 0
-        alert('No arch entity is selected to be added')
+        alert('No Archaeological Entity is selected to be added')
         return false
       else
-        $.ajax $(this).attr('src'),
-          type: 'POST'
-          data: {relationshipid: $('#relationshipid').val(), relntypeid: $('#relntypeid').val(), uuid: selected.val(), verb: verb}
-          dataType: 'json'
-          success: (data, textStatus, jqXHR) ->
-            if data.result == "success"
-              window.location = data.url
-              return
-            else
-              return false
+        $('#add-arch-ent-form input[name="verb"]').val(verb)
+        $('#add-arch-ent-form').submit()
         return
   )
 
   $('#add-rel').click(
     ->
       selected = $('input[type="radio"]:checked')
-      verb = $('#verb').val()
+      verb = $('#select-verb').val()
       if selected.length == 0
-        alert('No relationship is selected to be added')
+        alert('No Relationship is selected to be added')
         return false
       else
-        $.ajax $(this).attr('src'),
-          type: 'POST'
-          data: {relationshipid: selected.val(), uuid: $('#uuid').val(), verb: verb}
-          dataType: 'json'
-          success: (data, textStatus, jqXHR) ->
-            if data.result == "success"
-              window.location = data.url
-              return
-            else
-              return false
+        $('#add-rel-form input[name="verb"]').val(verb)
+        $('#add-rel-form').submit()
         return
   )
   return

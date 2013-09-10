@@ -17,7 +17,11 @@
               %input{:type => 'text', :name => 'search_query'}
             %input{:type => 'submit', :value => "Search", :class => 'btn'}
         - if !@uuid.nil? and !@uuid.empty?
-          %form
+          %form{:action => add_arch_ent_member_path(@project), :method => "post", id: 'add-arch-ent-form'}
+            %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+            %input{:type => 'hidden', :name => 'relationshipid',:value => session[:relationshipid]}
+            %input{:type => 'hidden', :name => 'relntypeid',:value => session[:relntypeid]}
+            %input{:type => 'hidden', :name => 'verb'}
             .records
               - for uuids in @uuid
                 %ul.inner
@@ -36,12 +40,10 @@
         %h4 Archaeological Entity Verb
         %label Verb (if required)
         .input-append
-          %select{:id => 'verb'}
+          %select{:id => 'select-verb'}
             - for verb in @verb
               %option{:value => verb[0].to_s.strip}
                 =verb[0].to_s.strip
-          %input{:type => 'hidden', :id => 'relationshipid',:value => session[:relationshipid]}
-          %input{:type => 'hidden', :id => 'relntypeid',:value => session[:relntypeid]}
-          %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-ent', :src => add_arch_ent_member_path(@project), :class => 'btn'}
+          %input{:type => 'button', :value=> 'Add Member', :id => 'add-arch-ent', :class => 'btn'}
   .form-actions
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project,session[:relationshipid])+'?offset=0&relntypeid='+session[:relntypeid], :class => 'btn'

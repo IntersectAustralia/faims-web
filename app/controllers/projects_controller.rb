@@ -689,6 +689,7 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     relntypeid = params[:relntypeid]
 
+    # TODO search_query should default to blank and not be in session
     if params[:search_query].nil?
       @uuid = nil
       @status = 'init'
@@ -707,8 +708,6 @@ class ProjectsController < ApplicationController
       query_params << "relntypeid=#{relntypeid}&" if relntypeid
       query_params << "search_query=#{params[:search_query]}&" if params[:search_query]
       @base_url = search_arch_ent_member_path(@project) + query_params
-
-
     end
     @verb = @project.db.get_verbs_for_relation(relntypeid)
 
@@ -719,10 +718,14 @@ class ProjectsController < ApplicationController
 
   def add_arch_ent_member
     @project = Project.find(params[:id])
-    @project.db.add_member(params[:relationshipid],@project.db.get_project_user_id(current_user.email),params[:uuid],params[:verb])
-    respond_to do |format|
-      format.json { render :json => {:result => 'success', :url => show_rel_members_path(@project,params[:relationshipid])+'?relntypeid='+params[:relntypeid]} }
+
+    if wait_for_db
+      @project.db.add_member(params[:relationshipid], @project.db.get_project_user_id(current_user.email), params[:uuid], params[:verb])
+
+      flash[:notice] = 'Added Archaeological Entity as member of Relationship'
     end
+
+    return redirect_to action: :show_rel_members, id: @project.id, relationshipid: params[:relationshipid], relntypeid: params[:relntypeid]
   end
 
   def show_rel_association
@@ -765,6 +768,7 @@ class ProjectsController < ApplicationController
 
     uuid = params[:uuid]
 
+    # TODO search_query should default to blank and not be in session
     if params[:search_query].nil?
       @uuid = nil
       @status = 'init'
@@ -789,6 +793,7 @@ class ProjectsController < ApplicationController
     session[:uuid] = params[:uuid]
   end
 
+  # TODO change this so page load all vocabs instead of using ajax call
   def get_verbs_for_rel_association
     verbs = @project.db.get_verbs_for_relation(params[:relntypeid])
     respond_to do |format|
@@ -798,10 +803,14 @@ class ProjectsController < ApplicationController
 
   def add_rel_association
     @project = Project.find(params[:id])
-    @project.db.add_member(params[:relationshipid],@project.db.get_project_user_id(current_user.email),params[:uuid],params[:verb])
-    respond_to do |format|
-      format.json { render :json => {:result => 'success', :url => show_rel_association_path(@project,params[:uuid])} }
+
+    if wait_for_db
+      @project.db.add_member(params[:relationshipid], @project.db.get_project_user_id(current_user.email), params[:uuid], params[:verb])
+
+      flash[:notice] = 'Added Archaeological Entity as member of Relationship'
     end
+
+    redirect_to action: :show_rel_association, id: @project.id, uuid: params[:uuid]
   end
 
   # TODO compare should use query params

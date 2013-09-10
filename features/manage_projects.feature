@@ -997,10 +997,44 @@ Feature: Manage projects
     And I click on "Search"
     And I select the first record
     And I press "Add Member"
+    Then I should see "Added Archaeological Entity as member of Relationship"
     Then I should see records
       | name         |
       | AboveBelow 1 |
       | AboveBelow 2 |
+      | AboveBelow 3 |
+
+  @javascript
+  Scenario: Cannot add relationship association to arch ent if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    Then I follow "Small 2"
+    And I follow "Show Relationship Association"
+    And database is locked for "Sync Example"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I press "Add Member"
+    And I click on "Search"
+    And I select the first record
+    And I press "Add Member"
+    Then I should see "Could not process request as database is currently locked"
+    Then I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I should not see records
+      | name         |
       | AboveBelow 3 |
 
   Scenario: Show arch ent member for relationship
@@ -1017,7 +1051,6 @@ Feature: Manage projects
     And I press "Filter"
     Then I follow "AboveBelow 1"
     And I follow "Show Relationship Member"
-    And I wait
     And I should see records
       | name    |
       | Small 2 |
@@ -1038,7 +1071,6 @@ Feature: Manage projects
     And I press "Filter"
     Then I follow "AboveBelow 1"
     And I follow "Show Relationship Member"
-    And I wait
     And I should see records
       | name    |
       | Small 2 |
@@ -1067,7 +1099,6 @@ Feature: Manage projects
     And I press "Filter"
     Then I follow "AboveBelow 1"
     And I follow "Show Relationship Member"
-    And I wait
     And I should see records
       | name    |
       | Small 2 |
@@ -1076,8 +1107,42 @@ Feature: Manage projects
     And I click on "Search"
     And I select the first record
     And I press "Add Member"
+    Then I should see "Added Archaeological Entity as member of Relationship"
     Then I should see records
       | name    |
       | Small 2 |
       | Small 3 |
       | Small 4 |
+
+  @javascript
+  Scenario: Cannot add arch ent member to relationship
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Relationship Records"
+    And I press "Filter"
+    Then I follow "AboveBelow 1"
+    And I follow "Show Relationship Member"
+    And database is locked for "Sync Example"
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    And I press "Add Member"
+    And I click on "Search"
+    And I select the first record
+    And I press "Add Member"
+    Then I should see "Could not process request as database is currently locked"
+    Then I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    And I should not see records
+      | name    |
+      | Small 3 |
