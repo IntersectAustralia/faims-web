@@ -3,12 +3,18 @@
 .content
   - if !@uuid.nil? and !@uuid.empty?
     .records
-      - for uuids in @uuid
-        %ul.inner
+      %ul.inner
+        - for uuids in @uuid
           %li
-            #remove-member.pull-left= link_to "<i class='ui-icon ui-icon-circle-minus'></i>".html_safe, remove_arch_ent_member_path(@project)+'?relationshipid='+session[:relationshipid].to_s+'&uuid='+uuids[0].to_s
+            %form.pull-left{:action => remove_arch_ent_member_path(@project), :method => "post"}
+              %input{ type: :hidden, name: :authenticity_token, value: session[:authenticity_token]}
+              %input{ type: :hidden, name: :relationshipid, value: session[:relationshipid]}
+              %input{ type: :hidden, name: :relntypeid, value: session[:relntypeid]}
+              %input{ type: :hidden, name: :uuid, value: uuids[0]}
+              .remove-member= link_to "<i class='ui-icon ui-icon-circle-minus'></i>".html_safe
             %a{:href => edit_arch_ent_records_path(@project,uuids[0])}
               =uuids[1].to_s
+          .clear
       .paging.search
         = render :partial => 'pagination'
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_arch_ent_member_path(@project,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}

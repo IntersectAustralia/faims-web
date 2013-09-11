@@ -891,40 +891,24 @@ Feature: Manage projects
       | small Below AboveBelow: Small 3 |
       | small Below AboveBelow: Small 4 |
 
-  Scenario: Update arch entity attribute causes validation error
-# TODO
+  Scenario: Update arch entity attribute
 
-  Scenario: Update arch entity attribute clears validation error
+  Scenario: Cannot update arch entity attribute if database is locked
+
+  Scenario: Update arch entity attribute causes validation error
 # TODO
 
   Scenario: Update arch entity attribute with multiple values causes validation error
 # TODO
 
-  Scenario: Update arch entity attribute with multiple values clears validation error
-# TODO
+  Scenario: Update rel attribute
 
-  Scenario: Show arch entity with validation errors as dirty
-# TODO
-
-  Scenario: Show arch entity with validation errors as normal after validation errors cleared
-# TODO
+  Scenario: Cannot update rel attribute if database is locked
 
   Scenario: Update relationship attribute causes validation error
 # TODO
 
-  Scenario: Update relationship attribute clears validation error
-# TODO
-
   Scenario: Update relationship attribute with multiple values causes validation error
-# TODO
-
-  Scenario: Update relationship attribute with multiple values clears validation error
-# TODO
-
-  Scenario: Show relationship with validation errors as dirty
-# TODO
-
-  Scenario: Show relationship with validation errors as normal after validation errors cleared
 # TODO
 
   Scenario: Show relationship association for arch ent
@@ -967,12 +951,42 @@ Feature: Manage projects
       | AboveBelow 2 |
     Then I delete the first record
     And I confirm
+    Then I should see "Removed Archaeological Entity from Relationship"
     Then I should see records
       | name         |
       | AboveBelow 2 |
     And I should not see records
       | name         |
       | AboveBelow 1 |
+
+  @javascript
+  Scenario: Cannot remove relationship association from arch ent if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    Then I follow "Small 2"
+    And I follow "Show Relationship Association"
+    And database is locked for "Sync Example"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    Then I delete the first record
+    And I confirm
+    And I wait for page
+    Then I should see "Could not process request as database is currently locked"
+    Then I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
 
   @javascript
   Scenario: Add relationship association to arch ent
@@ -1077,12 +1091,42 @@ Feature: Manage projects
       | Small 4 |
     Then I delete the first record
     And I confirm
+    Then I should see "Removed Archaeological Entity from Relationship"
     Then I should see records
       | name    |
       | Small 4 |
     And I should not see records
       | name    |
       | Small 2 |
+
+  @javascript
+  Scenario: Cannot remove arch ent member from relationship if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    Then I follow "List Relationship Records"
+    And I press "Filter"
+    Then I follow "AboveBelow 1"
+    And I follow "Show Relationship Member"
+    And database is locked for "Sync Example"
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    Then I delete the first record
+    And I confirm
+    And I wait for page
+    Then I should see "Could not process request as database is currently locked"
+    Then I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
 
   @javascript
   Scenario: Add arch ent member to relationship
@@ -1146,3 +1190,257 @@ Feature: Manage projects
     And I should not see records
       | name    |
       | Small 3 |
+
+  @javascript
+  Scenario: Merge arch ents (first)
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And I select the "first" entity to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    Then I should see "Merged Archaeological Entities"
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    And I should not see records
+      | name    |
+      | Small 3 |
+    And I follow "Small 2"
+    And I should see field with values
+      | field  | type     | value   |
+      | entity | freetext | Small 2 |
+      | name   | freetext | test3   |
+
+  @javascript
+  Scenario: Merge arch ents (second)
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And I select the "second" entity to merge to
+    And I select merge fields
+      | field | column |
+      | name  | left   |
+    And I click on "Merge"
+    Then I should see "Merged Archaeological Entities"
+    And I should see records
+      | name    |
+      | Small 3 |
+      | Small 4 |
+    And I should not see records
+      | name    |
+      | Small 2 |
+    And I follow "Small 3"
+    And I should see field with values
+      | field  | type     | value   |
+      | entity | freetext | Small 3 |
+      | name   | freetext | test2   |
+
+  @javascript
+  Scenario: Can only compare 2 arch ents
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I click on "Compare"
+    Then I should see dialog "Please select two records to compare"
+    And I confirm
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+      | Small 4 |
+    Then I click on "Compare"
+    Then I should see dialog "Can only compare two records at a time"
+
+  @javascript
+  Scenario: Cannot compare arch ents if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And database is locked for "Sync Example"
+    And I select the "first" entity to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    Then I should see dialog "Could not process request as database is currently locked"
+
+  Scenario: Cannot compare arch ents of different types
+# TODO
+
+  @javascript
+  Scenario: Merge rels (first)
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I select records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I click on "Compare"
+    And I select the "first" entity to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    Then I should see "Merged Relationship"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 3 |
+    And I should not see records
+      | name         |
+      | AboveBelow 2 |
+    And I follow "AboveBelow 1"
+    And I should see field with values
+      | field        | type     | value        |
+      | relationship | freetext | AboveBelow 1 |
+      | name         | freetext | rel2         |
+
+  @javascript
+  Scenario: Merge rels (second)
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I select records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I click on "Compare"
+    And I select the "second" entity to merge to
+    And I select merge fields
+      | field | column |
+      | name  | left   |
+    And I click on "Merge"
+    Then I should see "Merged Relationship"
+    And I should see records
+      | name         |
+      | AboveBelow 2 |
+      | AboveBelow 3 |
+    And I should not see records
+      | name         |
+      | AboveBelow 1 |
+    And I follow "AboveBelow 2"
+    And I should see field with values
+      | field        | type     | value        |
+      | relationship | freetext | AboveBelow 2 |
+      | name         | freetext | rel1         |
+
+  @javascript
+  Scenario: Can only compare 2 rels
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I click on "Compare"
+    Then I should see dialog "Please select two records to compare"
+    And I confirm
+    And I select records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+      | AboveBelow 3 |
+    Then I click on "Compare"
+    Then I should see dialog "Can only compare two records at a time"
+
+  @javascript
+  Scenario: Cannot merge rels if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I select records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I click on "Compare"
+    And database is locked for "Sync Example"
+    And I select the "first" entity to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    Then I should see dialog "Could not process request as database is currently locked"
+
+  Scenario: Cannot compare rels of different types
+# TODO

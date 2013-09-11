@@ -486,7 +486,7 @@ And(/^I select the first record$/) do
 end
 
 And(/^I delete the first record$/) do
-  first('#remove-member > a').click
+  first('.remove-member > a').click
 end
 
 Then /^I should see attached files$/ do |table|
@@ -778,6 +778,10 @@ And /^I confirm$/ do
   page.driver.browser.switch_to.alert.accept
 end
 
+And /^I should see dialog "([^"]*)"$/ do |message
+  page.driver.browser.switch_to.alert.text.should == message
+end
+
 And /^I perform HTTP authentication$/ do
   username = AndroidController::ANDROID_USER
   password = AndroidController::ANDROID_TOKEN
@@ -803,4 +807,36 @@ end
 And /^database is locked for "([^"]*)"$/ do |name|
   project = Project.find_by_name(name)
   project.db_mgr.wait_for_lock
+end
+
+And /^I select records$/ do |table|
+  table.hashes.each do |hash|
+    find(:xpath, "//input[@type='checkbox'][./following-sibling::li/a[contains(text(),\"#{hash[:name]}\")]]").set(true)
+  end
+end
+
+And /^I select the "([^"]*)" entity to merge to$/ do |first|
+  first(:css, "#select-#{first}").click
+end
+
+And /^I select merge fields$/ do |table|
+  table.hashes.each do |hash|
+    first(:xpath, "//td[contains(@class, 'merge-#{hash[:column]}')]/input[@type='radio'][./following-sibling::div/div/table/tbody/tr/td/h5[contains(text(), '#{hash[:field]}')]]").click
+  end
+end
+
+And /^I should see field with values$/ do |table|
+  table.hashes.each do |hash|
+    if hash[:type] == 'vocab'
+      (1..3).each do
+        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/div/div/select").size > 0
+      end
+      first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/div/div/select").text.should == hash[:value]
+    else
+      (1..3).each do
+        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/input").size > 0
+      end
+      first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/input").value.should == hash[:value]
+    end
+  end
 end

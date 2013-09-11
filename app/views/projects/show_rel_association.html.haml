@@ -3,12 +3,17 @@
 .content
   - if !@relationships.nil? and !@relationships.empty?
     .records
-      - for relationships in @relationships
-        %ul.inner
+      %ul.inner
+        - for relationships in @relationships
           %li
-            #remove-member.pull-left= link_to "<i class='ui-icon ui-icon-circle-minus'></i>".html_safe, remove_arch_ent_member_path(@project)+'?relationshipid='+relationships[0].to_s+'&uuid='+session[:uuid].to_s
+            %form.pull-left{:action => remove_rel_association_path(@project), :method => "post"}
+              %input{ type: :hidden, name: :authenticity_token, value: session[:authenticity_token]}
+              %input{ type: :hidden, name: :relationshipid, value: relationships[0]}
+              %input{ type: :hidden, name: :uuid, value: session[:uuid]}
+              .remove-member= link_to "<i class='ui-icon ui-icon-circle-minus'></i>".html_safe
             %a{:href => edit_rel_records_path(@project,relationships[0])}
               =relationships[1].to_s
+          .clear
       .paging.search
         = render :partial => 'pagination'
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project,session[:uuid])}

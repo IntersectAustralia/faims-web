@@ -186,51 +186,57 @@ class Database
     @db.execute(WebQuery.update_aent_value_as_dirty, isdirty, isdirtyreason, uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum)
   end
 
-  def insert_updated_arch_entity(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
+  def merge_arch_ents(delete_uuid, merge_uuid, vocab_id, attribute_id, measure, freetext, certainty, userid)
     @project.db_mgr.with_lock do
-      timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp, userid)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
+
+      delete_arch_entity_no_lock(delete_uuid, userid)
+
+      insert_updated_arch_entity(merge_uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def insert_updated_arch_entity(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
+    timestamp = current_timestamp
+
+    params = {
+        uuid:uuid,
+        userid:userid,
+        aenttimestamp:timestamp,
+        parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+    }
+
+    @db.execute(WebQuery.insert_arch_entity, params)
+
+    cache_timestamps = {}
+
+    (0..(freetext.length-1)).each do |i|
+
+      if cache_timestamps[attribute_id[i]]
+        parenttimestamp = cache_timestamps[attribute_id[i]]
+      else
+        parenttimestamp = @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id[i])
+
+        cache_timestamps[attribute_id[i]] = parenttimestamp
+      end
 
       params = {
           uuid:uuid,
           userid:userid,
-          aenttimestamp:timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+          attributeid:attribute_id[i],
+          vocabid:clean(vocab_id ? vocab_id[i] : nil),
+          measure:clean(measure[i]),
+          freetext:clean(freetext[i]),
+          certainty:clean(certainty[i]),
+          valuetimestamp:timestamp,
+          parenttimestamp:parenttimestamp
       }
 
-      @db.execute(WebQuery.insert_arch_entity, params)
+      @db.execute(WebQuery.insert_arch_entity_attribute, params)
 
-      cache_timestamps = {}
-
-      (0..(freetext.length-1)).each do |i|
-
-        if cache_timestamps[attribute_id[i]]
-          parenttimestamp = cache_timestamps[attribute_id[i]]
-        else
-          parenttimestamp = @db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id[i])
-
-          cache_timestamps[attribute_id[i]] = parenttimestamp
-        end
-
-
-        params = {
-            uuid:uuid,
-            userid:userid,
-            attributeid:attribute_id[i],
-            vocabid:clean(vocab_id ? vocab_id[i] : nil),
-            measure:clean(measure[i]),
-            freetext:clean(freetext[i]),
-            certainty:clean(certainty[i]),
-            valuetimestamp:timestamp,
-            parenttimestamp:parenttimestamp
-        }
-
-        @db.execute(WebQuery.insert_arch_entity_attribute, params)
-
-        validate_aent_value(uuid, timestamp, attribute_id[i])
-      end
-
-      @project.db_mgr.make_dirt
+      validate_aent_value(uuid, timestamp, attribute_id[i])
     end
   end
 
@@ -303,15 +309,19 @@ class Database
   def delete_arch_entity(uuid, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp, userid)
-      params = {
-          userid:userid,
-          deleted:'true',
-          uuid:uuid,
-          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
-      }
-      @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
+      delete_arch_entity_no_lock(uuid, userid)
       @project.db_mgr.make_dirt
     end
+  end
+
+  def delete_arch_entity_no_lock(uuid, userid)
+    params = {
+        userid:userid,
+        deleted:'true',
+        uuid:uuid,
+        parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+    }
+    @db.execute(WebQuery.delete_or_undelete_arch_entity, params)
   end
 
   def undelete_arch_entity(uuid, userid)
@@ -436,49 +446,56 @@ class Database
     @db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
   end
 
-  def insert_updated_rel(relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
+  def merge_rel(deleted_relationshipid, merge_relationshipid, vocab_id, attribute_id, freetext, certainty, userid)
     @project.db_mgr.with_lock do
-      timestamp = current_timestamp
-      @db.execute(WebQuery.insert_version, timestamp, userid)
+      @db.execute(WebQuery.insert_version, current_timestamp, userid)
+
+      delete_relationship_no_lock(deleted_relationshipid, userid)
+
+      insert_updated_rel(merge_relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
+
+      @project.db_mgr.make_dirt
+    end
+  end
+
+  def insert_updated_rel(relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
+    timestamp = current_timestamp
+
+    params = {
+        relationshipid:relationshipid,
+        userid:userid,
+        relntimestamp:timestamp,
+        parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+    }
+
+    @db.execute(WebQuery.insert_relationship, params)
+
+    cache_timestamps = {}
+
+    (0..(freetext.length-1)).each do |i|
+
+      if cache_timestamps[attribute_id[i]]
+        parenttimestamp = cache_timestamps[attribute_id[i]]
+      else
+        parenttimestamp = @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id[i])
+
+        cache_timestamps[attribute_id[i]] = parenttimestamp
+      end
 
       params = {
           relationshipid:relationshipid,
           userid:userid,
-          relntimestamp:timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+          attributeid:attribute_id[i],
+          vocabid:clean(vocab_id ? vocab_id[i] : nil),
+          freetext:clean(freetext[i]),
+          certainty:clean(certainty[i]),
+          relnvaluetimestamp:timestamp,
+          parenttimestamp:parenttimestamp
       }
 
-      @db.execute(WebQuery.insert_relationship, params)
+      @db.execute(WebQuery.insert_relationship_attribute, params)
 
-      cache_timestamps = {}
-
-      (0..(freetext.length-1)).each do |i|
-
-        if cache_timestamps[attribute_id[i]]
-          parenttimestamp = cache_timestamps[attribute_id[i]]
-        else
-          parenttimestamp = @db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id[i])
-
-          cache_timestamps[attribute_id[i]] = parenttimestamp
-        end
-
-        params = {
-            relationshipid:relationshipid,
-            userid:userid,
-            attributeid:attribute_id[i],
-            vocabid:clean(vocab_id ? vocab_id[i] : nil),
-            freetext:clean(freetext[i]),
-            certainty:clean(certainty[i]),
-            relnvaluetimestamp:timestamp,
-            parenttimestamp:parenttimestamp
-        }
-
-        @db.execute(WebQuery.insert_relationship_attribute, params)
-
-        validate_reln_value(relationshipid, timestamp, attribute_id[i])
-      end
-
-      @project.db_mgr.make_dirt
+      validate_reln_value(relationshipid, timestamp, attribute_id[i])
     end
   end
 
@@ -551,15 +568,19 @@ class Database
   def delete_relationship(relationshipid, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp, userid)
-      params = {
-          userid:userid,
-          deleted:'true',
-          relationshipid:relationshipid,
-          parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
-      }
-      @db.execute(WebQuery.delete_or_undelete_relationship, params)
+      delete_relationship_no_lock(relationshipid, userid)
       @project.db_mgr.make_dirt
     end
+  end
+
+  def delete_relationship_no_lock(relationshipid, userid)
+    params = {
+        userid:userid,
+        deleted:'true',
+        relationshipid:relationshipid,
+        parenttimestamp: @db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+    }
+    @db.execute(WebQuery.delete_or_undelete_relationship, params)
   end
 
   def undelete_relationship(relationshipid, userid)

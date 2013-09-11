@@ -114,12 +114,11 @@ compare_input_checked_handler = ->
   return
 
 aent_rel_management = ->
-  $('#remove-member').each(
+  $('.remove-member').each(
     -> $(this).click(
       ->
         if confirm("Are you sure you want to delete association?")
-          $.post $(this).find('a').attr('href')
-          $(this).parent('li').remove()
+          $(this).parent('form').submit()
         return false
     )
   )
@@ -270,11 +269,10 @@ merge_record_management = ->
         row.find('.merge-left').removeClass('selected')
   )
 
-
   $('#merge-record').click(
     ->
-      $form = $('<form method="post">')
-      $form.attr('action',$(this).attr('href'))
+      form = $('<form method="post">')
+      form.attr('action',$(this).attr('href'))
       $('#select-form').find('.merge-row').each (
         ->
           if ($(this).find('.merge-left').find('input:radio:checked').length)
@@ -283,13 +281,37 @@ merge_record_management = ->
             row = $(this).find('.merge-right')
           row.find('input').each(
             ->
-              $form.append(this)
+              form.append($(this).clone())
           )
           return
       )
-      $('body').append($form)
-      $form.hide()
-      $form.submit()
+
+      # open modal dialog
+      $('#loading').dialog({
+        autoOpen: false,
+        closeOnEscape: false,
+        draggable: false,
+        title: "Message",
+        width: 300,
+        minHeight: 50,
+        modal: true,
+        buttons: {},
+        resizable: false
+      });
+      $('#loading').removeClass('hidden')
+      $('#loading').dialog('open')
+
+      $.ajax $(this).attr('href'),
+        type: 'POST'
+        dataType: 'json'
+        data: form.serialize()
+        success: (data, textStatus, jqXHR) ->
+          if data.result == 'success'
+            window.location = data.url
+          else
+            $('#loading').addClass('hidden')
+            $('#loading').dialog('close')
+            alert(data.message)
       false
   )
   return

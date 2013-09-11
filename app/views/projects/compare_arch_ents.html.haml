@@ -47,3 +47,7 @@
         = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_arch_ent_records_path(@project)+"?query="+session[:query]+"&offset=0", :class => 'btn'
       = link_to "Merge", merge_arch_ents_path(@project), :id => 'merge-record', :class => 'btn btn-inverse'
 
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Merging Entities

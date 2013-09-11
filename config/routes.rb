@@ -79,10 +79,11 @@ FaimsWeb::Application.routes.draw do
   post 'projects/:id/add_arch_ent_member/', :to => 'projects#add_arch_ent_member', :as => 'add_arch_ent_member'
 
   get 'projects/:id/show_rel_association/:uuid', :to => 'projects#show_rel_association', :as => 'show_rel_association'
+  post 'projects/:id/remove_rel_association/', :to => 'projects#remove_rel_association', :as => 'remove_rel_association'
   get 'projects/:id/search_rel_association/:uuid', :to => 'projects#search_rel_association', :as => 'search_rel_association'
-  get 'projects/:id/get_verbs_for_rel_association', :to => 'projects#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
   post 'projects/:id/add_rel_association/', :to => 'projects#add_rel_association', :as => 'add_rel_association'
 
+  get 'projects/:id/get_verbs_for_rel_association', :to => 'projects#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
 
   post 'projects/:id/add_entity_to_compare/', :to => 'projects#add_entity_to_compare', :as => 'add_entity_to_compare'
   post 'projects/:id/remove_entity_to_compare/', :to => 'projects#remove_entity_to_compare', :as => 'remove_entity_to_compare'

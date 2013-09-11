@@ -399,23 +399,23 @@ class ProjectsController < ApplicationController
 
   def merge_arch_ents
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
+
+    if wait_for_db
+      @project.db.merge_arch_ents(params[:deleted_id], params[:uuid], params[:vocab_id], params[:attribute_id], params[:measure], params[:freetext], params[:certainty], @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Merged Archaeological Entities'
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        url = list_typed_arch_ent_records_path(@project, {type: session[:type], show_deleted: show_deleted, flash: flash[:notice]})
+      else
+        url = show_arch_ent_records_path(@project, {query: session[:query], show_deleted: show_deleted, flash: flash[:notice]})
+      end
+
+      return render :json => { result: 'success', url: url }
     end
 
-    @project.db.delete_arch_entity(params[:deleted_id],@project.db.get_project_user_id(current_user.email))
-
-    @project.db.insert_updated_arch_entity(params[:uuid],@project.db.get_project_user_id(current_user.email), params[:vocab_id],params[:attribute_id], params[:measure], params[:freetext], params[:certainty])
-    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
-    if session[:type]
-      redirect_to(list_typed_arch_ent_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
-      return
-    else
-      redirect_to(show_arch_ent_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
-      return
-    end
+    return render :json => { result: 'failure', message: flash[:error] }
   end
 
   def show_arch_ent_history
@@ -675,10 +675,18 @@ class ProjectsController < ApplicationController
 
   def remove_arch_ent_member
     @project = Project.find(params[:id])
+
     relationshipid = params[:relationshipid]
+    relntypeid = params[:relntypeid]
     uuid = params[:uuid]
-    @project.db.delete_member(relationshipid,@project.db.get_project_user_id(current_user.email),uuid)
-    render :nothing => true
+
+    if wait_for_db
+      @project.db.delete_member(relationshipid, @project.db.get_project_user_id(current_user.email), uuid)
+
+      flash[:notice] = 'Removed Archaeological Entity from Relationship'
+    end
+
+    return redirect_to action: :show_rel_members, id: @project.id, relationshipid: relationshipid, relntypeid: relntypeid
   end
 
   def search_arch_ent_member
@@ -758,6 +766,21 @@ class ProjectsController < ApplicationController
         session[:show].push('show_rel_associations')
       end
     end
+  end
+
+  def remove_rel_association
+    @project = Project.find(params[:id])
+
+    relationshipid = params[:relationshipid]
+    uuid = params[:uuid]
+
+    if wait_for_db
+      @project.db.delete_member(relationshipid, @project.db.get_project_user_id(current_user.email), uuid)
+
+      flash[:notice] = 'Removed Archaeological Entity from Relationship'
+    end
+
+    redirect_to action: :show_rel_association, id: @project.id, uuid: uuid
   end
 
   def search_rel_association
@@ -871,22 +894,23 @@ class ProjectsController < ApplicationController
 
   def merge_rel
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    end
-    @project.db.delete_relationship(params[:deleted_id],@project.db.get_project_user_id(current_user.email))
 
-    @project.db.insert_updated_rel(params[:rel_id],@project.db.get_project_user_id(current_user.email), params[:vocab_id], params[:attribute_id],  params[:freetext], params[:certainty])
-    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
-    if session[:type]
-      redirect_to(list_typed_rel_records_path(@project) + '?type=' + session[:type] + '&show_deleted=' + show_deleted)
-      return
-    else
-      redirect_to(show_rel_records_path(@project) + '?query=' + session[:query] + '&show_deleted=' + show_deleted)
-      return
+    if wait_for_db
+      @project.db.merge_rel(params[:deleted_id], params[:rel_id], params[:vocab_id], params[:attribute_id], params[:freetext], params[:certainty], @project.db.get_project_user_id(current_user.email))
+
+      flash[:notice] = 'Merged Relationships'
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        url = list_typed_rel_records_path(@project, {type: session[:type], show_deleted: show_deleted, flash: flash[:notice]})
+      else
+        url = show_rel_records_path(@project, {query: session[:query], show_deleted: show_deleted, flash: flash[:notice]})
+      end
+
+      return render :json => { result: 'success', url: url }
     end
+
+    render :json => { result: 'failure', message: flash[:error] }
   end
 
   def list_attributes_with_vocab
