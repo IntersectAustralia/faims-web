@@ -1288,6 +1288,7 @@ Feature: Manage projects
       | Small 4 |
     Then I click on "Compare"
     Then I should see dialog "Can only compare two records at a time"
+    And I confirm
 
   @javascript
   Scenario: Cannot compare arch ents if database is locked
@@ -1417,6 +1418,7 @@ Feature: Manage projects
       | AboveBelow 3 |
     Then I click on "Compare"
     Then I should see dialog "Can only compare two records at a time"
+    And I confirm
 
   @javascript
   Scenario: Cannot merge rels if database is locked
