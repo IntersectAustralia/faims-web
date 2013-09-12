@@ -788,13 +788,13 @@ class Database
     vocabs
   end
 
-  def update_attributes_vocab(attribute_id, vocab_id, vocab_name, userid)
+  def update_attributes_vocab(attribute_id, vocab_id, vocab_name, vocab_description,picture_url, userid)
     @project.db_mgr.with_lock do
       @db.execute(WebQuery.insert_version, current_timestamp, userid)
       vocab_id.length.times do |i|
         vocab_id[i-1] = vocab_id[i-1].blank? ? nil : vocab_id[i-1]
         if !vocab_name[i-1].blank?
-          @db.execute_batch(WebQuery.update_attributes_vocab,vocab_id[i-1],attribute_id,vocab_name[i-1])
+          @db.execute_batch(WebQuery.update_attributes_vocab,vocab_id[i-1],attribute_id,vocab_name[i-1], vocab_description[i-1], picture_url[i-1])
         end
       end
       @project.db_mgr.make_dirt

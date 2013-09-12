@@ -63,7 +63,8 @@ CREATE TABLE Vocabulary (
 	AttributeID          	INTEGER NOT NULL REFERENCES AttributeKey,
 	VocabName          	 	TEXT NOT NULL, -- This is the human-visible part of vocab that forms lookup tables. It is likely to be Arch16nized.
 	SemanticMapURL	     	TEXT,
-	PictureURL				TEXT -- relative path.
+	PictureURL				TEXT, -- relative path.
+	VocabDescription	     	TEXT
  );
 
 --create index vocabindex on vocabulary (vocabid);

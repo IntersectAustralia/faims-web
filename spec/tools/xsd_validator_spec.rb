@@ -26,6 +26,8 @@ describe XSDValidator do
     it { validate_data_schema('data_schema_2.xml').should be_empty }
     # empty data
     it { validate_data_schema('data_schema_3.xml').should be_empty }
+    # adding description to attribute and vocab
+    it { validate_data_schema('data_schema_4.xml').should be_empty }
     # error
     it { validate_data_schema('data_schema_error1.xml').should_not be_empty }
   end

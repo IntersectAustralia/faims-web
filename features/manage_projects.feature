@@ -403,10 +403,10 @@ Feature: Manage projects
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see vocabularies
-      | name  |
-      | Green |
-      | Pink  |
-      | Blue  |
+      | name  | description | pictureURL |
+      | Green |             |            |
+      | Pink  |             |            |
+      | Blue  |             |            |
 
   @javascript
   Scenario: Update Vocabulary
@@ -431,10 +431,10 @@ Feature: Manage projects
     Then I click on "Update"
     And I should see "Successfully updated vocabulary"
     And I should see vocabularies
-      | name |
-      | Red  |
-      | Pink |
-      | Blue |
+      | name | description | pictureURL |
+      | Red  |             |            |
+      | Pink |             |            |
+      | Blue |             |            |
 
   @javascript
   Scenario: Insert Vocabulary
@@ -457,14 +457,16 @@ Feature: Manage projects
     And I select "Soil Texture" for the attribute
     Then I click on "Insert"
     And I add "Red" to the vocabulary list
+    Then I add "New color" as description to the vocabulary list
+    And  I add "New picture url" as picture url to the vocabulary list
     Then I click on "Update"
     And I should see "Successfully updated vocabulary"
     And I should see vocabularies
-      | name  |
-      | Green |
-      | Red   |
-      | Pink  |
-      | Blue  |
+      | name  | description | pictureURL |
+      | Green |             |            |
+      | Red   | New color   | New picture url |
+      | Pink  |             |            |
+      | Blue  |             |            |
 
   @javascript
   Scenario: Cannot update vocabulary if db is locked
@@ -490,10 +492,10 @@ Feature: Manage projects
     Then I click on "Update"
     And I should see "Could not process request as database is currently locked"
     And I should see vocabularies
-      | name |
-      | Red  |
-      | Pink |
-      | Blue |
+      | name | description | pictureURL |
+      | Red  |             |            |
+      | Pink |             |            |
+      | Blue |             |            |
 
   @javascript
   Scenario: Cannot update vocabulary if db is locked
@@ -517,14 +519,16 @@ Feature: Manage projects
     And I select "Soil Texture" for the attribute
     Then I click on "Insert"
     And I add "Red" to the vocabulary list
+    Then I add "New color" as description to the vocabulary list
+    And  I add "New picture url" as picture url to the vocabulary list
     Then I click on "Update"
     And I should see "Could not process request as database is currently locked"
     And I should see vocabularies
-      | name  |
-      | Green |
-      | Red   |
-      | Pink  |
-      | Blue  |
+      | name  | description | pictureURL |
+      | Green |             |            |
+      | Red   | New color   | New picture url |
+      | Pink  |             |            |
+      | Blue  |             |            |
 
   @javascript
   Scenario: Seeing users to be added for project
