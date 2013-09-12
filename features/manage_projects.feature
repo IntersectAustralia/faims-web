@@ -1313,7 +1313,9 @@ Feature: Manage projects
       | field | column |
       | name  | right  |
     And I click on "Merge"
+    And I wait for popup to close
     Then I should see dialog "Could not process request as database is currently locked"
+    And I confirm
 
   Scenario: Cannot compare arch ents of different types
 # TODO
@@ -1440,7 +1442,9 @@ Feature: Manage projects
       | field | column |
       | name  | right  |
     And I click on "Merge"
+    And I wait for popup to close
     Then I should see dialog "Could not process request as database is currently locked"
+    And I confirm
 
   Scenario: Cannot compare rels of different types
 # TODO

@@ -1,6 +1,8 @@
 require File.expand_path("../../../spec/tools/helpers/database_generator_spec_helper", __FILE__)
 require File.expand_path("../../support/projects", __FILE__)
 
+wait_range = (1..3)
+
 And /^I pick file "([^"]*)" for "([^"]*)"$/ do |file, field|
   attach_file(field, File.expand_path("../../assets/" + file, __FILE__)) unless file.blank?
 end
@@ -183,7 +185,7 @@ When /^I click on "([^"]*)"$/ do |name|
   if all(:xpath, "//input[@value = \"#{name}\"]").size > 0
     find(:xpath, "//input[@value = \"#{name}\"]").click
   else
-    (1..3).each do
+    wait_range.each do
       if all(:xpath, "//a[contains(text(), \"#{name}\")]").size == 0
         sleep(1)
       else
@@ -734,7 +736,7 @@ Then /^I should not see project directories$/ do |table|
 end
 
 And /^I delete project file "([^"]*)" for "([^"]*)"$/ do |file, dir|
-  (1..3).each do
+  wait_range.each do
     if all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").size == 0
       sleep(1)
     else
@@ -745,7 +747,7 @@ And /^I delete project file "([^"]*)" for "([^"]*)"$/ do |file, dir|
 end
 
 And /^I delete root directory$/ do
-  (1..3).each do
+  wait_range.each do
     if all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").size == 0
       sleep(1)
     else
@@ -775,11 +777,31 @@ Then /^I delete project directories$/ do |table|
 end
 
 And /^I confirm$/ do
-  page.driver.browser.switch_to.alert.accept
+  checked = nil
+  wait_range.each do
+    begin
+      page.driver.browser.switch_to.alert.accept
+      checked = true
+      break
+    rescue
+      sleep(1)
+    end
+  end
+  page.driver.browser.switch_to.alert.accept unless checked
 end
 
-And /^I should see dialog "([^"]*)"$/ do |message
-  page.driver.browser.switch_to.alert.text.should == message
+And /^I should see dialog "([^"]*)"$/ do |message|
+  checked = nil
+  wait_range.each do
+    begin
+      page.driver.browser.switch_to.alert.text.should == message
+      checked = true
+      break
+    rescue
+      sleep(1)
+    end
+  end
+  page.driver.browser.switch_to.alert.text.should == message unless checked
 end
 
 And /^I perform HTTP authentication$/ do
@@ -828,15 +850,19 @@ end
 And /^I should see field with values$/ do |table|
   table.hashes.each do |hash|
     if hash[:type] == 'vocab'
-      (1..3).each do
+      wait_range.each do
         break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/div/div/select").size > 0
       end
       first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/div/div/select").text.should == hash[:value]
     else
-      (1..3).each do
+      wait_range.each do
         break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/input").size > 0
       end
       first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/input").value.should == hash[:value]
     end
   end
+end
+
+And /^I wait for popup to close$/ do
+  sleep(10)
 end
