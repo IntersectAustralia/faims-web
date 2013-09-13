@@ -287,10 +287,13 @@ class ProjectsController < ApplicationController
 
     @project = Project.find(params[:id])
     uuid = params[:uuid]
+
+    # TODO whats this for?
     session[:uuid] = uuid
     if !session[:show].nil? and session[:show][-1].eql?('show_rel_associations')
       session[:show].pop()
     end
+
     @attributes = @project.db.get_arch_entity_attributes(uuid)
     @vocab_name = {}
     for attribute in @attributes
@@ -303,6 +306,8 @@ class ProjectsController < ApplicationController
 
     @deleted = @project.db.get_arch_entity_deleted_status(uuid)
     @related_arch_ents = @project.db.get_related_arch_entities(uuid)
+
+    # TODO what this for?
     prev_id = params[:prev_id]
     if prev_id.nil?
       if !session[:prev_id].nil?
@@ -320,25 +325,25 @@ class ProjectsController < ApplicationController
 
   def update_arch_ent_records
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    else
-      uuid = params[:uuid]
-      vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
-      attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
-      measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
-      freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
-      certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+    uuid = params[:uuid]
+    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
+    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+    measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
+    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
+    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      @project.db.update_arch_entity_attribute(uuid,@project.db.get_project_user_id(current_user.email),vocab_id,attribute_id, measure, freetext, certainty, ignore_errors)
+    ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      redirect_to edit_arch_ent_records_path(@project, uuid)
+    if wait_for_db
+      @project.db.update_arch_entity_attribute(uuid, @project.db.get_project_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
+
+      # TODO add new query to return and attributes dirty flag and reason
+      @attributes = @project.db.get_arch_entity_attributes(uuid)
+      errors = @attributes.select { |a| a[1] == attribute_id }.map { |a| a[11] }.first
     end
 
+    render json: { result: flash[:error] ? 'failure' : 'success', message: flash[:error], errors: errors }
   end
 
   def delete_arch_ent_records
@@ -537,11 +542,15 @@ class ProjectsController < ApplicationController
 
     @project = Project.find(params[:id])
     relationshipid = params[:relationshipid]
+
     session[:relationshipid] = relationshipid
+
+    #TODO whats this for?
     if !session[:show].nil? and session[:show][-1].eql?('show_rel_members')
       session[:show].pop()
       p session[:show]
     end
+
     @attributes = @project.db.get_rel_attributes(relationshipid)
     @vocab_name = {}
     for attribute in @attributes
@@ -557,24 +566,24 @@ class ProjectsController < ApplicationController
 
   def update_rel_records
     @project = Project.find(params[:id])
-    if @project.db_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
-    else
-      relationshipid = params[:relationshipid]
-      vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
-      attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
-      freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
-      certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+    relationshipid = params[:relationshipid]
+    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
+    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
+    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
 
-      @project.db.update_rel_attribute(relationshipid,@project.db.get_project_user_id(current_user.email),vocab_id,attribute_id, freetext, certainty, ignore_errors)
+    ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-      redirect_to edit_rel_records_path(@project, relationshipid)
+    if wait_for_db
+      @project.db.update_rel_attribute(relationshipid, @project.db.get_project_user_id(current_user.email), vocab_id, attribute_id, freetext, certainty, ignore_errors)
+
+      # TODO add new query to return and attributes dirty flag and reason
+      @attributes = @project.db.get_rel_attributes(relationshipid)
+      errors = @attributes.select { |a| a[2] == attribute_id }.map { |a| a[11] }.first
     end
 
+    render json: { result: flash[:error] ? 'failure' : 'success', message: flash[:error], errors: errors }
   end
 
   def show_rel_history

@@ -858,22 +858,75 @@ And /^I select merge fields$/ do |table|
   end
 end
 
-And /^I should see field with values$/ do |table|
-  table.hashes.each do |hash|
-    if hash[:type] == 'vocab'
+And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, type, values_str|
+  values = values_str.split(';')
+  values = [''] if values.empty?
+  values.each_with_index do |value, index|
+    value.strip!
+    if type == 'vocab'
       wait_range.each do
-        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/div/div/select").size > 0
+        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select").size > 0
       end
-      first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/div/div/select").text.should == hash[:value]
+      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select/option[contains(text(), '#{value}')]")[index].select_option
     else
       wait_range.each do
-        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/input").size > 0
+        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input").size > 0
       end
-      first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{hash[:field]}')]]/div/div[./label[contains(text(), '#{hash[:type].capitalize}')]]/input").value.should == hash[:value]
+      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input")[index].set value
     end
   end
 end
 
+And /^I click on update for attribute with field "([^"]*)"$/ do |field|
+  first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/following-sibling::div/input").click
+end
+
+And /^I update fields with values$/ do |table|
+  table.hashes.each do |hash|
+    step "I update field \"#{hash[:field]}\" of type \"#{hash[:type]}\" with values \"#{hash[:values]}\""
+    step "I click on update for attribute with field \"#{hash[:field]}\""
+    sleep(1)
+  end
+end
+
+And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, type, values_str|
+  values = values_str.split(';')
+  values = [''] if values.empty?
+  values.each_with_index do |value, index|
+    value.strip!
+    if type == 'vocab'
+      wait_range.each do
+        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select").size > 0
+      end
+      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select/option[contains(text(), '#{value}')]")[index].text.should == value
+    else
+      wait_range.each do
+        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input").size > 0
+      end
+      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input")[index].value.should == value
+    end
+  end
+end
+
+And /^I should see fields with values$/ do |table|
+  table.hashes.each do |hash|
+    step "I should see field \"#{hash[:field]}\" of type \"#{hash[:type]}\" with values \"#{hash[:values]}\""
+  end
+end
+
+And /^I should see field "([^"]*)" with error "([^"]*)"$/ do |field, error|
+  wait_range.each do
+    break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/following-sibling::div/div/li[contains(text(), '#{error}')]").size > 0
+  end
+  all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/following-sibling::div/div/li[contains(text(), '#{error}')]").size == 1
+end
+
+And /^I should see fields with errors$/ do |table|
+  table.hashes.each do |hash|
+    step "I should see field \"#{hash[:field]}\" with error \"#{hash[:values]}\""
+  end
+end
+
 And /^I wait for popup to close$/ do
-  sleep(10)
+  sleep(ProjectsController::WAIT_FOR_DB_TIMEOUT)
 end

@@ -419,6 +419,65 @@ show_hide_deleted = ->
   )
   return
 
+update_attribute = (form) ->
+  # open modal dialog
+  $('#loading').dialog({
+    autoOpen: false,
+    closeOnEscape: false,
+    draggable: false,
+    title: "Message",
+    width: 300,
+    minHeight: 50,
+    modal: true,
+    buttons: {},
+    resizable: false
+  });
+  $('#loading').removeClass('hidden')
+  $('#loading').dialog('open')
+
+  $.ajax $(this).attr('href'),
+    type: 'POST'
+    dataType: 'json'
+    data: form.serialize()
+    success: (data, textStatus, jqXHR) ->
+      if data.result == 'success'
+        form.find('.form-attribute-result').empty()
+        if data.errors
+          errors = data.errors.split(';')
+          for error in errors
+            if error != ""
+              form.find('.form-attribute-result').append("<li class='form-attribute-error'>"+error+"</li>")
+
+          # hide update button
+          if form.find('.ignore-errors-btn').hasClass('hidden')
+            form.find('.ignore-errors-btn').removeClass('hidden')
+        else
+          form.find('.form-attribute-result').append("<div class='alert alert-success alert-dismissable'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>Updated</div>")
+          setTimeout(
+            ->
+              form.find('.form-attribute-result .alert').fadeOut()
+            , 2000)
+          # show update button
+          if !form.find('.ignore-errors-btn').hasClass('hidden')
+            form.find('.ignore-errors-btn').addClass('hidden')
+      else
+        alert(data.message)
+
+      $('#loading').addClass('hidden')
+      $('#loading').dialog('close')
+
+update_arch_ent_or_rel = ->
+  $('.update-arch-ent-form form').submit(
+    ->
+      update_attribute($(this))
+      return false
+  )
+  $('.update-rel-form form').submit(
+    ->
+      update_attribute($(this))
+      return false
+  )
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -434,5 +493,6 @@ $(document).ready(
     vocab_management()
     user_management()
     show_hide_deleted()
+    update_arch_ent_or_rel()
     return
 )

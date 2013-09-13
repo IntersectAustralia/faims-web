@@ -462,11 +462,11 @@ Feature: Manage projects
     Then I click on "Update"
     And I should see "Successfully updated vocabulary"
     And I should see vocabularies
-      | name  | description | pictureURL |
-      | Green |             |            |
+      | name  | description | pictureURL      |
+      | Green |             |                 |
       | Red   | New color   | New picture url |
-      | Pink  |             |            |
-      | Blue  |             |            |
+      | Pink  |             |                 |
+      | Blue  |             |                 |
 
   @javascript
   Scenario: Cannot update vocabulary if db is locked
@@ -524,11 +524,11 @@ Feature: Manage projects
     Then I click on "Update"
     And I should see "Could not process request as database is currently locked"
     And I should see vocabularies
-      | name  | description | pictureURL |
-      | Green |             |            |
+      | name  | description | pictureURL      |
+      | Green |             |                 |
       | Red   | New color   | New picture url |
-      | Pink  |             |            |
-      | Blue  |             |            |
+      | Pink  |             |                 |
+      | Blue  |             |                 |
 
   @javascript
   Scenario: Seeing users to be added for project
@@ -895,22 +895,154 @@ Feature: Manage projects
       | small Below AboveBelow: Small 3 |
       | small Below AboveBelow: Small 4 |
 
+  @javascript
   Scenario: Update arch entity attribute
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I follow "Small 2"
+    And I update fields with values
+      | field    | type      | values                 |
+      | location | vocab     | Location A; Location C |
+      | name     | freetext  | test3                  |
+      | name     | certainty |                        |
+      | value    | measure   | 10.0                   |
+      | value    | certainty | 0.5                    |
+    And I should see fields with values
+      | field    | type      | values                 |
+      | location | vocab     | Location A; Location C |
+      | name     | freetext  | test3                  |
+      | name     | certainty |                        |
+      | value    | measure   | 10.0                   |
+      | value    | certainty | 0.5                    |
 
-  Scenario: Cannot update arch entity attribute if database is locked
-
+  @javascript
   Scenario: Update arch entity attribute causes validation error
-# TODO
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "Edit Project"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I press "Update"
+    Then I should see "Successfully updated project"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I follow "Small 2"
+    And I update fields with values
+      | field | type     | values |
+      | name  | freetext |        |
+    And I should see fields with errors
+      | field | error                |
+      | name  | Field value is blank |
+      | name  | Field value not text |
+
+  @javascript
+  Scenario: Cannot update arch entity attribute if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I follow "Small 2"
+    And database is locked for "Sync Example"
+    And I update fields with values
+      | field    | type      | values                 |
+      | location | vocab     | Location A; Location C |
+    And I wait for popup to close
+    Then I should see dialog "Could not process request as database is currently locked"
+    And I confirm
 
   Scenario: Update arch entity attribute with multiple values causes validation error
 # TODO
 
+  @javascript
   Scenario: Update rel attribute
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I follow "AboveBelow 1"
+    And I update fields with values
+      | field    | type      | values                 |
+      | location | vocab     | Location A; Location C |
+      | name     | freetext  | rel2                   |
+      | name     | certainty |                        |
+    And I should see fields with values
+      | field    | type      | values                 |
+      | location | vocab     | Location A; Location C |
+      | name     | freetext  | rel2                   |
+      | name     | certainty |                        |
 
-  Scenario: Cannot update rel attribute if database is locked
+  @javascript
+  Scenario: Update arch entity attribute causes validation error
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I follow "AboveBelow 1"
+    And I update fields with values
+      | field | type     | values |
+      | name  | freetext |        |
+    And I should see fields with errors
+      | field | error                |
+      | name  | Field value is blank |
+      | name  | Field value not text |
 
-  Scenario: Update relationship attribute causes validation error
-# TODO
+  @javascript
+  Scenario: Cannot update arch entity attribute if database is locked
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Sync_Example.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Sync Example"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I follow "AboveBelow 1"
+    And database is locked for "Sync Example"
+    And I update fields with values
+      | field    | type      | values                 |
+      | location | vocab     | Location A; Location C |
+    And I wait for popup to close
+    Then I should see dialog "Could not process request as database is currently locked"
+    And I confirm
 
   Scenario: Update relationship attribute with multiple values causes validation error
 # TODO
@@ -1227,8 +1359,8 @@ Feature: Manage projects
       | name    |
       | Small 3 |
     And I follow "Small 2"
-    And I should see field with values
-      | field  | type     | value   |
+    And I should see fields with values
+      | field  | type     | values  |
       | entity | freetext | Small 2 |
       | name   | freetext | test3   |
 
@@ -1264,8 +1396,8 @@ Feature: Manage projects
       | name    |
       | Small 2 |
     And I follow "Small 3"
-    And I should see field with values
-      | field  | type     | value   |
+    And I should see fields with values
+      | field  | type     | values  |
       | entity | freetext | Small 3 |
       | name   | freetext | test2   |
 
@@ -1357,7 +1489,7 @@ Feature: Manage projects
       | name         |
       | AboveBelow 2 |
     And I follow "AboveBelow 1"
-    And I should see field with values
+    And I should see fields with values
       | field        | type     | value        |
       | relationship | freetext | AboveBelow 1 |
       | name         | freetext | rel2         |
@@ -1394,7 +1526,7 @@ Feature: Manage projects
       | name         |
       | AboveBelow 1 |
     And I follow "AboveBelow 2"
-    And I should see field with values
+    And I should see fields with values
       | field        | type     | value        |
       | relationship | freetext | AboveBelow 2 |
       | name         | freetext | rel1         |
