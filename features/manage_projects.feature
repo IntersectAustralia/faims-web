@@ -966,8 +966,8 @@ Feature: Manage projects
     And I follow "Small 2"
     And database is locked for "Sync Example"
     And I update fields with values
-      | field    | type      | values                 |
-      | location | vocab     | Location A; Location C |
+      | field    | type  | values                 |
+      | location | vocab | Location A; Location C |
     And I wait for popup to close
     Then I should see dialog "Could not process request as database is currently locked"
     And I confirm
@@ -1038,8 +1038,8 @@ Feature: Manage projects
     And I follow "AboveBelow 1"
     And database is locked for "Sync Example"
     And I update fields with values
-      | field    | type      | values                 |
-      | location | vocab     | Location A; Location C |
+      | field    | type  | values                 |
+      | location | vocab | Location A; Location C |
     And I wait for popup to close
     Then I should see dialog "Could not process request as database is currently locked"
     And I confirm
@@ -1490,7 +1490,7 @@ Feature: Manage projects
       | AboveBelow 2 |
     And I follow "AboveBelow 1"
     And I should see fields with values
-      | field        | type     | value        |
+      | field        | type     | values       |
       | relationship | freetext | AboveBelow 1 |
       | name         | freetext | rel2         |
 
@@ -1527,7 +1527,7 @@ Feature: Manage projects
       | AboveBelow 1 |
     And I follow "AboveBelow 2"
     And I should see fields with values
-      | field        | type     | value        |
+      | field        | type     | values       |
       | relationship | freetext | AboveBelow 2 |
       | name         | freetext | rel1         |
 
