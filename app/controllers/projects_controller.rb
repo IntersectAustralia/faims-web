@@ -333,7 +333,7 @@ class ProjectsController < ApplicationController
     if can_edit_db
       @project.db.update_arch_entity_attribute(uuid, @project.db.get_project_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
 
-      # TODO add new query to return and attributes dirty flag and reason
+      # TODO add new query to return attributes dirty flag and reason
       @attributes = @project.db.get_arch_entity_attributes(uuid)
       errors = @attributes.select { |a| a[1] == attribute_id }.map { |a| a[11] }.first
     end
@@ -573,7 +573,7 @@ class ProjectsController < ApplicationController
     if can_edit_db
       @project.db.update_rel_attribute(relationshipid, @project.db.get_project_user_id(current_user.email), vocab_id, attribute_id, freetext, certainty, ignore_errors)
 
-      # TODO add new query to return and attributes dirty flag and reason
+      # TODO add new query to return attributes dirty flag and reason
       @attributes = @project.db.get_rel_attributes(relationshipid)
       errors = @attributes.select { |a| a[2] == attribute_id }.map { |a| a[11] }.first
     end
