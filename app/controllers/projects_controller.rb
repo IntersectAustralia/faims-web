@@ -2,25 +2,10 @@ require Rails.root.join('app/models/projects/database')
 
 class ProjectsController < ApplicationController
 
-  WAIT_FOR_DB_TIMEOUT = 10
+  WAIT_TIMEOUT = 10
 
   before_filter :authenticate_user!
   load_and_authorize_resource
-
-  before_filter :authenticate_project_user, only: [:update_project_user,
-                                                   :update_arch_ent_records,
-                                                   :delete_arch_ent_records,
-                                                   :undelete_arch_ent_records,
-                                                   :merge_arch_ents,
-                                                   :revert_arch_ent_to_timestamp,
-                                                   :update_rel_records,
-                                                   :revert_rel_to_timestamp,
-                                                   :delete_rel_records,
-                                                   :undelete_rel_records,
-                                                   :remove_arch_ent_member,
-                                                   :add_arch_ent_member,
-                                                   :add_rel_association,
-                                                   :update_attributes_vocab]
 
   def crumbs
     project = Project.find(params[:id]) if params[:id]
@@ -74,16 +59,20 @@ class ProjectsController < ApplicationController
 
   def authenticate_project_user
     @project = Project.find(params[:id])
+
     redirect_to :projects unless @project
     user_emails = @project.db.get_list_of_users.map { |x| x.last }
+
     unless user_emails.include? current_user.email
-      flash[:error] = "Only project users can edit the database. Please get a project user to add you to the project."
-      redirect_to :projects
+      flash[:error] = 'Only project users can edit the database. Please get a project user to add you to the project.'
+      return false
     end
+
+    return true
   end
 
   def wait_for_db
-    (1..WAIT_FOR_DB_TIMEOUT).each do
+    (1..WAIT_TIMEOUT).each do
       break unless @project.db_mgr.locked?
       sleep(1)
     end
@@ -93,6 +82,12 @@ class ProjectsController < ApplicationController
       return false
     end
 
+    return true
+  end
+
+  def can_edit_db
+    return false unless authenticate_project_user
+    return false unless wait_for_db
     return true
   end
 
@@ -176,7 +171,7 @@ class ProjectsController < ApplicationController
 
     user = User.find(params[:user_id])
 
-    if wait_for_db
+    if can_edit_db
       @project.db.update_list_of_users(user, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Successfully updated user'
@@ -335,7 +330,7 @@ class ProjectsController < ApplicationController
 
     ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-    if wait_for_db
+    if can_edit_db
       @project.db.update_arch_entity_attribute(uuid, @project.db.get_project_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
 
       # TODO add new query to return and attributes dirty flag and reason
@@ -351,7 +346,7 @@ class ProjectsController < ApplicationController
 
     uuid = params[:uuid]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.delete_arch_entity(uuid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Deleted Archaeological Entity'
@@ -372,7 +367,7 @@ class ProjectsController < ApplicationController
 
     uuid = params[:uuid]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.undelete_arch_entity(uuid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Restored Archaeological Entity'
@@ -405,7 +400,7 @@ class ProjectsController < ApplicationController
   def merge_arch_ents
     @project = Project.find(params[:id])
 
-    if wait_for_db
+    if can_edit_db
       @project.db.merge_arch_ents(params[:deleted_id], params[:uuid], params[:vocab_id], params[:attribute_id], params[:measure], params[:freetext], params[:certainty], @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Merged Archaeological Entities'
@@ -439,7 +434,7 @@ class ProjectsController < ApplicationController
     entity = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    if wait_for_db
+    if can_edit_db
       @project.db.revert_arch_ent(entity[:uuid], entity[:timestamp], attributes, params[:resolve] == 'true', @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Reverted Archaeological Entity'
@@ -575,7 +570,7 @@ class ProjectsController < ApplicationController
 
     ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-    if wait_for_db
+    if can_edit_db
       @project.db.update_rel_attribute(relationshipid, @project.db.get_project_user_id(current_user.email), vocab_id, attribute_id, freetext, certainty, ignore_errors)
 
       # TODO add new query to return and attributes dirty flag and reason
@@ -602,7 +597,7 @@ class ProjectsController < ApplicationController
     rel = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    if wait_for_db
+    if can_edit_db
       @project.db.revert_rel(rel[:relationshipid], rel[:timestamp], attributes, params[:resolve] == 'true', @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Reverted Relationship'
@@ -616,7 +611,7 @@ class ProjectsController < ApplicationController
 
     relationshipid = params[:relationshipid]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.delete_relationship(relationshipid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Deleted Relationship'
@@ -637,7 +632,7 @@ class ProjectsController < ApplicationController
 
     relationshipid = params[:relationshipid]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.undelete_relationship(relationshipid, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Restored Relationship'
@@ -689,7 +684,7 @@ class ProjectsController < ApplicationController
     relntypeid = params[:relntypeid]
     uuid = params[:uuid]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.delete_member(relationshipid, @project.db.get_project_user_id(current_user.email), uuid)
 
       flash[:notice] = 'Removed Archaeological Entity from Relationship'
@@ -736,7 +731,7 @@ class ProjectsController < ApplicationController
   def add_arch_ent_member
     @project = Project.find(params[:id])
 
-    if wait_for_db
+    if can_edit_db
       @project.db.add_member(params[:relationshipid], @project.db.get_project_user_id(current_user.email), params[:uuid], params[:verb])
 
       flash[:notice] = 'Added Archaeological Entity as member of Relationship'
@@ -783,7 +778,7 @@ class ProjectsController < ApplicationController
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.delete_member(relationshipid, @project.db.get_project_user_id(current_user.email), uuid)
 
       flash[:notice] = 'Removed Archaeological Entity from Relationship'
@@ -836,7 +831,7 @@ class ProjectsController < ApplicationController
   def add_rel_association
     @project = Project.find(params[:id])
 
-    if wait_for_db
+    if can_edit_db
       @project.db.add_member(params[:relationshipid], @project.db.get_project_user_id(current_user.email), params[:uuid], params[:verb])
 
       flash[:notice] = 'Added Archaeological Entity as member of Relationship'
@@ -904,7 +899,7 @@ class ProjectsController < ApplicationController
   def merge_rel
     @project = Project.find(params[:id])
 
-    if wait_for_db
+    if can_edit_db
       @project.db.merge_rel(params[:deleted_id], params[:rel_id], params[:vocab_id], params[:attribute_id], params[:freetext], params[:certainty], @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Merged Relationships'
@@ -953,7 +948,7 @@ class ProjectsController < ApplicationController
     vocab_description = params[:vocab_description]
     picture_url = params[:picture_url]
 
-    if wait_for_db
+    if can_edit_db
       @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, vocab_description, picture_url, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Successfully updated vocabulary'

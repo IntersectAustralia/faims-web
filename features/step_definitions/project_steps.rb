@@ -685,15 +685,6 @@ And /^I add "([^"]*)" to "([^"]*)"$/ do |email, name|
   project.db.update_list_of_users(user, User.first.id)
 end
 
-And /^I update attribute "([^"]*)" with "([^"]*)"$/ do |name, value|
-  find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/div/label[contains(text(), 'Freetext')]/following-sibling::input").set value
-  find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/input[@value='Update']").click
-end
-
-Then /^I see attribute "([^"]*)" with "([^"]*)"$/ do |name, value|
-  find(:xpath, "//h4[contains(text(), '#{name}')]/following-sibling::div/div/label[contains(text(), 'Freetext')]/following-sibling::input").value.should == value
-end
-
 And /^I click "([^"]*)" for "([^"]*)"$/ do |button, dir|
   find(:xpath, "//a[contains(text(), '#{dir}')]/../following-sibling::span/div/a[contains(text(), '#{button}')]").click
 end
@@ -928,5 +919,5 @@ And /^I should see fields with errors$/ do |table|
 end
 
 And /^I wait for popup to close$/ do
-  sleep(ProjectsController::WAIT_FOR_DB_TIMEOUT)
+  sleep(ProjectsController::WAIT_TIMEOUT)
 end
