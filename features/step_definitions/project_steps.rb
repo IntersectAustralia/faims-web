@@ -924,8 +924,9 @@ And /^I should see fields with errors$/ do |table|
 end
 
 And /^I wait for popup to close$/ do
-  (1..60).each do
-    break all('.ui-dialog').size == 0
+  begin
+    (1..60).each do
+      break all('.ui-dialog').size == 0
+    end
   end
-  page.should_not have_css('.ui-dialog')
 end

@@ -996,7 +996,7 @@ Feature: Manage projects
 # TODO
 
   @javascript
-  Scenario: Update rel attribute
+  Scenario: Update relationship attribute
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
@@ -1021,7 +1021,7 @@ Feature: Manage projects
       | name     | certainty |                        |
 
   @javascript
-  Scenario: Update arch entity attribute causes validation error
+  Scenario: Update relationship attribute causes validation error
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
@@ -1043,7 +1043,7 @@ Feature: Manage projects
       | name  | Field value not text |
 
   @javascript
-  Scenario: Cannot update arch entity attribute if database is locked
+  Scenario: Cannot update relationship attribute if database is locked
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page
@@ -1447,7 +1447,7 @@ Feature: Manage projects
     And I confirm
 
   @javascript
-  Scenario: Cannot compare arch ents if database is locked
+  Scenario: Cannot merge arch ents if database is locked
     Given I am on the home page
     And I follow "Show Projects"
     Then I should be on the projects page

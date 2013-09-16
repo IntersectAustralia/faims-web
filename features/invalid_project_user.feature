@@ -98,7 +98,6 @@ Feature: Invalid project user
       | field | column |
       | name  | right  |
     And I click on "Merge"
-    And I wait for popup to close
     Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project"
     And I confirm
 
