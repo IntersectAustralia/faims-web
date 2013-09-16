@@ -1003,9 +1003,10 @@ class ProjectsController < ApplicationController
 
     if @project.settings_mgr.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
-      return
+      @spatial_list = Database.get_spatial_ref_list
+      return render 'edit_project'
     end
+
     valid = validate_project_update
     if valid
       if @project.update_attributes(:name => params[:project][:name])
@@ -1016,21 +1017,18 @@ class ProjectsController < ApplicationController
         FileUtils.remove_entry_secure session[:tmpdir]
 
         flash[:notice] = 'Successfully updated project'
-        redirect_to :project
-        return
+        return redirect_to :project
       else
         @name = params[:project][:name]
         parse_parameter_for_project(params)
         @spatial_list = Database.get_spatial_ref_list
         flash.now[:error] = 'Error updating project'
-        render 'edit_project'
-        return
+        return render 'edit_project'
       end
     else
       @spatial_list = Database.get_spatial_ref_list
       flash.now[:error] = 'Error updating project'
-      render 'edit_project'
-      return
+      return render 'edit_project'
     end
   end
 

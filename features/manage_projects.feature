@@ -199,7 +199,7 @@ Feature: Manage projects
     | Project Name |           | can't be blank |
     | Project Name | Project * | is invalid     |
 
-  Scenario:  Edit project but not upload new file
+  Scenario: Edit project but not upload new file
     Given I am on the home page
     And I have project "Project 1"
     And I follow "Show Projects"
@@ -208,6 +208,17 @@ Feature: Manage projects
     Then I follow "Edit Project"
     And I press "Update"
     Then I should see "Successfully updated project"
+
+  Scenario: Cannot edit project if project is locked
+    Given I am on the home page
+    And I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Project 1"
+    Then I follow "Edit Project"
+    And settings is locked for "Project 1"
+    And I press "Update"
+    Then I should see "Could not process request as project is currently locked"
 
   Scenario: Edit project and upload correct file
     Given I am on the home page

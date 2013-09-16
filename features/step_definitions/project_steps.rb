@@ -833,6 +833,11 @@ And /^database is locked for "([^"]*)"$/ do |name|
   project.db_mgr.wait_for_lock
 end
 
+And /^settings is locked for "([^"]*)"$/ do |name|
+  project = Project.find_by_name(name)
+  project.settings_mgr.wait_for_lock
+end
+
 And /^I select records$/ do |table|
   table.hashes.each do |hash|
     find(:xpath, "//input[@type='checkbox'][./following-sibling::li/a[contains(text(),\"#{hash[:name]}\")]]").set(true)
