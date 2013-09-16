@@ -282,6 +282,7 @@ Feature: Manage projects
     And database is locked for "Project 1"
     And I follow "Download Project"
     Then I should see dialog "Could not process request as project is currently locked"
+    And I confirm
 
   Scenario: See attached files for arch ent
     Given I am on the home page
