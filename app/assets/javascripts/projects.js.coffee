@@ -61,29 +61,31 @@ show_archive_modal_dialog = ->
         type: 'GET'
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
-          if data.archive == "true"
-            setTimeout (->check_archive()),5000
-            return
+          if data.result == "success"
+            $('#loading').dialog('destroy')
+            window.location = data.url
+          else if data.result == "waiting"
+            setTimeout (-> check_archive(data.jobid)), 5000
           else
-            $('#loading').dialog('close')
-            alert("Could not process request as project is currently locked")
-            return
+            $('#loading').dialog('destroy')
+            alert(data.message)
+          return
       return false
   )
   return
 
-check_archive = ->
+check_archive = (jobid) ->
   $.ajax $('#check-archive').val(),
     type: 'GET'
     dataType: 'json'
+    data: {jobid: jobid}
     success: (data, textStatus, jqXHR) ->
-      if data.finish == "true"
-        $('#loading').dialog('close')
-        window.location.href = $("#download-project").val()
-        false
+      if data.result == "success"
+        $('#loading').dialog('destroy')
+        window.location = data.url
       else
-        setTimeout (->check_archive()),5000
-        return
+        setTimeout (-> check_archive(jobid)), 5000
+      return
   return
 
 compare_input_checked_handler = ->
@@ -310,7 +312,7 @@ merge_record_management = ->
             window.location = data.url
           else
             $('#loading').addClass('hidden')
-            $('#loading').dialog('close')
+            $('#loading').dialog('destroy')
             alert(data.message)
       false
   )
@@ -464,7 +466,7 @@ update_attribute = (form) ->
         alert(data.message)
 
       $('#loading').addClass('hidden')
-      $('#loading').dialog('close')
+      $('#loading').dialog('destroy')
 
 update_arch_ent_or_rel = ->
   $('.update-arch-ent-form form').submit(

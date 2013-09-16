@@ -258,10 +258,19 @@ Feature: Manage projects
     And I follow "Show Projects"
     Then I should be on the projects page
     And I follow "Project 1"
-    And I follow "Download Project"
-    Then I automatically archive project package "Project 1"
-    Then I automatically download project package "Project 1"
+    And I automatically archive project package "Project 1"
+    And I automatically download project package "Project 1"
     Then I should download project package file for "Project 1"
+
+  @javascript
+  Scenario: Cannot download package if project is locked
+    Given I have project "Project 1"
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Project 1"
+    And database is locked for "Project 1"
+    And I follow "Download Project"
+    Then I should see dialog "Could not process request as project is currently locked"
 
   Scenario: See attached files for arch ent
     Given I am on the home page

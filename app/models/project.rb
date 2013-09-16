@@ -194,15 +194,29 @@ class Project < ActiveRecord::Base
       info
   end
 
-  def android_archives_dirty?
+  def dirty?
     settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty?
   end
 
-  def update_android_archives
-    settings_mgr.update_archive
-    app_mgr.update_archive
-    data_mgr.update_archive
-    archive_database
+  def package_dirty?
+    settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty? or package_mgr.dirty?
+  end
+
+  def locked?
+    settings_mgr.locked? or db_mgr.locked? or app_mgr.locked? or data_mgr.locked?
+  end
+
+  def with_lock
+    settings_mgr.wait_for_lock
+    db_mgr.wait_for_lock
+    app_mgr.wait_for_lock
+    data_mgr.wait_for_lock
+    return yield
+  ensure
+    settings_mgr.clear_lock
+    db_mgr.clear_lock
+    app_mgr.clear_lock
+    data_mgr.clear_lock
   end
 
   def generate_archives
@@ -210,7 +224,6 @@ class Project < ActiveRecord::Base
     settings_mgr.make_dirt
     app_mgr.make_dirt
     data_mgr.make_dirt
-    package_mgr.make_dirt
     update_archives
   end
 
@@ -219,11 +232,20 @@ class Project < ActiveRecord::Base
     app_mgr.update_archive
     data_mgr.update_archive
 
-    # TODO create db file manager for archiving database
+    # custom update archive for database
     archive_database
 
-    # TODO create package file manager for archiving package
+    # custom update archive for package
     package_project
+  end
+
+  def update_android_archives
+    settings_mgr.update_archive
+    app_mgr.update_archive
+    data_mgr.update_archive
+
+    # custom update archive for database
+    archive_database
   end
 
   def get_settings
@@ -591,7 +613,7 @@ class Project < ActiveRecord::Base
   end
 
   def package_project
-    package_mgr.with_lock do
+    with_lock do
       begin
         tmp_dir = Dir.mktmpdir + '/'
 
@@ -614,6 +636,8 @@ class Project < ActiveRecord::Base
         end
 
         TarHelper.tar('jcf', get_path(:package_archive), File.basename(project_dir), tmp_dir)
+
+        package_mgr.clean_dirt
       rescue Exception => e
         raise e
       ensure

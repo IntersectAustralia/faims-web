@@ -27,7 +27,7 @@ Feature: Invalid project user
     And I follow "Small 2"
     And I update field "name" of type "freetext" with values "test"
     And I click on update for attribute with field "name"
-    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project"
     And I confirm
 
   @javascript
@@ -46,7 +46,7 @@ Feature: Invalid project user
     And I follow "AboveBelow 1"
     And I update field "name" of type "freetext" with values "test"
     And I click on update for attribute with field "name"
-    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project"
     And I confirm
 
   @javascript
@@ -72,7 +72,7 @@ Feature: Invalid project user
       | field | column |
       | name  | right  |
     And I click on "Merge"
-    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project"
     And I confirm
 
   @javascript
@@ -99,7 +99,7 @@ Feature: Invalid project user
       | name  | right  |
     And I click on "Merge"
     And I wait for popup to close
-    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see dialog "Only project users can edit the database. Please get a project user to add you to the project"
     And I confirm
 
   @javascript
@@ -118,7 +118,7 @@ Feature: Invalid project user
     Then I follow "Small 3"
     And I click on "Delete"
     And I confirm
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     And I follow "Back"
     Then I should see records
       | name    |
@@ -140,7 +140,7 @@ Feature: Invalid project user
     Then I click on "Show Deleted"
     Then I follow "Small 1"
     Then I click on "Restore"
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     And I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records
@@ -163,7 +163,7 @@ Feature: Invalid project user
     Then I follow "AboveBelow 2"
     And I click on "Delete"
     And I confirm
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     And I follow "Back"
     Then I should see records
       | name         |
@@ -185,7 +185,7 @@ Feature: Invalid project user
     Then I click on "Show Deleted"
     Then I follow "AboveBelow 4"
     Then I click on "Restore"
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records
@@ -208,7 +208,7 @@ Feature: Invalid project user
     And I follow "Show History"
     Then I history should have conflicts
     And I click on "Revert and Resolve Conflicts"
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I history should have conflicts
 
   @not-jenkins
@@ -227,7 +227,7 @@ Feature: Invalid project user
     And I follow "Show History"
     Then I history should have conflicts
     And I click on "Revert and Resolve Conflicts"
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I history should have conflicts
 
   @javascript
@@ -251,7 +251,7 @@ Feature: Invalid project user
       | AboveBelow 2 |
     Then I delete the first record
     And I confirm
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -280,7 +280,7 @@ Feature: Invalid project user
     And I click on "Search"
     And I select the first record
     And I press "Add Member"
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -310,7 +310,7 @@ Feature: Invalid project user
       | Small 4 |
     Then I delete the first record
     And I confirm
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I should see records
       | name    |
       | Small 2 |
@@ -339,7 +339,7 @@ Feature: Invalid project user
     And I click on "Search"
     And I select the first record
     And I press "Add Member"
-    Then I should see "Only project users can edit the database. Please get a project user to add you to the project."
+    Then I should see "Only project users can edit the database. Please get a project user to add you to the project"
     Then I should see records
       | name    |
       | Small 2 |

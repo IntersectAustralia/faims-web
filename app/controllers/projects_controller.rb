@@ -64,7 +64,7 @@ class ProjectsController < ApplicationController
     user_emails = @project.db.get_list_of_users.map { |x| x.last }
 
     unless user_emails.include? current_user.email
-      flash[:error] = 'Only project users can edit the database. Please get a project user to add you to the project.'
+      flash[:error] = 'Only project users can edit the database. Please get a project user to add you to the project'
       return false
     end
 
@@ -1044,40 +1044,44 @@ class ProjectsController < ApplicationController
 
   def archive_project
     @project = Project.find(params[:id])
-    if !@project.package_mgr.locked?
-      begin
-        job = @project.delay.package_project
-        session[:job] = job.id
-      rescue Exception => e
-        raise e
+
+    if @project.locked?
+      return render json: { result: 'failure', message: 'Could not process request as project is currently locked' }
+    end
+
+    begin
+      if @project.package_dirty?
+        job = @project.delay.update_archives
+
+        return render json: { result: 'waiting', jobid: job.id }
       end
+    rescue Exception => e
+      p e
+      p e.backtrace
+      return render json: { result: 'failure', message: 'Error occurred while trying to archive project' }
     end
-    respond_to do |format|
-      format.json { render :json => {:archive => 'false'} } if @project.package_mgr.locked?
-      format.json { render :json => {:archive => 'true'} } if !@project.package_mgr.locked?
-    end
+
+    render json: { result: 'success', url: download_project_path(@project) }
   end
 
   def check_archive_status
     @project = Project.find(params[:id])
-    jobid = session[:job]
-    if !Delayed::Job.exists?(jobid)
-      session[:job] = nil
-    end
-    respond_to do |format|
-      format.json { render :json => {:finish => 'false'} } if Delayed::Job.exists?(jobid)
-      format.json { render :json => {:finish => 'true'} } if !Delayed::Job.exists?(jobid)
-    end
+
+    jobid = params[:job]
+
+    render json: { result: (Delayed::Job.exists?(jobid) or @project.locked?) ?  nil : 'success', url: download_project_path(@project) }
   end
 
   def download_project
     @project = Project.find(params[:id])
-    if @project.package_mgr.locked?
+
+    if @project.locked?
       flash.now[:error] = 'Could not process request as project is currently locked'
-      render 'show'
+
+      return redirect_to project_path(@project)
     end
 
-    @project.package_mgr.with_lock do
+    @project.with_lock do
       send_file @project.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
     end
   end

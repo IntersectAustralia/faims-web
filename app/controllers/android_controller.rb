@@ -21,7 +21,7 @@ class AndroidController < ApplicationController
   def settings_archive
     project = Project.find_by_key(params[:key])
 
-    if project.android_archives_dirty?
+    if project.android_dirty?
       project.delay.update_android_archives
       render :json => {message: 'archiving files' }.to_json, :status => 503
     else
@@ -40,7 +40,7 @@ class AndroidController < ApplicationController
   def db_archive
     project = Project.find_by_key(params[:key])
 
-    if project.android_archives_dirty?
+    if project.android_dirty?
       project.delay.update_android_archives
       render :json => {message: 'archiving files' }.to_json, :status => 503
     else
@@ -139,7 +139,7 @@ class AndroidController < ApplicationController
   def app_file_list
     project = Project.find_by_key(params[:key])
 
-    if project.android_archives_dirty?
+    if project.android_dirty?
       project.delay.update_android_archives
       render :json => {message: 'archiving files' }.to_json, :status => 503
     else
@@ -154,7 +154,7 @@ class AndroidController < ApplicationController
 
     return render :json => {message: 'no files to download' }.to_json, :status => 400 if project.app_file_list.size == 0
 
-    if project.android_archives_dirty?
+    if project.android_dirty?
       project.delay.update_android_archives
       render :json => {message: 'archiving files' }.to_json, :status => 503
     else
@@ -199,7 +199,7 @@ class AndroidController < ApplicationController
   def data_file_list
     project = Project.find_by_key(params[:key])
 
-    if project.android_archives_dirty?
+    if project.android_dirty?
       project.delay.update_android_archives
       render :json => {message: 'archiving files' }.to_json, :status => 503
     else
@@ -212,7 +212,7 @@ class AndroidController < ApplicationController
     project = Project.find_by_key(params[:key])
     files = params[:files]
 
-    if project.android_archives_dirty?
+    if project.android_dirty?
       project.delay.update_android_archives
       render :json => {message: 'archiving files' }.to_json, :status => 503
     else
