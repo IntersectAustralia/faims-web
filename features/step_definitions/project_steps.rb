@@ -839,7 +839,7 @@ And /^I select records$/ do |table|
   end
 end
 
-And /^I select the "([^"]*)" entity to merge to$/ do |first|
+And /^I select the "([^"]*)" record to merge to$/ do |first|
   first(:css, "#select-#{first}").click
 end
 

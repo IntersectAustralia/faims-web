@@ -1345,7 +1345,7 @@ Feature: Manage projects
       | Small 2 |
       | Small 3 |
     And I click on "Compare"
-    And I select the "first" entity to merge to
+    And I select the "first" record to merge to
     And I select merge fields
       | field | column |
       | name  | right  |
@@ -1382,7 +1382,7 @@ Feature: Manage projects
       | Small 2 |
       | Small 3 |
     And I click on "Compare"
-    And I select the "second" entity to merge to
+    And I select the "second" record to merge to
     And I select merge fields
       | field | column |
       | name  | left   |
@@ -1445,7 +1445,7 @@ Feature: Manage projects
       | Small 3 |
     And I click on "Compare"
     And database is locked for "Sync Example"
-    And I select the "first" entity to merge to
+    And I select the "first" record to merge to
     And I select merge fields
       | field | column |
       | name  | right  |
@@ -1475,7 +1475,7 @@ Feature: Manage projects
       | AboveBelow 1 |
       | AboveBelow 2 |
     And I click on "Compare"
-    And I select the "first" entity to merge to
+    And I select the "first" record to merge to
     And I select merge fields
       | field | column |
       | name  | right  |
@@ -1512,7 +1512,7 @@ Feature: Manage projects
       | AboveBelow 1 |
       | AboveBelow 2 |
     And I click on "Compare"
-    And I select the "second" entity to merge to
+    And I select the "second" record to merge to
     And I select merge fields
       | field | column |
       | name  | left   |
@@ -1575,7 +1575,7 @@ Feature: Manage projects
       | AboveBelow 2 |
     And I click on "Compare"
     And database is locked for "Sync Example"
-    And I select the "first" entity to merge to
+    And I select the "first" record to merge to
     And I select merge fields
       | field | column |
       | name  | right  |
