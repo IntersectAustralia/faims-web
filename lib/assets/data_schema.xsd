@@ -1,4 +1,16 @@
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="term">
+    <xs:complexType mixed="true">
+      <xs:sequence>
+        <xs:element type="xs:string" name="description" minOccurs="0"/>
+        <xs:element ref="term" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+      <xs:attribute type="xs:string" name="semanticMapURL" use="optional"/>
+      <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
+    </xs:complexType>
+    </xs:element>
+
+
   <xs:element name="dataSchema">
     <xs:complexType>
       <xs:sequence>
@@ -15,16 +27,8 @@
                     <xs:element type="xs:string" name="bundle" minOccurs="0"/>
                     <xs:element name="lookup" minOccurs="0">
                       <xs:complexType>
-                        <xs:sequence>
-                          <xs:element name="term" maxOccurs="unbounded" minOccurs="0">
-                            <xs:complexType mixed="true">
-                              <xs:sequence>
-                                <xs:element type="xs:string" name="description" minOccurs="0"/>
-                              </xs:sequence>
-                              <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
-                              <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
-                            </xs:complexType>
-                          </xs:element>
+                        <xs:sequence >
+                          <xs:element ref="term" maxOccurs="unbounded" minOccurs="0" />
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
@@ -52,16 +56,9 @@
                     <xs:element type="xs:string" name="bundle" maxOccurs="unbounded" minOccurs="0"/>
                     <xs:element name="lookup" minOccurs="0">
                       <xs:complexType>
-                        <xs:sequence>
-                          <xs:element name="term" maxOccurs="unbounded" minOccurs="0">
-                            <xs:complexType mixed="true">
-                              <xs:sequence>
-                                <xs:element type="xs:string" name="description" minOccurs="0"/>
-                              </xs:sequence>
-                              <xs:attribute type="xs:string" name="annotationRequired" use="optional"/>
-                              <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
-                            </xs:complexType>
-                          </xs:element>
+                        <xs:sequence maxOccurs="unbounded" minOccurs="0" >
+                          <xs:element ref="term" maxOccurs="unbounded" minOccurs="0"/>
+                            
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>

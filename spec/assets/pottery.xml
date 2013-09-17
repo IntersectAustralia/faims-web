@@ -54,7 +54,7 @@
 				<term>GW</term>
 				<term>BS</term>
 				<term>imitation of BS</term>
-				<term annotationRequired="true" >Other</term>
+				<term >Other</term>
 			</lookup>
 		</property>
 		<property type="Text" name="Origin" minCardinality="1" maxCardinality="n" >
@@ -69,8 +69,8 @@
 				<term>storage</term>
 				<term>cooking</term>
 				<term>votive</term>
-				<term annotationRequired="true" >Other</term>
-				<term annotationRequired="true" >Non-id</term>
+				<term >Other</term>
+				<term >Non-id</term>
 			</lookup>
 		</property>
 	</RelationshipElement>

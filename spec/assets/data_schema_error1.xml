@@ -75,7 +75,7 @@
         <term>Burial</term>
         <term>In Situ</term>
         <term>Dispersed</term>
-        <term annotationRequired="true">Other</term>
+        <term>Other</term>
       </lookup>
     </property>
     <property type="Text" name="PH Level" minCardinality="1" maxCardinality="n">
@@ -194,7 +194,7 @@
         <term>Burial</term>
         <term>In Situ</term>
         <term>Dispersed</term>
-        <term annotationRequired="true">Other</term>
+        <term>Other</term>
       </lookup>
     </property>
     <property type="Text" name="PH Level" minCardinality="1" maxCardinality="n">
