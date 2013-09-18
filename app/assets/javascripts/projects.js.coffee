@@ -62,11 +62,13 @@ show_archive_modal_dialog = ->
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
           if data.result == "success"
+            $('#loading').addClass('hidden')
             $('#loading').dialog('destroy')
             window.location = data.url
           else if data.result == "waiting"
             setTimeout (-> check_archive(data.jobid)), 5000
           else
+            $('#loading').addClass('hidden')
             $('#loading').dialog('destroy')
             alert(data.message)
           return
@@ -81,6 +83,7 @@ check_archive = (jobid) ->
     data: {jobid: jobid}
     success: (data, textStatus, jqXHR) ->
       if data.result == "success"
+        $('#loading').addClass('hidden')
         $('#loading').dialog('destroy')
         window.location = data.url
       else
