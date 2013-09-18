@@ -71,6 +71,34 @@ class ProjectsController < ApplicationController
     return true
   end
 
+  def wait_for_project
+    (1..WAIT_TIMEOUT).each do
+      break unless @project.locked?
+      sleep(1)
+    end
+
+    if @project.locked?
+      flash[:error] = 'Could not process request as project is currently locked'
+      return false
+    end
+
+    return true
+  end
+
+  def wait_for_settings
+    (1..WAIT_TIMEOUT).each do
+      break unless @project.settings_mgr.locked?
+      sleep(1)
+    end
+
+    if @project.settings_mgr.locked?
+      flash[:error] = 'Could not process request as project is currently locked'
+      return false
+    end
+
+    return true
+  end
+
   def wait_for_db
     (1..WAIT_TIMEOUT).each do
       break unless @project.db_mgr.locked?
@@ -100,6 +128,7 @@ class ProjectsController < ApplicationController
 
     @project = Project.new
     @spatial_list = Database.get_spatial_ref_list
+
     # make temp directory and store its path in session
     create_tmp_dir
   end
@@ -107,19 +136,19 @@ class ProjectsController < ApplicationController
   def create
     @page_crumbs = [:pages_home, :projects_index, :projects_create]
 
-    # create project if valid and schemas uploaded
+    @project = Project.new
+    @spatial_list = Database.get_spatial_ref_list
 
+    parse_parameter_for_project(params)
+
+    # check if spatialite exists?
     unless SpatialiteDB.library_exists?
-      @spatial_list = Database.get_spatial_ref_list
       flash.now[:error] = 'Cannot find library libspatialite. Please install library to create project.'
-      render 'new'
-      return
+      return render 'new'
     end
 
-    valid = create_project
-
+    valid = create_project_if_valid
     if valid
-
       has_exception = nil
       begin
         @project.save
@@ -127,6 +156,7 @@ class ProjectsController < ApplicationController
         @project.create_project_from(session[:tmpdir], current_user)
       rescue Exception => e
         has_exception = e
+        # cleanup
         FileUtils.rm_rf @project.get_path(:project_dir) if File.directory? @project.get_path(:project_dir)
         @project.destroy
       ensure
@@ -134,14 +164,13 @@ class ProjectsController < ApplicationController
       end
 
       if has_exception.nil?
-        flash[:notice] = t 'projects.new.success'
+        flash[:notice] = 'New project created'
       else
-        flash[:error] = "Failed to create project."
+        flash[:error] = 'Failed to create project'
       end
 
       redirect_to :projects
     else
-      @spatial_list = Database.get_spatial_ref_list
       flash.now[:error] = t 'projects.new.failure'
       render 'new'
     end
@@ -979,6 +1008,11 @@ class ProjectsController < ApplicationController
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_edit]
 
     @project = Project.find(params[:id])
+    @spatial_list = Database.get_spatial_ref_list
+
+    # make temp directory and store its path in session
+    create_tmp_dir
+
     project_setting = JSON.parse(File.read(@project.get_path(:settings)))
     @name = @project.name
     @season = project_setting['season']
@@ -994,40 +1028,42 @@ class ProjectsController < ApplicationController
     @client_sponsor = project_setting['client_sponsor']
     @land_owner = project_setting['land_owner']
     @has_sensitive_data = project_setting['has_sensitive_data']
-    create_tmp_dir
-    @spatial_list = Database.get_spatial_ref_list
   end
 
   def update_project
     @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_edit]
 
-    if @project.settings_mgr.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-      @spatial_list = Database.get_spatial_ref_list
-      return render 'edit_project'
-    end
+    @project = Project.find(params[:id])
+    @spatial_list = Database.get_spatial_ref_list
 
-    valid = validate_project_update
-    if valid
-      if @project.update_attributes(:name => params[:project][:name])
-        @project.update_settings(params)
+    parse_parameter_for_project(params)
 
-        @project.update_project_from(session[:tmpdir])
+    if wait_for_settings
+      valid = update_project_if_valid
+      if valid
+        has_exception = nil
+        begin
+          @project.save
+          @project.update_settings(params)
+          @project.update_project_from(session[:tmpdir])
+        rescue Exception => e
+          has_exception = e
+        ensure
+          FileUtils.remove_entry_secure session[:tmpdir]
+        end
 
-        FileUtils.remove_entry_secure session[:tmpdir]
+        if has_exception.nil?
+          flash[:notice] = 'Updated project'
+        else
+          flash[:error] = 'Failed to update project'
+        end
 
-        flash[:notice] = 'Successfully updated project'
         return redirect_to :project
       else
-        @name = params[:project][:name]
-        parse_parameter_for_project(params)
-        @spatial_list = Database.get_spatial_ref_list
-        flash.now[:error] = 'Error updating project'
+        flash.now[:error] = t 'projects.new.failure'
         return render 'edit_project'
       end
     else
-      @spatial_list = Database.get_spatial_ref_list
-      flash.now[:error] = 'Error updating project'
       return render 'edit_project'
     end
   end
@@ -1073,15 +1109,14 @@ class ProjectsController < ApplicationController
   def download_project
     @project = Project.find(params[:id])
 
-    if @project.locked?
-      flash.now[:error] = 'Could not process request as project is currently locked'
-
+    if wait_for_project
+      @project.with_lock do
+        send_file @project.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
+      end
+    else
       return redirect_to project_path(@project)
     end
 
-    @project.with_lock do
-      send_file @project.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
-    end
   end
 
   def upload_project
@@ -1096,8 +1131,7 @@ class ProjectsController < ApplicationController
     unless SpatialiteDB.library_exists?
       @project = Project.new
       flash.now[:error] = 'Cannot find library libspatialite. Please install library to upload project.'
-      render 'upload_project'
-      return
+      return render 'upload_project'
     end
 
     if params[:project]
@@ -1135,10 +1169,9 @@ class ProjectsController < ApplicationController
     session[:tmpdir] = nil
   end
 
-  def create_project
-    # check if project is valid
-
+  def create_project_if_valid
     valid = false
+
     if params[:project]
       @project = Project.new(:name => params[:project][:name], :key => SecureRandom.uuid) if params[:project]
       valid = @project.valid?
@@ -1182,7 +1215,7 @@ class ProjectsController < ApplicationController
 
     # check if arch16n is valid
     if !session[:arch16n]
-      error = Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
+      error = Project.validate_arch16n(params[:project][:arch16n])
       if error
         @project.errors.add(:arch16n, error)
         valid = false
@@ -1208,43 +1241,44 @@ class ProjectsController < ApplicationController
       end
     end
 
-    if !valid
-      parse_parameter_for_project(params)
-    end
-
     valid
   end
 
-  def validate_project_update
-    # check if project is valid
+  def update_project_if_valid
+    valid = false
 
-    valid = true
+    if params[:project]
+      @project.assign_attributes(:name => params[:project][:name]) if params[:project]
+      valid = @project.valid?
+    end
 
     # check if ui schema is valid
-    if !session[:ui_schema]
-      if !params[:project][:ui_schema].blank?
-        error = Project.validate_ui_schema(params[:project][:ui_schema])
-        if error
-          @project.errors.add(:ui_schema, error)
-          valid = false
-        else
-          create_temp_file(@project.get_name(:ui_schema), params[:project][:ui_schema])
-          session[:ui_schema] = true
-        end
+    if !session[:ui_schema] and !params[:project][:ui_schema].nil?
+      error = Project.validate_ui_schema(params[:project][:ui_schema])
+      if error
+        @project.errors.add(:ui_schema, error)
+        valid = false
+      else
+        create_temp_file(@project.get_name(:ui_schema), params[:project][:ui_schema])
+        session[:ui_schema] = true
       end
     end
 
-    # check if arch16n is valid
-    if !session[:ui_logic]
-      if !params[:project][:ui_logic].nil?
+    # check if ui logic is valid
+    if !session[:ui_logic] and !params[:project][:ui_logic].nil?
+      error = Project.validate_ui_logic(params[:project][:ui_logic])
+      if error
+        @project.errors.add(:ui_logic, error)
+        valid = false
+      else
         create_temp_file(@project.get_name(:ui_logic), params[:project][:ui_logic])
         session[:ui_logic] = true
       end
     end
 
     # check if arch16n is valid
-    if !session[:arch16n]
-      error = Project.validate_arch16n(params[:project][:arch16n],params[:project][:name])
+    if !session[:arch16n] and !params[:project][:arch16n].nil?
+      error = Project.validate_arch16n(params[:project][:arch16n])
       if error
         @project.errors.add(:arch16n, error)
         valid = false
@@ -1257,7 +1291,7 @@ class ProjectsController < ApplicationController
     end
 
     # check if validation schema is valid
-    if !session[:validation_schema]
+    if !session[:validation_schema] and !params[:project][:validation_schema].nil?
       error = Project.validate_validation_schema(params[:project][:validation_schema])
       if error
         @project.errors.add(:validation_schema, error)
@@ -1268,11 +1302,6 @@ class ProjectsController < ApplicationController
           session[:validation_schema] = true
         end
       end
-    end
-
-    if !valid
-      @name = params[:project][:name]
-      parse_parameter_for_project(params)
     end
 
     valid
@@ -1290,6 +1319,7 @@ class ProjectsController < ApplicationController
   private
 
   def parse_parameter_for_project(params)
+    @name = params[:project][:name]
     @season = params[:project][:season]
     @description = params[:project][:description]
     @permit_no = params[:project][:permit_no]

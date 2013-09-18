@@ -407,7 +407,7 @@ class Project < ActiveRecord::Base
     return "can't be blank" if schema.blank?
   end
 
-  def self.validate_arch16n(arch16n, project_name)
+  def self.validate_arch16n(arch16n)
     return nil if arch16n.blank?
     begin
       file = arch16n.tempfile

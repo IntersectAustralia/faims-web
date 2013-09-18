@@ -38,7 +38,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I have project files for "Project 1"
 
@@ -54,7 +54,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I have project files for "Project 1"
 
@@ -72,7 +72,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I have project files for "Project 1"
     And I should have setting "srid" for "Project 1" as "4326"
@@ -207,7 +207,7 @@ Feature: Manage projects
     And I follow "Project 1"
     Then I follow "Edit Project"
     And I press "Update"
-    Then I should see "Successfully updated project"
+    Then I should see "Updated project"
 
   Scenario: Cannot edit project if project is locked
     Given I am on the home page
@@ -232,7 +232,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Update"
-    Then I should see "Successfully updated project"
+    Then I should see "Updated project"
 
   Scenario: Edit project and upload correct file so project has correct file
     Given I am on the home page
@@ -243,7 +243,7 @@ Feature: Manage projects
     Then I follow "Edit Project"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Update"
-    Then I should see "Successfully updated project"
+    Then I should see "Updated project"
     And Project "Project 1" should have the same file "faims.properties"
 
   Scenario Outline: Edit project and upload incorrect file
@@ -418,7 +418,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I follow "Project 1"
     Then I follow "Edit Vocabulary"
@@ -443,7 +443,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I follow "Project 1"
     Then I follow "Edit Vocabulary"
@@ -471,7 +471,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I follow "Project 1"
     Then I follow "Edit Vocabulary"
@@ -503,7 +503,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I follow "Project 1"
     Then I follow "Edit Vocabulary"
@@ -532,7 +532,7 @@ Feature: Manage projects
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims_Project_1.properties" for "Arch16n"
     And I press "Submit"
-    Then I should see "New project created."
+    Then I should see "New project created"
     And I should be on the projects page
     And I follow "Project 1"
     Then I follow "Edit Vocabulary"
@@ -959,7 +959,7 @@ Feature: Manage projects
     And I follow "Edit Project"
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I press "Update"
-    Then I should see "Successfully updated project"
+    Then I should see "Updated project"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
     And I follow "Small 2"

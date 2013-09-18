@@ -51,7 +51,7 @@ VALUES('<xsl:value-of select="substring(generate-id(..),4)"/>', '<xsl:value-of s
           <xsl:for-each select="dataSchema/ArchaeologicalElement">
             <li>
 INSERT INTO AEntType (AEntTypeID, AEntTypeName, AEntTypeDescription)
-VALUES ('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of select="@name | @type"/>', '<xsl:value-of select="normalize-space(description)"/>');
+VALUES ('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of select="normalize-space(@name | @type)"/>', '<xsl:value-of select="normalize-space(description)"/>');
             </li>
             <ul>
               <xsl:for-each select="property">
