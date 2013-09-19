@@ -34,7 +34,8 @@
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute type="xs:string" name="name" use="required"/>
+            <xs:attribute type="xs:string" name="name" use="optional"/>
+            <xs:attribute type="xs:string" name="type" use="optional"/>
           </xs:complexType>
         </xs:element>
         <xs:element name="ArchaeologicalElement" maxOccurs="unbounded" minOccurs="0">
@@ -70,7 +71,8 @@
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute type="xs:string" name="type" use="required"/>
+            <xs:attribute type="xs:string" name="name" use="optional"/>
+            <xs:attribute type="xs:string" name="type" use="optional"/>
           </xs:complexType>
         </xs:element>
       </xs:sequence>

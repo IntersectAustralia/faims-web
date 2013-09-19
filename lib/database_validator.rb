@@ -17,12 +17,12 @@ class DatabaseValidator
 
 						validator.xpath("./param").each do |param|
 
-							raise "Invalid param type " + param['type'] unless param['type'] == 'field' or param['type'] == 'query'
+							raise "Invalid param type #{param['type']}" unless param['type'] == 'field' or param['type'] == 'query'
 
               value = param.xpath("./value").first
               value ||= param['value']
 							if param['type'] == 'field'
-								raise "Invalid value type " + value unless value == 'freetext' or
+								raise "Invalid value type #{value}" unless value == 'freetext' or
                     value == 'vocab' or
                     value == 'certainty'
 							end
@@ -44,13 +44,17 @@ class DatabaseValidator
 
 							validators.push(QueryValidator.new(params, query ? query.text : validator['query']))
 						else
-							raise 'Invalid validator type ' + validator['type']
+							raise "Invalid validator type #{validator['type']}"
 						end
 
-					end
+          end
+
+          raise "Invalid property name" if property['name'].blank?
 
 					properties[property['name']] = validators
-				end
+        end
+
+        raise "Invalid relationship name" if relationship['name'].blank?
 
 				@relationship_validators[relationship['name']] = properties
 			end
@@ -66,12 +70,12 @@ class DatabaseValidator
 
 						validator.xpath("./param").each do |param|
 
-							raise "Invalid param type " + param['type'] unless param['type'] == 'field' or param['type'] == 'query'
+							raise "Invalid param type #{param['type']}" unless param['type'] == 'field' or param['type'] == 'query'
 
               value = param.xpath("./value").first
               value ||= param['value']
               if param['type'] == 'field'
-                raise "Invalid value type " + value unless value == 'freetext' or
+                raise "Invalid value type #{value}" unless value == 'freetext' or
                     value == 'vocab' or
                     value == 'certainty' or
                     value == 'measure'
@@ -94,15 +98,22 @@ class DatabaseValidator
 
               validators.push(QueryValidator.new(params, query ? query.text : validator['query']))
 						else
-							raise 'Invalid validator type ' + validator['type']
+							raise "Invalid validator type #{validator['type']}"
 						end
 
-					end
+          end
+
+          raise "Invalid property name" if property['name'].blank?
 
 					properties[property['name']] = validators
 				end
 
-				@entity_validators[entity['type']] = properties
+        name = entity['name']
+        name = entity['type'] unless name
+
+        raise "Invalid entity name" if name.blank?
+
+				@entity_validators[name] = properties
       end
 
 		end
