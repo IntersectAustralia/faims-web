@@ -1618,7 +1618,7 @@ EOF
 
   def self.get_vocab
     cleanup_query(<<EOF
-select vocabname, vocabid from vocabulary where attributeid = ?
+select vocabname, vocabid, parentvocabid from vocabulary where attributeid = ?
 EOF
     )
   end

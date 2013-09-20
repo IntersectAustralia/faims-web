@@ -930,3 +930,7 @@ And /^I wait for popup to close$/ do
     end
   end
 end
+
+And /^I refresh page$/ do
+  visit(current_path)
+end

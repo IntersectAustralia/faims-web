@@ -34,10 +34,12 @@
                   - if !@vocab_name[attribute[2]].empty?
                     .span3
                       = f.label :vocab_id, "Vocab:"
+                      - vocabs = @vocab_name[attribute[2]]
+                      - vocabs = vocab_name_to_breadcrumb(vocabs)
                       - if attribute[1].blank?
-                        = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, input_html: {name: 'attr[vocab_id][]'}
+                        = f.input :vocab_id , collection: vocabs, label: false, input_html: {name: 'attr[vocab_id][]'}
                       - else
-                        = f.input :vocab_id , collection: @vocab_name[attribute[2]], label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
+                        = f.input :vocab_id , collection: vocabs, label: false, selected: attribute[1], input_html: {name: 'attr[vocab_id][]'}
                   .span3
                     = f.label :freetext, "Freetext:"
                     = f.text_field :freetext, :value => attribute[4], name: 'attr[freetext][]', :class => "span12"

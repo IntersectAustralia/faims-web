@@ -319,6 +319,7 @@ class ProjectsController < ApplicationController
     end
 
     @attributes = @project.db.get_arch_entity_attributes(uuid)
+
     @vocab_name = {}
     for attribute in @attributes
       @vocab_name[attribute[1]] = @project.db.get_vocab(attribute[1])

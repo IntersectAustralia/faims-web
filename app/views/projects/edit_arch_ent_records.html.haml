@@ -39,10 +39,12 @@
                   - if !@vocab_name[attribute[1]].empty?
                     .span3
                       = f.label :vocab_id, "Vocab:"
+                      - vocabs = @vocab_name[attribute[1]]
+                      - vocabs = vocab_name_to_breadcrumb(vocabs)
                       - if attribute[2].blank?
-                        = f.input :vocab_id, collection: @vocab_name[attribute[1]], label: false, input_html: {name: 'attr[vocab_id][]'}
+                        = f.input :vocab_id, collection: vocabs, label: false, input_html: {name: 'attr[vocab_id][]'}
                       - else
-                        = f.input :vocab_id, collection: @vocab_name[attribute[1]], label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
+                        = f.input :vocab_id, collection: vocabs, label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
                   .span3
                     = f.label :measure, "Measure:"
                     = f.text_field :measure, :value => attribute[5], name: 'attr[measure][]'

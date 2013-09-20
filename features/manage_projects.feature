@@ -937,6 +937,7 @@ Feature: Manage projects
       | name     | certainty |                        |
       | value    | measure   | 10.0                   |
       | value    | certainty | 0.5                    |
+    And I refresh page
     And I should see fields with values
       | field    | type      | values                 |
       | location | vocab     | Location A; Location C |
@@ -944,6 +945,28 @@ Feature: Manage projects
       | name     | certainty |                        |
       | value    | measure   | 10.0                   |
       | value    | certainty | 0.5                    |
+
+  @javascript
+  Scenario: Update arch entity with hierarchical vocabulary
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Hierarchical_Vocabulary.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Hierarchical Vocabulary"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I follow "Small 1"
+    And I update fields with values
+      | field | type  | values                                       |
+      | type  | vocab | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
+    And I refresh page
+    And I should see fields with values
+      | field | type  | values                                       |
+      | type  | vocab | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
 
   @javascript
   Scenario: Update arch entity attribute causes validation error
@@ -1015,11 +1038,34 @@ Feature: Manage projects
       | location | vocab     | Location A; Location C |
       | name     | freetext  | rel2                   |
       | name     | certainty |                        |
+    And I refresh page
     And I should see fields with values
       | field    | type      | values                 |
       | location | vocab     | Location A; Location C |
       | name     | freetext  | rel2                   |
       | name     | certainty |                        |
+
+  @javascript
+  Scenario: Update relationship with hierarchical vocabulary
+    Given I am on the home page
+    And I follow "Show Projects"
+    Then I should be on the projects page
+    And I follow "Upload Project"
+    And I pick file "Hierarchical_Vocabulary.tar.bz2" for "Project File"
+    And I press "Upload"
+    Then I should see "Project has been successfully uploaded"
+    And I should be on the projects page
+    And I follow "Hierarchical Vocabulary"
+    And I follow "List Relationship Records"
+    And I press "Filter"
+    And I follow "AboveBelow 2"
+    And I update fields with values
+      | field | type  | values                                       |
+      | type  | vocab | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
+    And I refresh page
+    And I should see fields with values
+      | field | type  | values                                       |
+      | type  | vocab | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
 
   @javascript
   Scenario: Update relationship attribute causes validation error

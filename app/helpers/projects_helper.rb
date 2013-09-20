@@ -225,4 +225,25 @@ module ProjectsHelper
       @history_rows[timestamp[1]] = row
     end
   end
+
+  def vocab_breadcrumb(vocab, id_to_vocab)
+    name = vocab[0]
+    parent = vocab[2]
+    return name if parent.blank?
+    return vocab_breadcrumb(id_to_vocab[parent], id_to_vocab) + " > #{name}"
+  end
+
+  def vocab_name_to_breadcrumb(vocabs)
+    id_to_vocab = {}
+
+    vocabs.each do |vocab|
+      id_to_vocab[vocab[1]] = vocab
+    end
+
+    vocabs = vocabs.map do |vocab|
+      [vocab_breadcrumb(vocab, id_to_vocab), vocab[1]]
+    end
+
+    vocabs.sort
+  end
 end
