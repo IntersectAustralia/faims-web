@@ -1,18 +1,4 @@
 module ProjectsHelper
-  def group_ids(ids)
-    prev_id = ids[0][0]
-    @id_array = []
-    array = []
-    for id in ids
-      if prev_id != id[0]
-        @id_array << array
-        array = []
-        prev_id = id[0]
-      end
-      array << id
-    end
-    @id_array << array
-  end
   
   def get_files(attributes,type_index, value_index)
     @files = {}
@@ -246,4 +232,34 @@ module ProjectsHelper
 
     vocabs.sort
   end
+
+  def group_vocabularies(vocabs)
+    map = {}
+
+    vocabs.each do |v|
+      if v[:vocab_id].blank?
+        map[v[:temp_id]] = v
+      else
+        map[v[:vocab_id]] = v
+      end
+
+    end
+
+    @grouped_vocabs = {}
+
+    vocabs.each do |v|
+      parent_vocab_id = v[:parent_vocab_id]
+      temp_parent_id = v[:temp_parent_id]
+      if parent_vocab_id == nil || !map.has_key?(parent_vocab_id)
+        if temp_parent_id.blank? || !map.has_key?(temp_parent_id)
+          (@grouped_vocabs[nil] ||= []) << v
+        else
+          (@grouped_vocabs[temp_parent_id] ||= []) << v
+        end
+      else
+        (@grouped_vocabs[parent_vocab_id] ||= []) << v
+      end
+    end
+  end
+
 end

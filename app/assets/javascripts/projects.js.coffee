@@ -362,6 +362,12 @@ history_management = ->
   )
 
 vocab_management = ->
+  temp_id = $('.show input[name="temp_id[]"]').last().val()
+  if temp_id == "" || temp_id == undefined
+    temp_id = 1
+  else
+    temp_id = parseInt(temp_id) + 1
+
   select_vocabs = ->
     value = $('#attribute').val()
 
@@ -371,10 +377,8 @@ vocab_management = ->
     $('.vocab-list-' + value).addClass('show')
 
     if (value == "")
-      $('#insert_vocab').addClass('hide')
       $('#update_vocab').addClass('hide')
     else
-      $('#insert_vocab').removeClass('hide')
       $('#update_vocab').removeClass('hide')
 
   $('#attribute').change(
@@ -387,13 +391,57 @@ vocab_management = ->
       return
   )
 
-  $('#insert_vocab').click(
+  $(document).on('click', '.insert-new-vocab',
     ->
-      value = '<tr class="vocab-new"><td><input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td>'
-      value += '<td><input name="vocab_description[]"/></td><td><input name="picture_url[]"/></td></tr>'
-      table = $('#vocab-content').find('.vocab-list.show')
-      $(value).appendTo($(table))
+      parent_vocab_id = $($(this).parents('.vocab-row')[0]).prev('table').find('input[name="vocab_id[]"]').val()
+      parent_id = $($(this).parents('.vocab-row')[0]).prev('table').find('input[name="temp_id[]"]').val()
+
+
+
+
+      value = '<table class="vocab-new"><tr><td><input type="hidden" name="temp_id[]" value="' + temp_id + '"/>'
+      if parent_id == undefined
+        value += '<input type="hidden" name="temp_parent_id[]"/>'
+      else
+        value += '<input type="hidden" name="temp_parent_id[]" value="'+ parent_id + '"/>'
+
+      if parent_vocab_id == undefined
+        value += '<input type="hidden" name="parent_vocab_id[]"/>'
+      else
+        value += '<input type="hidden" name="parent_vocab_id[]"value="'+ parent_vocab_id + '"/>'
+
+      value += '<input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td>'
+      value += '<td><input name="vocab_description[]"/></td><td><input name="picture_url[]"/></td>'
+      value += '<td><a href="#" class="btn add-child">Add Child</a></td></tr></table>'
+      temp_id += 1
+      $(this).before($(value).fadeIn('slow'))
       return false
+  )
+
+  $(document).on('click', '.add-child',
+  ->
+    table = $(this).parents('table')[0]
+    parent_vocab_id = $(table).find('input[name="vocab_id[]"]').val()
+    parent_id = $(table).find('input[name="temp_id[]"]').val()
+    value = '<div class="vocab-row" style="margin-left: 25px" class="vocab-new"><table><tr><td><input type="hidden" name="temp_id[]" value="' + temp_id + '"/>'
+    if parent_id == ""
+      value += '<input type="hidden" name="temp_parent_id[]"/>'
+    else
+      value += '<input type="hidden" name="temp_parent_id[]" value="'+parent_id+'"/>'
+
+    if parent_vocab_id == ""
+      value += '<input type="hidden" name="parent_vocab_id[]"/>'
+    else
+      value += '<input type="hidden" name="parent_vocab_id[]" value="'+ parent_vocab_id + '"/>'
+
+    value += '<input type="hidden" name="vocab_id[]"/><input name="vocab_name[]"/></td>'
+    value += '<td><input name="vocab_description[]"/></td><td><input name="picture_url[]"/></td>'
+    value += '<td><a href="#" class="btn add-child">Add Child</a></td></tr></table><a href="#" class="btn btn-block insert-new-vocab">Insert</a></div><br class="vocab-new"/>'
+    $(table).after($(value).fadeIn('slow'))
+    $(this).remove()
+    temp_id += 1
+
+    return false
   )
 
   $('#update_vocab').click(

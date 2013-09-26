@@ -530,8 +530,13 @@ Then(/^I should see vocabularies$/) do |table|
   table.hashes.each do |hash|
     page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_name[]'][value='#{hash[:name]}']")
     page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_description[]'][value='#{hash[:description]}']")
-    page.should have_css(".vocab-list-#{attribute_id} input[name='picture_url[]'][value='#{hash[:picture_url]}']")
+    page.should have_css(".vocab-list-#{attribute_id} input[name='picture_url[]'][value='#{hash[:pictureURL]}']")
   end
+end
+
+Then(/^I click on "([^"]*)" for the attribute$/) do |name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id} a:contains('#{name}')").click()
 end
 
 When(/^I modify vocabulary "([^"]*)" with "([^"]*)"$/) do |original, value|
@@ -555,6 +560,41 @@ When(/^I add "([^"]*)" as picture url to the vocabulary list$/) do |value|
   attribute_id = find(:css, '#attribute')[:value]
   all(:css, ".vocab-list-#{attribute_id} input[name='picture_url[]']").last.set value
   sleep(1)
+end
+
+Then(/^I click add child for vocabulary "([^"]*)"$/) do |vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../..").find(:css, "a:contains('Add Child')").click()
+end
+
+Then(/^I click insert for vocabulary "([^"]*)"$/) do |vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").find(:css, "a:contains('Insert')").click()
+end
+
+When(/^I add "([^"]*)" as child for "([^"]*)"$/) do |value, vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").all(:css, "input[name='vocab_name[]']").last.set value
+end
+
+When(/^I add "([^"]*)" as child description for "([^"]*)"$/) do |value, vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").all(:css, "input[name='vocab_description[]']").last.set value
+end
+
+When(/^I add "([^"]*)" as child picture url for "([^"]*)"$/) do |value, vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").all(:css, "input[name='picture_url[]']").last.set value
+end
+
+When(/^I should see child vocabularies for "([^"]*)"$/) do |vocab_name, table|
+  attribute_id = find(:css, '#attribute')[:value]
+  div = find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div")
+  table.hashes.each do |hash|
+    div.should have_css("input[name='vocab_name[]'][value='#{hash[:name]}']")
+    div.should have_css("input[name='vocab_description[]'][value='#{hash[:description]}']")
+    div.should have_css("input[name='picture_url[]'][value='#{hash[:pictureURL]}']")
+  end
 end
 
 When(/^Project "([^"]*)" should have the same file "([^"]*)"$/) do |project_name, file_name|

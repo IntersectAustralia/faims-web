@@ -16,23 +16,10 @@
     #vocab-content
       - @attribute_vocabs.each do |attribute_id, vocabs|
         - selected = attribute_id.to_s == @attribute_id.to_s ? 'show' : 'hide'
-        %table{class: "vocab-list vocab-list-#{attribute_id} #{selected}"}
-          %tr
-            %th='Name'
-            %th='Description'
-            %th='Picture URL'
-          - vocabs.each do |v|
-            - vocab_new = v[:vocab_id].blank? ? 'vocab-new' : ''
-            %tr{class:vocab_new}
-              %td
-                %input{:type => 'hidden', :name => 'vocab_id[]', :value => v[:vocab_id]}
-                %input{:name => 'vocab_name[]', :value => v[:vocab_name]}
-              %td
-                %input{:name => 'vocab_description[]', :value => v[:vocab_description]}
-              %td
-                %input{:name => 'picture_url[]', :value => v[:picture_url]}
+        %div{class: "vocab-list vocab-list-#{attribute_id} #{selected}"}
+          - group_vocabularies(vocabs)
+          = render :partial => 'create_vocabularies_table', :locals => {key: nil, indent: 0}
   - show_buttons = @attribute_id.blank? ? 'hide' : ''
   = link_to "Update",'#', :id => 'update_vocab', :class => "btn #{show_buttons}"
-  = link_to "Insert",'#', :id => 'insert_vocab', :class => "btn #{show_buttons}"
 .form-actions
   = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_path(@project), :class => 'btn'

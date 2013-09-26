@@ -2,7 +2,7 @@ require Rails.root.join('app/models/projects/database')
 
 class ProjectsController < ApplicationController
 
-  WAIT_TIMEOUT = 10
+  WAIT_TIMEOUT = Rails.env == 'test' ? 1 : 20
 
   before_filter :authenticate_user!
   load_and_authorize_resource
@@ -962,7 +962,7 @@ class ProjectsController < ApplicationController
 
       vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
 
-      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4]} }
+      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4], parent_vocab_id: v[5], temp_id: '', temp_parent_id: ''} }
     end
   end
 
@@ -973,13 +973,19 @@ class ProjectsController < ApplicationController
 
     @attribute_id = params[:attribute_id]
 
+    temp_id = params[:temp_id]
+    temp_parent_id = params[:temp_parent_id]
     vocab_id = params[:vocab_id]
+    parent_vocab_id = params[:parent_vocab_id]
     vocab_name = params[:vocab_name]
     vocab_description = params[:vocab_description]
     picture_url = params[:picture_url]
 
-    if can_edit_db
-      @project.db.update_attributes_vocab(@attribute_id, vocab_id, vocab_name, vocab_description, picture_url, @project.db.get_project_user_id(current_user.email))
+    if vocab_name.select { |x| x.blank? }.size > 0
+       flash[:error] = 'Please correct the errors in this form. Vocabulary name cannot be empty'
+    elsif can_edit_db
+
+      @project.db.update_attributes_vocab(@attribute_id, temp_id, temp_parent_id, vocab_id, parent_vocab_id, vocab_name, vocab_description, picture_url, @project.db.get_project_user_id(current_user.email))
 
       flash[:notice] = 'Successfully updated vocabulary'
 
@@ -993,12 +999,12 @@ class ProjectsController < ApplicationController
       attribute_id = attribute.first
 
       if attribute_id.to_s == @attribute_id.to_s
-        vocabs = (1..vocab_id.size).to_a.zip(vocab_id, vocab_name, vocab_description, picture_url)
+        vocabs = (1..vocab_id.size).to_a.zip(vocab_id, vocab_name, vocab_description, picture_url, parent_vocab_id, temp_id, temp_parent_id)
       else
         vocabs = @project.db.get_vocabs_for_attribute(attribute_id)
       end
 
-      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4]} }
+      @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4], parent_vocab_id: v[5].blank? ? nil : v[5], temp_id: v[6].nil? ? '' : v[6], temp_parent_id: v[7].nil? ? '' : v[7]} }
     end
 
     flash.now[:error] = flash[:error]

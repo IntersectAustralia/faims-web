@@ -1669,7 +1669,7 @@ EOF
 
   def self.get_vocabs_for_attribute
     cleanup_query(<<EOF
-    select attributeid, vocabid, vocabname, vocabdescription, pictureurl
+    select attributeid, vocabid, vocabname, vocabdescription, pictureurl, parentvocabid
       from vocabulary
       where attributeid = ?;
 EOF
@@ -1678,7 +1678,7 @@ EOF
 
   def self.update_attributes_vocab
     cleanup_query(<<EOF
-    insert or replace into vocabulary (vocabid, attributeid, vocabname, vocabdescription, pictureurl) VALUES(?, ?, ?, ?, ?);
+    insert or replace into vocabulary (vocabid, attributeid, vocabname, vocabdescription, pictureurl, parentvocabid) VALUES(?, ?, ?, ?, ?, ?);select last_insert_rowid();
 EOF
     )
   end

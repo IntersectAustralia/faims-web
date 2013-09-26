@@ -25,6 +25,10 @@ class SpatialiteDB
     @db.execute_batch(sql, bind_vars)
   end
 
+  def last_insert_row_id
+    @db.last_insert_row_id
+  end
+
   def path
     @path
   end
