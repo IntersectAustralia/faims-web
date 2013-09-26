@@ -362,11 +362,14 @@ history_management = ->
   )
 
 vocab_management = ->
-  temp_id = $('.show input[name="temp_id[]"]').last().val()
-  if temp_id == "" || temp_id == undefined
-    temp_id = 1
-  else
-    temp_id = parseInt(temp_id) + 1
+  temp_id = 0
+  $('.show input[name="temp_id[]"]').each(
+    ->
+      if $(this).val() != "" && $(this).val() != undefined
+        if temp_id < parseInt($(this).val())
+          temp_id = parseInt($(this).val())
+  )
+  temp_id = temp_id + 1
 
   select_vocabs = ->
     value = $('#attribute').val()
@@ -395,9 +398,6 @@ vocab_management = ->
     ->
       parent_vocab_id = $($(this).parents('.vocab-row')[0]).prev('table').find('input[name="vocab_id[]"]').val()
       parent_id = $($(this).parents('.vocab-row')[0]).prev('table').find('input[name="temp_id[]"]').val()
-
-
-
 
       value = '<table class="vocab-new"><tr><td><input type="hidden" name="temp_id[]" value="' + temp_id + '"/>'
       if parent_id == undefined
