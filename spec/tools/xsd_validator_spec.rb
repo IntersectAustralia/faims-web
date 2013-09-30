@@ -89,6 +89,8 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_26.xml').should be_empty }
     # map
     it { validate_ui_schema('ui_schema_27.xml').should be_empty }
+    # sync attribute
+    it { validate_ui_schema('ui_schema_28.xml').should be_empty }
     # error
     it { validate_ui_schema('ui_schema_error1.xml').should_not be_empty }
   end
