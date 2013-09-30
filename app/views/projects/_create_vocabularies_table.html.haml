@@ -18,7 +18,7 @@
             %input{:name => 'vocab_description[]', :value => v[:vocab_description]}
           %td
             %input{:name => 'picture_url[]', :value => v[:picture_url]}
-          - if @grouped_vocabs[v[:vocab_id]].nil?
+          - if @grouped_vocabs[v[:vocab_id].blank? ? v[:temp_id] : v[:vocab_id] ].nil?
             %td
               = link_to "Add Child",'#', :class => "btn add-child"
       = render :partial => 'create_vocabularies_table', :locals => {key: v[:vocab_id].blank? ? v[:temp_id] : v[:vocab_id], indent: 1}
