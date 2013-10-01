@@ -966,7 +966,8 @@ end
 And /^I wait for popup to close$/ do
   begin
     (1..60).each do
-      break all('.ui-dialog').size == 0
+      break if all('.ui-dialog').size == 0
+      sleep(1)
     end
   end
 end
