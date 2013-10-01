@@ -964,12 +964,7 @@ And /^I should see fields with errors$/ do |table|
 end
 
 And /^I wait for popup to close$/ do
-  begin
-    (1..60).each do
-      break if all('.ui-dialog').size == 0
-      sleep(1)
-    end
-  end
+
 end
 
 And /^I refresh page$/ do
