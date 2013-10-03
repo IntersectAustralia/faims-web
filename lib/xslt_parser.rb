@@ -7,7 +7,7 @@ module XSLTParser
     doc = Nokogiri::XML(File.read(file))
 
     # replace single quotes with double single quotes
-    doc.xpath("//description").each { |d| d.content = d.content.gsub(/([^'])?'([^'])?/, "\\1''\\2") }
+    doc.xpath("//description").each { |d| d.content = d.content.gsub("'", "''") }
 
     result = xslt.transform(doc).text
 
