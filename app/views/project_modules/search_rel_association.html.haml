@@ -1,0 +1,45 @@
+- title @project_module.name + " - Search"
+= breadcrumbs
+.content
+  %h2 Search Relationship
+  %p
+  .search-arch-member
+    %ul.tabs
+      %li.search
+        %form{:action => search_rel_association_path, :method => "get"}
+          %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+          %input{:type => 'hidden', :value => 0, :name => 'offset'}
+          .input-append
+            - if session[:query]
+              %input{:type => 'text', :name => 'search_query', :value=> session[:search_query]}
+            -else
+              %input{:type => 'text', :name => 'search_query'}
+            %input{:type => 'submit', :value => "Search", :class => 'btn'}
+        - if !@relationships.nil? and !@relationships.empty?
+          %form{:action => add_rel_association_path(@project_module), :method => "post", id: 'add-rel-form'}
+            %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+            %input{:type => 'hidden', :name => 'uuid', :value => session[:uuid]}
+            %input{:type => 'hidden', :name => 'verb'}
+            .records
+              - for relationships in @relationships
+                %ul.inner
+                  %input{:type => 'radio', :name => 'relationshipid',:value => relationships[0]}
+                  %input{:type => 'hidden', :name => 'typeid', :value => relationships[2], :src => get_verbs_for_rel_association_path(@project_module)}
+                  %li
+                    %span
+                      =relationships[1].to_s
+          .paging.search
+            = render :partial => 'pagination'
+        -else
+          - if @status.eql?('init')
+            %p Please enter keywords to search for a particular relationship or leave the search empty to show all relationships
+          -else
+            %p No Relationships found
+      %li.verb
+        %h4 Relationship Verb
+        %label Verb (if required)
+        .input-append
+          %select{:id => 'select-verb'}
+          %input{:type => 'button', :value=> 'Add Member', :id => 'add-rel', :class => 'btn'}
+  .form-actions
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_association_path(@project_module,session[:uuid])+'?offset=0', :class => 'btn'

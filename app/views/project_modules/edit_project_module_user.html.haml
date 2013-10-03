@@ -1,0 +1,25 @@
+- title @project_module.name + " - Users"
+= breadcrumbs
+.content
+  %form{:id => 'user_form', :action => update_project_module_user_path(@project_module), :method => 'post'}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %label Select User:
+    .input-append
+      %select{:name => 'user_id', :id => 'select_user'}
+        %option
+        - for user in @server_user
+          %option{:value => user.id}=user.first_name + ' ' + user.last_name
+      = link_to "Add",'#', :id => 'add_user', :class => 'btn'
+    %table
+      %th
+        = "First Name"
+      %th
+        = "Last Name"
+      - @users.each do |user|
+        %tr
+          %td
+            %input{:name => 'fname[]', :value=> user[1], :readonly => 'readonly'}
+          %td
+            %input{:name => 'lname[]', :value=> user[2], :readonly => 'readonly'}
+.form-actions
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'

@@ -1,0 +1,30 @@
+- title @project_module.name
+= breadcrumbs
+
+%input{:type => 'hidden', :value => check_archive_status_path(@project_module), :id=> 'check-archive'}
+%input{:type => 'hidden', :value => download_project_module_path(@project_module), :id=> 'download-project-module'}
+
+.well
+  %h3 Module Actions
+  .btn-group
+    = link_to "Edit Module", edit_project_module_path(@project_module), :class => 'btn'
+    = link_to "Edit Vocabulary", list_attributes_with_vocab_path(@project_module), :class => 'btn'
+    = link_to "Edit Users", edit_project_module_user_path(@project_module), :class => 'btn'
+  .btn-group
+    = link_to "Upload Files", project_module_file_list_path(@project_module), :class => 'btn', :id => 'project-module-file-list-btn'
+    = link_to "Download Module", archive_project_module_path(@project_module), :class => 'btn', :id => 'archive-project-module-btn'
+.well
+  %h3 Module Details
+  .btn-group
+    = link_to "Search Archaeological Entity Records", search_arch_ent_records_path(@project_module), :class => 'btn'
+    = link_to "Search Relationship Records", search_rel_records_path(@project_module), :class => 'btn'
+  .btn-group
+    = link_to "List Archaeological Entity Records", list_arch_ent_records_path(@project_module), :class => 'btn'
+    = link_to "List Relationship Records", list_rel_records_path(@project_module), :class => 'btn'
+.form-actions
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_modules_path, :class => 'btn'
+
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Archiving Module

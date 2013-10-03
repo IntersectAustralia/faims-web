@@ -1,6 +1,6 @@
 require 'spec_helper'
 require Rails.root.join('lib/merge_daemon_helper')
-require Rails.root.join('features/support/projects')
+require Rails.root.join('features/support/project_modules')
 require Rails.root.join('spec/tools/helpers/database_generator_spec_helper')
 
 describe MergeDaemon do
@@ -31,21 +31,21 @@ describe MergeDaemon do
     tmp_dir = Rails.root.to_s + '/tmp'
 	FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
     
-	projects_dir = Rails.root.to_s + '/tmp/projects'
+	project_modules_dir = Rails.root.to_s + '/tmp/project_modules'
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
-    # cleanup projects and uploads directory
-    FileUtils.rm_rf projects_dir if File.directory? projects_dir
+    # cleanup project_modules and uploads directory
+    FileUtils.rm_rf project_modules_dir if File.directory? project_modules_dir
     FileUtils.rm_rf uploads_dir if File.directory? uploads_dir
 	
-    FileUtils.mkdir projects_dir
+    FileUtils.mkdir project_modules_dir
     FileUtils.mkdir uploads_dir
 
-    # create project
-    project = make_project 'Project'
+    # create project_module
+    project_module = make_project_module 'Project'
 
     # create uploads database
-    filename = uploads_dir + '/' + project.key + '_v1'
+    filename = uploads_dir + '/' + project_module.key + '_v1'
     Database.generate_database(filename, Rails.root.join('spec/assets/data_schema.xml'))
     fill_database(SpatialiteDB.new(filename), 1)
 
@@ -57,29 +57,29 @@ describe MergeDaemon do
     # check that upload is removed
     File.exists?(filename).should be_false
 
-    # check that database is merged into project
-    is_database_same(project.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_true
+    # check that database is merged into project_module
+    is_database_same(project_module.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_true
   end
 
   it 'should not merge file uploads directory for bad names' do
     tmp_dir = Rails.root.to_s + '/tmp'
     FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
 
-    projects_dir = Rails.root.to_s + '/tmp/projects'
+    project_modules_dir = Rails.root.to_s + '/tmp/project_modules'
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
-    # cleanup projects and uploads directory
-    FileUtils.rm_rf projects_dir if File.directory? projects_dir
+    # cleanup project_modules and uploads directory
+    FileUtils.rm_rf project_modules_dir if File.directory? project_modules_dir
     FileUtils.rm_rf uploads_dir if File.directory? uploads_dir
 
-    FileUtils.mkdir projects_dir
+    FileUtils.mkdir project_modules_dir
     FileUtils.mkdir uploads_dir
 
-    # create project
-    project = make_project 'Project'
+    # create project_module
+    project_module = make_project_module 'Project'
 
     # create uploads database
-    filename = uploads_dir + '/' + project.key
+    filename = uploads_dir + '/' + project_module.key
     Database.generate_database(filename, Rails.root.join('spec/assets/data_schema.xml'))
     fill_database(SpatialiteDB.new(filename), 1)
 
@@ -91,8 +91,8 @@ describe MergeDaemon do
     # check that upload is removed
     File.exists?(filename).should be_true
 
-    # check that database is merged into project
-    is_database_same(project.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_false
+    # check that database is merged into project_module
+    is_database_same(project_module.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_false
   end
 
 end

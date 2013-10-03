@@ -1,4 +1,4 @@
-require Rails.root.join('features/support/projects')
+require Rails.root.join('features/support/project_modules')
 
 def init_database(db)
   
