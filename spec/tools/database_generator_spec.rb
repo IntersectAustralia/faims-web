@@ -16,6 +16,19 @@ describe Database do
     tempfile.unlink
   end
 
+  it 'Generates and Parses database' do
+    tempfile = Tempfile.new('db.sqlite3')
+    Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'data_schema_quote.xml').to_s)
+    db = SpatialiteDB.new(tempfile.path)
+    result = db.execute("select count(*) || 'ideal arch ent' from idealAEnt union select count(*) || 'ideal reln'  from idealreln union select count(*) || 'aent type' from aenttype union select count(*) || 'relntype' from relntype union select count(*) || 'attributekey'  from attributekey;")
+    result[0].should == ['2aent type']
+    result[1].should == ['30attributekey']
+    result[2].should == ['3ideal reln']
+    result[3].should == ['3relntype']
+    result[4].should == ['46ideal arch ent']
+    tempfile.unlink
+  end
+
   it 'Generates and Parses data_schema.xml with single qoutes' do
     tempfile = Tempfile.new('db.sqlite3')
     Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'pottery.xml').to_s)
