@@ -43,14 +43,14 @@ class MergeDaemon
         key = match[:key]
         version = match[:version]
 
-        project = Project.find_by_key(key)
-        raise Exception unless project
+        project_module = ProjectModule.find_by_key(key)
+        raise Exception unless project_module
 
         puts "Merging #{db_file}"
 
         # merge database
 
-        project.db.merge_database(db_file_path, version)
+        project_module.db.merge_database(db_file_path, version)
 
         puts 'Finished merging database'
       end

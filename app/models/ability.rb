@@ -13,10 +13,10 @@ class Ability
 
     if user.admin?
       can [:read, :update_user, :new, :create, :destroy], User
-      can [:manage], Project
+      can [:manage], ProjectModule
     else
       can [:read], User
-      can [:manage], Project
+      can [:manage], ProjectModule
     end
 
     # Define abilities for the passed in user here. For example:

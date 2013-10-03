@@ -17,8 +17,8 @@
 # Ignore all rubymine files
 /.idea
 
-# Ignore all project directories
-/projects
+# Ignore all module directories
+/modules
 
 # Ignore all uploads
 /uploads

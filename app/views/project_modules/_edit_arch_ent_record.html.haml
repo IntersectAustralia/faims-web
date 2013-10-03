@@ -1,0 +1,29 @@
+- for uuids in @uuid
+  %ul.inner
+    %input{:type => 'hidden', :id=> 'timestamp', :value => uuids[3] }
+    - if values and values.include?(uuids[0].to_s)
+      %input{:type => 'checkbox', :value=> uuids[0],:checked => 'checked'}
+        %li
+          %a{:href => edit_arch_ent_records_path(@project_module,uuids[0])}
+            =uuids[1].to_s
+          - if @entity_dirty_map[uuids[0]]
+            .label.label-important='review'
+          - if @entity_forked_map[uuids[0]]
+            .label.label-warning='conflict'
+      - if !uuids[2].nil?
+        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project_module,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
+      %input{:type => 'hidden', :id => 'identifier', :value=> uuids[1].to_s}
+    - else
+      %input{:type => 'checkbox', :value=> uuids[0]}
+        %li
+          %a{:href => edit_arch_ent_records_path(@project_module,uuids[0])}
+            =uuids[1].to_s
+            - if @entity_dirty_map[uuids[0]]
+              .label.label-important='review'
+            - if @entity_forked_map[uuids[0]]
+              .label.label-warning='conflict'
+      - if !uuids[2].nil?
+        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project_module,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'undelete-record'
+      %input{:type => 'hidden',:id => 'identifier', :value=> uuids[1].to_s}
+.paging
+  = render :partial => 'pagination'

@@ -78,13 +78,13 @@ module FaimsWeb
 
     config.server_properties_file = Rails.root.join("server.properties").to_s
 
-    config.server_projects_directory = Rails.root.join("projects").to_s
+    config.server_project_modules_directory = Rails.root.join("modules").to_s
 
     config.server_uploads_directory = Rails.root.join("uploads").to_s
 
     config.after_initialize do
       require 'find'
-      Find.find(Rails.root.join('projects').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('projects')
+      Find.find(Rails.root.join('modules').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('modules')
     end
   end
 end

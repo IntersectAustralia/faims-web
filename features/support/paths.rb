@@ -43,91 +43,91 @@ module NavigationHelpers
       when /the list users page/
         users_path
 
-      # Projects paths
-      when /the projects page/
-        projects_path
+      # Project module paths
+      when /the project modules page/
+        project_modules_path
 
-      when /the new projects page/
-        new_project_path
+      when /the new project modules page/
+        new_project_module_path
 
-      when /the android projects page/
-        android_projects_path
+      when /the android project modules page/
+        android_project_modules_path
 
       when /the android archive settings info for (.*)$/
-        project = Project.find_by_name($1)
-        android_settings_archive_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_settings_archive_path(project_module ? project_module.key : 'na')
 
       when /the android settings download link for (.*)$/
-        project = Project.find_by_name($1)
-        android_settings_download_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_settings_download_path(project_module ? project_module.key : 'na')
 
       when /the android archive db info for (.*) with request version (.*)$/
-        project = Project.find_by_name($1)
-        "/android/project/#{project ? project.key : 'na'}/db_archive?version=#{$2}"
+        project_module = ProjectModule.find_by_name($1)
+        "/android/module/#{project_module ? project_module.key : 'na'}/db_archive?version=#{$2}"
 
       when /the android download db link for (.*) with request version (.*)$/
-        project = Project.find_by_name($1)
-        "/android/project/#{project ? project.key : 'na'}/db_download?version=#{$2}"
+        project_module = ProjectModule.find_by_name($1)
+        "/android/module/#{project_module ? project_module.key : 'na'}/db_download?version=#{$2}"
 
       when /the android archive db info for (.*)$/
-        project = Project.find_by_name($1)
-        android_project_db_archive_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_project_module_db_archive_path(project_module ? project_module.key : 'na')
 
       when /the android download db link for (.*)$/
-        project = Project.find_by_name($1)
-        android_project_db_download_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_project_module_db_download_path(project_module ? project_module.key : 'na')
 
       when /the android server file list for (.*)$/
-        project = Project.find_by_name($1)
-        android_server_file_list_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_server_file_list_path(project_module ? project_module.key : 'na')
 
       when /the android server files archive info for (.*)$/
-        project = Project.find_by_name($1)
-        android_server_file_archive_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_server_file_archive_path(project_module ? project_module.key : 'na')
 
       when /the android server files download link for (.*)$/
-        project = Project.find_by_name($1)
-        android_server_file_download_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_server_file_download_path(project_module ? project_module.key : 'na')
 
       when /the android server upload file link for (.*)$/
-        project = Project.find_by_name($1)
-        android_server_file_upload_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_server_file_upload_path(project_module ? project_module.key : 'na')
 
       when /the android app file list for (.*)$/
-        project = Project.find_by_name($1)
-        android_app_file_list_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_app_file_list_path(project_module ? project_module.key : 'na')
 
       when /the android app files archive info for (.*)$/
-        project = Project.find_by_name($1)
-        android_app_file_archive_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_app_file_archive_path(project_module ? project_module.key : 'na')
 
       when /the android app files download link for (.*)$/
-        project = Project.find_by_name($1)
-        android_app_file_download_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_app_file_download_path(project_module ? project_module.key : 'na')
 
       when /the android app upload file link for (.*)$/
-        project = Project.find_by_name($1)
-        android_app_file_upload_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_app_file_upload_path(project_module ? project_module.key : 'na')
 
       when /the android data file list for (.*)$/
-        project = Project.find_by_name($1)
-        android_data_file_list_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_data_file_list_path(project_module ? project_module.key : 'na')
 
       when /the android data files archive info for (.*)$/
-        project = Project.find_by_name($1)
-        android_data_file_archive_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_data_file_archive_path(project_module ? project_module.key : 'na')
 
       when /the android data files download link for (.*)$/
-        project = Project.find_by_name($1)
-        android_data_file_download_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_data_file_download_path(project_module ? project_module.key : 'na')
 
       when /the android data upload file link for (.*)$/
-        project = Project.find_by_name($1)
-        android_data_file_upload_path(project ? project.key : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        android_data_file_upload_path(project_module ? project_module.key : 'na')
 
       when /upload data files page for (.*)/
-        project = Project.find_by_name($1)
-        project_file_list_path(project ? project.id : 'na')
+        project_module = ProjectModule.find_by_name($1)
+        project_module_file_list_path(project_module ? project_module.id : 'na')
 
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:

@@ -130,7 +130,7 @@ cd /opt/faims-web/
 bundle install 
 
 # echo -e "Setting up Server. This will take a while."
-rake db:drop db:create db:migrate db:seed projects:clean projects:setup assets:precompile RAILS_ENV=production 
+rake db:drop db:create db:migrate db:seed modules:clean modules:setup assets:precompile RAILS_ENV=production
 
 # chmod -R a+wx /opt/faims-web
 

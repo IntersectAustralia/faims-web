@@ -1,24 +1,24 @@
 class FileManagerController < ApplicationController
 
   before_filter :authenticate_user!
-  load_and_authorize_resource :project
+  load_and_authorize_resource :project_module
 
   def crumbs
-    project = Project.find(params[:id]) if params[:id]
+    project_module = ProjectModule.find(params[:id]) if params[:id]
     @crumbs =
       {
           :pages_home => {title: 'Home', url: pages_home_path},
-          :projects_index => {title: 'Projects', url: projects_path},
-          :projects_show => {title: project ? project.name : nil, url: project ? project_path(project) : nil},
-          :projects_files => {title: 'Files', url: project ? project_file_list_path(project) : nil},
+          :project_modules_index => {title: 'Modules', url: project_modules_path},
+          :project_modules_show => {title: project_module ? project_module.name : nil, url: project_module ? project_module_path(project_module) : nil},
+          :project_modules_files => {title: 'Files', url: project_module ? project_module_file_list_path(project_module) : nil},
       }
   end
 
   def file_list
-    @page_crumbs = [:pages_home, :projects_index, :projects_show, :projects_files]
+    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_files]
 
-    @project = Project.find_by_id(params[:id])
-    @dir = FileHelper.get_file_list_by_dir(@project.get_path(:data_files_dir), '.')
+    @project_module = ProjectModule.find_by_id(params[:id])
+    @dir = FileHelper.get_file_list_by_dir(@project_module.get_path(:data_files_dir), '.')
 
     if params[:notice]
       flash[:notice] = params[:notice]
@@ -28,20 +28,20 @@ class FileManagerController < ApplicationController
   end
 
   def download_file
-    @project = Project.find_by_id(params[:id])
+    @project_module = ProjectModule.find_by_id(params[:id])
 
     if params[:path].blank?
       redirect_to :action => 'file_list', :error => 'Please select file to download'
     else
-      file = File.join(@project.get_path(:data_files_dir), params[:path])
+      file = File.join(@project_module.get_path(:data_files_dir), params[:path])
       if !File.exists? file
         redirect_to :action => 'file_list', :error => 'File does not exist'
       elsif File.directory? file and FileHelper.get_file_list(file).size == 0
         redirect_to :action => 'file_list', :error => 'No files to download'
       else
-        @project.data_mgr.with_lock do
+        @project_module.data_mgr.with_lock do
           if File.directory? file
-            archive = @project.create_temp_dir_archive(file)
+            archive = @project_module.create_temp_dir_archive(file)
             send_file archive
           else
             send_file file
@@ -52,15 +52,15 @@ class FileManagerController < ApplicationController
   end
 
   def upload_file
-    @project = Project.find_by_id(params[:id])
+    @project_module = ProjectModule.find_by_id(params[:id])
 
     if params[:file_manager].blank? or params[:file_manager][:file].blank?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
-    elsif @project.data_mgr.locked?
+    elsif @project_module.data_mgr.locked?
       redirect_to :action => 'file_list', :error => 'Could not upload file. Files are currently locked'
     else
       file = params[:file_manager][:file]
-      error = @project.add_data_file(file.tempfile, File.join(params[:path], file.original_filename))
+      error = @project_module.add_data_file(file.tempfile, File.join(params[:path], file.original_filename))
 
       if error
         redirect_to :action => 'file_list', :error => error
@@ -71,15 +71,15 @@ class FileManagerController < ApplicationController
   end
 
   def create_dir
-    @project = Project.find_by_id(params[:id])
+    @project_module = ProjectModule.find_by_id(params[:id])
 
-    if params[:file_manager].blank? or !Project.validate_directory(params[:file_manager][:dir].strip)
+    if params[:file_manager].blank? or !ProjectModule.validate_directory(params[:file_manager][:dir].strip)
       redirect_to :action => 'file_list', :error => 'Please enter a valid directory name'
-    elsif @project.data_mgr.locked?
+    elsif @project_module.data_mgr.locked?
       redirect_to :action => 'file_list', :error => 'Could not create directory. Files are currently locked'
     else
       dir = params[:file_manager][:dir].strip
-      error = @project.create_data_dir(File.join(File.join(params[:path], dir)))
+      error = @project_module.create_data_dir(File.join(File.join(params[:path], dir)))
 
       if error
         redirect_to :action => 'file_list', :error => error
@@ -90,25 +90,25 @@ class FileManagerController < ApplicationController
   end
 
   def delete_file
-    @project = Project.find_by_id(params[:id])
+    @project_module = ProjectModule.find_by_id(params[:id])
 
     if params[:path].blank?
       redirect_to :action => 'file_list', :error => 'Please select file to delete'
     else
-      file = File.join(@project.get_path(:data_files_dir), params[:path])
+      file = File.join(@project_module.get_path(:data_files_dir), params[:path])
       if !File.exists? file and !File.directory? file
         redirect_to :action => 'file_list', :error => 'Could not find anything to delete'
-      elsif @project.data_mgr.locked?
+      elsif @project_module.data_mgr.locked?
         if File.directory? file
           redirect_to :action => 'file_list', :error => 'Could not delete directory. Files are currently locked'
         else
           redirect_to :action => 'file_list', :error => 'Could not delete file. Files are currently locked'
         end
       else
-        @project.data_mgr.with_lock do
+        @project_module.data_mgr.with_lock do
           if params[:path] == '.'
-            FileUtils.rm_rf @project.get_path(:data_files_dir)
-            FileUtils.mkdir @project.get_path(:data_files_dir)
+            FileUtils.rm_rf @project_module.get_path(:data_files_dir)
+            FileUtils.mkdir @project_module.get_path(:data_files_dir)
             redirect_to :action => 'file_list', :notice => 'Deleted directory'
           elsif File.directory? file
             FileUtils.rm_rf file
@@ -123,15 +123,15 @@ class FileManagerController < ApplicationController
   end
 
   def batch_upload_file
-    @project = Project.find_by_id(params[:id])
+    @project_module = ProjectModule.find_by_id(params[:id])
 
-    if params[:project].blank? or params[:project][:file].blank?
+    if params[:project_module].blank? or params[:project_module][:file].blank?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
-    elsif @project.data_mgr.locked?
+    elsif @project_module.data_mgr.locked?
       redirect_to :action => 'file_list', :error => 'Could not upload archive. Files are currently locked'
     else
-      file = params[:project][:file]
-      error = @project.add_batch_file(file.tempfile)
+      file = params[:project_module][:file]
+      error = @project_module.add_batch_file(file.tempfile)
       if error
         redirect_to :action => 'file_list', :error => error
       else

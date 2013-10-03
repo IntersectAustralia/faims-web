@@ -1,0 +1,32 @@
+- title @project_module_setting['name']
+= breadcrumbs
+.container
+  = simple_form_for @project_module, :url => update_project_module_setting_path, :class =>"span12", :method => "post" do|f|
+    %h4 Static Data
+    = f.label :name, "Module Name:"
+    = f.text_field :name, :value => @project_module.name, :class => "input-block-level"
+    = f.error :name
+    %p
+    = f.label :season, 'Module SRID:'
+    = f.select :srid, @spatial_list, :selected => @project_module_setting['srid'], :class => "input-block-level"
+    %p
+    = f.label :season, "Module Season:"
+    = f.text_field :season, :value => @project_module_setting['season'], :class => "input-block-level"
+    %p
+    = f.label :description, "Project Description:"
+    = f.text_area :description, :size => "40x5", :class => 'project_module-textarea input-block-level', :value => @project_module_setting['description']
+    %p
+    = f.label :permit_no, "Permit No:"
+    = f.text_field :permit_no, :value => @project_module_setting['permit_no'], :class => "input-block-level"
+    %p
+    = f.label :permit_holder, "Permit Holder:"
+    = f.text_area :permit_holder, :size => "40x5", :class => 'project_module-textarea input-block-level', :value => @project_module_setting['permit_holder']
+    %p
+    = f.label :contact_address, "Contact and Address:"
+    = f.text_area :contact_address, :size => "40x5", :class => 'project_module-textarea input-block-level', :value => @project_module_setting['contact_address']
+    %p
+    = f.label :participant, "Participants:"
+    = f.text_area :participant, :size => "40x5", :class => 'project_module-textarea input-block-level', :value => @project_module_setting['participant']
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
+      = f.submit "Update", :class => "btn btn-inverse", :id => "update-project-module-setting-btn"
