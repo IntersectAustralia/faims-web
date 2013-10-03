@@ -37,8 +37,8 @@ describe Database do
 
   describe 'Merging databases' do
     it 'Empty database and Empty database' do
-      p1 = make_project('Project 1')
-      p2 = make_project('Project 2')
+      p1 = make_project_module('Module 1')
+      p2 = make_project_module('Module 2')
 
       init_database(p1.db.spatialite_db)
       init_database(p2.db.spatialite_db)
@@ -51,8 +51,8 @@ describe Database do
     it 'Empty database and Full database' do
       version = 1
 
-      p1 = make_project('Project 1')
-      p2 = make_project('Project 2')
+      p1 = make_project_module('Module 1')
+      p2 = make_project_module('Module 2')
 
       init_database(p1.db.spatialite_db)
       fill_database(p2.db.spatialite_db, version)
@@ -65,8 +65,8 @@ describe Database do
     it 'Full database and Empty database' do
       version = 1
 
-      p1 = make_project('Project 1')
-      p2 = make_project('Project 2')
+      p1 = make_project_module('Module 1')
+      p2 = make_project_module('Module 2')
 
       init_database(p1.db.spatialite_db)
       fill_database(p1.db.spatialite_db, version)
@@ -81,8 +81,8 @@ describe Database do
     it 'Full database and Full database' do
       version = 1
 
-      p1 = make_project('Project 1')
-      p2 = make_project('Project 2')
+      p1 = make_project_module('Module 1')
+      p2 = make_project_module('Module 2')
 
       fill_database(p1.db.spatialite_db, version)
       fill_database(p2.db.spatialite_db)
@@ -97,7 +97,7 @@ describe Database do
     it 'Does not insert duplicate records' do
       version = 1
       
-      p1 = make_project('Project 100')
+      p1 = make_project_module('Module 100')
       fill_database(p1.db.spatialite_db, version)
       
       backup_db1 = backup_database(p1.db.spatialite_db)
@@ -108,9 +108,9 @@ describe Database do
     end
 
     it 'Merge rows must have correct version number' do
-      p1 = make_project('Project 1')
-      p2 = make_project('Project 2')
-      p3 = make_project('Project 3')
+      p1 = make_project_module('Module 1')
+      p2 = make_project_module('Module 2')
+      p3 = make_project_module('Module 3')
 
       init_database(p1.db.spatialite_db)
       fill_database(p2.db.spatialite_db, nil, 0)

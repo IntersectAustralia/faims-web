@@ -1,0 +1,27 @@
+- title @project_module.name + " - Relationship Archaeological Entity Members"
+= breadcrumbs
+.content
+  - if !@uuid.nil? and !@uuid.empty?
+    .records
+      %ul.inner
+        - for uuids in @uuid
+          %li
+            %form.pull-left{:action => remove_arch_ent_member_path(@project_module), :method => "post"}
+              %input{ type: :hidden, name: :authenticity_token, value: session[:authenticity_token]}
+              %input{ type: :hidden, name: :relationshipid, value: session[:relationshipid]}
+              %input{ type: :hidden, name: :relntypeid, value: session[:relntypeid]}
+              %input{ type: :hidden, name: :uuid, value: uuids[0]}
+              .remove-member= link_to "<i class='ui-icon ui-icon-circle-minus'></i>".html_safe
+            %a{:href => edit_arch_ent_records_path(@project_module,uuids[0])}
+              =uuids[1].to_s
+          .clear
+      .paging.search
+        = render :partial => 'pagination'
+    %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_arch_ent_member_path(@project_module,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_rel_records_path(@project_module,session[:relationshipid]), :class => 'btn'
+  -else
+    %p No Members Found
+    %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_arch_ent_member_path(@project_module,session[:relationshipid])+"?relntypeid="+session[:relntypeid].to_s}
+    .form-actions
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_rel_records_path(@project_module,session[:relationshipid]), :class => 'btn'

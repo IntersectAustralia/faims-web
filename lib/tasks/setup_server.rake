@@ -12,7 +12,7 @@ begin
         end
       end
       create_server_properties(Rails.application.config.server_properties_file)
-      puts "Created #{Rails.root}/projects/server.properties"
+      puts "Created #{Rails.root}/modules/server.properties"
     end
   end
 rescue LoadError

@@ -1,0 +1,95 @@
+- title @project_module.name + " - Archaeological Entity"
+= breadcrumbs
+- get_files(@attributes,8,6)
+.form-actions
+  - if !session[:prev_id].nil? and !session[:prev_id].empty?
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module,session[:prev_id][-1]), :class => 'btn'
+  - else
+    - if !session[:show].nil? and !session[:show].empty?
+      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project_module,session[:relationshipid])+"?offset=0&relntypeid="+session[:relntypeid].to_s, :class => 'btn'
+    -else
+      - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      - if session[:action].eql?('list_typed_arch_ent_records')
+        = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_arch_ent_records_path(@project_module)+"?type="+session[:type]+"&show_deleted="+ show_deleted, :class => 'btn'
+      - elsif session[:action].eql?('show_arch_ent_records')
+        = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_arch_ent_records_path(@project_module)+"?query="+session[:query]+"&show_deleted="+ show_deleted, :class => 'btn'
+  - if !@deleted[1].nil?
+    = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, undelete_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn btn-warning', :id => 'undelete-record'
+  - else
+    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn btn-warning', :id => 'delete-record', confirm: "Are you sure you want to delete this record?"
+  = link_to "Show Relationship Association", show_rel_association_path(@project_module,session[:uuid]) + "?offset=0", :class => 'btn'
+  = link_to "Show History", show_arch_ent_history_path(@project_module,session[:uuid]), :class => 'btn'
+  - if !@related_arch_ents.empty?
+    = link_to "Show Related Archaelogical Entities", '#related-arch-ents', :class => 'btn', :id => 'show-related'
+.container
+  - attributeGroup = @attributes.group_by{|a|a[3]}
+  - attributeGroup.each do |key,val|
+    .update-arch-ent-form
+      = simple_form_for :attr, :url => update_arch_ent_records_path, :method => "post" do|f|
+        .step-container
+          .step-body{:style => "width: 1125px;"}
+            .arch_ent_record_content
+              = f.hidden_field :uuid, :value => val[0][0]
+              = f.hidden_field :attribute_id, :value => val[0][1]
+              = f.hidden_field 'ignore_errors'
+              %h4=key
+              - show_error_button = 'hidden'
+              - for attribute in val
+                .row-fluid
+                  - if !@vocab_name[attribute[1]].empty?
+                    .span3
+                      = f.label :vocab_id, "Vocab:"
+                      - vocabs = @vocab_name[attribute[1]]
+                      - vocabs = vocab_name_to_breadcrumb(vocabs)
+                      - if attribute[2].blank?
+                        = f.input :vocab_id, collection: vocabs, label: false, input_html: {name: 'attr[vocab_id][]'}
+                      - else
+                        = f.input :vocab_id, collection: vocabs, label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
+                  .span3
+                    = f.label :measure, "Measure:"
+                    = f.text_field :measure, :value => attribute[5], name: 'attr[measure][]'
+                  .span3
+                    = f.label :freetext, "Freetext:"
+                    = f.text_field :freetext, :value => attribute[6], name: 'attr[freetext][]'
+                  .span3
+                    = f.label :certainty, "Certainty:"
+                    = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'
+                .row-fluid.form-attribute-result
+                  - if attribute[10] == 1
+                    - show_error_button = nil
+                    .form-attribute-error
+                      - attribute[11].each_line(';') do |l|
+                        - next if l.gsub(';', '').blank?
+                        %li=l.gsub(';', '')
+              .form-actions
+                = f.submit "Update", :class => "btn btn-inverse"
+                = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn #{show_error_button}"
+                = link_to "cancel", edit_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn'
+- if !@related_arch_ents.empty?
+  #related-arch-ents
+    %h2 Related Archaeological Entities
+    .inner-box
+      %ul
+        - @related_arch_ents.each do |aent|
+          %li
+            = link_to aent[1], edit_arch_ent_records_path(@project_module,aent[0]) + "?prev_id=" + session[:uuid]
+  
+- if !@files.empty?
+  .attached-files
+    %h2 Attached Files
+    %ul
+      - @files.each do |path,name|
+        %li
+          %form{:method => 'GET', :action => download_attached_file_path(@project_module), :id => 'download-attached-file'}
+            %input{:type => 'hidden', :name => 'path', :value => path}
+            %input{:type => 'hidden', :name => 'name', :value => name}
+            - if File.exists? @project_module.get_path(:project_module_dir) + path
+              %a{:href => '#'}
+                = name
+            - else
+              %p
+                = name
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Updating

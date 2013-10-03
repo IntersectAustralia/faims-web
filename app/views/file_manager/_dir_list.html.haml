@@ -3,12 +3,12 @@
     .dir-header
       - if name == '.'
         %h3
-          %span= link_to('data', download_project_file_path({path: File.join(name)}))
+          %span= link_to('data', download_project_module_file_path({path: File.join(name)}))
           %span.pull-right
             .upload-container.inline
               =link_to('upload file', '', :class => 'btn upload-btn')
               .file-upload-form
-                = simple_form_for :file_manager, :url => upload_project_file_path({path:name}), :method => 'post', :multipart => true do |f|
+                = simple_form_for :file_manager, :url => upload_project_module_file_path({path:name}), :method => 'post', :multipart => true do |f|
                   .input-append
                     = f.file_field 'file'
                     = f.submit 'Submit', :class => 'btn upload-submit-btn btn-primary'
@@ -16,22 +16,22 @@
             .create-container.inline
               = link_to('create directory', '', :class => 'btn create-btn')
               .create-dir-form
-                = simple_form_for :file_manager, :url => project_create_dir_path({path:name}), :method => 'post', :multipart => true do |f|
+                = simple_form_for :file_manager, :url => project_module_create_dir_path({path:name}), :method => 'post', :multipart => true do |f|
                   .hidden= f.label 'Directory:'
                   .input-append
                     = f.text_field 'dir', :placeholder => "Directory Name..."
                     = f.submit 'Submit', :class => 'btn create-submit-btn btn-primary'
                     = link_to 'Cancel', '', :class => 'btn create-cancel-btn'
-            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_file_path({path: File.join(name)}), :class => "btn btn-warning", confirm: "Are you sure you want to delete directory?")
+            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_module_file_path({path: File.join(name)}), :class => "btn btn-warning", confirm: "Are you sure you want to delete directory?")
 
       - else
         %h3
-          %span= link_to(File.basename(name), download_project_file_path({path: File.join(name)}))
+          %span= link_to(File.basename(name), download_project_module_file_path({path: File.join(name)}))
           %span.pull-right
             .upload-container.inline
               =link_to('upload file', '', :class => 'btn upload-btn')
               .file-upload-form
-                = simple_form_for :file_manager, :url => upload_project_file_path({path:name}), :method => 'post', :multipart => true do |f|
+                = simple_form_for :file_manager, :url => upload_project_module_file_path({path:name}), :method => 'post', :multipart => true do |f|
                   .input-append
                     = f.file_field 'file'
                     = f.submit 'Submit', :class => 'btn upload-submit-btn btn-primary'
@@ -39,19 +39,19 @@
             .create-container.inline
               = link_to('create directory', '', :class => 'btn create-btn')
               .create-dir-form
-                = simple_form_for :file_manager, :url => project_create_dir_path({path:name}), :method => 'post', :multipart => true do |f|
+                = simple_form_for :file_manager, :url => project_module_create_dir_path({path:name}), :method => 'post', :multipart => true do |f|
                   .hidden= f.label 'Directory:'
                   .input-append
                     = f.text_field 'dir', :placeholder => "Directory Name..."
                     = f.submit 'Submit', :class => 'btn create-submit-btn btn-primary'
                     = link_to 'Cancel', '', :class => 'btn create-cancel-btn'
-            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_file_path({path: File.join(name)}), :class => "btn btn-warning", confirm: "Are you sure you want to delete directory?")
+            = link_to(raw('<i class="inline icon-remove"></i>'), delete_project_module_file_path({path: File.join(name)}), :class => "btn btn-warning", confirm: "Are you sure you want to delete directory?")
         .clear
     %ul.dir-body
       - files.each do |file|
         - if file.class == Hash
           = render :partial => 'dir_list', :locals => {dir:file}
         - else
-          %li.inline= link_to(File.basename(file), download_project_file_path({path: File.join(name, file)}))
-          = link_to(raw('<i class="delete-icon icon-remove-sign"></i>'), delete_project_file_path({path: File.join(name, file)}), confirm: "Are you sure you want to delete file?")
+          %li.inline= link_to(File.basename(file), download_project_module_file_path({path: File.join(name, file)}))
+          = link_to(raw('<i class="delete-icon icon-remove-sign"></i>'), delete_project_module_file_path({path: File.join(name, file)}), confirm: "Are you sure you want to delete file?")
           .clear

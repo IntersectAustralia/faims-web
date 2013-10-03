@@ -2,9 +2,9 @@
 # See https://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  projects:
+  modules:
     index:
-      empty: "Click 'Create Project' to add a new project."
+      empty: "Click 'Create Module' to add a new module."
     new:
-      success: "New project created."
+      success: "New module created."
       failure: "Please correct the errors in this form."

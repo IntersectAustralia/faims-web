@@ -1,0 +1,25 @@
+- title @project_module.name + " - Vocabulary"
+= breadcrumbs
+.content
+  %form{:id => 'attribute_form', :action => update_attributes_vocab_path(@project_module), :method => 'post'}
+    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %label Select attribute:
+    %select{:id => 'attribute', :name => 'attribute_id'}
+      %option
+      - @attributes.each do |attribute|
+        - if @attribute_id.to_s == attribute[0].to_s
+          %option{:value => attribute[0], :selected => 'selected'}
+            = attribute[1]
+        - else
+          %option{:value => attribute[0]}
+            = attribute[1]
+    #vocab-content
+      - @attribute_vocabs.each do |attribute_id, vocabs|
+        - selected = attribute_id.to_s == @attribute_id.to_s ? 'show' : 'hide'
+        %div{class: "vocab-list vocab-list-#{attribute_id} #{selected}"}
+          - group_vocabularies(vocabs)
+          = render :partial => 'create_vocabularies_table', :locals => {key: nil, indent: 0}
+  - show_buttons = @attribute_id.blank? ? 'hide' : ''
+  = link_to "Update",'#', :id => 'update_vocab', :class => "btn #{show_buttons}"
+.form-actions
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'

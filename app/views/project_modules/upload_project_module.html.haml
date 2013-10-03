@@ -1,0 +1,16 @@
+- title "Upload New Module"
+= breadcrumbs
+= simple_form_for @project_module, :url => upload_new_project_module_path, :method => "post", :multipart => true do |f|
+  .well
+    %h4 Module Archive
+    = f.label :project_module_file, "Module File:"
+    = f.file_field :project_module_file
+  .form-actions
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_modules_path, :class => 'btn'
+    = f.submit "Upload", :class => "btn btn-inverse", :id => "upload-project-module-btn"
+    = link_to "Clear", upload_project_module_path, :class => "btn"
+
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Uploading Module
