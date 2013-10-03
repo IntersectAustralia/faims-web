@@ -93,6 +93,11 @@ class FileManager
     end
 	ensure
 		FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
-	end
+  end
+
+  def last_modified
+    return File.ctime(@archive) if File.exists? @archive
+    nil
+  end
 
 end

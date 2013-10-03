@@ -218,4 +218,69 @@ describe Project do
     File.exists?(project.get_path(:app_files_dir)).should be_true
   end
 
+  it 'Updating settings causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    project.settings_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
+    project.package_dirty?.should be_true
+  end
+
+  it 'Updating database causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    project.db_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
+    project.package_dirty?.should be_true
+  end
+
+  it 'Adding data files causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    FileUtils.touch project.get_path(:data_files_dir) + '/temp'
+    project.package_dirty?.should be_true
+  end
+
+  it 'Updating data files causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    FileUtils.touch project.get_path(:data_files_dir) + '/temp'
+    project.update_archives
+    project.package_dirty?.should be_false
+    project.data_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
+    project.package_dirty?.should be_true
+  end
+
+  it 'Adding app files causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    FileUtils.touch project.get_path(:app_files_dir) + '/temp'
+    project.package_dirty?.should be_true
+  end
+
+  it 'Updating app files causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    FileUtils.touch project.get_path(:app_files_dir) + '/temp'
+    project.update_archives
+    project.package_dirty?.should be_false
+    project.app_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
+    project.package_dirty?.should be_true
+  end
+
+  it 'Adding server files causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    FileUtils.touch project.get_path(:server_files_dir) + '/temp'
+    project.package_dirty?.should be_true
+  end
+
+  it 'Updating server files causes package to rearchive' do
+    project = make_project('Project 1')
+    project.package_dirty?.should be_false
+    FileUtils.touch project.get_path(:server_files_dir) + '/temp'
+    project.update_archives
+    project.package_dirty?.should be_false
+    project.server_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
+    project.package_dirty?.should be_true
+  end
+
 end

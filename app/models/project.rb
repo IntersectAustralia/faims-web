@@ -49,6 +49,7 @@ class Project < ActiveRecord::Base
         db_archive: { name: 'db.tar.gz', path: project_dir + 'tmp/db.tar.gz' },
         settings_archive: { name: 'settings.tar.gz', path: project_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_dir + 'tmp/app.tar.gz' },
+        server_files_archive: { name: 'server.tar.gz', path: project_dir + 'tmp/server.tar.gz' },
         data_files_archive: { name: 'data.tar.gz', path: project_dir + 'tmp/data.tar.gz' },
         validation_schema: { name: 'validation_schema.xml', path: project_dir + 'validation_schema.xml' },
     }
@@ -96,6 +97,7 @@ class Project < ActiveRecord::Base
 
   def db_mgr
     mgr = FileManager.new('db', get_path(:project_dir), 'zcf', get_path(:db_archive))
+    mgr.add_file(get_path(:db))
     mgr
   end
 
@@ -105,6 +107,12 @@ class Project < ActiveRecord::Base
     mgr.add_file(get_path(:ui_logic))
     mgr.add_file(get_path(:settings))
     mgr.add_file(get_path(:properties))
+    mgr
+  end
+
+  def server_mgr
+    mgr = FileManager.new('server', get_path(:project_dir), 'zcf', get_path(:server_files_archive))
+    mgr.add_dir(get_path(:server_files_dir))
     mgr
   end
 
@@ -198,8 +206,26 @@ class Project < ActiveRecord::Base
     settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty?
   end
 
+  def modified_after_package(mgr)
+    return true unless package_mgr.last_modified
+    modified = false
+    mgr.file_list.each do |f|
+      next unless File.exists? f
+      if File.ctime(f) > package_mgr.last_modified
+        modified = true
+        break
+      end
+    end
+    modified
+  end
+
   def package_dirty?
-    settings_mgr.dirty? or db_mgr.dirty? or app_mgr.dirty? or data_mgr.dirty? or package_mgr.dirty?
+    package_mgr.dirty? or
+        modified_after_package(settings_mgr) or
+        modified_after_package(db_mgr) or
+        modified_after_package(data_mgr) or
+        modified_after_package(app_mgr) or
+        modified_after_package(server_mgr)
   end
 
   def locked?
