@@ -8,6 +8,7 @@ module XSLTParser
 
     # replace single quotes with double single quotes
     doc.xpath("//description").each { |d| d.content = d.content.gsub("'", "''") }
+    doc.xpath("//term").each { |d| d.content = d.content.gsub("'", "''") }
 
     result = xslt.transform(doc).text
 
