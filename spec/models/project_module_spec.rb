@@ -63,7 +63,7 @@ describe ProjectModule do
 
   it 'Archiving settings' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       tmp_dir = Dir.mktmpdir
       `tar zxf #{project_module.get_path(:settings_archive)} -C #{tmp_dir}`
       entries = FileHelper.get_file_list(tmp_dir)
@@ -81,7 +81,7 @@ describe ProjectModule do
 
   it 'Archiving settings with project_module properties' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       project_module.generate_archives
       tmp_dir = Dir.mktmpdir
       `tar zxf #{project_module.get_path(:settings_archive)} -C #{tmp_dir}`
@@ -100,7 +100,7 @@ describe ProjectModule do
 
   it 'Archiving data directory' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test1')
       FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test2')
       FileUtils.mkdir_p project_module.get_path(:data_files_dir) + 'dir1/dir2'
@@ -121,7 +121,7 @@ describe ProjectModule do
 
   it 'Archiving data directory' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       FileHelper.touch_file(project_module.get_path(:app_files_dir) + 'test1')
       FileHelper.touch_file(project_module.get_path(:app_files_dir) + 'test2')
       FileUtils.mkdir_p project_module.get_path(:app_files_dir) + 'dir1/dir2'
@@ -142,7 +142,7 @@ describe ProjectModule do
 
   it 'Archiving database' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       tmp_dir = Dir.mktmpdir
       `tar zxf #{project_module.get_path(:db_archive)} -C #{tmp_dir}`
       entries = FileHelper.get_file_list(tmp_dir)
@@ -156,7 +156,7 @@ describe ProjectModule do
 
   it 'Create temp data archive for directory' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test1')
       FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test2')
       FileUtils.mkdir_p project_module.get_path(:data_files_dir) + 'dir1/dir2'
@@ -175,9 +175,9 @@ describe ProjectModule do
     end
   end
 
-  it 'Packaging project_module' do
+  it 'Packaging project module' do
     begin
-      project_module = make_project_module_module('Module 1')
+      project_module = make_project_module('Module 1')
       FileHelper.touch_file(project_module.get_path(:project_module_dir) + 'test1')
       FileHelper.touch_file(project_module.get_path(:project_module_dir) + 'test2')
       FileUtils.mkdir_p project_module.get_path(:project_module_dir) + 'dir1/dir2'
@@ -211,7 +211,7 @@ describe ProjectModule do
   end
 
   it 'Creating project_module initialise directory' do
-    project_module = project_module('Module 1')
+    project_module = make_project_module('Module 1')
     File.exists?(project_module.get_path(:project_module_dir)).should be_true
     File.exists?(project_module.get_path(:tmp_dir)).should be_true
     File.exists?(project_module.get_path(:server_files_dir)).should be_true

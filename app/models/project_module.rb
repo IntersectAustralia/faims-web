@@ -41,15 +41,15 @@ class ProjectModule < ActiveRecord::Base
         settings: { name: 'module.settings', path: project_module_dir + 'module.settings' },
         properties: { name: 'faims.properties', path: project_module_dir + 'faims.properties' },
         files_dir: { name: 'files', path: project_module_dir + 'files/' },
-        server_files_dir: { name: 'server', path: project_module_dir + 'files/server/' },
         app_files_dir: { name: 'app', path: project_module_dir + 'files/app/' },
+        server_files_dir: { name: 'server', path: project_module_dir + 'files/server/' },
         data_files_dir: { name: 'data', path: project_module_dir + 'files/data/' },
         tmp_dir: { name: 'tmp', path: project_module_dir + 'tmp/' },
         package_archive: { name: "#{n}.tar.bz2", path: project_module_dir + "tmp/#{n}.tar.bz2" },
         db_archive: { name: 'db.tar.gz', path: project_module_dir + 'tmp/db.tar.gz' },
         settings_archive: { name: 'settings.tar.gz', path: project_module_dir + 'tmp/settings.tar.gz' },
         app_files_archive: { name: 'app.tar.gz', path: project_module_dir + 'tmp/app.tar.gz' },
-        server_files_archive: { name: 'server.tar.gz', path: project_dir + 'tmp/server.tar.gz' },
+        server_files_archive: { name: 'server.tar.gz', path: project_modules_dir + 'tmp/server.tar.gz' },
         data_files_archive: { name: 'data.tar.gz', path: project_module_dir + 'tmp/data.tar.gz' },
         validation_schema: { name: 'validation_schema.xml', path: project_module_dir + 'validation_schema.xml' },
     }
@@ -111,7 +111,7 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def server_mgr
-    mgr = FileManager.new('server', get_path(:project_dir), 'zcf', get_path(:server_files_archive))
+    mgr = FileManager.new('server', get_path(:project_module_dir), 'zcf', get_path(:server_files_archive))
     mgr.add_dir(get_path(:server_files_dir))
     mgr
   end
