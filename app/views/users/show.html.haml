@@ -16,7 +16,7 @@
       %td= @user.role ? @user.role.name : ""
     %tr
       %th Last signed in
-      %td= @user.last_sign_in_at ? @user.last_sign_in_at.localtime.strftime("%d/%m/%Y %I:%M%p") : ""
+      %td= @user.last_sign_in_at ? @user.last_sign_in_at.localtime.strftime("%d/%m/%Y %I:%M%p") : "Never logged in"
 = link_to "<i class='icon-arrow-left'></i> Back".html_safe, users_path, :class => "btn"
 - if @user.id != current_user.id and can?(:update_user, User)
   = link_to 'Edit Details', edit_details_user_path(@user), :class => 'btn btn-inverse'
