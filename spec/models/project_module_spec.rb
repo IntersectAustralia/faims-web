@@ -221,6 +221,7 @@ describe ProjectModule do
   it 'Updating settings causes package to rearchive' do
     project_module = make_project_module('Module 1')
     project_module.package_dirty?.should be_false
+    sleep(1)
     project_module.settings_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
     project_module.package_dirty?.should be_true
   end
@@ -228,6 +229,7 @@ describe ProjectModule do
   it 'Updating database causes package to rearchive' do
     project_module = make_project_module('Module 1')
     project_module.package_dirty?.should be_false
+    sleep(1)
     project_module.db_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
     project_module.package_dirty?.should be_true
   end
@@ -235,6 +237,7 @@ describe ProjectModule do
   it 'Adding data files causes package to rearchive' do
     project_module = make_project_module('Module 1')
     project_module.package_dirty?.should be_false
+    sleep(1)
     FileUtils.touch project_module.get_path(:data_files_dir) + '/temp'
     project_module.package_dirty?.should be_true
   end
@@ -245,6 +248,7 @@ describe ProjectModule do
     FileUtils.touch project_module.get_path(:data_files_dir) + '/temp'
     project_module.update_archives
     project_module.package_dirty?.should be_false
+    sleep(1)
     project_module.data_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
     project_module.package_dirty?.should be_true
   end
@@ -252,6 +256,7 @@ describe ProjectModule do
   it 'Adding app files causes package to rearchive' do
     project_module = make_project_module('Module 1')
     project_module.package_dirty?.should be_false
+    sleep(1)
     FileUtils.touch project_module.get_path(:app_files_dir) + '/temp'
     project_module.package_dirty?.should be_true
   end
@@ -262,6 +267,7 @@ describe ProjectModule do
     FileUtils.touch project_module.get_path(:app_files_dir) + '/temp'
     project_module.update_archives
     project_module.package_dirty?.should be_false
+    sleep(1)
     project_module.app_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
     project_module.package_dirty?.should be_true
   end
@@ -269,6 +275,7 @@ describe ProjectModule do
   it 'Adding server files causes package to rearchive' do
     project_module = make_project_module('Module 1')
     project_module.package_dirty?.should be_false
+    sleep(1)
     FileUtils.touch project_module.get_path(:server_files_dir) + '/temp'
     project_module.package_dirty?.should be_true
   end
@@ -279,6 +286,7 @@ describe ProjectModule do
     FileUtils.touch project_module.get_path(:server_files_dir) + '/temp'
     project_module.update_archives
     project_module.package_dirty?.should be_false
+    sleep(1)
     project_module.server_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
     project_module.package_dirty?.should be_true
   end
