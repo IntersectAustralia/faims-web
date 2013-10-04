@@ -13,6 +13,8 @@ class UsersController < ApplicationController
             :users_add => {title: 'Add', url: new_user_path },
             :users_show => {title: 'Details', url: user ? user_path(user) : nil },
             :users_edit_role => {title: 'Edit Role', url: user ? edit_role_user_path(user) : nil },
+            :users_edit_details => {title: 'Edit Details', url: user ? edit_details_user_path(user) : nil },
+            :users_edit_password => {title: 'Edit Password', url: user ? change_password_user_path(user) : nil },
         }
   end
 
@@ -138,13 +140,13 @@ class UsersController < ApplicationController
   end
 
   def edit_details
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_details]
 
     @user = User.find(params[:id])
   end
 
   def update_details
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_details]
 
     @user = User.find(params[:id])
     @user.assign_attributes(params[:user])
@@ -159,13 +161,13 @@ class UsersController < ApplicationController
   end
 
   def change_password
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
 
     @user = User.find(params[:id])
   end
 
   def save_password
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
 
     @user = User.find(params[:id])
     @user.assign_attributes(params[:user])
