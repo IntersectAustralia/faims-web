@@ -20,6 +20,6 @@
           - group_vocabularies(vocabs)
           = render :partial => 'create_vocabularies_table', :locals => {key: nil, indent: 0}
   - show_buttons = @attribute_id.blank? ? 'hide' : ''
-  = link_to "Update",'#', :id => 'update_vocab', :class => "btn #{show_buttons}"
 .form-actions
   = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
+  = link_to "Update",'#', :id => 'update_vocab', :class => "btn btn-inverse #{show_buttons}"

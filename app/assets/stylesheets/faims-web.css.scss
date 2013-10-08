@@ -112,8 +112,21 @@ td.selected { border: 1px solid #f156af; }
 
 #select-form h4 { margin: 0; }
 
+.arch_ent_record_content label { padding-right: 20px; text-align: right; font-weight: bold; }
+.attr_vocab_id select, input#attr_measure, input#attr_certainty, input#attr_freetext { width: 100%; }
+.labels label { font-weight: bold; }
+label h4 { margin: 5px 0 0 0; }
+.update-rel-form, .update-arch-ent-form { margin: 0 0 10px 0; padding: 0 10px 0 0; border-bottom: 1px solid #DDD; }
+.update-rel-form .row-fluid, .update-arch-ent-form .row-fluid { margin: 0px; }
+.update-rel-form form, .update-arch-ent-form form { margin: 0px; }
+
 td.first input[type="radio"], td.second input[type="radio"] { display: inline-block; vertical-align: middle; float: none; }
 td.first label, td.second label { margin-bottom: 0; }
 td.first h5, td.second h5 { margin: 0px; }
 td.first td, td.second td { padding: 10px 0 0 10px; border-top: 0px solid #EEE; }
 td.first .attribute-info, td.second .attribute-info { margin: 0 0 10px 0; padding: 0px 0 0px 10px; border-top: 0px solid #EEE; display: block; }
+
+
+.vocab-new { margin: 20px 0 0 10px; padding: 0 0 0 9px; border-left: 1px solid #CCC; }
+.insert-new-vocab { margin: 20px 0 0 0; }
+
