@@ -171,7 +171,7 @@ class ProjectModulesController < ApplicationController
 
       redirect_to :project_modules
     else
-      flash.now[:error] = t 'project_modules.new.failure'
+      flash.now[:error] = t 'modules.new.failure'
       render 'new'
     end
   end
@@ -1067,7 +1067,7 @@ class ProjectModulesController < ApplicationController
 
         return redirect_to :project_module
       else
-        flash.now[:error] = t 'project_modules.new.failure'
+        flash.now[:error] = t 'modules.new.failure'
         return render 'edit_project_module'
       end
     else
