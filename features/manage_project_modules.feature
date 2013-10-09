@@ -1249,6 +1249,10 @@ Feature: Manage project modules
     Then I should see "Module has been successfully uploaded"
     And I should be on the project modules page
     And I follow "Sync Example"
+    And I follow "Edit Module"
+    And I pick file "validation_schema.xml" for "Validation Schema"
+    And I press "Update"
+    Then I should see "Updated module"
     And I follow "List Relationship Records"
     And I press "Filter"
     And I follow "AboveBelow 1"

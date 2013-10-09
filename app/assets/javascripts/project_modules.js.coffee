@@ -497,21 +497,21 @@ update_attribute = (form) ->
     data: form.serialize()
     success: (data, textStatus, jqXHR) ->
       if data.result == 'success'
-        form.find('.form-attribute-result').empty()
+        form.find('.form-attribute-error').remove()
         if data.errors
           errors = data.errors.split(';')
           for error in errors
             if error != ""
-              form.find('.form-attribute-result').append("<li class='form-attribute-error'>"+error+"</li>")
+              form.find('.row-fluid').after("<div class='form-attribute-error'><li>"+error+"</li></div>")
 
           # hide update button
           if form.find('.ignore-errors-btn').hasClass('hidden')
             form.find('.ignore-errors-btn').removeClass('hidden')
         else
-          form.find('.form-attribute-result').append("<div class='alert alert-success alert-dismissable'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>Updated</div>")
+          form.find('.row-fluid').after("<div class='alert alert-success alert-dismissable'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>Updated</div>")
           setTimeout(
             ->
-              form.find('.form-attribute-result .alert').fadeOut()
+              form.find('.alert').fadeOut()
             , 2000)
           # show update button
           if !form.find('.ignore-errors-btn').hasClass('hidden')

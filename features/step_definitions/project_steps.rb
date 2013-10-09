@@ -952,14 +952,14 @@ end
 
 And /^I should see field "([^"]*)" with error "([^"]*)"$/ do |field, error|
   wait_range.each do
-    break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/following-sibling::div/div/li[contains(text(), '#{error}')]").size > 0
+    break if all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size > 0
   end
-  all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/following-sibling::div/div/li[contains(text(), '#{error}')]").size == 1
+  all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size.should == 1
 end
 
 And /^I should see fields with errors$/ do |table|
   table.hashes.each do |hash|
-    step "I should see field \"#{hash[:field]}\" with error \"#{hash[:values]}\""
+    step "I should see field \"#{hash[:field]}\" with error \"#{hash[:error]}\""
   end
 end
 
