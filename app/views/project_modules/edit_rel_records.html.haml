@@ -38,13 +38,6 @@
             = f.hidden_field 'ignore_errors'
             - show_error_button = 'hidden'
             - for attribute in val
-              .row-fluid.form-attribute-result
-                - if attribute[10] == 1
-                  - show_error_button = nil
-                  .form-attribute-error
-                    - attribute[11].each_line(';') do |l|
-                      - next if l.gsub(';', '').blank?
-                      %li=l.gsub(';', '')
               .row-fluid
                 %label.span3
                   %h4=key
@@ -64,10 +57,16 @@
                 .span1
                   = f.text_field :certainty, :value => attribute[5], name: 'attr[certainty][]', :class => "span12"
                 .span3
+                  - if attribute[10] == 1
+                    - show_error_button = nil
                   = f.submit "Update", :class => "btn btn-inverse"
                   = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn #{show_error_button}"
-                  = link_to "cancel", edit_rel_records_path(@project_module,session[:relationshipid]), :class => 'btn'
-
+              - if attribute[10] == 1
+                - show_error_button = nil
+                .form-attribute-error
+                  - attribute[11].each_line(';') do |l|
+                    - next if l.gsub(';', '').blank?
+                    %li=l.gsub(';', '')
 
 - if !@files.empty?
   .attached-files

@@ -564,32 +564,32 @@ end
 
 Then(/^I click add child for vocabulary "([^"]*)"$/) do |vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../..").find(:css, "a:contains('Add Child')").click()
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../a").click()
 end
 
 Then(/^I click insert for vocabulary "([^"]*)"$/) do |vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").find(:css, "a:contains('Insert')").click()
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../div/a").click()
 end
 
 When(/^I add "([^"]*)" as child for "([^"]*)"$/) do |value, vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").all(:css, "input[name='vocab_name[]']").last.set value
+  find(:css, ".vocab-list-#{attribute_id}").all(:xpath, ".//input[@value='#{vocab_name}']/../div/div").last.find(:css, "input[name='vocab_name[]']").set value
 end
 
 When(/^I add "([^"]*)" as child description for "([^"]*)"$/) do |value, vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").all(:css, "input[name='vocab_description[]']").last.set value
+  find(:css, ".vocab-list-#{attribute_id}").all(:xpath, ".//input[@value='#{vocab_name}']/../div/div").last.find(:css, "input[name='vocab_description[]']").set value
 end
 
 When(/^I add "([^"]*)" as child picture url for "([^"]*)"$/) do |value, vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div").all(:css, "input[name='picture_url[]']").last.set value
+  find(:css, ".vocab-list-#{attribute_id}").all(:xpath, ".//input[@value='#{vocab_name}']/../div/div").last.find(:css, "input[name='picture_url[]']").set value
 end
 
 When(/^I should see child vocabularies for "([^"]*)"$/) do |vocab_name, table|
   attribute_id = find(:css, '#attribute')[:value]
-  div = find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../../../../div")
+  div = find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../div")
   table.hashes.each do |hash|
     div.should have_css("input[name='vocab_name[]'][value='#{hash[:name]}']")
     div.should have_css("input[name='vocab_description[]'][value='#{hash[:description]}']")
@@ -901,20 +901,20 @@ And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |fie
     value.strip!
     if type == 'vocab'
       wait_range.each do
-        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select").size > 0
+        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
       end
-      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select/option[contains(text(), '#{value}')]")[index].select_option
+      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]/option[contains(text(),'#{value}')]")[index].select_option
     else
       wait_range.each do
-        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input").size > 0
+        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]").size > 0
       end
-      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input")[index].set value
+      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]")[index].set value
     end
   end
 end
 
 And /^I click on update for attribute with field "([^"]*)"$/ do |field|
-  first(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/following-sibling::div/input").click
+  first(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[@value='Update']").click
 end
 
 And /^I update fields with values$/ do |table|
@@ -932,14 +932,14 @@ And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do 
     value.strip!
     if type == 'vocab'
       wait_range.each do
-        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select").size > 0
+        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
       end
-      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/div/div/select/option[contains(text(), '#{value}')]")[index].text.should == value
+      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]/option[contains(text(),'#{value}')]")[index].text.should == value
     else
       wait_range.each do
-        break if all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input").size > 0
+        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]").size > 0
       end
-      all(:xpath, "//div[contains(@class, 'step-body')]/div[./h4[contains(text(), '#{field}')]]/div/div[./label[contains(text(), '#{type.capitalize}')]]/input")[index].value.should == value
+      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]")[index].value.should == value
     end
   end
 end

@@ -2,10 +2,14 @@
   %div{class: 'vocab-row', style: "margin-left: #{indent * 25}px"}
     - @grouped_vocabs[key].each_with_index do |v, index|
       - if index == 0 && indent == 0
-        %label='Name'
-        %label='Description'
-        %label='Picture URL'
-      .vocab-row.row-fluid.well
+        %label.span3
+          ='Name'
+        %label.span3
+          ='Description'
+        %label.span3
+          ='Picture URL'
+      - class_name = indent ? 'vocab-row well':'vocab-row row-fluid well'
+      %div{class: class_name}
         %input.span3{:type => 'hidden', :name => 'temp_id[]', :value => v[:temp_id]}
         %input.span3{:type => 'hidden', :name => 'temp_parent_id[]', :value => v[:temp_parent_id]}
         %input.span3{:type => 'hidden', :name => 'vocab_id[]', :value => v[:vocab_id]}

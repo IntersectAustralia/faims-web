@@ -44,12 +44,6 @@
           = f.hidden_field 'ignore_errors'
           - show_error_button = 'hidden'
           - for attribute in val
-            - if attribute[10] == 1
-              - show_error_button = nil
-              .form-attribute-error
-                - attribute[11].each_line(';') do |l|
-                  - next if l.gsub(';', '').blank?
-                  %li=l.gsub(';', '')
             .row-fluid
               %label.span3
                 %h4=key
@@ -70,9 +64,16 @@
               .span1
                 = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'
               .span3
+                - if attribute[10] == 1
+                  - show_error_button = nil
                 = f.submit "Update", :class => "btn btn-inverse"
                 = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn #{show_error_button}"
-                = link_to "cancel", edit_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn'
+            - if attribute[10] == 1
+              - show_error_button = nil
+              .form-attribute-error
+                - attribute[11].each_line(';') do |l|
+                  - next if l.gsub(';', '').blank?
+                  %li=l.gsub(';', '')
 
 - if !@related_arch_ents.empty?
   #related-arch-ents
