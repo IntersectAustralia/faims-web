@@ -496,6 +496,7 @@ update_attribute = (form) ->
     dataType: 'json'
     data: form.serialize()
     success: (data, textStatus, jqXHR) ->
+      form.find('#attr_ignore_errors').val('')
       if data.result == 'success'
         form.find('.form-attribute-error').remove()
         if data.errors
