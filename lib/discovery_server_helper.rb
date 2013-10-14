@@ -28,7 +28,7 @@ class DiscoveryServer
   def self.find_matching_local_ip(ip)
     begin
       # read each line of config and return ip address by looking for inet
-      ips = `ifconfig`.split(line_splitter).select { |l| l if l =~ /inet\s/ }.map { |l| /(?<ip>\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})/.match(l)[:ip] }
+      ips = `/sbin/ifconfig`.split(line_splitter).select { |l| l if l =~ /inet\s/ }.map { |l| /(?<ip>\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3})/.match(l)[:ip] }
 
       # return ip which matches in same subnet
       found_ip = ips.select { |local_ip| local_ip if get_subnet(local_ip) == get_subnet(ip) }
