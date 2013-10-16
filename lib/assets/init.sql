@@ -1,5 +1,7 @@
 PRAGMA page_size = 4096;
 PRAGMA cache_size = 400000;
+PRAGMA temp_store = 2;
+
 vacuum;
 
 -- The user table is incomplete. It however, holds user information.
@@ -304,7 +306,7 @@ create view latestAllRelationshipIdentifiers as
         JOIN (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
               from relnvalue
               group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
-        LEFT OUTER JOIN vocabulary using (attributeid, vocabid);
+        LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
         WHERE isIdentifier = 'true';
 
 drop view if exists latestNonDeletedAentReln;
