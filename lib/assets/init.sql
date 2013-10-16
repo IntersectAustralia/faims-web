@@ -305,6 +305,7 @@ create view latestAllRelationshipIdentifiers as
               from relnvalue
               group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
         LEFT OUTER JOIN vocabulary using (attributeid, vocabid);
+        WHERE isIdentifier = 'true';
 
 drop view if exists latestNonDeletedAentReln;
 create view latestNonDeletedAentReln as
