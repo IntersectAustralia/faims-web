@@ -10,7 +10,7 @@ class ProjectModule < ActiveRecord::Base
   attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address,
                 :participant, :validation_schema, :srid, :copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data
 
-  attr_accessible :name, :key, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address, :participant, :vocab_id, :type,
+  attr_accessible :name, :key, :created, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address, :participant, :vocab_id, :type,
     :validation_schema, :srid,:copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data
 
   validates :name, :presence => true, :length => {:maximum => 255},
@@ -303,7 +303,7 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def create_project_module_from(tmp_dir, user = nil)
-    begin      
+    begin
       # copy files from temp directory to project_modules directory
       FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir))
 
@@ -736,6 +736,8 @@ class ProjectModule < ActiveRecord::Base
         begin
           project_module.save
           project_module.create_project_module_from_compressed_file(tmp_dir + 'module')
+          project_module.created = true
+          project_module.save
         rescue
           File.rm_rf project_module.get_path(:project_module_dir) if File.directory? project_module.get_path(:project_module_dir)
           project_module.destroy

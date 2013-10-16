@@ -57,7 +57,7 @@ Then /^I have project module files for "([^"]*)"$/ do |name|
 end
 
 Then /^I should see json for project modules$/ do
-  project_modules = ProjectModule.all.map { |p| {key:p.key, name:p.name} }
+  project_modules = ProjectModule.where(created:true).map { |p| {key:p.key, name:p.name} }
   page.should have_content(project_modules.to_json)
 end
 

@@ -14,7 +14,7 @@ class AndroidController < ApplicationController
   end
 
   def project_modules
-    project_modules = ProjectModule.all.map { |p| {key:p.key, name:p.name} }
+    project_modules = ProjectModule.where(created: true).map { |p| {key:p.key, name:p.name} }
     render :json => project_modules.to_json
   end
 

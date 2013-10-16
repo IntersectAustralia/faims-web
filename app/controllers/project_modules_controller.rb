@@ -154,6 +154,8 @@ class ProjectModulesController < ApplicationController
         @project_module.save
         @project_module.update_settings(params)
         @project_module.create_project_module_from(session[:tmpdir], current_user)
+        @project_module.created = true
+        @project_module.save
       rescue Exception => e
         has_exception = e
         # cleanup

@@ -13,7 +13,7 @@ def make_project_module(name)
     FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
     FileUtils.cp(assets_dir + 'module.settings', tmp_dir + '/module.settings' )
     FileUtils.cp(assets_dir + 'validation_schema.xml', tmp_dir + '/validation_schema.xml' )
-    project_module = ProjectModule.create(:name => name, :key => SecureRandom.uuid)
+    project_module = ProjectModule.create(:name => name, :key => SecureRandom.uuid, :created => true)
     project_module.create_project_module_from(tmp_dir)
     project_module
   rescue Exception => e
