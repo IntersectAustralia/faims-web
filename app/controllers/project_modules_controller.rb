@@ -1058,7 +1058,7 @@ class ProjectModulesController < ApplicationController
         rescue Exception => e
           has_exception = e
         ensure
-          FileUtils.remove_entry_secure tmpdir
+          FileUtils.remove_entry_secure @tmpdir
         end
 
         if has_exception.nil?
