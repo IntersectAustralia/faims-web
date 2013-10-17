@@ -51,6 +51,7 @@
       .upload.span6
         .well
           %h4 Upload Data Definition Schema
+          = f.hidden_field :tmpdir, :value => @tmpdir
           - if session[:data_schema]
             %span.uploaded-inline Data Schema Uploaded!
           - else

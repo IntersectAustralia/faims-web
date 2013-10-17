@@ -8,10 +8,10 @@ class ProjectModule < ActiveRecord::Base
   SRID = 4326
 
   attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address,
-                :participant, :validation_schema, :srid, :copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data
+                :participant, :validation_schema, :srid, :copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data, :tmpdir
 
   attr_accessible :name, :key, :created, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address, :participant, :vocab_id, :type,
-    :validation_schema, :srid,:copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data
+    :validation_schema, :srid,:copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data , :tmpdir
 
   validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters

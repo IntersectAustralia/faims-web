@@ -146,14 +146,14 @@ class ProjectModulesController < ApplicationController
       flash.now[:error] = 'Cannot find library libspatialite. Please install library to create module.'
       return render 'new'
     end
-
-    valid = create_project_module_if_valid
+    valid = create_project_module_if_valid(@tmpdir)
     if valid
       has_exception = nil
+
       begin
         @project_module.save
         @project_module.update_settings(params)
-        @project_module.create_project_module_from(session[:tmpdir], current_user)
+        @project_module.create_project_module_from(@tmpdir, current_user)
         @project_module.created = true
         @project_module.save
       rescue Exception => e
@@ -162,7 +162,7 @@ class ProjectModulesController < ApplicationController
         FileUtils.rm_rf @project_module.get_path(:project_module_dir) if File.directory? @project_module.get_path(:project_module_dir)
         @project_module.destroy
       ensure
-        FileUtils.remove_entry_secure session[:tmpdir]
+        FileUtils.remove_entry_secure @tmpdir
       end
 
       if has_exception.nil?
@@ -1048,17 +1048,17 @@ class ProjectModulesController < ApplicationController
     parse_parameter_for_project_module(params)
 
     if wait_for_settings
-      valid = update_project_module_if_valid
+      valid = update_project_module_if_valid(@tmpdir)
       if valid
         has_exception = nil
         begin
           @project_module.save
           @project_module.update_settings(params)
-          @project_module.update_project_module_from(session[:tmpdir])
+          @project_module.update_project_module_from(@tmpdir)
         rescue Exception => e
           has_exception = e
         ensure
-          FileUtils.remove_entry_secure session[:tmpdir]
+          FileUtils.remove_entry_secure tmpdir
         end
 
         if has_exception.nil?
@@ -1163,9 +1163,7 @@ class ProjectModulesController < ApplicationController
   private
 
   def create_tmp_dir
-    clear_tmp_dir
-    tmpdir = Dir.mktmpdir
-    session[:tmpdir] = tmpdir
+    @tmpdir = Dir.mktmpdir
     session[:data_schema] = false
     session[:ui_schema] = false
     session[:ui_logic] = false
@@ -1173,12 +1171,7 @@ class ProjectModulesController < ApplicationController
     session[:validation_schema] = false
   end
 
-  def clear_tmp_dir
-    FileUtils.remove_entry_secure session[:tmpdir] if !session[:tmpdir].blank? and File.directory? session[:tmpdir]
-    session[:tmpdir] = nil
-  end
-
-  def create_project_module_if_valid
+  def create_project_module_if_valid(tmpdir)
     valid = false
 
     if params[:project_module]
@@ -1193,7 +1186,7 @@ class ProjectModulesController < ApplicationController
         @project_module.errors.add(:data_schema, error)
         valid = false
       else
-        create_temp_file(@project_module.get_name(:data_schema), params[:project_module][:data_schema])
+        create_temp_file(@project_module.get_name(:data_schema), params[:project_module][:data_schema], tmpdir)
         session[:data_schema] = true
       end
     end
@@ -1205,7 +1198,7 @@ class ProjectModulesController < ApplicationController
         @project_module.errors.add(:ui_schema, error)
         valid = false
       else
-        create_temp_file(@project_module.get_name(:ui_schema), params[:project_module][:ui_schema])
+        create_temp_file(@project_module.get_name(:ui_schema), params[:project_module][:ui_schema], tmpdir)
         session[:ui_schema] = true
       end
     end
@@ -1217,7 +1210,7 @@ class ProjectModulesController < ApplicationController
         @project_module.errors.add(:ui_logic, error)
         valid = false
       else
-        create_temp_file(@project_module.get_name(:ui_logic), params[:project_module][:ui_logic])
+        create_temp_file(@project_module.get_name(:ui_logic), params[:project_module][:ui_logic], tmpdir)
         session[:ui_logic] = true
       end
     end
@@ -1230,7 +1223,7 @@ class ProjectModulesController < ApplicationController
         valid = false
       else
         if !params[:project_module][:arch16n].nil?
-          create_temp_file(@project_module.get_name(:properties), params[:project_module][:arch16n])
+          create_temp_file(@project_module.get_name(:properties), params[:project_module][:arch16n], tmpdir)
           session[:arch16n] = true
         end
       end
@@ -1244,7 +1237,7 @@ class ProjectModulesController < ApplicationController
         valid = false
       else
         if !params[:project_module][:validation_schema].nil?
-          create_temp_file(@project_module.get_name(:validation_schema), params[:project_module][:validation_schema])
+          create_temp_file(@project_module.get_name(:validation_schema), params[:project_module][:validation_schema], tmpdir)
           session[:validation_schema] = true
         end
       end
@@ -1253,7 +1246,7 @@ class ProjectModulesController < ApplicationController
     valid
   end
 
-  def update_project_module_if_valid
+  def update_project_module_if_valid(tmpdir)
     valid = false
 
     if params[:project_module]
@@ -1268,7 +1261,7 @@ class ProjectModulesController < ApplicationController
         @project_module.errors.add(:ui_schema, error)
         valid = false
       else
-        create_temp_file(@project_module.get_name(:ui_schema), params[:project_module][:ui_schema])
+        create_temp_file(@project_module.get_name(:ui_schema), params[:project_module][:ui_schema], tmpdir)
         session[:ui_schema] = true
       end
     end
@@ -1280,7 +1273,7 @@ class ProjectModulesController < ApplicationController
         @project_module.errors.add(:ui_logic, error)
         valid = false
       else
-        create_temp_file(@project_module.get_name(:ui_logic), params[:project_module][:ui_logic])
+        create_temp_file(@project_module.get_name(:ui_logic), params[:project_module][:ui_logic], tmpdir)
         session[:ui_logic] = true
       end
     end
@@ -1293,7 +1286,7 @@ class ProjectModulesController < ApplicationController
         valid = false
       else
         if !params[:project_module][:arch16n].nil?
-          create_temp_file(@project_module.get_name(:properties), params[:project_module][:arch16n])
+          create_temp_file(@project_module.get_name(:properties), params[:project_module][:arch16n], tmpdir)
           session[:arch16n] = true
         end
       end
@@ -1307,7 +1300,7 @@ class ProjectModulesController < ApplicationController
         valid = false
       else
         if !params[:project_module][:validation_schema].nil?
-          create_temp_file(@project_module.get_name(:validation_schema), params[:project_module][:validation_schema])
+          create_temp_file(@project_module.get_name(:validation_schema), params[:project_module][:validation_schema], tmpdir)
           session[:validation_schema] = true
         end
       end
@@ -1316,8 +1309,7 @@ class ProjectModulesController < ApplicationController
     valid
   end
 
-  def create_temp_file(filename, upload)
-    tmpdir = session[:tmpdir]
+  def create_temp_file(filename, upload, tmpdir)
     File.open(upload.tempfile, 'r') do |upload_file|
       File.open(tmpdir + '/' + filename, 'w') do |temp_file|
         temp_file.write(upload_file.read)
@@ -1328,6 +1320,7 @@ class ProjectModulesController < ApplicationController
   private
 
   def parse_parameter_for_project_module(params)
+    @tmpdir = params[:project_module][:tmpdir]
     @name = params[:project_module][:name]
     @season = params[:project_module][:season]
     @description = params[:project_module][:description]

@@ -51,6 +51,7 @@
       .upload.span6
         .well
           %h4 Upload User Interface Schema
+          = f.hidden_field :tmpdir, :value => @tmpdir
           - if session[:ui_schema]
             %span.uploaded-inline UI Schema Uploaded!
           - else
