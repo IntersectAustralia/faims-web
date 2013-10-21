@@ -1988,7 +1988,7 @@ from (
                                         measure,
                                         vocabname,
                                         freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestNonDeletedArchEntIdentifiers
+  from latestAllArchEntIdentifiers
   where uuid = ?
   group by uuid, attributeid
   order by epoch)
@@ -2006,7 +2006,7 @@ from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetex
                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
                                              vocabname,
                                              freetext), ' | ') as response, deleted, relntimestamp
-      from latestNonDeletedRelnIdentifiers
+      from latestAllRelationshipIdentifiers
       where relationshipid = ?
       group by relationshipid, attributeid
 )
