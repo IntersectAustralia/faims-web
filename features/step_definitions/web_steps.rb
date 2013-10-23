@@ -79,7 +79,12 @@ When /^(?:|I )fill in "([^"]*)" for "([^"]*)"$/ do |value, field|
 end
 
 def get_field(field)
-  label = first(:css, "label:contains('#{field}')")
+  label = nil
+  (1..3).each do |i|
+    label = first(:css, "label:contains('#{field}')")
+    break if label
+    sleep(1)
+  end
   first(:css, "##{label[:for]}")
 end
 

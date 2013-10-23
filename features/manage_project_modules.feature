@@ -411,7 +411,6 @@ Feature: Manage project modules
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
-    And I wait
     And I fill in "Name" with "Module 1"
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
