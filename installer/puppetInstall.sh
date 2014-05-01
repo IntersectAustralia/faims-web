@@ -14,6 +14,11 @@ if [ ! -d "$HOME/.puppet/modules/stdlib" ]; then
 fi
 
 # Clone webapp
+if [ ! -d "/var/www/faims" ]; then
+    sudo git clone https://github.com/IntersectAustralia/faims-web.git /var/www/faims
+    chown -R faims:faims /var/www/faims
+fi
+cd /var/www/faims && git pull
 
 # Configure puppet
 sed -i "s/webapp_user:.*/webapp_user: $USER/g" $APP_ROOT/puppet/data/common.yaml
