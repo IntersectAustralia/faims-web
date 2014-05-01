@@ -19,7 +19,7 @@ fi
 # Clone webapp
 if [ ! -d "$APP_ROOT" ]; then
     sudo git clone https://github.com/IntersectAustralia/faims-web.git $APP_ROOT
-    sudo chown -R faims:faims $APP_ROOT
+    sudo chown -R $USER:$USER $APP_ROOT
 fi
 cd $APP_ROOT && git pull
 
