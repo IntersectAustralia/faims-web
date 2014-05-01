@@ -104,7 +104,7 @@ class webapp {
 
   exec { "setup app":
     path      => $rbenv_path,
-    command   => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:migrate db:seed modules:clean modules:setup\"",
+    command   => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:migrate db:seed modules:clean modules:setup assets:precompile\"",
     environment => $rbenv_env,
     logoutput => "on_failure",
     require   => Exec["install webapp gems"]
