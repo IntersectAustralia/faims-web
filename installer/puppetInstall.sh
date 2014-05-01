@@ -3,10 +3,13 @@
 APP_ROOT=/var/www/faims
 
 # Update packages
-#sudo apt-get update
+sudo apt-get update
+
+# Install common packages
+sudo apt-get -y install git
 
 # Install puppet
-#sudo apt-get -y install puppet
+sudo apt-get -y install puppet
 
 # Install puppet modules
 if [ ! -d "$HOME/.puppet/modules/stdlib" ]; then
@@ -16,7 +19,7 @@ fi
 # Clone webapp
 if [ ! -d "/var/www/faims" ]; then
     sudo git clone https://github.com/IntersectAustralia/faims-web.git /var/www/faims
-    chown -R faims:faims /var/www/faims
+    sudo chown -R faims:faims /var/www/faims
 fi
 cd /var/www/faims && git pull
 
