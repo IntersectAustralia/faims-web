@@ -37,3 +37,6 @@ server.properties
 
 # Ignore assets
 /public/assets
+
+# Ignore sqlite3 journal files
+*.sqlite3-journal
