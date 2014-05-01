@@ -40,3 +40,6 @@ server.properties
 
 # Ignore sqlite3 journal files
 *.sqlite3-journal
+
+.vagrant
+Vagrantfile

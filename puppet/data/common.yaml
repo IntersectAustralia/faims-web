@@ -1,0 +1,4 @@
+---
+webapp_user: faims
+webapp_version: development # development, qa, staging or production
+ruby_version: 2.1.1
