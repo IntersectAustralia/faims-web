@@ -1,0 +1,261 @@
+<h:html xmlns="http://www.w3.org/2002/xforms"
+        xmlns:h="http://www.w3.org/1999/xhtml"
+        xmlns:ev="http://www.w3.org/2001/xml-events"
+        xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+        xmlns:jr="http://openrosa.org/javarosa">
+  <h:head>
+    <h:title>Simple Example</h:title>
+
+    <model>
+      <instance>
+        <faims id="simple_example">
+          <user>
+              <tab1>
+                  <users></users>
+              </tab1>
+          </user>
+          <menu>
+              <tab1>
+                  <options></options>
+              </tab1>
+          </menu>
+          <tabgroup1>
+              <tab1>
+                  <name></name>
+                  <value></value>
+                  <timestamp></timestamp>
+                  <location></location>
+                  <filename></filename>
+                  <file></file>
+                  <filename2></filename2>
+                  <file2></file2>
+                  <sync></sync>
+                  <attach></attach>
+                  <attach2></attach2>
+                  <save></save>
+                  <update></update>
+                  <clear></clear>
+              </tab1>
+              <tab2>
+                  <entities></entities>
+                  <load></load>
+              </tab2>
+          </tabgroup1>
+          <tabgroup2>
+              <tab1>
+                  <name></name>
+                  <location></location>
+                  <filename></filename>
+                  <file></file>
+                  <filename2></filename2>
+                  <file2></file2>
+                  <sync></sync>
+                  <attach></attach>
+                  <attach2></attach2>
+                  <save></save>
+                  <update></update>
+                  <clear></clear>
+              </tab1>
+              <tab2>
+                  <relationships></relationships>
+                  <load></load>
+              </tab2>
+          </tabgroup2>
+          <tabgroup3>
+              <tab1>
+                  <start></start>
+                  <stop></stop>
+              </tab1>
+          </tabgroup3>
+        </faims>
+      </instance>
+
+      <bind nodeset="/faims/tabgroup1/tab1/name" type="string"/>
+      <bind nodeset="/faims/tabgroup1/tab1/value" type="decimal"/>
+      <bind nodeset="/faims/tabgroup1/tab1/filename" type="string"/>
+      
+    </model>
+  </h:head>
+
+  
+  <h:body>
+    <group ref="user">
+      <label></label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>User List</label>
+        <select1 ref="users" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="menu">
+      <label></label>
+      <group ref="tab1" faims_scrollable="false">
+        <label>Menu</label>
+        <select1 ref="options" appearance="compact">
+          <label>Users:</label>
+          <item>
+            <label>dummy</label>
+            <value>dummy</value>
+          </item>
+        </select1>
+      </group>
+    </group>
+    <group ref="tabgroup1" faims_archent_type="small">
+      <label></label>
+      <group ref="tab1" faims_hidden="false">
+        <label>Save Entity</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+          <label>Name:</label>
+        </input>
+        <input ref="value" faims_attribute_name="value" faims_attribute_type="measure">
+            <label>Value:</label>
+        </input>
+        <input ref="timestamp" faims_attribute_name="timestamp" faims_attribute_type="freetext" faims_read_only="true" faims_certainty="false">
+            <label>Timestamp:</label>
+        </input>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select>
+        <input ref="filename" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
+            <label>Filename:</label>
+        </input>
+        <input ref="file" faims_read_only="true" faims_certainty="false">
+            <label>Attached File:</label>
+        </input>
+        <input ref="filename2" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
+            <label>Filename 2:</label>
+        </input>
+        <input ref="file2" faims_read_only="true" faims_certainty="false">
+            <label>Attached File 2:</label>
+        </input>
+        <select1 ref="sync" appearance="full" faims_certainty="false">
+            <label>Sync:</label>
+            <item>
+                <label>On</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Off</label>
+                <value>0</value>
+            </item>
+        </select1>
+        <trigger ref="attach">
+            <label>Attach</label>
+        </trigger>
+        <trigger ref="attach2">
+            <label>Attach 2</label>
+        </trigger>
+        <trigger ref="save">
+            <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+            <label>Update</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
+      </group>
+      <group ref="tab2" faims_hidden="false">
+        <label>Load Entity</label>
+       	<select1 ref="entities" faims_certainty="false">
+            <label>Entity:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select1>
+        <trigger ref="load">
+            <label>Load</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup2" faims_rel_type="AboveBelow">
+      <label></label>
+      <group ref="tab1">
+        <label>Save Relationship</label>
+        <input ref="name" faims_attribute_name="name" faims_attribute_type="freetext">
+            <label>Name:</label>
+        </input>
+        <select ref="location" faims_attribute_name="location" faims_attribute_type="vocab">
+            <label>Location:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select>
+        <input ref="filename" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
+            <label>Filename:</label>
+        </input>
+        <input ref="file" faims_read_only="true" faims_certainty="false">
+            <label>Attached File:</label>
+        </input>
+        <input ref="filename2" faims_read_only="true" faims_certainty="false" faims_attribute_name="filename" faims_attribute_type="freetext">
+            <label>Filename 2:</label>
+        </input>
+        <input ref="file2" faims_read_only="true" faims_certainty="false">
+            <label>Attached File 2:</label>
+        </input>
+        <select1 ref="sync" appearance="full" faims_certainty="false">
+            <label>Sync:</label>
+            <item>
+                <label>On</label>
+                <value>1</value>
+            </item>
+            <item>
+                <label>Off</label>
+                <value>0</value>
+            </item>
+        </select1>
+        <trigger ref="attach">
+            <label>Attach</label>
+        </trigger>
+        <trigger ref="attach2">
+            <label>Attach 2</label>
+        </trigger>
+        <trigger ref="save">
+            <label>Save</label>
+        </trigger>
+        <trigger ref="update">
+            <label>Update</label>
+        </trigger>
+        <trigger ref="clear">
+            <label>Clear</label>
+        </trigger>
+      </group>
+      <group ref="tab2">
+        <label>Load Relationship</label>
+        <select1 ref="relationships" faims_certainty="false">
+            <label>Relationship:</label>
+            <item>
+            	<label>dummy</label>
+            	<value>dummy</value>
+          	</item>
+        </select1>
+        <trigger ref="load">
+            <label>Load</label>
+        </trigger>
+      </group>
+    </group>
+    <group ref="tabgroup3">
+      <label></label>
+      <group ref="tab1" faims_hidden="false">
+          <label>Controls</label>
+          <trigger ref="start">
+              <label>Enable File Sync</label>
+          </trigger>
+          <trigger ref="stop">
+              <label>Disable File Sync</label>
+          </trigger>
+      </group>
+    </group>
+  </h:body>
+</h:html>

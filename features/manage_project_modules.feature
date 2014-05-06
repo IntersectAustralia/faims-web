@@ -6,9 +6,7 @@ Feature: Manage project modules
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   Scenario: View project modules list
@@ -36,7 +34,7 @@ Feature: Manage project modules
     And I pick file "ui_schema.xml" for "UI Schema"
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
+    And I pick file "faims.properties" for "Arch16n"
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
@@ -52,7 +50,7 @@ Feature: Manage project modules
     And I pick file "data_schema.xml" for "Data Schema"
     And I pick file "ui_schema.xml" for "UI Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
+    And I pick file "faims.properties" for "Arch16n"
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
@@ -70,7 +68,7 @@ Feature: Manage project modules
     And I pick file "ui_schema.xml" for "UI Schema"
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
+    And I pick file "faims.properties" for "Arch16n"
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
@@ -252,10 +250,10 @@ Feature: Manage project modules
 
   Scenario Outline: Cannot edit project module due to file validation errors
     Given I am on the home page
-    And I have project module "Module 2"
+    And I have project module "Module 1"
     And I follow "Show Modules"
     Then I should be on the project modules page
-    And I click on "Module 2"
+    And I click on "Module 1"
     Then I follow "Edit Module"
     And I pick file "<value>" for "<field>"
     And I press "Update"

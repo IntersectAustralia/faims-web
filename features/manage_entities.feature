@@ -6,22 +6,13 @@ Feature: Manage entities
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I have a user "other@intersect.org.au"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   @javascript
   Scenario: Update entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -45,15 +36,10 @@ Feature: Manage entities
   @javascript
   Scenario: Cannot update entity if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -65,14 +51,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Update entity with hierarchical vocabulary
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Hierarchical_Vocabulary.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Hierarchical Vocabulary"
+    And I am on the project modules page
     And I follow "Hierarchical Vocabulary"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -87,14 +67,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Update entity attribute causes validation error
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "Edit Module"
     And I pick file "validation_schema.xml" for "Validation Schema"
@@ -113,14 +87,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Cannot update entity attribute if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -136,14 +104,8 @@ Feature: Manage entities
   # TODO Scenario: Update entity attribute with multiple values causes validation error
 
   Scenario: View entity with attachments
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Test.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Test"
+    And I am on the project modules page
     And I click on "Sync Test"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -154,14 +116,8 @@ Feature: Manage entities
       | Screenshot_2013-04-09-10-32-04 (1).png |
 
   Scenario: View entity with attachments which aren't synced
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Test.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Test"
+    And I am on the project modules page
     And I click on "Sync Test"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -195,14 +151,8 @@ Feature: Manage entities
 #    And I should download attached file with name "Screenshot_2013-04-09-10-32-04(1).png"
 
   Scenario: View entity list
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -214,14 +164,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: View entity list including deleted entities
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -235,14 +179,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Delete entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -257,14 +195,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Cannot delete entity if database locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -282,15 +214,10 @@ Feature: Manage entities
   @javascript
   Scenario: Cannot delete entity if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -305,14 +232,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Restore entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -334,14 +255,8 @@ Feature: Manage entities
 
   @javascript
   Scenario: Cannot restore entity if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -364,15 +279,10 @@ Feature: Manage entities
   @javascript
   Scenario: Cannot restore entity if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form

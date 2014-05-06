@@ -6,22 +6,13 @@ Feature: Merge relationships
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I have a user "other@intersect.org.au"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   @javascript
   Scenario: Merge relationships (first)
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Relationship Records"
     And I press "Filter"
@@ -51,14 +42,8 @@ Feature: Merge relationships
 
   @javascript
   Scenario: Merge relationships (second)
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Relationship Records"
     And I press "Filter"
@@ -88,14 +73,8 @@ Feature: Merge relationships
 
   @javascript
   Scenario: Can only compare 2 relationships
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Relationship Records"
     And I press "Filter"
@@ -113,14 +92,8 @@ Feature: Merge relationships
 
   @javascript
   Scenario: Cannot merge relationships if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Relationship Records"
     And I press "Filter"
@@ -142,15 +115,10 @@ Feature: Merge relationships
   @javascript
   Scenario: Cannot merge relationships if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Relationship Records"
     And I press "Filter"

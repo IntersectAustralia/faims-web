@@ -6,9 +6,6 @@ Feature: Android
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I requested the login page
-    And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
     And I perform HTTP authentication
 

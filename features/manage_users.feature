@@ -22,8 +22,7 @@ Feature: Manage users
       | User2      | Last2     | user2@intersect.org.au      | user      |
 
   Scenario: Add new user
-    When I follow "Show Users"
-    And I click on "Add User"
+    Given I click on "Add User"
     And I fill in "First Name" with "User3"
     And I fill in "Last Name" with "Last3"
     And I fill in "Email" with "user3@intersect.org.au"
@@ -44,8 +43,7 @@ Feature: Manage users
     Then I should see "You are not authorized to access this page."
 
   Scenario Outline: Cannot add user due to validation errors
-    When I follow "Show Users"
-    And I click on "Add User"
+    Given I click on "Add User"
     And I fill in "<field>" with "<value>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
@@ -59,8 +57,7 @@ Feature: Manage users
     | Password   |                        | can't be blank         |
 
   Scenario Outline: Cannot add user due to password errors
-    When I follow "Show Users"
-    And I click on "Add User"
+    Given I click on "Add User"
     And I fill in "<field1>" with "<value1>"
     And I fill in "<field2>" with "<value2>"
     And I press "Submit"
@@ -72,7 +69,7 @@ Feature: Manage users
     | Password | Password Confirmation | dddddddd | dddddddd | must be between 6 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one symbol |
 
   Scenario: View user details
-    When I follow "View Details" for "faimsadmin@intersect.org.au"
+    Given I follow "View Details" for "faimsadmin@intersect.org.au"
     Then I should see row "Email" with value "faimsadmin@intersect.org.au"
     And I should see row "First name" with value "Georgina"
     And I should see row "Last name" with value "Edwards"
@@ -81,7 +78,7 @@ Feature: Manage users
     Then I should be on the list users page
 
   Scenario: Edit users details
-    When I follow "View Details" for "user1@intersect.org.au"
+    Given I follow "View Details" for "user1@intersect.org.au"
     And I follow "Edit Details"
     And I fill in "First Name" with "Fred"
     And I fill in "Last Name" with "Bloggs"
@@ -101,7 +98,7 @@ Feature: Manage users
     Then I should see "You are not authorized to access this page."
 
   Scenario Outline: Cannot edit users details due to validation errors
-    When I follow "View Details" for "user1@intersect.org.au"
+    Given I follow "View Details" for "user1@intersect.org.au"
     When I follow "Edit My Details"
     And I fill in "<field>" with "<value>"
     And I press "Update"
@@ -112,7 +109,7 @@ Feature: Manage users
     | Last Name  |       | Last name can't be blank  |
 
   Scenario: Change users role
-    When I follow "View Details" for "user1@intersect.org.au"
+    Given I follow "View Details" for "user1@intersect.org.au"
     And I follow "Edit Role"
     And I select "superuser" from "Role"
     And I press "Save"
@@ -131,12 +128,12 @@ Feature: Manage users
     Then I should see "You are not authorized to access this page."
 
   Scenario: Show warning if editing own role
-    When I follow "View Details" for "faimsadmin@intersect.org.au"
+    Given I follow "View Details" for "faimsadmin@intersect.org.au"
     And I follow "Edit Role"
     Then I should see "You are changing the role of the user you are logged in as."
 
   Scenario: Change users password
-    When I follow "View Details" for "user1@intersect.org.au"
+    Given I follow "View Details" for "user1@intersect.org.au"
     And I follow "Change Password"
     And I fill in "New password" with "Pass.123"
     And I fill in "Confirm new password" with "Pass.123"
@@ -152,7 +149,7 @@ Feature: Manage users
     Then I should see "You are not authorized to access this page."
 
   Scenario: Change users password not allowed if confirmation doesn't match new password
-    When I follow "View Details" for "user1@intersect.org.au"
+    Given I follow "View Details" for "user1@intersect.org.au"
     And I follow "Change Password"
     And I fill in "New password" with "Pass.123"
     And I fill in "Confirm new password" with "Pass.1233"
@@ -169,7 +166,7 @@ Feature: Manage users
     And I should be able to log in with "user1@intersect.org.au" and "Pas$w0rd"
 
   Scenario: Change users password not allowed if new password doesn't meet password rules
-    When I follow "View Details" for "user1@intersect.org.au"
+    Given I follow "View Details" for "user1@intersect.org.au"
     And I follow "Change Password"
     And I fill in "New password" with "Pass.abc"
     And I fill in "Confirm new password" with "Pass.abc"
@@ -179,8 +176,7 @@ Feature: Manage users
 
   @javascript
   Scenario: Delete user
-    And I follow "Show Users"
-    And I delete user "user2@intersect.org.au"
+    Given I delete user "user2@intersect.org.au"
     And I confirm
     Then I should see "users" table with
       | First name | Last name | Email                       | Role      |
@@ -194,5 +190,4 @@ Feature: Manage users
     And I cannot delete user "user2@intersect.org.au"
 
   Scenario: Cannot delete logged in user
-    Given I follow "Show Users"
     And I cannot delete user "faimsadmin@intersect.org.au"

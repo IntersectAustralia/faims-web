@@ -6,29 +6,14 @@ Feature: Manage vocabulary
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I have a user "other@intersect.org.au"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   @javascript
   Scenario: View Vocabularies
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see vocabularies
@@ -39,21 +24,9 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Update Vocabulary
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
@@ -67,21 +40,9 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Insert Vocabulary
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I click on "Insert" for the attribute
@@ -99,21 +60,9 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Add Child Vocabulary
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I click add child for vocabulary "Green"
@@ -133,21 +82,9 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Add Child To Child Vocabulary
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I click add child for vocabulary "Green"
@@ -171,21 +108,9 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Cannot update vocabulary if it contains empty vocabulary name
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I click on "Insert" for the attribute
@@ -201,21 +126,9 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Cannot update vocabulary if it contains empty child vocabulary name
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     Then I click add child for vocabulary "Green"
@@ -235,23 +148,11 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Cannot update vocabulary if db is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
-    And I follow "Module 1"
+    Given I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
-    And database is locked for "Module 1"
+    And database is locked for "Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
     Then I click on "Update"
@@ -264,24 +165,12 @@ Feature: Manage vocabulary
 
   @javascript
   Scenario: Cannot update vocabulary if user is not member of module
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Create Module"
-    Then I should be on the new project modules page
-    And I fill in "Name" with "Module 1"
-    And I pick file "data_schema.xml" for "Data Schema"
-    And I pick file "ui_schema.xml" for "UI Schema"
-    And I pick file "validation_schema.xml" for "Validation Schema"
-    And I pick file "ui_logic.bsh" for "UI Logic"
-    And I pick file "faims_Module_1.properties" for "Arch16n"
-    And I press "Submit"
-    Then I should see "New module created"
-    And I should be on the project modules page
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    And I follow "Module 1"
+    And I have project module "Vocabulary"
+    And I am on the project modules page
+    And I follow "Vocabulary"
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"

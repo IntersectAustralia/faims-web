@@ -5,7 +5,6 @@ Feature: Edit my details
 
   Background:
     Given I have a user "georgina@intersect.org.au"
-    Given I have a user "other@intersect.org.au"
     And I am logged in as "georgina@intersect.org.au"
 
   Scenario: Edit my details
@@ -38,5 +37,6 @@ Feature: Edit my details
     Then I should be on the user details page for georgina@intersect.org.au
 
   Scenario: Cannot edit details for other users
-    Given I am on the edit details page for other@intersect.org.au
+    Given I have a user "other@intersect.org.au"
+    And I am on the edit details page for other@intersect.org.au
     Then I should see "You are not authorized to access this page."

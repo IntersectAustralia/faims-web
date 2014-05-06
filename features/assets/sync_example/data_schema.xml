@@ -1,0 +1,71 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type="text/xsl" href="sampleDataXML.xsl"?>
+<dataSchema name="SyncExample" preparer="Nobody">
+    
+   <RelationshipElement name="AboveBelow" type="hierarchy">
+    <description>
+      Indicates that one element is above or below another element.
+    </description>
+    <parent>
+      Above
+    </parent>
+    <child>
+      Below
+    </child>
+    <property type="string" name="relationship" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+     <property type="string" name="name">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="location">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+  </RelationshipElement>
+  
+  <ArchaeologicalElement type="small">
+    <description>
+      An small entity
+    </description>
+    <property type="string" name="entity" isIdentifier="true">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="string" name="name">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="integer" name="value">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="filename">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="picture">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="video">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="file" name="audio">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="timestamp" name="timestamp">
+      <bundle>DOI</bundle>
+    </property>
+    <property type="dropdown" name="location">
+      <bundle>DOI</bundle>
+      <lookup>
+        <term>Location A</term>
+        <term>Location B</term>
+        <term>Location C</term>
+        <term>Location D</term>
+      </lookup>
+    </property>
+  </ArchaeologicalElement>
+  
+</dataSchema>

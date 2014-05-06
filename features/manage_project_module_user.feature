@@ -6,10 +6,7 @@ Feature: Manage project module users
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I have a user "other@intersect.org.au"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   @javascript
@@ -78,6 +75,7 @@ Feature: Manage project module users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
     And I am on the home page
     And I have project module "Module 1"

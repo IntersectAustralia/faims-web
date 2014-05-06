@@ -1,25 +1,10 @@
-def setup
-  tmp_dir = Rails.root.join('tmp').to_s
-  FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
-end
-
 def make_project_module(name)
   begin
-    setup
-    tmp_dir = Dir.mktmpdir(nil, Rails.root.to_s + '/tmp/')
-    assets_dir = Rails.root.to_s + '/features/assets/'
-    FileUtils.cp(assets_dir + 'data_schema.xml', tmp_dir + '/data_schema.xml' )
-    FileUtils.cp(assets_dir + 'ui_schema.xml', tmp_dir + '/ui_schema.xml' )
-    FileUtils.cp(assets_dir + 'ui_logic.bsh', tmp_dir + '/ui_logic.bsh' )
-    FileUtils.cp(assets_dir + 'module.settings', tmp_dir + '/module.settings' )
-    FileUtils.cp(assets_dir + 'validation_schema.xml', tmp_dir + '/validation_schema.xml' )
     project_module = ProjectModule.create(:name => name, :key => SecureRandom.uuid, :created => true)
-    project_module.create_project_module_from(tmp_dir)
+    FileUtils.cp_r(Dir[Rails.root.join("features/assets/#{project_module.name.downcase.gsub(/\s/,'_')}/*")], Rails.root.join("tmp/modules/#{project_module.key}"))
     project_module
   rescue Exception => e
     raise e
-  ensure
-    FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 end
 

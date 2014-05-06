@@ -6,22 +6,13 @@ Feature: Merge entities
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I have a user "other@intersect.org.au"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   @javascript
   Scenario: Merge entities (first)
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -51,14 +42,8 @@ Feature: Merge entities
 
   @javascript
   Scenario: Merge entities (second)
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -71,6 +56,7 @@ Feature: Merge entities
     And I select merge fields
       | field | column |
       | name  | left   |
+    And I wait
     And I click on "Merge"
     Then I should see "Merged Archaeological Entities"
     And I should see records
@@ -81,6 +67,7 @@ Feature: Merge entities
       | name    |
       | Small 2 |
     And I follow "Small 3"
+    And I wait
     And I should see fields with values
       | field  | type     | values  |
       | entity | freetext | Small 3 |
@@ -88,14 +75,8 @@ Feature: Merge entities
 
   @javascript
   Scenario: Can only compare 2 entities
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -113,14 +94,8 @@ Feature: Merge entities
 
   @javascript
   Scenario: Cannot merge entities if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -142,15 +117,10 @@ Feature: Merge entities
   @javascript
   Scenario: Cannot merge entities if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     And I follow "List Archaeological Entity Records"
     And I press "Filter"

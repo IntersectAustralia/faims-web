@@ -1,0 +1,437 @@
+getDefaultUsersList() {
+	users = fetchAll("select userid, fname ||' ' || lname from user");
+	return users;
+}
+
+usersList = getDefaultUsersList();
+
+populateListForUsers(){
+	populateList("user/tab1/users", usersList);
+}
+
+login(){
+	Object userResult = fetchOne("select userid,fname,lname from user where userid='" + getListItemValue() + "';");
+	User user = new User(userResult.get(0),userResult.get(1),userResult.get(2));
+	setUser(user);
+	showTabGroup("menu");
+}
+
+populateListForUsers();
+
+onEvent("user/tab1/users", "click", "login()");
+
+createOption(id, name) {
+	ArrayList option = new ArrayList();
+	option.add(id);
+	option.add(name);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("entity", "Create Entity"));
+options.add(createOption("relationship", "Create Relationship"));
+options.add(createOption("controls", "Controls"));
+
+populateList("menu/tab1/options", options);
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("entity".equals(value)) {
+		showTabGroup("tabgroup1");
+	} else if ("relationship".equals(value)) {
+		showTabGroup("tabgroup2");
+	} else {
+		showTabGroup("tabgroup3");
+	}
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+	setSyncEnabled(true);
+	setFileSyncEnabled(true);
+}
+
+stopSync() {
+	setSyncEnabled(false);
+}
+
+syncStarted() {
+	//showToast("starting sync");
+}
+
+syncCompleted() {
+	//showToast("completed sync");
+	updateAll();
+}
+
+syncFailed() {
+	//showToast("failed sync");
+}
+
+onSyncEvent("syncStarted()", "syncCompleted()", "syncFailed()");
+
+Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+
+String entity_id = null;
+
+saveEntity() {
+	entity_id = null;
+	entity_id = updateEntity();
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+	loadFileAttributes(entity_id);
+}
+
+loadEntity() {
+
+	clearEntity();
+
+	entity_id = getFieldValue("tabgroup1/tab3/entities");
+	
+	if (entity_id == null || "".equals(entity_id)) return;
+	
+	showTab("tabgroup1/tab1", entity_id);
+	loadFileAttributes(entity_id);
+}
+
+loadFileAttributes(id){
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	archEntity = fetchArchEnt(id);
+	entityAttributes = archEntity.getAttributes();
+	for(EntityAttribute attr : entityAttributes){
+		if("file".equals(attr.getType())){
+			if(!attr.isDeleted()){
+				if("picture".equals(attr.getName())){
+					pictures.add(attr.getText());
+				}else if("video".equals(attr.getName())){
+					videos.add(attr.getText());
+				}else if("audio".equals(attr.getName())){
+					audios.add(attr.getText());
+				}
+			}
+		}
+	}
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+}
+
+updateEntity() {
+	if (entity_id == null || "".equals(entity_id)) entity_id = null;
+
+	ArrayList loadedFiles = new ArrayList();
+	ArrayList loadedPictures = new ArrayList();
+	ArrayList loadedVideos = new ArrayList();
+	ArrayList loadedAudios = new ArrayList();
+	List attributes = createAttributeList();
+	if (entity_id == null) {
+		attributes.add(createEntityAttribute("entity", "Small " + entityCount++, null, null, null));
+	}else{
+		archEntity = fetchArchEnt(entity_id);
+		entityAttributes = archEntity.getAttributes();
+		for(EntityAttribute attr : entityAttributes){
+			if("file".equals(attr.getType())){
+				if("picture".equals(attr.getName())){
+					loadedPictures.add(attr.getText());
+				}else if("video".equals(attr.getName())){
+					loadedVideos.add(attr.getText());
+				}else if("audio".equals(attr.getName())){
+					loadedAudios.add(attr.getText());
+				}else{
+					loadedFiles.add(attr.getText());
+				}
+			}
+		}
+	}
+	
+	attributes.add(createEntityAttribute("name", getFieldValue("tabgroup1/tab1/name"), null, null, getFieldCertainty("tabgroup1/tab1/name")));
+	attributes.add(createEntityAttribute("value", getFieldAnnotation("tabgroup1/tab1/value"), null, getFieldValue("tabgroup1/tab1/value"), getFieldCertainty("tabgroup1/tab1/value")));
+	attributes.add(createEntityAttribute("timestamp", getFieldValue("tabgroup1/tab1/timestamp"), null, null, null));
+	Object values = getFieldValue("tabgroup1/tab1/location");
+	
+	for (Object value : values) {
+		attributes.add(createEntityAttribute("location", getFieldAnnotation("tabgroup1/tab1/location"), value.getName(), null, getFieldCertainty("tabgroup1/tab1/location")));
+	}
+	
+	Object value = getFieldValue("tabgroup1/tab1/file");
+	if (!"".equals(value)) {
+		if(loadedFiles.isEmpty()){
+			sync = getFieldValue("tabgroup1/tab1/sync");
+			filename = attachFile(getLastSelectedFilepath(), "1".equals(sync));
+			attributes.add(createEntityAttribute("filename", filename, null, null, null));
+		}else{
+			File file = new File(getLastSelectedFilepath());
+			for(String loadedFile : loadedFiles){
+				if(loadedFile.contains(file.getName())){
+					sync = getFieldValue("tabgroup1/tab1/sync");
+					filename = attachFile(getLastSelectedFilepath(), "1".equals(sync));
+					attributes.add(createEntityAttribute("filename", filename, null, null, null));
+				}else{
+					attributes.add(createEntityAttribute("filename", loadedFile, null, null, null));
+				}
+			}
+		}
+	}else{
+		if(!loadedFiles.isEmpty()){
+			for(String loadedFile : loadedFiles){
+				attributes.add(createEntityAttribute("filename", loadedFile, null, null, null));
+			}
+		}
+	}
+	
+	Object values = getFieldValue("tabgroup1/tab1/gallery");
+	saveFiles(values, loadedPictures, pictures, "picture", attributes);
+	
+	values = getFieldValue("tabgroup1/tab1/videogallery");
+	saveFiles(values, loadedVideos, videos, "video", attributes);
+	
+	values = getFieldValue("tabgroup1/tab2/audiolist");
+	saveFiles(values, loadedAudios, audios, "audio", attributes);
+
+	String id = saveArchEnt(entity_id, "small", null, attributes);
+	
+	updateAll();
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+	loadFileAttributes(id);
+	
+	return id;
+}
+
+saveFiles(values, loadedfiles, files, type, attributes){
+	if (!"".equals(values)){
+		if(loadedfiles.isEmpty()){
+			for(String file : files){
+				sync = getFieldValue("tabgroup1/tab1/sync");
+				filename = attachFile(file, "1".equals(sync));
+				if(values.contains(file)){
+					attributes.add(createEntityAttribute(type, filename, null, null, null));
+				}else{
+					attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+				}
+			}
+		}else{
+			for(String file : files){
+				if(loadedfiles.contains(file)){
+					if(values.contains(file)){
+						attributes.add(createEntityAttribute(type, file, null, null, null));
+					}else{
+						attributes.add(createEntityAttribute(type, file, null, null, null,true));
+					}
+				}else{
+					sync = getFieldValue("tabgroup1/tab1/sync");
+					filename = attachFile(file, "1".equals(sync));
+					if(values.contains(file)){
+						attributes.add(createEntityAttribute(type, filename, null, null, null));
+					}else{
+						attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+					}
+				}
+			}
+		}
+	}else{
+		if(loadedfiles.isEmpty()){
+			for(String file : files){
+				sync = getFieldValue("tabgroup1/tab1/sync");
+				filename = attachFile(file, "1".equals(sync));
+				attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+			}
+		}else{
+			for(String file : files){
+				if(loadedfiles.contains(file)){
+					attributes.add(createEntityAttribute(type, file, null, null, null,true));
+				}else{
+					sync = getFieldValue("tabgroup1/tab1/sync");
+					filename = attachFile(file, "1".equals(sync));
+					attributes.add(createEntityAttribute(type, filename, null, null, null,true));
+				}
+			}
+		}
+	}
+}
+
+clearEntity() {
+	newTab("tabgroup1/tab1");
+	pictures.clear();
+	videos.clear();
+	audios.clear();
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+	
+	setFieldValue("tabgroup1/tab1/timestamp", getCurrentTime());
+}
+
+deleteEntity(){
+	if (entity_id == null || "".equals(entity_id)) return;
+	deleteArchEnt(entity_id);
+    cancelTabGroup("tabgroup1", false);
+}
+
+ArrayList pictures = new ArrayList();
+
+takePicture() {
+	openCamera("OnPictureTaken()");
+}
+
+OnPictureTaken() {
+	pictureFilepath = getLastPictureFilePath();
+	pictures.add(pictureFilepath);
+	populateCameraPictureGallery("tabgroup1/tab1/gallery", pictures);
+}
+
+ArrayList videos = new ArrayList();
+
+takeVideo() {
+	openVideo("OnVideoTaken()");
+}
+
+OnVideoTaken() {
+	videoFilepath = getLastVideoFilePath();
+	videos.add(videoFilepath);
+	populateVideoGallery("tabgroup1/tab1/videogallery", videos);
+}
+
+ArrayList audios = new ArrayList();
+
+recordAudio(){
+	recordAudio("OnAudioRecorded()");
+}
+
+OnAudioRecorded(){
+	audioFilePath = getLastAudioFilePath();
+	audios.add(audioFilePath);
+	populateAudioList("tabgroup1/tab2/audiolist",audios);
+}
+
+onEvent("tabgroup1", "load", "populateAudioList(\"tabgroup1/tab2/audiolist\",audios)");
+onEvent("tabgroup1/tab1/camera", "click", "takePicture()");
+onEvent("tabgroup1/tab1/video", "click", "takeVideo()");
+onEvent("tabgroup1/tab1/audio", "click", "recordAudio()");
+onEvent("tabgroup1/tab1/save", "click", "saveEntity()");
+onEvent("tabgroup1/tab1/clear", "click", "clearEntity()");
+onEvent("tabgroup1/tab3/load", "click", "loadEntity()");
+onEvent("tabgroup1/tab1/update", "click", "updateEntity()");
+onEvent("tabgroup1/tab1/delete", "click", "deleteEntity()");
+
+setFilename() {
+	setFieldValue("tabgroup1/tab1/file", getLastSelectedFilename());
+}
+
+attachFile() {
+	showFileBrowser("setFilename()");
+}
+
+onEvent("tabgroup1/tab1/attach", "click", "attachFile()");
+onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entity_id)");
+
+initEntity() {
+	clearEntity();
+}
+
+String rel_id;
+
+saveRel() {
+	
+	rel_id = updateRel(null);
+	
+}
+
+loadRel() {
+
+	rel_id = getFieldValue("tabgroup2/tab2/relationships");
+	
+	if (rel_id == null || "".equals(rel_id)) return;
+	
+	showTab("tabgroup2/tab1", rel_id);
+	
+}
+
+updateRel(rel_id) {
+	if (rel_id == null || "".equals(rel_id)) rel_id = null;
+
+	List attributes = createAttributeList();
+	if (rel_id == null) {
+		attributes.add(createRelationshipAttribute("relationship", "AboveBelow " + relCount++, null, null));
+	}
+	attributes.add(createRelationshipAttribute("name", getFieldValue("tabgroup2/tab1/name"), null, getFieldCertainty("tabgroup2/tab1/name")));
+	Object values = getFieldValue("tabgroup2/tab1/location");
+	
+	for (Object value : values) {
+		attributes.add(createRelationshipAttribute("location", getFieldAnnotation("tabgroup2/tab1/location"), value.getName(), getFieldCertainty("tabgroup2/tab1/location")));
+	}
+	
+	String id = saveRel(rel_id, "abovebelow", null, attributes);
+	
+	updateAll();
+	
+	return id;
+}
+
+clearRel() {
+	newTab("tabgroup2/tab1");
+	
+	populateCheckBoxGroup("tabgroup2/tab1/location", locations);
+}
+
+updateAll() {
+	Object entities = fetchEntityList("small");
+	Object relationships = fetchRelationshipList("abovebelow");
+	Object values = getFieldValue("tabgroup1/tab1/location");
+	Object locations = fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location';");
+	Object usersList = fetchAll("select userid, fname ||' ' || lname from user");
+	populateDropDown("tabgroup1/tab3/entities", entities);
+	populateDropDown("tabgroup2/tab2/relationships", relationships);
+	populateCheckBoxGroup("tabgroup1/tab1/location", locations);
+	populateList("user/tab1/users", usersList);
+	setFieldValue("tabgroup1/tab1/location",values);
+}
+
+onEvent("tabgroup2/tab1/save", "click", "saveRel()");
+onEvent("tabgroup2/tab1/clear", "click", "clearRel()");
+onEvent("tabgroup2/tab2/load", "click", "loadRel()");
+onEvent("tabgroup2/tab1/update", "click", "updateRel(getFieldValue(\"tabgroup2/tab2/relationships\"))");
+
+initRel() {
+	clearRel();
+}
+
+int entityCount;
+int relCount;
+
+init() {
+    updateAll();
+	startSync();
+	entityCount = fetchEntityList("small").size() + 1;
+	relCount = fetchRelationshipList("abovebelow").size() + 1;
+}
+
+cleanup() {
+	stopSync();
+}
+
+onEvent("menu", "show", "init()"); 
+onEvent("user", "show", "cleanup()");	
+onEvent("tabgroup1", "show", "initEntity()");	
+onEvent("tabgroup2", "show", "initRel()");	
+
+onEvent("tabgroup3/tab1/start", "click", "setFileSyncEnabled(true)");
+onEvent("tabgroup3/tab1/stop", "click", "setFileSyncEnabled(false)");
+
+setFieldValue("tabgroup1/tab1/sync", "0");

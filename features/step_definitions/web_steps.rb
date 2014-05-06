@@ -60,14 +60,12 @@ When /^(?:|I )press "([^"]*)"$/ do |button|
 end
 
 When /^(?:|I )follow "([^"]*)"$/ do |link|
-  (1..3).each do
+  WAIT_RANGE.each do
     if all(:css, "a:contains('#{link}')").size == 0
       sleep(1)
-    else
-      first(:css, "a:contains('#{link}')").click
-      break
     end
   end
+  first(:css, "a:contains('#{link}')").click
 end
 
 When /^(?:|I )fill in "([^"]*)" with "([^"]*)"$/ do |field, value|
@@ -80,7 +78,7 @@ end
 
 def get_field(field)
   label = nil
-  (1..3).each do |i|
+  WAIT_RANGE.each do |i|
     label = first(:css, "label:contains('#{field}')")
     break if label
     sleep(1)
@@ -296,7 +294,7 @@ And /^I wait$/ do
 end
 
 And /^I wait for page$/ do
-  (1..3).each do
+  WAIT_RANGE.each do
     begin
       page.find('html')
       break

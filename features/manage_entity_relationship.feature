@@ -6,21 +6,12 @@ Feature: Manage entity relationships
   Background:
     And I have role "superuser"
     And I have a user "faimsadmin@intersect.org.au" with role "superuser"
-    And I have a user "other@intersect.org.au"
-    And I am on the login page
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I should see "Logged in successfully."
     And I have a project modules dir
 
   Scenario: See entities relations for entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "Search Archaeological Entity Records"
     And I enter "" and submit the form
@@ -33,14 +24,8 @@ Feature: Manage entity relationships
       | small Below AboveBelow: Small 4 |
 
   Scenario: Show relationship associations for entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -53,14 +38,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Remove relationship association from entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -82,14 +61,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Cannot remove relationship association from entity if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -112,15 +85,10 @@ Feature: Manage entity relationships
   @javascript
   Scenario: Cannot remove relationship association from entity if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -140,14 +108,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Add relationship association to entity
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -170,14 +132,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Cannot add relationship association to entity if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -204,15 +160,10 @@ Feature: Manage entity relationships
   @javascript
   Scenario: Cannot add relationship association to entity if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Archaeological Entity Records"
     And I press "Filter"
@@ -236,14 +187,8 @@ Feature: Manage entity relationships
       | AboveBelow 3 |
 
   Scenario: Show entity membership for relationship
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"
@@ -256,14 +201,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Remove entity from relationship
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"
@@ -285,14 +224,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Cannot remove entity from relationship if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"
@@ -315,15 +248,10 @@ Feature: Manage entity relationships
   @javascript
   Scenario:Cannot remove entity from relationship if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"
@@ -343,14 +271,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Add entity to relationship
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"
@@ -373,14 +295,8 @@ Feature: Manage entity relationships
 
   @javascript
   Scenario: Cannot add entity to relationship if database is locked
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    Given I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"
@@ -407,15 +323,10 @@ Feature: Manage entity relationships
   @javascript
   Scenario: Cannot add entity to relationship if not member of module
     Given I logout
+    And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "Sync_Example.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
+    And I have project module "Sync Example"
+    And I am on the project modules page
     And I follow "Sync Example"
     Then I follow "List Relationship Records"
     And I press "Filter"

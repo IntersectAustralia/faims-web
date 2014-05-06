@@ -1,7 +1,7 @@
+WAIT_RANGE = (1..5)
+
 require File.expand_path("../../../spec/tools/helpers/database_generator_spec_helper", __FILE__)
 require File.expand_path("../../support/project_modules", __FILE__)
-
-wait_range = (1..3)
 
 And /^I pick file "([^"]*)" for "([^"]*)"$/ do |file, field|
   attach_file(field, File.expand_path("../../assets/" + file, __FILE__)) unless file.blank?
@@ -185,7 +185,7 @@ When /^I click on "([^"]*)"$/ do |name|
   if all(:xpath, "//input[@value = \"#{name}\"]").size > 0
     find(:xpath, "//input[@value = \"#{name}\"]").click
   else
-    wait_range.each do
+    WAIT_RANGE.each do
       if all(:xpath, "//a[contains(text(), \"#{name}\")]").size == 0
         sleep(1)
       else
@@ -778,7 +778,7 @@ Then /^I should not see project module directories$/ do |table|
 end
 
 And /^I delete project module file "([^"]*)" for "([^"]*)"$/ do |file, dir|
-  wait_range.each do
+  WAIT_RANGE.each do
     if all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").size == 0
       sleep(1)
     else
@@ -789,7 +789,7 @@ And /^I delete project module file "([^"]*)" for "([^"]*)"$/ do |file, dir|
 end
 
 And /^I delete root directory$/ do
-  wait_range.each do
+  WAIT_RANGE.each do
     if all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").size == 0
       sleep(1)
     else
@@ -820,7 +820,7 @@ end
 
 And /^I confirm$/ do
   checked = nil
-  wait_range.each do
+  WAIT_RANGE.each do
     begin
       page.driver.browser.switch_to.alert.accept
       checked = true
@@ -834,7 +834,7 @@ end
 
 And /^I should see dialog "([^"]*)"$/ do |message|
   checked = nil
-  wait_range.each do
+  WAIT_RANGE.each do
     begin
       page.driver.browser.switch_to.alert.text.should == message
       checked = true
@@ -900,12 +900,12 @@ And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |fie
   values.each_with_index do |value, index|
     value.strip!
     if type == 'vocab'
-      wait_range.each do
+      WAIT_RANGE.each do
         break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
       end
       all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]/option[contains(text(),'#{value}')]")[index].select_option
     else
-      wait_range.each do
+      WAIT_RANGE.each do
         break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]").size > 0
       end
       all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]")[index].set value
@@ -931,12 +931,12 @@ And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do 
   values.each_with_index do |value, index|
     value.strip!
     if type == 'vocab'
-      wait_range.each do
+      WAIT_RANGE.each do
         break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
       end
       all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]/option[contains(text(),'#{value}')]")[index].text.should == value
     else
-      wait_range.each do
+      WAIT_RANGE.each do
         break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]").size > 0
       end
       all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]")[index].value.should == value
@@ -951,7 +951,7 @@ And /^I should see fields with values$/ do |table|
 end
 
 And /^I should see field "([^"]*)" with error "([^"]*)"$/ do |field, error|
-  wait_range.each do
+  WAIT_RANGE.each do
     break if all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size > 0
   end
   all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size.should == 1
