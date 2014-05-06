@@ -42,7 +42,7 @@ describe MergeDaemon do
     FileUtils.mkdir uploads_dir
 
     # create project_module
-    project_module = make_project_module 'Project'
+    project_module = make_project_module 'Module 1'
 
     # create uploads database
     filename = uploads_dir + '/' + project_module.key + '_v1'
@@ -76,7 +76,7 @@ describe MergeDaemon do
     FileUtils.mkdir uploads_dir
 
     # create project_module
-    project_module = make_project_module 'Project'
+    project_module = make_project_module 'Module 1'
 
     # create uploads database
     filename = uploads_dir + '/' + project_module.key

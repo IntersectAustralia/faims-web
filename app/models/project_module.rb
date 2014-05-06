@@ -2,7 +2,6 @@ require Rails.root.join('app/models/modules/database')
 
 class ProjectModule < ActiveRecord::Base
   include XSDValidator
-  include Archive::Tar
   include MD5Checksum
 
   SRID = 4326

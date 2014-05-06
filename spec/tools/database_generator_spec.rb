@@ -97,7 +97,7 @@ describe Database do
     it 'Does not insert duplicate records' do
       version = 1
       
-      p1 = make_project_module('Module 100')
+      p1 = make_project_module('Module 1')
       fill_database(p1.db.spatialite_db, version)
       
       backup_db1 = backup_database(p1.db.spatialite_db)
