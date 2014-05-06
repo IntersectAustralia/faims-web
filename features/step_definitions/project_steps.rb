@@ -666,7 +666,7 @@ end
 
 def check_project_module_archive_updated(project_module)
   begin
-    tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
+    tmp_dir = Dir.mktmpdir(nil, Rails.root.to_s + '/tmp/')
 
     `tar xfz #{project_module.get_path(:project_module_archive)} -C #{tmp_dir}`
 

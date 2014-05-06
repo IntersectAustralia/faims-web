@@ -5,6 +5,7 @@ Feature: Change my password
 
   Background:
     Given I have a user "georgina@intersect.org.au"
+    Given I have a user "other@intersect.org.au"
     And I am logged in as "georgina@intersect.org.au"
 
   Scenario: Change password
@@ -66,3 +67,6 @@ Feature: Change my password
     Then I should see "Password must be between 6 and 20 characters long and contain at least one uppercase letter, one lowercase letter, one digit and one symbol"
     And I should be able to log in with "georgina@intersect.org.au" and "Pas$w0rd"
 
+  Scenario: Cannot change password for other users
+    Given I am on the change password page for other@intersect.org.au
+    Then I should see "You are not authorized to access this page."

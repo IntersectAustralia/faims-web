@@ -6,7 +6,7 @@ end
 def make_project_module(name)
   begin
     setup
-    tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/')
+    tmp_dir = Dir.mktmpdir(nil, Rails.root.to_s + '/tmp/')
     assets_dir = Rails.root.to_s + '/features/assets/'
     FileUtils.cp(assets_dir + 'data_schema.xml', tmp_dir + '/data_schema.xml' )
     FileUtils.cp(assets_dir + 'ui_schema.xml', tmp_dir + '/ui_schema.xml' )
@@ -33,7 +33,7 @@ end
 
 def archived_file_match(archived_file, file)
   begin
-    tmp_dir = Dir.mktmpdir(Rails.root.to_s + '/tmp/') + '/'
+    tmp_dir = Dir.mktmpdir(nil, Rails.root.to_s + '/tmp/') + '/'
 
     `tar xfz #{archived_file} -C #{tmp_dir}`
 

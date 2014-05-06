@@ -30,6 +30,12 @@ module NavigationHelpers
       when /^the user details page for (.*)$/
         user_path(User.where(:email => $1).first)
 
+      when /^the change password page for (.*)$/
+        change_password_user_path(User.where(:email => $1).first)
+
+      when /^the edit details page for (.*)$/
+        edit_details_user_path(User.where(:email => $1).first)
+
       when /^the edit role page for (.*)$/
         edit_role_user_path(User.where(:email => $1).first)
 
@@ -42,6 +48,9 @@ module NavigationHelpers
 
       when /the list users page/
         users_path
+
+      when /^the add user page$/
+        new_user_path
 
       # Project module paths
       when /the project modules page/

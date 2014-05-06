@@ -18,8 +18,8 @@
       %th Last signed in
       %td= @user.last_sign_in_at ? @user.last_sign_in_at.localtime.strftime("%d/%m/%Y %I:%M%p") : "Never logged in"
 = link_to "<i class='icon-arrow-left'></i> Back".html_safe, users_path, :class => "btn"
-- if @user.id != current_user.id and can?(:update_user, User)
+- if @user.id != current_user.id and can?(:edit_user, @user)
   = link_to 'Edit Details', edit_details_user_path(@user), :class => 'btn btn-inverse'
   = link_to 'Change Password', change_password_user_path(@user), :class => 'btn btn-inverse'
-- if can?(:update_user, User)
+- if can?(:edit_user, @user)
   = link_to 'Edit Role', edit_role_user_path(@user), :class => 'btn btn-inverse'

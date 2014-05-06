@@ -424,7 +424,7 @@ describe 'Web Database Queries' do
                 [1000011365058835006, "supervisor", "53296", "radiogroup", "2013-04-30 01:57:54", "superc (66.0% certain)"],
                 [1000011365058835006, "timestamp", "29344", "timestamp", "2013-04-30 01:57:54", "2013-04-04 17:59:58 (66.0% certain)"],
                 [1000011365058835006, "type", "31072", "checklist", "2013-04-30 01:57:54", "Type C (; 39.0% certain)"],
-                [1000011365058835006, "value", "27616", "integer", "2013-05-06 04:12:15", "17115 (100.0% certain) | 121551 (100.0% certain) | 133500 (100.0% certain) | 146620 (100.0% certain) | 235159 (100.0% certain) | 303306 (100.0% certain) | 412728 (100.0% certain) | 427823 (100.0% certain) | 548408 (100.0% certain) | 610287 (100.0% certain) | 662605 (100.0% certain) | 736398 (100.0% certain) | 743895 (100.0% certain) | 747748 (100.0% certain) | 809098 (100.0% certain) | 810461 (100.0% certain) | 835655 (100.0% certain) | 862096 (100.0% certain) | 918434 (100.0% certain) | 965129 (100.0% certain)"]]
+                [1000011365058835006, "value", "27616", "integer", "2013-05-06 04:12:15", "743895 (100.0% certain) | 965129 (100.0% certain) | 662605 (100.0% certain) | 133500 (100.0% certain) | 835655 (100.0% certain) | 809098 (100.0% certain) | 918434 (100.0% certain) | 121551 (100.0% certain) | 303306 (100.0% certain) | 862096 (100.0% certain) | 810461 (100.0% certain) | 427823 (100.0% certain) | 610287 (100.0% certain) | 412728 (100.0% certain) | 146620 (100.0% certain) | 747748 (100.0% certain) | 17115 (100.0% certain) | 548408 (100.0% certain) | 235159 (100.0% certain) | 736398 (100.0% certain)"]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)

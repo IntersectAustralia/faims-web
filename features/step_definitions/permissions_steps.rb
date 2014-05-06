@@ -24,7 +24,7 @@ Given /^I have the usual roles and permissions$/ do
   Role.create!(:name => "Researcher")
 
   create_permission("User", "read", [super_role])
-  create_permission("User", "update_user", [super_role])
+  create_permission("User", "edit", [super_role])
   create_permission("User", "activate_deactivate", [super_role])
   create_permission("User", "admin", [super_role])
   create_permission("User", "reject", [super_role])

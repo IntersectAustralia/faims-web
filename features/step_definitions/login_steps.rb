@@ -43,6 +43,10 @@ Given /^I am logged in as "([^"]*)" with "([^"]*)"$/ do |email, password|
   click_button("Log in")
 end
 
+Given /^I logout$/ do
+  visit path_to("the logout page")
+end
+
 Given /^I have no users$/ do
   User.delete_all
 end

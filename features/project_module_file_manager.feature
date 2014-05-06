@@ -1,4 +1,4 @@
-Feature: project_module_file manager
+Feature: Project module file manager
   In order manage project module files
   As a user
   I want to upload, list and delete project module files

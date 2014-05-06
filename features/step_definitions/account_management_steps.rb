@@ -5,8 +5,9 @@ Given /^I have access requests$/ do |table|
 end
 
 Given /^I have users$/ do |table|
+  r = Role.find_by_name('user')
+  r ||= Role.create(name:'user')
   table.hashes.each do |hash|
-    r = Role.create(name: 'user')
     u = User.new(hash.merge({password: "Pas$w0rd", password_confirmation: "Pas$w0rd"}))
     u.activate
     u.role = r

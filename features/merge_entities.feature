@@ -1,0 +1,170 @@
+Feature: Merge entities
+  In order merge entities
+  As a user
+  I want to compare and merge entities
+
+  Background:
+    And I have role "superuser"
+    And I have a user "faimsadmin@intersect.org.au" with role "superuser"
+    And I have a user "other@intersect.org.au"
+    And I am on the login page
+    And I am logged in as "faimsadmin@intersect.org.au"
+    And I should see "Logged in successfully."
+    And I have a project modules dir
+
+  @javascript
+  Scenario: Merge entities (first)
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "Sync_Example.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I should be on the project modules page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And I select the "first" record to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    Then I should see "Merged Archaeological Entities"
+    And I should see records
+      | name    |
+      | Small 2 |
+      | Small 4 |
+    And I should not see records
+      | name    |
+      | Small 3 |
+    And I follow "Small 2"
+    And I should see fields with values
+      | field  | type     | values  |
+      | entity | freetext | Small 2 |
+      | name   | freetext | test3   |
+
+  @javascript
+  Scenario: Merge entities (second)
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "Sync_Example.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I should be on the project modules page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And I select the "second" record to merge to
+    And I select merge fields
+      | field | column |
+      | name  | left   |
+    And I click on "Merge"
+    Then I should see "Merged Archaeological Entities"
+    And I should see records
+      | name    |
+      | Small 3 |
+      | Small 4 |
+    And I should not see records
+      | name    |
+      | Small 2 |
+    And I follow "Small 3"
+    And I should see fields with values
+      | field  | type     | values  |
+      | entity | freetext | Small 3 |
+      | name   | freetext | test2   |
+
+  @javascript
+  Scenario: Can only compare 2 entities
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "Sync_Example.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I should be on the project modules page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I click on "Compare"
+    Then I should see dialog "Please select two records to compare"
+    And I confirm
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+      | Small 4 |
+    Then I click on "Compare"
+    Then I should see dialog "Can only compare two records at a time"
+    And I confirm
+
+  @javascript
+  Scenario: Cannot merge entities if database is locked
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "Sync_Example.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I should be on the project modules page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And database is locked for "Sync Example"
+    And I select the "first" record to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    And I wait for popup to close
+    Then I should see dialog "Could not process request as database is currently locked"
+    And I confirm
+
+  @javascript
+  Scenario: Cannot merge entities if not member of module
+    Given I logout
+    And I am logged in as "other@intersect.org.au"
+    And I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "Sync_Example.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I should be on the project modules page
+    And I follow "Sync Example"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I click on "Compare"
+    And I select the "first" record to merge to
+    And I select merge fields
+      | field | column |
+      | name  | right  |
+    And I click on "Merge"
+    Then I should see dialog "Only module users can edit the database. Please get a module user to add you to the module"
+    And I confirm
+
+  # TODO Scenario: Cannot compare arch entities of different types

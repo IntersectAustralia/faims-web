@@ -15,7 +15,9 @@ Then /^I should see field "([^"]*)" with value "([^"]*)"$/ do |field, value|
 end
 
 Then /^I should see row "([^"]*)" with value "([^"]*)"$/ do |field, value|
-  first(:css, "tr:contains('#{field}')").should == first(:css, "tr:contains('#{value}')")
+  within(first(:css, "tr:contains('#{field}')")) do
+    find(:css, "td:contains('#{value}')")
+  end
 end
 
 Then /^I should see fields displayed$/ do |table|

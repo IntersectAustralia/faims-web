@@ -983,15 +983,16 @@ class ProjectModulesController < ApplicationController
     vocab_description = params[:vocab_description]
     picture_url = params[:picture_url]
 
-    if vocab_name.select { |x| x.blank? }.size > 0
-       flash[:error] = 'Please correct the errors in this form. Vocabulary name cannot be empty'
-    elsif can_edit_db
+    if can_edit_db
+      if vocab_name.select { |x| x.blank? }.size > 0
+         flash[:error] = 'Please correct the errors in this form. Vocabulary name cannot be empty'
+      else
+        @project_module.db.update_attributes_vocab(@attribute_id, temp_id, temp_parent_id, vocab_id, parent_vocab_id, vocab_name, vocab_description, picture_url, @project_module.db.get_project_module_user_id(current_user.email))
 
-      @project_module.db.update_attributes_vocab(@attribute_id, temp_id, temp_parent_id, vocab_id, parent_vocab_id, vocab_name, vocab_description, picture_url, @project_module.db.get_project_module_user_id(current_user.email))
+        flash[:notice] = 'Successfully updated vocabulary'
 
-      flash[:notice] = 'Successfully updated vocabulary'
-
-      return redirect_to list_attributes_with_vocab_path(@project_module, {attribute_id:@attribute_id})
+        return redirect_to list_attributes_with_vocab_path(@project_module, {attribute_id:@attribute_id})
+      end
     end
 
     @attribute_vocabs = {}

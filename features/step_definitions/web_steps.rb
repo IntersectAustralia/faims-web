@@ -75,7 +75,7 @@ When /^(?:|I )fill in "([^"]*)" with "([^"]*)"$/ do |field, value|
 end
 
 When /^(?:|I )fill in "([^"]*)" for "([^"]*)"$/ do |value, field|
-  get_field(field).set(value).set(value)
+  get_field(field).set(value)
 end
 
 def get_field(field)
@@ -292,7 +292,7 @@ Then /^show me the page$/ do
 end
 
 And /^I wait$/ do
-  sleep(1)
+  sleep(10)
 end
 
 And /^I wait for page$/ do
