@@ -15,8 +15,8 @@ def fill_database(db, version = nil, seed = nil)
   index = seed ? seed : 0
 
   (s..n).each do |i|
-    db.execute("INSERT INTO archentity (uuid, userid, aenttypeid, geospatialcolumntype, geospatialcolumn, aenttimestamp, versionnum) " +
-        "VALUES (cast('#{index}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
+    db.execute("INSERT INTO archentity (uuid, userid, aenttypeid, aenttimestamp, versionnum) " +
+        "VALUES (cast('#{index}' as integer), '0', 'ExcavationUnitStructure', CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
       db.execute("INSERT INTO aentvalue (uuid, userid, vocabid, attributeid, measure, freetext, certainty, valuetimestamp, versionnum) " +
@@ -30,8 +30,8 @@ def fill_database(db, version = nil, seed = nil)
   index = seed ? seed : 0
 
   (s..n).each do |i|
-    db.execute("INSERT INTO relationship (relationshipid, userid, relnTypeid, geospatialcolumntype, geospatialcolumn, relntimestamp, versionnum) " +
-        "VALUES (cast('#{index}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
+    db.execute("INSERT INTO relationship (relationshipid, userid, relnTypeid, relntimestamp, versionnum) " +
+        "VALUES (cast('#{index}' as integer), '0', 'Area', CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
       db.execute("INSERT INTO relnvalue (relationshipid, userid, vocabid, attributeid, freetext, certainty, relnvaluetimestamp, versionnum) " +
