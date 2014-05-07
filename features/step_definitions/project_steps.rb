@@ -536,7 +536,7 @@ end
 
 Then(/^I click on "([^"]*)" for the attribute$/) do |name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id} a:contains('#{name}')").click()
+  find(:css, ".vocab-list-#{attribute_id}").find('a', text: name).click()
 end
 
 When(/^I modify vocabulary "([^"]*)" with "([^"]*)"$/) do |original, value|

@@ -17,7 +17,7 @@ class FileManagerController < ApplicationController
   def file_list
     @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_files]
 
-    @project_module = ProjectModule.find_by_id(params[:id])
+    @project_module = ProjectModule.find(params[:id])
     @dir = FileHelper.get_file_list_by_dir(@project_module.get_path(:data_files_dir), '.')
 
     if params[:notice]
@@ -28,7 +28,7 @@ class FileManagerController < ApplicationController
   end
 
   def download_file
-    @project_module = ProjectModule.find_by_id(params[:id])
+    @project_module = ProjectModule.find(params[:id])
 
     if params[:path].blank?
       redirect_to :action => 'file_list', :error => 'Please select file to download'
@@ -52,7 +52,7 @@ class FileManagerController < ApplicationController
   end
 
   def upload_file
-    @project_module = ProjectModule.find_by_id(params[:id])
+    @project_module = ProjectModule.find(params[:id])
 
     if params[:file_manager].blank? or params[:file_manager][:file].blank?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'
@@ -71,7 +71,7 @@ class FileManagerController < ApplicationController
   end
 
   def create_dir
-    @project_module = ProjectModule.find_by_id(params[:id])
+    @project_module = ProjectModule.find(params[:id])
 
     if params[:file_manager].blank? or !ProjectModule.validate_directory(params[:file_manager][:dir].strip)
       redirect_to :action => 'file_list', :error => 'Please enter a valid directory name'
@@ -90,7 +90,7 @@ class FileManagerController < ApplicationController
   end
 
   def delete_file
-    @project_module = ProjectModule.find_by_id(params[:id])
+    @project_module = ProjectModule.find(params[:id])
 
     if params[:path].blank?
       redirect_to :action => 'file_list', :error => 'Please select file to delete'
@@ -123,7 +123,7 @@ class FileManagerController < ApplicationController
   end
 
   def batch_upload_file
-    @project_module = ProjectModule.find_by_id(params[:id])
+    @project_module = ProjectModule.find(params[:id])
 
     if params[:project_module].blank? or params[:project_module][:file].blank?
       redirect_to :action => 'file_list', :error => 'Please select a file to upload'

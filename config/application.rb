@@ -86,5 +86,7 @@ module FaimsWeb
       require 'find'
       Find.find(Rails.root.join('modules').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('modules')
     end
+
+    config.i18n.enforce_available_locales = true
   end
 end
