@@ -35,7 +35,7 @@ describe Database do
     tempfile.unlink
   end
 
-  describe 'Merging databases' do
+  describe 'Merging databases', :ignore_jenkins => true do
     it 'Empty database and Empty database' do
       p1 = make_project_module('Module 1')
       p2 = make_project_module('Module 2')

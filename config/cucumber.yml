@@ -1,2 +1,2 @@
 default: --format pretty --tags ~@wip features
-jenkins: --no-color --format progress --tags ~@not-jenkins features
+jenkins: --no-color --format progress --tags ~@ignore_jenkins features

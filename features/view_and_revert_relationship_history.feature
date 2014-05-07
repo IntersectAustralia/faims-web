@@ -9,7 +9,7 @@ Feature: View and Revert relationship history
     And I am logged in as "faimsadmin@intersect.org.au"
     And I have a project modules dir
 
-  @not-jenkins
+  @ignore_jenkins
   @javascript
   Scenario: Resolve relationship conflicts
     Given I have project module "Resolve Conflicts"
@@ -25,7 +25,7 @@ Feature: View and Revert relationship history
     And I click on "Revert and Resolve Conflicts"
     Then I history should not have conflicts
 
-  @not-jenkins
+  @ignore_jenkins
   @javascript
   Scenario: Cannot resolve conflicts if database is locked
     Given I have project module "Resolve Conflicts"
@@ -43,7 +43,7 @@ Feature: View and Revert relationship history
     And I should see "Could not process request as database is currently locked"
     Then I history should have conflicts
 
-  @not-jenkins
+  @ignore_jenkins
   @javascript
   Scenario: Cannot resolve conflicts if not member of module
     Given I logout

@@ -27,11 +27,11 @@ describe MergeDaemon do
     MergeDaemon.sort_files_by_version(files).should == [b + '_v1', a + '_v2', b + '_v3', a + '_v4']
   end
 
-  it 'should merge file uploads directory' do
+  it 'should merge file uploads directory', :ignore_jenkins => true do
     tmp_dir = Rails.root.to_s + '/tmp'
-	FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
+	  FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
     
-	project_modules_dir = Rails.root.to_s + '/tmp/project_modules'
+	  project_modules_dir = Rails.root.to_s + '/tmp/project_modules'
     uploads_dir = Rails.root.to_s + '/tmp/uploads'
 
     # cleanup project_modules and uploads directory
@@ -61,7 +61,7 @@ describe MergeDaemon do
     is_database_same(project_module.db.spatialite_db, SpatialiteDB.new(uploads_dir + '/temp.sqlite3')).should be_true
   end
 
-  it 'should not merge file uploads directory for bad names' do
+  it 'should not merge file uploads directory for bad names', :ignore_jenkins => true do
     tmp_dir = Rails.root.to_s + '/tmp'
     FileUtils.mkdir tmp_dir unless File.directory? tmp_dir
 

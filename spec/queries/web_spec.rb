@@ -417,7 +417,7 @@ describe 'Web Database Queries' do
     results.should =~ expected
   end
 
-  it 'Get arch entity attributes for comparison' do
+  it 'Get arch entity attributes for comparison', :ignore_jenkins => true do
     expected = [[1000011365058835006, "location", "34768", "dropdown", "2013-05-06 02:10:05", "Loc A (35.0% certain) | Loc B (49.0% certain) | Loc C (56.0% certain)"],
                 [1000011365058835006, "name", "17136", "string", "2013-05-06 07:02:48", "Ballsun-Stanton (100.0% certain) | Brian (100.0% certain)"],
                 [1000011365058835006, "picture", "38416", "dropdown", "2013-04-30 01:57:54", "cugl69808.jpg (; 38.0% certain)"],
