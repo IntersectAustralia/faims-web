@@ -1,75 +1,12 @@
 require Rails.root.join('app/models/modules/database')
 
 class ProjectModulesController < ApplicationController
-
-  WAIT_TIMEOUT = Rails.env == 'test' ? 1 : 20
-
+  include ProjectModuleBreadCrumbs
+  before_filter :crumbs
   before_filter :authenticate_user!
   load_and_authorize_resource
-
-  def crumbs
-    project_module = ProjectModule.find(params[:id]) if params[:id]
-    uuid = params[:uuid]
-    relationshipid = params[:relationshipid]
-
-    #TODO fix paths to use url params instead of session params
-    type = session[:type]
-    query = session[:query]
-
-    list_arch_ent = session[:action].eql?('list_typed_arch_ent_records')
-    list_rel = session[:action].eql?('list_typed_rel_records')
-
-    query_params = '?'
-    query_params << "type=#{type}&" if type
-    query_params << "query=#{query}&" if query
-
-    @crumbs =
-      {
-          :pages_home => {title: 'Home', url: pages_home_path},
-          :project_modules_index => {title: 'Modules', url: project_modules_path},
-          :project_modules_create => {title: 'Create', url: new_project_module_path},
-          :project_modules_upload => {title: 'Upload', url: upload_project_module_path},
-          :project_modules_show => {title: project_module ? project_module.name : nil, url: project_module ? project_module_path(project_module) : nil},
-          :project_modules_edit => {title: 'Edit', url: project_module ? edit_project_module_path(project_module) : nil},
-          :project_modules_vocabulary => {title: 'Vocabulary', url: project_module ? list_attributes_with_vocab_path(project_module) : nil},
-          :project_modules_users => {title: 'Users', url: project_module ? edit_project_module_user_path(project_module) : nil},
-          :project_modules_files => {title: 'Files', url: project_module ? project_module_file_list_path(project_module) : nil},
-
-          :project_modules_search_or_list_arch_ent => !list_arch_ent ? {title: 'Search Entity', url: project_module ? search_arch_ent_records_path(project_module) : nil} : {title: 'List Entity', url: project_module ? list_arch_ent_records_path(project_module) : nil},
-          :project_modules_search_arch_ent => {title: 'Search Entity', url: project_module ? search_arch_ent_records_path(project_module) : nil},
-          :project_modules_list_arch_ent => {title: 'List Entity', url: project_module ? list_arch_ent_records_path(project_module) : nil},
-          :project_modules_show_arch_ent => {title: 'Entities', url: project_module ? (query ? show_arch_ent_records_path(project_module) : list_typed_arch_ent_records_path(project_module)) + query_params : nil},
-          :project_modules_compare_arch_ent => {title: 'Compare', url: project_module ? compare_arch_ents_path(project_module) : nil},
-          :project_modules_edit_arch_ent => {title: project_module ? project_module.db.get_entity_identifier(uuid) : 'Edit', url: (project_module and uuid) ? edit_arch_ent_records_path(project_module, uuid) : nil},
-          :project_modules_show_arch_ent_history => {title: 'History', url: (project_module and uuid) ? show_arch_ent_history_path(project_module, uuid) : nil},
-          :project_modules_show_arch_ent_associations => {title: 'Associations', url: (project_module and uuid) ? show_rel_association_path(project_module, uuid) : nil},
-          :project_modules_search_arch_ent_associations => {title: 'Search Association', url: (project_module and uuid) ? search_rel_association_path(project_module, uuid) : nil},
-
-          :project_modules_search_or_list_rel => !list_rel ? {title: 'Search Relationship', url: project_module ? search_rel_records_path(project_module) : nil} : {title: 'List Relationship', url: project_module ? list_rel_records_path(project_module) : nil},
-          :project_modules_search_rel => {title: 'Search Relationship', url: project_module ? search_rel_records_path(project_module) : nil},
-          :project_modules_list_rel => {title: 'List Relationship', url: project_module ? list_rel_records_path(project_module) : nil},
-          :project_modules_show_rel => {title: 'Relationships', url: project_module ? (query ? show_rel_records_path(project_module) : list_typed_rel_records_path(project_module)) + query_params : nil},
-          :project_modules_compare_rel => {title: 'Compare', url: project_module ? compare_rel_path(project_module) : nil},
-          :project_modules_edit_rel => {title: project_module ? project_module.db.get_rel_identifier(relationshipid) : 'Edit', url: (project_module and relationshipid) ? edit_rel_records_path(project_module, relationshipid) : nil},
-          :project_modules_show_rel_history => {title: 'History', url: (project_module and relationshipid) ? show_rel_history_path(project_module, relationshipid) : nil},
-          :project_modules_show_rel_associations => {title: 'Associations', url: (project_module and relationshipid) ? show_rel_association_path(project_module, relationshipid) : nil},
-          :project_modules_search_rel_associations => {title: 'Search Association', url: (project_module and relationshipid) ? search_arch_ent_member_path(project_module, relationshipid) : nil},
-      }
-  end
-
-  def authenticate_project_module_user
-    @project_module = ProjectModule.find(params[:id])
-
-    redirect_to :project_modules unless @project_module
-    user_emails = @project_module.db.get_list_of_users.map { |x| x.last }
-
-    unless user_emails.include? current_user.email
-      flash[:error] = 'Only module users can edit the database. Please get a module user to add you to the module'
-      return false
-    end
-
-    return true
-  end
+  
+  WAIT_TIMEOUT = Rails.env == 'test' ? 1 : 20
 
   def wait_for_project_module
     (1..WAIT_TIMEOUT).each do
@@ -113,6 +50,20 @@ class ProjectModulesController < ApplicationController
     return true
   end
 
+  def authenticate_project_module_user
+    @project_module = ProjectModule.find(params[:id])
+
+    redirect_to :project_modules unless @project_module
+    user_emails = @project_module.db.get_list_of_users.map { |x| x.last }
+
+    unless user_emails.include? current_user.email
+      flash[:error] = 'Only module users can edit the database. Please get a module user to add you to the module'
+      return false
+    end
+
+    return true
+  end
+
   def can_edit_db
     return false unless authenticate_project_module_user
     return false unless wait_for_db
@@ -120,11 +71,11 @@ class ProjectModulesController < ApplicationController
   end
 
   def index
-    @page_crumbs = [:pages_home, :project_modules_index]
+    page_crumbs :pages_home, :project_modules_index
   end
 
   def new
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_create]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_create
 
     @project_module = ProjectModule.new
     @spatial_list = Database.get_spatial_ref_list
@@ -134,7 +85,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def create
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_create]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_create
 
     @project_module = ProjectModule.new
     @spatial_list = Database.get_spatial_ref_list
@@ -179,14 +130,14 @@ class ProjectModulesController < ApplicationController
   end
 
   def show
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show
 
     @project_module = ProjectModule.find(params[:id])
     session[:has_attached_files] = @project_module.has_attached_files
   end
 
   def edit_project_module_user
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_users]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_users
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -196,7 +147,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def update_project_module_user
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_users]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_users
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -220,7 +171,7 @@ class ProjectModulesController < ApplicationController
   # Arch entity functionalities
 
   def list_arch_ent_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_list_arch_ent]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_list_arch_ent
 
     @project_module = ProjectModule.find(params[:id])
     @type = @project_module.db.get_arch_ent_types
@@ -234,7 +185,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def list_typed_arch_ent_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_list_arch_ent, :project_modules_show_arch_ent]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_list_arch_ent, :project_modules_show_arch_ent
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -265,7 +216,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def search_arch_ent_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_arch_ent]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_arch_ent
 
     @project_module = ProjectModule.find(params[:id])
     session.delete(:values)
@@ -278,7 +229,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def show_arch_ent_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_arch_ent, :project_modules_show_arch_ent]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_arch_ent, :project_modules_show_arch_ent
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -309,7 +260,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def edit_arch_ent_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent
 
     @project_module = ProjectModule.find(params[:id])
     uuid = params[:uuid]
@@ -411,7 +362,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def compare_arch_ents
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_compare_arch_ent]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_compare_arch_ent
 
     @project_module = ProjectModule.find(params[:id])
     session[:values] = []
@@ -451,7 +402,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def show_arch_ent_history
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent, :project_modules_show_arch_ent_history]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent, :project_modules_show_arch_ent_history
 
     @project_module = ProjectModule.find(params[:id])
     uuid = params[:uuid]
@@ -478,7 +429,7 @@ class ProjectModulesController < ApplicationController
   # Relationship functionalities
 
   def list_rel_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_list_rel]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_list_rel
 
     @project_module = ProjectModule.find(params[:id])
     @type = @project_module.db.get_rel_types
@@ -491,7 +442,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def list_typed_rel_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_list_rel, :project_modules_show_rel]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_list_rel, :project_modules_show_rel
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -522,7 +473,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def search_rel_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_rel]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_rel
 
     @project_module = ProjectModule.find(params[:id])
     session.delete(:values)
@@ -534,7 +485,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def show_rel_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_rel, :project_modules_show_rel]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_rel, :project_modules_show_rel
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -565,7 +516,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def edit_rel_records
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel
 
     @project_module = ProjectModule.find(params[:id])
     relationshipid = params[:relationshipid]
@@ -614,7 +565,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def show_rel_history
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_show_rel_history]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_show_rel_history
 
     @project_module = ProjectModule.find(params[:id])
     relationshipid = params[:relationshipid]
@@ -676,7 +627,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def show_rel_members
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_show_rel_associations]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_show_rel_associations
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -726,7 +677,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def search_arch_ent_member
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_search_rel_associations]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_search_rel_associations
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -773,7 +724,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def show_rel_association
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent, :project_modules_show_arch_ent_associations]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent, :project_modules_show_arch_ent_associations
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -820,8 +771,8 @@ class ProjectModulesController < ApplicationController
   end
 
   def search_rel_association
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent, :project_modules_show_arch_ent_associations,
-      :project_modules_search_arch_ent_associations]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_arch_ent, :project_modules_show_arch_ent, :project_modules_edit_arch_ent, :project_modules_show_arch_ent_associations,
+      :project_modules_search_arch_ent_associations
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -910,7 +861,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def compare_rel
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_compare_rel]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_compare_rel
 
     @project_module = ProjectModule.find(params[:id])
     ids = params[:ids]
@@ -950,7 +901,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def list_attributes_with_vocab
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_vocabulary]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_vocabulary
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -969,7 +920,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def update_attributes_vocab
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_vocabulary]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_vocabulary
 
     @project_module = ProjectModule.find(params[:id])
 
@@ -1015,7 +966,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def edit_project_module
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_edit]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_edit
 
     @project_module = ProjectModule.find(params[:id])
     @spatial_list = Database.get_spatial_ref_list
@@ -1041,7 +992,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def update_project_module
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_edit]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_edit
 
     @project_module = ProjectModule.find(params[:id])
     @spatial_list = Database.get_spatial_ref_list
@@ -1100,8 +1051,6 @@ class ProjectModulesController < ApplicationController
         return render json: { result: 'waiting', jobid: job.id }
       end
     rescue Exception => e
-      p e
-      p e.backtrace
       return render json: { result: 'failure', message: 'Error occurred while trying to archive module' }
     end
 
@@ -1130,13 +1079,13 @@ class ProjectModulesController < ApplicationController
   end
 
   def upload_project_module
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_upload]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_upload
 
     @project_module = ProjectModule.new
   end
 
   def upload_new_project_module
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_upload]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_upload
 
     unless SpatialiteDB.library_exists?
       @project_module = ProjectModule.new

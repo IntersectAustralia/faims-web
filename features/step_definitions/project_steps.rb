@@ -847,8 +847,8 @@ And /^I should see dialog "([^"]*)"$/ do |message|
 end
 
 And /^I perform HTTP authentication$/ do
-  username = AndroidController::ANDROID_USER
-  password = AndroidController::ANDROID_TOKEN
+  username = Rails.application.config.android[:user]
+  password = Rails.application.config.android[:token]
   if page.driver.respond_to?(:basic_auth)
     #puts 'Responds to basic_auth'
     page.driver.basic_auth(username, password)

@@ -1,31 +1,17 @@
 class UsersController < ApplicationController
-
+  include UserBreadCrumbs
+  before_filter :crumbs
   before_filter :authenticate_user!
   load_and_authorize_resource
 
-  def crumbs
-    user = User.find(params[:id]) if params[:id]
-    @crumbs =
-        {
-            :pages_home => {title: 'Home', url: pages_home_path},
-
-            :users_index => {title: 'Users', url: users_path },
-            :users_add => {title: 'Add', url: new_user_path },
-            :users_show => {title: 'Details', url: user ? user_path(user) : nil },
-            :users_edit_role => {title: 'Edit Role', url: user ? edit_role_user_path(user) : nil },
-            :users_edit_details => {title: 'Edit Details', url: user ? edit_details_user_path(user) : nil },
-            :users_edit_password => {title: 'Edit Password', url: user ? change_password_user_path(user) : nil },
-        }
-  end
-
   def index
-    @page_crumbs = [:pages_home, :users_index]
+    page_crumbs :pages_home, :users_index
 
     @users = User.all
   end
 
   def show
-    @page_crumbs = [:pages_home, :users_index, :users_show]
+    page_crumbs :pages_home, :users_index, :users_show
   end
 
   def admin
@@ -62,7 +48,7 @@ class UsersController < ApplicationController
   end
 
   def edit_role
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_role]
+    page_crumbs :pages_home, :users_index, :users_show, :users_edit_role
 
     if @user == current_user
       flash.now[:alert] = "You are changing the role of the user you are logged in as."
@@ -102,13 +88,13 @@ class UsersController < ApplicationController
   end
 
   def new
-    @page_crumbs = [:pages_home, :users_index, :users_add]
+    page_crumbs :pages_home, :users_index, :users_add
 
     @user = User.new
   end
 
   def create
-    @page_crumbs = [:pages_home, :users_index, :users_add]
+    page_crumbs :pages_home, :users_index, :users_add
 
     @user = User.new(params[:user])
     if @user.valid?
@@ -140,13 +126,13 @@ class UsersController < ApplicationController
   end
 
   def edit_details
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_details]
+    page_crumbs :pages_home, :users_index, :users_show, :users_edit_details
 
     @user = User.find(params[:id])
   end
 
   def update_details
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_details]
+    page_crumbs :pages_home, :users_index, :users_show, :users_edit_details
 
     @user = User.find(params[:id])
     @user.assign_attributes(params[:user])
@@ -161,13 +147,13 @@ class UsersController < ApplicationController
   end
 
   def change_password
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
+    page_crumbs :pages_home, :users_index, :users_show, :users_edit_password
 
     @user = User.find(params[:id])
   end
 
   def save_password
-    @page_crumbs = [:pages_home, :users_index, :users_show, :users_edit_password]
+    page_crumbs :pages_home, :users_index, :users_show, :users_edit_password
 
     @user = User.find(params[:id])
     @user.assign_attributes(params[:user])

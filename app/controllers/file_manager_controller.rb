@@ -1,21 +1,11 @@
 class FileManagerController < ApplicationController
-
+  include ProjectModuleBreadCrumbs
+  before_filter :crumbs
   before_filter :authenticate_user!
   load_and_authorize_resource :project_module
 
-  def crumbs
-    project_module = ProjectModule.find(params[:id]) if params[:id]
-    @crumbs =
-      {
-          :pages_home => {title: 'Home', url: pages_home_path},
-          :project_modules_index => {title: 'Modules', url: project_modules_path},
-          :project_modules_show => {title: project_module ? project_module.name : nil, url: project_module ? project_module_path(project_module) : nil},
-          :project_modules_files => {title: 'Files', url: project_module ? project_module_file_list_path(project_module) : nil},
-      }
-  end
-
   def file_list
-    @page_crumbs = [:pages_home, :project_modules_index, :project_modules_show, :project_modules_files]
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_files
 
     @project_module = ProjectModule.find(params[:id])
     @dir = FileHelper.get_file_list_by_dir(@project_module.get_path(:data_files_dir), '.')

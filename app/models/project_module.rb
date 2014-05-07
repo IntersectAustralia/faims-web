@@ -72,12 +72,6 @@ class ProjectModule < ActiveRecord::Base
     write_attribute(:name, value.strip.squish) if value
   end
 
-  def vocab_id
-  end
-
-  def type
-  end
-
   # project_module database
   def db
     Database.new(self)
