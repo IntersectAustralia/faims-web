@@ -15,13 +15,13 @@ def fill_database(db, version = nil, seed = nil)
   index = seed ? seed : 0
 
   (s..n).each do |i|
-    db.execute("INSERT INTO ArchEntity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, AEntTimestamp, VersionNum) " +
+    db.execute("INSERT INTO archentity (uuid, userid, aenttypeid, geospatialcolumntype, geospatialcolumn, aenttimestamp, versionnum) " +
         "VALUES (cast('#{index}' as integer), '0', 'ExcavationUnitStructure', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
-      db.execute("INSERT INTO AEntValue (uuid, userid, VocabID, AttributeID, Measure, FreeText, Certainty, ValueTimestamp, VersionNum) " +
-          "SELECT cast('#{index}' as integer), '0', '0', attributeID, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
-          "FROM AttributeKey " +
+      db.execute("INSERT INTO aentvalue (uuid, userid, vocabid, attributeid, measure, freetext, certainty, valuetimestamp, versionnum) " +
+          "SELECT cast('#{index}' as integer), '0', '0', attributeid, '0', 'Text', '0', CURRENT_TIMESTAMP, #{version} " +
+          "FROM attributekey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
       index = index + 1
     end
@@ -30,13 +30,13 @@ def fill_database(db, version = nil, seed = nil)
   index = seed ? seed : 0
 
   (s..n).each do |i|
-    db.execute("INSERT INTO Relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, RelnTimestamp, VersionNum) " +
+    db.execute("INSERT INTO relationship (relationshipid, userid, relnTypeid, geospatialcolumntype, geospatialcolumn, relntimestamp, versionnum) " +
         "VALUES (cast('#{index}' as integer), '0', 'Area', 'GEOMETRYCOLLECTION', GeomFromText('GEOMETRYCOLLECTION(POINT(0 0))', 4326), CURRENT_TIMESTAMP, #{version});")
 
     (s..n).each do |j|
-      db.execute("INSERT INTO RelnValue (RelationshipID, userid, VocabID, AttributeID, FreeText, Certainty, RelnValueTimestamp, VersionNum) " +
-          "SELECT cast('#{index}' as integer), '0', '0', attributeId, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
-          "FROM AttributeKey " +
+      db.execute("INSERT INTO relnvalue (relationshipid, userid, vocabid, attributeid, freetext, certainty, relnvaluetimestamp, versionnum) " +
+          "SELECT cast('#{index}' as integer), '0', '0', attributeid, 'Text', '1.0', CURRENT_TIMESTAMP, #{version} " +
+          "FROM attributekey " +
           "WHERE attributeName = 'Excavator' COLLATE NOCASE;")
       index = index + 1
     end
@@ -45,7 +45,7 @@ def fill_database(db, version = nil, seed = nil)
   index = seed ? seed : 0
 
   (s..n).each do |i|
-    db.execute("INSERT INTO AEntReln (UUID, RelationshipID, userid, ParticipatesVerb, AEntRelnTimestamp, VersionNum) " +
+    db.execute("INSERT INTO aentreln (uuid, relationshipid, userid, participatesverb, aentrelntimestamp, versionnum) " +
                                         "VALUES ('#{index}', '#{index}', '0', '', CURRENT_TIMESTAMP, #{version});")
     index = index + 1
   end
