@@ -74,7 +74,7 @@ module FaimsWeb
     config.discovery_server_port = 3001
 
     # specify port for server
-    config.server_port = 3000
+    config.server_port = 80
 
     config.server_properties_file = Rails.root.join("server.properties").to_s
 
