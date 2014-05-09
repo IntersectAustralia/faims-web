@@ -74,7 +74,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
 
   end
@@ -93,7 +93,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
 
   end
@@ -115,7 +115,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
   end
 
@@ -136,7 +136,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
   end
 
@@ -150,7 +150,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
   end
 
@@ -171,7 +171,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
   end
 
@@ -205,7 +205,7 @@ describe ProjectModule do
     rescue Exception => e
       raise e
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
 
   end

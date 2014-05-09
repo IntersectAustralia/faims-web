@@ -951,14 +951,14 @@ class Database
     db = SpatialiteDB.new(temp.path)
     db.execute("SELECT InitSpatialMetaData();")
     result = db.execute("select srid || ' / ' || ref_sys_name, auth_srid from spatial_ref_sys;")
-    FileUtils.rm Rails.root.join('lib/assets/spatial_ref_list.json') if File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')
+    FileUtils.remove_entry_secure Rails.root.join('lib/assets/spatial_ref_list.json') if File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')
     File.open(Rails.root.join('lib/assets/spatial_ref_list.json'), 'w') do |f|
       f.write(result.to_json)
     end
   end
 
   def self.generate_template_db
-    FileUtils.rm Rails.root.join('lib/assets/template_db.sqlite3') if File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
+    FileUtils.remove_entry_secure Rails.root.join('lib/assets/template_db.sqlite3') if File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
     db = SpatialiteDB.new(Rails.root.join('lib/assets/template_db.sqlite3').to_s)
     db.execute("SELECT InitSpatialMetaData();")
   end

@@ -30,7 +30,7 @@ class AndroidController < ApplicationController
   def settings_download
     project_module = ProjectModule.find_by_key(params[:key])
     project_module.settings_mgr.with_lock do
-      send_file project_module.get_path(:settings_archive)
+      safe_send_file project_module.get_path(:settings_archive)
     end
   end
 
@@ -55,12 +55,12 @@ class AndroidController < ApplicationController
 
     unless project_module.validate_version(params[:version])
       project_module.db_mgr.with_lock do
-        send_file project_module.get_path(:db_archive)
+        safe_send_file project_module.get_path(:db_archive)
       end
     else
       info = project_module.db_version_archive_info(params[:version])
       temp_db_file = info[:file]
-      send_file temp_db_file
+      safe_send_file temp_db_file
     end
   end
 
@@ -111,7 +111,7 @@ class AndroidController < ApplicationController
     return render :json => {message: 'bad request'}.to_json, :status => 400 if file == nil
     return render :json => {message: 'file does not exist'}.to_json, :status => 400 unless File.exists? file
 
-    send_file file
+    safe_send_file file
   end
 
   def server_file_upload
@@ -169,10 +169,10 @@ class AndroidController < ApplicationController
     project_module = ProjectModule.find_by_key(params[:key])
     if file == project_module.get_path(:app_files_archive)
       project_module.app_mgr.with_lock do
-        send_file file
+        safe_send_file file
       end
     else
-      send_file file
+      safe_send_file file
     end
   end
 
@@ -227,10 +227,10 @@ class AndroidController < ApplicationController
     project_module = ProjectModule.find_by_key(params[:key])
     if file == project_module.get_path(:data_files_archive)
       project_module.data_mgr.with_lock do
-        send_file file
+        safe_send_file file
       end
     else
-      send_file file
+      safe_send_file file
     end
   end
 

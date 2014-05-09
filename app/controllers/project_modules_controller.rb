@@ -110,7 +110,7 @@ class ProjectModulesController < ApplicationController
       rescue Exception => e
         has_exception = e
         # cleanup
-        FileUtils.rm_rf @project_module.get_path(:project_module_dir) if File.directory? @project_module.get_path(:project_module_dir)
+        safe_delete_directory @project_module.get_path(:project_module_dir) if File.directory? @project_module.get_path(:project_module_dir)
         @project_module.destroy
       ensure
         FileUtils.remove_entry_secure @tmpdir
@@ -974,7 +974,7 @@ class ProjectModulesController < ApplicationController
     # make temp directory and store its path in session
     create_tmp_dir
 
-    project_module_setting = JSON.parse(File.read(@project_module.get_path(:settings)))
+    project_module_setting = JSON.parse(safe_file_read(@project_module.get_path(:settings)))
     @name = @project_module.name
     @season = project_module_setting['season']
     @description = project_module_setting['description']
@@ -1030,7 +1030,7 @@ class ProjectModulesController < ApplicationController
   end
 
   def download_attached_file
-    send_file Rails.root.join("modules/#{ProjectModule.find(params[:id]).key}/#{params[:path]}"), :filename => params[:name]
+    safe_send_file safe_root_join("modules/#{ProjectModule.find(params[:id]).key}/#{params[:path]}"), :filename => params[:name]
   end
 
   def update
@@ -1070,7 +1070,7 @@ class ProjectModulesController < ApplicationController
 
     if wait_for_project_module
       @project_module.with_lock do
-        send_file @project_module.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
+        safe_send_file @project_module.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
       end
     else
       return redirect_to project_module_path(@project_module)

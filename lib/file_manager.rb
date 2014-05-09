@@ -34,7 +34,7 @@ class FileManager
 	end
 
 	def clean_dirt
-		FileUtils.rm @dirty_file if dirty?
+		FileUtils.remove_entry_secure @dirty_file if dirty?
 		!dirty?
 	end
 
@@ -59,7 +59,7 @@ class FileManager
 	end
 
 	def clear_lock
-		FileUtils.rm @lock_file if locked?
+		FileUtils.remove_entry_secure @lock_file if locked?
 		!locked?
 	end
 
@@ -77,7 +77,7 @@ class FileManager
       return true
     end
 		return true unless dirty?
-    FileUtils.rm @archive if File.exists? @archive
+    FileUtils.remove_entry_secure @archive if File.exists? @archive
     tmp_dir = Dir.mktmpdir
     with_lock do
       @files.each do |f|
@@ -92,7 +92,7 @@ class FileManager
       clean_dirt
     end
 	ensure
-		FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+		FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 
   def last_modified

@@ -13,8 +13,8 @@ end
 
 And /^I have a project modules dir$/ do
   Dir.mkdir('tmp') unless File.directory? 'tmp'
-  FileUtils.rm_rf('tmp/modules')
-  FileUtils.rm_rf('tmp/uploads')
+  FileUtils.remove_entry_secure('tmp/modules')
+  FileUtils.remove_entry_secure('tmp/uploads')
   Dir.mkdir('tmp/modules')
   Dir.mkdir('tmp/uploads')
 end
@@ -351,9 +351,8 @@ def check_archive_download_files(type, name, info, project_module_files, exclude
 
   # check if files all exist
   project_module = ProjectModule.find_by_name(name)
-  tmp_dir = project_module.get_path(:project_module_dir) + '/' + SecureRandom.uuid
 
-  download_list = get_archive_list(tmp_dir, file)
+  download_list = get_archive_list(file)
 
   exclude_files ||= []
 
@@ -362,21 +361,19 @@ def check_archive_download_files(type, name, info, project_module_files, exclude
 
   # check if file is not in exclude list
   download_list.select{ |f| exclude_files.include? f }.size.should == 0
-
-  FileUtils.rm_rf tmp_dir
-
 end
 
-def get_archive_list(dir, archive)
+def get_archive_list(archive)
+  dir = Rails.root.join("tmp/#{SecureRandom.uuid}")
   Dir.mkdir(dir)
 
   `tar xfz #{archive.path} -C #{dir}`
 
   file_list = FileHelper.get_file_list(dir)
 
-  FileUtils.rm_rf dir
-
   file_list
+ensure
+  FileUtils.remove_entry_secure dir if Dir.exists? dir
 end
 
 Then /^I should download project module package file for "([^"]*)"$/ do |name|
@@ -425,9 +422,7 @@ Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
   project_module = ProjectModule.find_by_name(name)
 
   upload_file = File.open(filepath, 'r')
-
-  tmp_dir = project_module.get_path(:project_module_dir) + '/' + SecureRandom.uuid
-  upload_list = get_archive_list(tmp_dir, upload_file)
+  upload_list = get_archive_list(upload_file)
 
   # check if uploaded files exist on server file list
   server_list = project_module.server_file_list
@@ -439,9 +434,7 @@ Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
   project_module = ProjectModule.find_by_name(name)
 
   upload_file = File.open(filepath, 'r')
-
-  tmp_dir = project_module.get_path(:project_module_dir) + '/' + SecureRandom.uuid
-  upload_list = get_archive_list(tmp_dir, upload_file)
+  upload_list = get_archive_list(upload_file)
 
   # check if uploaded files exist on app file list
   app_list = project_module.app_file_list
@@ -453,9 +446,7 @@ Then /^I should have stored data files "([^"]*)" for (.*)$/ do |file, name|
   project_module = ProjectModule.find_by_name(name)
 
   upload_file = File.open(filepath, 'r')
-
-  tmp_dir = project_module.get_path(:project_module_dir) + '/' + SecureRandom.uuid
-  upload_list = get_archive_list(tmp_dir, upload_file)
+  upload_list = get_archive_list(upload_file)
 
   # check if uploaded files exist on data file list
   data_list = project_module.data_file_list
@@ -509,7 +500,7 @@ end
 
 Then /^I remove all files for "([^"]*)"$/ do |name|
    p = ProjectModule.find_by_name(name)
-   FileUtils.rm_rf p.get_path(:files_dir)
+   FileUtils.remove_entry_secure p.get_path(:files_dir)
 end
 
 Then(/^I click file with name "([^"]*)"$/) do |name|
@@ -676,7 +667,7 @@ def check_project_module_archive_updated(project_module)
   rescue Exception => e
     raise e
   ensure
-    FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+    FileUtils.remove_entry_secure tmp_dir if File.directory? tmp_dir
   end
 end
 

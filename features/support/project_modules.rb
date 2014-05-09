@@ -28,6 +28,6 @@ def archived_file_match(archived_file, file)
   rescue Exception => e
     raise e
   ensure
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if File.directory? tmp_dir
   end
 end

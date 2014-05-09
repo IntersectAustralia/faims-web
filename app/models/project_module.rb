@@ -9,11 +9,11 @@ class ProjectModule < ActiveRecord::Base
   attr_accessor :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address,
                 :participant, :validation_schema, :srid, :copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data, :tmpdir
 
-  attr_accessible :name, :key, :created, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by,:permit_type, :contact_address, :participant, :vocab_id, :type,
+  attr_accessible :name, :key, :created, :data_schema, :ui_schema, :ui_logic, :arch16n, :season, :description, :permit_no, :permit_holder, :permit_issued_by, :permit_type, :contact_address, :participant,
     :validation_schema, :srid,:copyright_holder, :client_sponsor, :land_owner, :has_sensitive_data , :tmpdir
 
   validates :name, :presence => true, :length => {:maximum => 255},
-            :format => {:with => /^(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*$/i} # do not allow file name reserved characters
+            :format => {:with => /\A(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*\z/i} # do not allow file name reserved characters
 
   validates :key, :presence => true, :uniqueness => true
 
@@ -309,7 +309,7 @@ class ProjectModule < ActiveRecord::Base
       # generate archive
       generate_archives
     rescue Exception => e
-      FileUtils.rm_rf get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
+      FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
       raise e
     ensure
       # ignore
@@ -325,7 +325,7 @@ class ProjectModule < ActiveRecord::Base
         # generate archive
         settings_mgr.make_dirt
       rescue Exception => e
-        FileUtils.rm_rf get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
+        FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
         raise e
       ensure
         # ignore
@@ -340,7 +340,7 @@ class ProjectModule < ActiveRecord::Base
       # generate archive
       generate_archives
     rescue Exception => e
-      FileUtils.rm_rf get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
+      FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
       raise e
     ensure
       # ignore
@@ -372,7 +372,7 @@ class ProjectModule < ActiveRecord::Base
       # TODO remove added version in database if created
     ensure
       # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if File.directory? tmp_dir
     end
 
   end
@@ -660,7 +660,7 @@ class ProjectModule < ActiveRecord::Base
         raise e
       ensure
         # cleanup
-        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+        FileUtils.remove_entry_secure tmp_dir if File.directory? tmp_dir
       end
     end
   end
@@ -678,7 +678,7 @@ class ProjectModule < ActiveRecord::Base
         raise e
       ensure
         # cleanup
-        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+        FileUtils.remove_entry_secure tmp_dir if File.directory? tmp_dir
 
         db_mgr.clean_dirt
       end
@@ -698,7 +698,7 @@ class ProjectModule < ActiveRecord::Base
         raise e
       ensure
         # cleanup
-        FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+        FileUtils.remove_entry_secure tmp_dir if File.directory? tmp_dir
       end
     end
   end
@@ -718,7 +718,7 @@ class ProjectModule < ActiveRecord::Base
       tar_file = params[:project_module][:project_module_file]
 
       tmp_dir = Dir.mktmpdir + '/'
-      `tar xjf #{tar_file.tempfile.to_path.to_s} -C #{tmp_dir}`
+      TarHelper.untar('xjf', tar_file.tempfile.to_path.to_s, tmp_dir)
       project_module_settings = JSON.parse(File.read(tmp_dir + 'module/module.settings').as_json)
       if !ProjectModule.checksum_uploaded_file(tmp_dir + 'module')
         return 'Wrong hash sum for the module'
@@ -741,7 +741,7 @@ class ProjectModule < ActiveRecord::Base
     rescue Exception
       return 'Module failed to upload'
     ensure
-      FileUtils.rm_rf tmp_dir if tmp_dir
+      FileUtils.remove_entry_secure tmp_dir if tmp_dir
     end
   end
 
@@ -755,7 +755,7 @@ class ProjectModule < ActiveRecord::Base
     TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
     tmp_file.path
   ensure
-    FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir
+    FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 
 end

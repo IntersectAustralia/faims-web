@@ -32,9 +32,9 @@ class FileManagerController < ApplicationController
         @project_module.data_mgr.with_lock do
           if File.directory? file
             archive = @project_module.create_temp_dir_archive(file)
-            send_file archive
+            safe_send_file archive
           else
-            send_file file
+            safe_send_file file
           end
         end
       end
@@ -97,14 +97,14 @@ class FileManagerController < ApplicationController
       else
         @project_module.data_mgr.with_lock do
           if params[:path] == '.'
-            FileUtils.rm_rf @project_module.get_path(:data_files_dir)
-            FileUtils.mkdir @project_module.get_path(:data_files_dir)
+            safe_delete_directory @project_module.get_path(:data_files_dir)
+            safe_create_directory @project_module.get_path(:data_files_dir)
             redirect_to :action => 'file_list', :notice => 'Deleted directory'
           elsif File.directory? file
-            FileUtils.rm_rf file
+            safe_delete_directory file
             redirect_to :action => 'file_list', :notice => 'Deleted directory'
           else
-            File.delete file
+            safe_delete_file file
             redirect_to :action => 'file_list', :notice => 'Deleted file'
           end
         end

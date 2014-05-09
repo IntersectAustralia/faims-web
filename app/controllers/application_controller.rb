@@ -1,4 +1,7 @@
+require Rails.root.join('lib/security_helper')
+
 class ApplicationController < ActionController::Base
+  include SecurityHelper
   protect_from_forgery
 
   # catch access denied and redirect to the home page

@@ -57,7 +57,7 @@ class MergeDaemon
 
       !sorted_files.empty?
     ensure
-      FileUtils.rm_rf db_file_path if db_file_path
+      FileUtils.remove_entry_secure db_file_path if db_file_path
     end
   end
 

@@ -26,7 +26,7 @@ begin
     desc 'Clear locks from all project modules'
     task :clear_lock => :environment do
     	require 'find'
-		  Find.find(Rails.root.join('modules').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('modules')
+		  Find.find(Rails.root.join('modules').to_s) { |path| FileUtils.remove_entry_secure Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('modules')
 	  end
     desc 'Setup project module assets'
     task :setup => :environment do
@@ -49,10 +49,10 @@ def clean_project_modules
   ProjectModule.destroy_all
 
   project_modules_dir = Rails.application.config.server_project_modules_directory
-  FileUtils.rm_rf Rails.root.join(project_modules_dir) if File.directory? project_modules_dir
+  FileUtils.remove_entry_secure Rails.root.join(project_modules_dir) if File.directory? project_modules_dir
   Dir.mkdir(Rails.root.join(project_modules_dir))
 
   uploads_dir = Rails.application.config.server_uploads_directory
-  FileUtils.rm_rf Rails.root.join(uploads_dir) if File.directory? uploads_dir
+  FileUtils.remove_entry_secure Rails.root.join(uploads_dir) if File.directory? uploads_dir
   Dir.mkdir(Rails.root.join(uploads_dir))
 end
