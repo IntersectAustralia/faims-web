@@ -91,8 +91,13 @@ class AndroidController < ApplicationController
 
     if MD5Checksum.compute_checksum(file) == md5
       begin
-        @project_module.add_server_file(path, file)
-        render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
+        @project_module.server_mgr.with_shared_lock do
+          @project_module.add_server_file(path, file)
+          render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
+        end
+      rescue FileManager::TimeoutException => e
+        logger.warn e
+        render :json => { message: 'request timeout' }.to_json, :status => 408
       rescue Exception => e
         logger.error e
         render :json => { message: 'internal server error' }.to_json, :status => 500
@@ -128,8 +133,13 @@ class AndroidController < ApplicationController
 
     if MD5Checksum.compute_checksum(file) == md5
       begin
-        @project_module.add_app_file(path, file)
-        render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
+        @project_module.app_mgr.with_shared_lock do
+          @project_module.add_app_file(path, file)
+          render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
+        end
+      rescue FileManager::TimeoutException => e
+        logger.warn e
+        render :json => { message: 'request timeout' }.to_json, :status => 408
       rescue Exception => e
         logger.error e
         render :json => { message: 'internal server error' }.to_json, :status => 500

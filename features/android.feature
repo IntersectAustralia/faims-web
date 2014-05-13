@@ -202,8 +202,8 @@ Feature: Android
     Given I have project module "Module 1"
     And I upload server file "<file>" to Module 2 fails
   Examples:
-    | file                        |
-    | file1.tar.gz                |
+    | file         |
+    | file1.tar.gz |
 
   Scenario: See app files info for project module
     Given I have project module "Module 1"
@@ -226,36 +226,64 @@ Feature: Android
     And I requested the android app files info for Module 2
     Then I should see bad request page
 
-  Scenario: Download app files
+  Scenario Outline: Download app files
     Given I have project module "Module 1"
-    And I have app files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    Then I archive and download app files for "Module 1"
+    And I have app file "<file>" for "Module 1"
+    And I requested the android app file download "<file>" link for Module 1
+    Then I should download app "<file>" for "Module 1"
+  Examples:
+    | file                        |
+    | file1.tar.gz                |
+    | file2.sqlite3               |
+    | file3.txt                   |
+    | dir1/dir2/dir3/file4.tar.gz |
 
-  Scenario: Cannot download app files no new files to download
+  Scenario Outline: Cannot download app files if app files is locked
     Given I have project module "Module 1"
-    And I requested the android app files download link for Module 1
+    And I have app file "<file>" for "Module 1"
+    And app files are locked for "Module 1"
+    And I requested the android app file download "<file>" link for Module 1
+    Then I should see timeout request page
+  Examples:
+    | file         |
+    | file1.tar.gz |
+
+  Scenario Outline: Cannot download app files if file doesn't exist
+    Given I have project module "Module 1"
+    And I requested the android app file download "<file>" link for Module 2
     Then I should see bad request page
+  Examples:
+    | file         |
+    | file1.tar.gz |
 
-  Scenario: Cannot download app files if project module doesn't exist
+  Scenario Outline: Cannot download app files if module doesn't exist
     Given I have project module "Module 1"
-    And I requested the android app files download link for Module 2
+    And I have app file "<file>" for "Module 1"
+    And I requested the android app file download "<file>" link for Module 2
     Then I should see bad request page
+  Examples:
+    | file         |
+    | file1.tar.gz |
 
-  Scenario: Upload app files
+  Scenario Outline: Upload app files
     Given I have project module "Module 1"
-    And I upload app files "test_files.tar.gz" to Module 1 succeeds
-    Then I should have stored app files "test_files.tar.gz" for Module 1
+    And I upload app file "<file>" to Module 1 succeeds
+    Then I should have stored app file "<file>" for Module 1
+  Examples:
+    | file                        |
+    | file1.tar.gz                |
+    | file2.sqlite3               |
+    | file3.txt                   |
+    | dir1/dir2/dir3/file4.tar.gz |
 
-  Scenario: Cannot upload app files if project module doesn't exist
+  Scenario Outline: Cannot upload app files is module does not exist
     Given I have project module "Module 1"
-    And I upload app files "test_files.tar.gz" to Module 2 fails
+    And I upload app file "<file>" to Module 2 fails
+  Examples:
+    | file         |
+    | file1.tar.gz |
 
-  Scenario: See data files archive info for project module
+  Scenario: See data files info for project module
     Given I have project module "Module 1"
     And I have data files for "Module 1"
       | file                        |
@@ -263,39 +291,55 @@ Feature: Android
       | file2.sqlite3               |
       | file3.txt                   |
       | dir1/dir2/dir3/file4.tar.gz |
-    And I requested the android data files archive info for Module 1
-    Then I should see json for "Module 1" data files archive
+    And I requested the android data files info for Module 1
+    Then I should see json for "Module 1" data files with
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
 
   Scenario: Cannot see data files archive info if project module doesn't exist
     Given I have project module "Module 1"
-    And I requested the android data files archive info for Module 2
+    And I requested the android data files info for Module 2
     Then I should see bad request page
 
-  Scenario: Download data files
+  Scenario Outline: Download data files
     Given I have project module "Module 1"
-    And I have data files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    Then I archive and download data files for "Module 1"
+    And I have data file "<file>" for "Module 1"
+    And I requested the android data file download "<file>" link for Module 1
+    Then I should download data "<file>" for "Module 1"
+  Examples:
+    | file                        |
+    | file1.tar.gz                |
+    | file2.sqlite3               |
+    | file3.txt                   |
+    | dir1/dir2/dir3/file4.tar.gz |
 
-  Scenario: Cannot download data files no new files to download
+  Scenario Outline: Cannot download data files if app files is locked
     Given I have project module "Module 1"
-    And I requested the android data files download link for Module 1
+    And I have data file "<file>" for "Module 1"
+    And data files are locked for "Module 1"
+    And I requested the android data file download "<file>" link for Module 1
+    Then I should see timeout request page
+  Examples:
+    | file         |
+    | file1.tar.gz |
+
+  Scenario Outline: Cannot download data files if file doesn't exist
+    Given I have project module "Module 1"
+    And I requested the android data file download "<file>" link for Module 2
     Then I should see bad request page
+  Examples:
+    | file         |
+    | file1.tar.gz |
 
-  Scenario: Cannot download data files if project module doesn't exist
+  Scenario Outline: Cannot download data files if module doesn't exist
     Given I have project module "Module 1"
-    And I requested the android data files download link for Module 2
+    And I have data file "<file>" for "Module 1"
+    And I requested the android data file download "<file>" link for Module 2
     Then I should see bad request page
+  Examples:
+    | file         |
+    | file1.tar.gz |
 
-  Scenario: Upload data files
-    Given I have project module "Module 1"
-    And I upload data files "test_files.tar.gz" to Module 1 succeeds
-    Then I should have stored data files "test_files.tar.gz" for Module 1
-
-  Scenario: Cannot upload data files if project module doesn't exist
-    Given I have project module "Module 1"
-    And I upload app files "test_files.tar.gz" to Module 2 fails

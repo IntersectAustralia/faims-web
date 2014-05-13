@@ -70,10 +70,10 @@ Then /^I should see json for "([^"]*)" settings with version (.*)$/ do |name, ve
   page.should have_content("\"version\":\"#{version}\"")
 end
 
-Then /^I should download settings "([^"]*)" for "([^"]*)"$/ do |file, name|
+Then /^I should download (.*) "([^"]*)" for "([^"]*)"$/ do |type, file, name|
   project_module = ProjectModule.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + file + "\""
-  file = File.open(project_module.settings_request_file(file), 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(file) + "\""
+  file = File.open(project_module.send("#{type}_request_file", file), 'r')
   page.source == file.read
 end
 
@@ -232,14 +232,18 @@ Then /^I should see empty file list$/ do
   page.should have_content({files:[]}.to_json)
 end
 
-And /^I have (.*) files for "([^"]*)"$/ do |type, name, table|
+And /^I have (.*) file "([^"]*)" for "([^"]*)"$/ do |type, file, name|
   project_module = ProjectModule.find_by_name(name)
-  table.hashes.each do |hash|
-    upload_file = File.open(File.join(project_module.get_path(:tmp_dir), File.basename(hash[:file])), File::CREAT | File::RDWR)
-    upload_file.write(File.read(Rails.root.join("features/assets/#{hash[:file]}")))
-    upload_file.close
+  upload_file = File.open(File.join(project_module.get_path(:tmp_dir), File.basename(file)), File::CREAT | File::RDWR)
+  upload_file.write(File.read(Rails.root.join("features/assets/#{file}")))
+  upload_file.close
 
-    project_module.send("add_#{type}_file", hash[:file], upload_file)
+  project_module.send("add_#{type}_file", file, upload_file)
+end
+
+And /^I have (.*) files for "([^"]*)"$/ do |type, name, table|
+  table.hashes.each do |hash|
+    step "I have #{type} file \"#{hash[:file]}\" for \"#{name}\""
   end
 end
 
@@ -640,7 +644,12 @@ And /^I perform HTTP authentication$/ do
   end
 end
 
-And /^files are locked for "([^"]*)"$/ do |name|
+And /^app files are locked for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  project_module.app_mgr.wait_for_lock(File::LOCK_EX)
+end
+
+And /^data files are locked for "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
   project_module.data_mgr.wait_for_lock(File::LOCK_EX)
 end

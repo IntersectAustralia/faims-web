@@ -94,25 +94,21 @@ module NavigationHelpers
         project_module = ProjectModule.find_by_name($1)
         android_app_file_info_path(project_module ? project_module.key : 'na')
 
-      when /the android app files download link for (.*)$/
-        project_module = ProjectModule.find_by_name($1)
-        android_app_file_download_path(project_module ? project_module.key : 'na')
+      when /the android app file download "(.*)" link for (.*)$/
+        project_module = ProjectModule.find_by_name($2)
+        android_app_file_download_path(project_module ? project_module.key : 'na', { request_file: $1 })
 
       when /the android app upload file link for (.*)$/
         project_module = ProjectModule.find_by_name($1)
         android_app_file_upload_path(project_module ? project_module.key : 'na')
 
-      when /the android data file list for (.*)$/
-        project_module = ProjectModule.find_by_name($1)
-        android_data_file_list_path(project_module ? project_module.key : 'na')
-
       when /the android data files info for (.*)$/
         project_module = ProjectModule.find_by_name($1)
         android_data_file_info_path(project_module ? project_module.key : 'na')
 
-      when /the android data files download link for (.*)$/
-        project_module = ProjectModule.find_by_name($1)
-        android_data_file_download_path(project_module ? project_module.key : 'na')
+      when /the android data file download "(.*)" link for (.*)$/
+        project_module = ProjectModule.find_by_name($2)
+        android_data_file_download_path(project_module ? project_module.key : 'na', { request_file: $1 })
 
       when /the android data upload file link for (.*)$/
         project_module = ProjectModule.find_by_name($1)

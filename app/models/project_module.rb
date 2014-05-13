@@ -307,7 +307,7 @@ class ProjectModule < ActiveRecord::Base
 
   def data_files_info
     {
-        files: file_mgr_info(app_mgr)
+        files: file_mgr_info(data_mgr)
     }
   end
 
