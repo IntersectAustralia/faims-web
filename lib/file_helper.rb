@@ -39,11 +39,6 @@ module FileHelper
     end
   end
 
-  def self.touch_file(file)
-    raise ArgumentError unless file
-    `touch #{file}`
-  end
-
   def self.group_by_dir(files)
     dirs = {}
 

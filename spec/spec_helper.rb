@@ -51,3 +51,5 @@ class Warden::SessionSerializer
     keys
   end
 end
+
+FileManager::LOCK_TIMEOUT = 1

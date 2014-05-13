@@ -62,101 +62,91 @@ Then /^I should see json for project modules$/ do
 end
 
 Then /^I should see json for "([^"]*)" settings$/ do |name|
-  page.should have_content(ProjectModule.find_by_name(name).settings_archive_info.to_json)
+  page.should have_content(ProjectModule.find_by_name(name).settings_info.to_json)
 end
 
-Then /^I should download settings for "([^"]*)"$/ do |name|
+Then /^I should see json for "([^"]*)" settings with version (.*)$/ do |name, version|
+  page.should have_content(ProjectModule.find_by_name(name).settings_info.to_json)
+  page.should have_content("\"version\":\"#{version}\"")
+end
+
+Then /^I should download settings "([^"]*)" for "([^"]*)"$/ do |file, name|
   project_module = ProjectModule.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project_module.get_name(:settings_archive) + "\""
-  file = File.open(project_module.get_path(:settings_archive), 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + file + "\""
+  file = File.open(project_module.settings_request_file(file), 'r')
   page.source == file.read
 end
 
 And /^I upload database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-  md5 = MD5Checksum.compute_checksum(upload_db_file)
-  project_module.check_sum(upload_db_file,md5).should be_true
+  # TODO post database to controller action
 end
 
 And /^I upload sync database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-  md5 = MD5Checksum.compute_checksum(upload_db_file)
-  project_module.check_sum(upload_db_file,md5).should be_true
+  # TODO post database to controller action
 end
 
 And /^I upload database "([^"]*)" to (.*) fails/ do |db_file, name|
-  lambda {
-    project_module = ProjectModule.find_by_name(name)
-    upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-    md5 = MD5Checksum.compute_checksum(upload_db_file)
-    project_module.check_sum(upload_db_file,md5).should be_true
-  }.should raise_error
-end
-
-Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
-  project_module.store_database(uploaded_file, 0)
-  stored_file = ProjectModule.uploads_path + '/' + Dir.entries(ProjectModule.uploads_path).select { |f| f unless File.directory? f }.first
-
-  # check stored file format (TODO why can't i use merge daemon)
-  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
-
-  # check if uploaded_file unarchived matches stored_file
-  archived_file_match(uploaded_file.path, stored_file).should be_true
-end
-
-Then /^I should have stored sync "([^"]*)" into (.*)$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
-  project_module.store_database(uploaded_file, 0)
-
-  stored_file = ProjectModule.uploads_path + '/' + Dir.entries(ProjectModule.uploads_path).select { |f| f unless File.directory? f }.first
-
-  # check stored file format (TODO why can't i use merge daemon)
-  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
-
-  # check if uploaded_file unarchived matches stored_file
-  archived_file_match(uploaded_file.path, stored_file).should be_true
-end
-
-Then /^I should not have stored "([^"]*)" into (.*)$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
-  project_module.store_database(uploaded_file, 0)
-
-  stored_file = ProjectModule.uploads_path + '/' + Dir.entries(ProjectModule.uploads_path).select { |f| f unless File.directory? f }.first
-
-  # check if uploaded_file unarchived matches stored_file
-  archived_file_match(uploaded_file.path, stored_file).should be_true
+  # TODO post database to controller action
 end
 
 And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
-  md5 = MD5Checksum.compute_checksum(upload_db_file) + '55'
-  project_module.check_sum(upload_db_file,md5).should be_false
+  # TODO post database to controller action
 end
 
-Then /^I should see json for "([^"]*)" db/ do |name|
-  page.should have_content(ProjectModule.find_by_name(name).db_archive_info.to_json)
+Then /^I should see json for "([^"]*)" db$/ do |name|
+  project = ProjectModule.find_by_name(name)
+  page.should have_content(project.db_version_info.to_json)
+  page.should have_content("\"version\":\"0\"")
+end
+
+Then /^I should see json for "([^"]*)" db with version (.*)$/ do |name, version|
+  project = ProjectModule.find_by_name(name)
+  page.should have_content(project.db_version_info.to_json)
+  page.should have_content("\"version\":\"#{version}\"")
+end
+
+Then /^I should see json for "([^"]*)" db from version (.*) to version (.*)$/ do |name, requested_version, version|
+  project = ProjectModule.find_by_name(name)
+  page.should have_content(project.db_version_info(requested_version).to_json)
+  page.should have_content("\"version\":\"#{version}\"")
+end
+
+And /^I have generate database cache version (.*) for "([^"]*)"$/ do |version, name|
+  project = ProjectModule.find_by_name(name)
+  project.generate_database_cache(version)
 end
 
 Then /^I should download db file for "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project_module.get_name(:db_archive) + "\""
-  file = File.open(project_module.get_path(:db_archive), 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(project_module.db_version_file_path) + "\""
+  file = File.open(project_module.db_version_file_path, 'r')
   page.source == file.read
 end
 
 Then /^I should download db file for "([^"]*)" from version (.*)$/ do |name, version|
   project_module = ProjectModule.find_by_name(name)
-  info = project_module.db_version_archive_info(version)
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
-  file = File.open(project_module.temp_db_version_file_path(version), 'r')
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(project_module.db_version_file_path(version)) + "\""
+  file = File.open(project_module.db_version_file_path(version), 'r')
   page.source == file.read
+end
+
+Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
+  project_module = ProjectModule.find_by_name(name)
+
+  db = File.read(Rails.root.join("features/assets/db.sqlite3"))
+
+  uploaded_file = Tempfile.new("db")
+  uploaded_file.write(db)
+  uploaded_file.close
+
+  project_module.store_database_from_android(uploaded_file, 0)
+  stored_file = ProjectModule.uploads_path + '/' + Dir.entries(ProjectModule.uploads_path).select { |f| f unless File.directory? f }.first
+
+  # check file matches
+  File.read(stored_file).should == db
+
+  # check stored filename matches
+  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
 end
 
 And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
@@ -164,21 +154,6 @@ And /^I have synced (.*) times for "([^"]*)"$/ do |num, name|
   (1..num.to_i).each do |i|
     SpatialiteDB.new(project_module.get_path(:db)).execute("insert into version (versionnum, uploadtimestamp, userid, ismerged) select #{i}, CURRENT_TIMESTAMP, 0, 1;")
   end
-end
-
-Then /^I should see json for "([^"]*)" settings with version (.*)$/ do |name, version|
-  page.should have_content(ProjectModule.find_by_name(name).settings_archive_info.to_json)
-  page.should have_content("\"version\":\"#{version}\"")
-end
-
-Then /^I should see json for "([^"]*)" database with version (.*)$/ do |name, version|
-  page.should have_content(ProjectModule.find_by_name(name).db_archive_info.to_json)
-  page.should have_content("\"version\":\"#{version}\"")
-end
-
-Then /^I should see json for "([^"]*)" version (.*) db with version (.*)$/ do |name, requested_version, version|
-  page.should have_content(ProjectModule.find_by_name(name).db_version_archive_info(requested_version).to_json)
-  page.should have_content("\"version\":\"#{version}\"")
 end
 
 When /^I click on "([^"]*)"$/ do |name|
@@ -196,184 +171,16 @@ When /^I click on "([^"]*)"$/ do |name|
   end
 end
 
+Then /^I should see processing request page$/ do
+  page.status_code.should == 202
+end
+
+Then /^I should see timeout request page$/ do
+  page.status_code.should == 408
+end
+
 Then /^I should see bad request page$/ do
   page.status_code.should == 400
-end
-
-Then /^I should see empty file list$/ do
-  page.should have_content({files:[]}.to_json)
-end
-
-And /^I have server only files for "([^"]*)"$/ do |name, table|
-  project_module = ProjectModule.find_by_name(name)
-  table.hashes.each do |row|
-    project_module.add_server_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
-  end
-end
-
-And /^I have app files for "([^"]*)"$/ do |name, table|
-  project_module = ProjectModule.find_by_name(name)
-  table.hashes.each do |row|
-    project_module.add_app_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
-  end
-  project_module.update_archives
-end
-
-And /^I have data files for "([^"]*)"$/ do |name, table|
-  project_module = ProjectModule.find_by_name(name)
-  table.hashes.each do |row|
-    project_module.add_data_file(File.open(Rails.root.to_s + '/features/assets/' + row[:file], 'r'), row[:file])
-  end
-  project_module.update_archives
-end
-
-Then /^I should see files$/ do |table|
-  files = []
-  table.hashes.each do |row|
-      files.push(row[:file])
-  end
-  files = files.sort
-  page.should have_content({files:files}.to_json)
-end
-
-Then /^I should see json for "([^"]*)" server files archive$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.server_file_archive_info
-  page.should have_content("\"size\":#{info[:size]}")
-end
-
-Then /^I should see json for "([^"]*)" app files archive$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.app_file_archive_info
-  page.should have_content("\"size\":#{info[:size]}")
-end
-
-Then /^I should see json for "([^"]*)" data files archive$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.data_file_archive_info
-  page.should have_content("\"size\":#{info[:size]}")
-end
-
-Then /^I should see json for "([^"]*)" server files archive given I already have files$/ do |name, table|
-  project_module = ProjectModule.find_by_name(name)
-  files = []
-  table.hashes.each do |row|
-    files.push(row[:file])
-  end
-  info = project_module.server_file_archive_info(files)
-  page.should have_content("\"size\":#{info[:size]}")
-end
-
-Then /^I should see json for "([^"]*)" app files archive given I already have files$/ do |name, table|
-  project_module = ProjectModule.find_by_name(name)
-  files = []
-  table.hashes.each do |row|
-    files.push(row[:file])
-  end
-  info = project_module.app_file_archive_info(files)
-  page.should have_content("\"size\":#{info[:size]}")
-end
-
-Then /^I should see json for "([^"]*)" data files archive given I already have files$/ do |name, table|
-  project_module = ProjectModule.find_by_name(name)
-  files = []
-  table.hashes.each do |row|
-    files.push(row[:file])
-  end
-  info = project_module.data_file_archive_info(files)
-  page.should have_content("\"size\":#{info[:size]}")
-end
-
-And /^I request for (.+) with files$/ do |name, table|
-  page_name = path_to(name)
-  files = []
-  table.hashes.each do |row|
-    files.push(row[:file])
-  end
-  files_list = files.map{ |f| "files[]=#{f}&" }.join
-  visit page_name + "?#{files_list}"
-end
-
-Then /^I archive and download server files for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.server_file_archive_info
-  check_archive_download_files('server', name, info, project_module.server_file_list)
-end
-
-Then /^I archive and download server files for "([^"]*)" given I already have files$/ do |name, table|
-  files = []
-  table.hashes.each do |row|
-    files.push(row)
-  end
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.server_file_archive_info(files)
-  check_archive_download_files('server', name, info, project_module.server_file_list, files)
-end
-
-Then /^I archive and download app files for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.app_file_archive_info
-  check_archive_download_files('app', name, info, project_module.app_file_list)
-end
-
-Then /^I archive and download app files for "([^"]*)" given I already have files$/ do |name, table|
-  files = []
-  table.hashes.each do |row|
-    files.push(row)
-  end
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.app_file_archive_info(files)
-  check_archive_download_files('app', name, info, project_module.app_file_list, files)
-end
-
-Then /^I archive and download data files for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.data_file_archive_info
-  check_archive_download_files('data', name, info, project_module.data_file_list)
-end
-
-Then /^I archive and download data files for "([^"]*)" given I already have files$/ do |name, table|
-  files = []
-  table.hashes.each do |row|
-    files.push(row)
-  end
-  project_module = ProjectModule.find_by_name(name)
-  info = project_module.data_file_archive_info(files)
-  check_archive_download_files('data', name, info, project_module.data_file_list, files)
-end
-
-def check_archive_download_files(type, name, info, project_module_files, exclude_files = nil)
-  visit path_to("the android #{type} files download link for #{name}") + "?file=#{info[:file]}"
-
-  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + File.basename(info[:file]) + "\""
-  file = File.open(info[:file], 'r')
-  page.source == file.read
-
-  # check if files all exist
-  project_module = ProjectModule.find_by_name(name)
-
-  download_list = get_archive_list(file)
-
-  exclude_files ||= []
-
-  # check if file is part of directory list
-  download_list.select{ |f| !project_module_files.include? f }.size.should == 0
-
-  # check if file is not in exclude list
-  download_list.select{ |f| exclude_files.include? f }.size.should == 0
-end
-
-def get_archive_list(archive)
-  dir = Rails.root.join("tmp/#{SecureRandom.uuid}")
-  Dir.mkdir(dir)
-
-  `tar xfz #{archive.path} -C #{dir}`
-
-  file_list = FileHelper.get_file_list(dir)
-
-  file_list
-ensure
-  FileUtils.remove_entry_secure dir if Dir.exists? dir
 end
 
 Then /^I should download project module package file for "([^"]*)"$/ do |name|
@@ -393,76 +200,55 @@ Then /^I automatically download project module package "([^"]*)"$/ do |name|
   visit ("/project_modules/" + project_module.id.to_s + "/download_project_module")
 end
 
-And /^I upload server files "([^"]*)" to (.*) succeeds$/ do |file, name|
-  filepath = Rails.root.to_s + "/features/assets/" + file
+And /^I upload (.*) file "([^"]*)" to (.*) succeeds$/ do |type, file, name|
   project_module = ProjectModule.find_by_name(name)
 
-  upload_file = File.open(filepath, 'r')
-  project_module.server_file_upload(upload_file)
+  upload_file = File.open(File.join(project_module.get_path(:tmp_dir), File.basename(file)), File::CREAT | File::RDWR)
+  upload_file.write(File.read(Rails.root.join("features/assets/#{file}")))
+  upload_file.close
+
+  project_module.send("add_#{type}_file", file, upload_file)
 end
 
-And /^I upload app files "([^"]*)" to (.*) succeeds$/ do |file, name|
-  filepath = Rails.root.to_s + "/features/assets/" + file
+Then /^I should have stored (.*) file "([^"]*)" for (.*)$/ do |type, file, name|
   project_module = ProjectModule.find_by_name(name)
 
-  upload_file = File.open(filepath, 'r')
-  project_module.app_file_upload(upload_file)
-end
-
-And /^I upload data files "([^"]*)" to (.*) succeeds$/ do |file, name|
-  filepath = Rails.root.to_s + "/features/assets/" + file
-  project_module = ProjectModule.find_by_name(name)
-
-  upload_file = File.open(filepath, 'r')
-  project_module.data_file_upload(upload_file)
-end
-
-Then /^I should have stored server files "([^"]*)" for (.*)$/ do |file, name|
-  filepath = Rails.root.to_s + '/features/assets/' + file
-  project_module = ProjectModule.find_by_name(name)
-
-  upload_file = File.open(filepath, 'r')
-  upload_list = get_archive_list(upload_file)
+  dir = project_module.get_path("#{type}_files_dir".to_sym)
 
   # check if uploaded files exist on server file list
-  server_list = project_module.server_file_list
-  upload_list.select { |f| !server_list.include? f }.size.should == 0
+  list = FileHelper.get_file_list(dir)
+  list.select { |f| f != file }.size.should == 0
+
+  # check if file is the same
+  File.read(Rails.root.join("features/assets/#{file}")).should == File.read(File.join(dir, file))
 end
 
-Then /^I should have stored app files "([^"]*)" for (.*)$/ do |file, name|
-  filepath = Rails.root.to_s + '/features/assets/' + file
+And /^I upload (.*) file "([^"]*)" to (.*) fails$/ do |type, file, name|
+  ProjectModule.find_by_name(name).should be_nil
+  # TODO post file to controller action
+end
+
+Then /^I should see empty file list$/ do
+  page.should have_content({files:[]}.to_json)
+end
+
+And /^I have (.*) files for "([^"]*)"$/ do |type, name, table|
   project_module = ProjectModule.find_by_name(name)
+  table.hashes.each do |hash|
+    upload_file = File.open(File.join(project_module.get_path(:tmp_dir), File.basename(hash[:file])), File::CREAT | File::RDWR)
+    upload_file.write(File.read(Rails.root.join("features/assets/#{hash[:file]}")))
+    upload_file.close
 
-  upload_file = File.open(filepath, 'r')
-  upload_list = get_archive_list(upload_file)
-
-  # check if uploaded files exist on app file list
-  app_list = project_module.app_file_list
-  upload_list.select { |f| !app_list.include? f }.size.should == 0
+    project_module.send("add_#{type}_file", hash[:file], upload_file)
+  end
 end
 
-Then /^I should have stored data files "([^"]*)" for (.*)$/ do |file, name|
-  filepath = Rails.root.to_s + '/features/assets/' + file
+Then /^I should see json for "([^"]*)" (.*) files with$/ do |name, type, table|
   project_module = ProjectModule.find_by_name(name)
-
-  upload_file = File.open(filepath, 'r')
-  upload_list = get_archive_list(upload_file)
-
-  # check if uploaded files exist on data file list
-  data_list = project_module.data_file_list
-  upload_list.select { |f| !data_list.include? f }.size.should == 0
-end
-
-And /^I upload server files "([^"]*)" to (.*) fails$/ do |file, name|
-  ProjectModule.find_by_name(name).should be_nil
-end
-
-And /^I upload app files "([^"]*)" to (.*) fails$/ do |file, name|
-  ProjectModule.find_by_name(name).should be_nil
-end
-
-And /^I upload data files "([^"]*)" to (.*) fails$/ do |file, name|
-  ProjectModule.find_by_name(name).should be_nil
+  page.should have_content(project_module.send("#{type}_files_info").to_json)
+  table.hashes.each do |hash|
+    page.should have_content("\"file\":\"#{hash[:file]}\"")
+  end
 end
 
 And(/^I enter "([^"]*)" and submit the form$/) do |keywords|
@@ -856,17 +642,17 @@ end
 
 And /^files are locked for "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
-  project_module.data_mgr.wait_for_lock
+  project_module.data_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^database is locked for "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
-  project_module.db_mgr.wait_for_lock
+  project_module.db_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^settings is locked for "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
-  project_module.settings_mgr.wait_for_lock
+  project_module.settings_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^I select records$/ do |table|

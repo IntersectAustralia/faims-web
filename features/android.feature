@@ -9,35 +9,75 @@ Feature: Android
     And I have a project modules dir
     And I perform HTTP authentication
 
-  Scenario: See archive info for project module settings
+  Scenario: Pull a list of project modules
+    Given I have project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
+      | Module 3 |
+    And I requested the android project modules page
+    Then I should see json for project modules
+
+  Scenario: See info for project module settings
     Given I have project module "Module 1"
-    And I requested the android archive settings info for Module 1
+    And I requested the android settings info for Module 1
     Then I should see json for "Module 1" settings
 
-  Scenario: See archive info for project module settings after syncing
+  Scenario: See info for project module settings after syncing
     Given I have project module "Module 1"
     And I have synced 20 times for "Module 1"
-    And I requested the android archive settings info for Module 1
+    And I requested the android settings info for Module 1
     Then I should see json for "Module 1" settings with version 20
 
-  Scenario: Cannot see archive settings info if project module doesn't exist
+  Scenario: Cannot see settings info if project module doesn't exist
     Given I have project module "Module 1"
-    And I requested the android archive settings info for Module 2
+    And I requested the android settings info for Module 2
     Then I should see bad request page
 
-  Scenario: Can download project module settings
+  Scenario Outline: Can download project module settings
     Given I have project module "Module 1"
-    And I requested the android settings download link for Module 1
-    Then I should download settings for "Module 1"
+    And I requested the android settings download "<file>" link for Module 1
+    Then I should download settings "<file>" for "Module 1"
+  Examples:
+    | file             |
+    | ui_schema.xml    |
+    | ui_logic.bsh     |
+    | faims.properties |
+    | module.settings  |
 
-  Scenario: Cannot download project module settings if project module doesn't exist
+  Scenario Outline: Cannot download project module settings if settings is locked
     Given I have project module "Module 1"
-    And I requested the android settings download link for Module 2
+    And settings is locked for "Module 1"
+    And I requested the android settings download "<file>" link for Module 1
+    Then I should see timeout request page
+  Examples:
+    | file          |
+    | ui_schema.xml |
+
+  Scenario Outline: Cannot download project module settings if file doesn't exist
+    Given I have project module "Module 1"
+    And I requested the android settings download "<file>" link for Module 2
     Then I should see bad request page
+  Examples:
+    | file         |
+    | blahblahblah |
+
+  Scenario Outline: Cannot download project module settings if module doesn't exist
+    Given I have project module "Module 1"
+    And I requested the android settings download "<file>" link for Module 2
+    Then I should see bad request page
+  Examples:
+    | file          |
+    | ui_schema.xml |
 
   Scenario: Can upload project module database
     Given I have project module "Module 1"
     And I upload database "db" to Module 1 succeeds
+    Then I should have stored "db" into Module 1
+
+  Scenario: Can upload sync database
+    Given I have project module "Module 1"
+    And I upload sync database "db" to Module 1 succeeds
     Then I should have stored "db" into Module 1
 
   Scenario: Cannot upload project module database because of corruption
@@ -48,20 +88,27 @@ Feature: Android
     Given I have project module "Module 1"
     And I upload database "db" to Module 2 fails
 
-  Scenario: See archive info for database
+  Scenario: See info for database
     Given I have project module "Module 1"
-    And I requested the android archive db info for Module 1
+    And I requested the android db info for Module 1
     Then I should see json for "Module 1" db
 
-  Scenario: See archive info for database after syncing
+  Scenario: See info for database after syncing
     Given I have project module "Module 1"
     And I have synced 20 times for "Module 1"
-    And I requested the android archive db info for Module 1
-    Then I should see json for "Module 1" db with 20
+    And I have generate database cache version 0 for "Module 1"
+    And I requested the android db info for Module 1
+    Then I should see json for "Module 1" db with version 20
 
-  Scenario: Cannot see archive info for database if project module doesn't exist
+  Scenario: Cannot see info for database if generating cache
     Given I have project module "Module 1"
-    And I requested the android archive db info for Module 2
+    And I have synced 20 times for "Module 1"
+    And I requested the android db info for Module 1
+    Then I should see processing request page
+
+  Scenario: Cannot see info for database if project module doesn't exist
+    Given I have project module "Module 1"
+    And I requested the android db info for Module 2
     Then I should see bad request page
 
   Scenario: Can download project module database
@@ -74,163 +121,91 @@ Feature: Android
     And I requested the android download db link for Module 2
     Then I should see bad request page
 
-  Scenario Outline: See archive info for database with version
+  Scenario Outline: See info for database with version
     Given I have project module "Module 1"
     And I have synced 20 times for "Module 1"
-    And I requested the android archive db info for Module 1 with request version <version>
-    Then I should see json for "Module 1" version <version> db with version 20
-  Examples:
-    | version |
-    | 1       |
-    | 10      |
-    | 20      |
-
-  Scenario Outline: Cannot see archive info for database with invalid version
-    Given I have project module "Module 1"
-    And I have synced 20 times for "Module 1"
-    And I requested the android archive db info for Module 1 with request version <version>
-  # this returns the full database
-    Then I should see json for "Module 1" database with version 20
+    And I have generate database cache version <version> for "Module 1"
+    And I requested the android db info for Module 1 with request version <version>
+    Then I should see json for "Module 1" db from version <version> to version 20
   Examples:
     | version |
     | 0       |
+    | 10      |
+    | 20      |
+
+  Scenario Outline: Cannot see info for database with invalid version
+    Given I have project module "Module 1"
+    And I have synced 20 times for "Module 1"
+    And I requested the android db info for Module 1 with request version <version>
+    Then I should see bad request page
+  Examples:
+    | version |
     | -1      |
     | 21      |
+    | 100     |
+
+  Scenario Outline: Cannot see info for database if module does not exist
+    Given I have project module "Module 1"
+    And I have synced 20 times for "Module 1"
+    And I requested the android db info for Module 2 with request version <version>
+    Then I should see bad request page
+  Examples:
+    | version |
+    | 0       |
 
   Scenario Outline: Can download database with version
     Given I have project module "Module 1"
     And I have synced 20 times for "Module 1"
+    And I have generate database cache version <version> for "Module 1"
     And I requested the android download db link for Module 1 with request version <version>
     Then I should download db file for "Module 1" from version <version>
   Examples:
     | version |
-    | 1       |
+    | 0       |
     | 10      |
     | 20      |
 
-  Scenario: Can upload sync database
-    Given I have project module "Module 1"
-    And I upload sync database "db" to Module 1 succeeds
-    Then I should have stored sync "db" into Module 1
-
-  Scenario: Cannot see archive info for database with version if project module doesn't exist
+  Scenario Outline: Cannot download database with invalid version
     Given I have project module "Module 1"
     And I have synced 20 times for "Module 1"
-    And I requested the android archive db info for Module 2 with request version 10
+    And I have generate database cache version <version> for "Module 1"
+    And I requested the android download db link for Module 1 with request version <version>
     Then I should see bad request page
+  Examples:
+    | version |
+    | -1      |
+    | 21      |
+    | 100     |
 
-  Scenario: Show empty server file list
+  Scenario Outline: Cannot download database with version if module does not exist
     Given I have project module "Module 1"
-    And I requested the android server file list for Module 1
-    Then I should see empty file list
-
-  Scenario: Cannot see server file list if project module doesn't exist
-    Given I have project module "Module 1"
-    And I requested the android server file list for Module 2
+    And I have synced 20 times for "Module 1"
+    And I have generate database cache version <version> for "Module 1"
+    And I requested the android download db link for Module2 with request version <version>
     Then I should see bad request page
+  Examples:
+    | version |
+    | 0       |
 
-  Scenario: Show full server file list
+  Scenario Outline: Upload server files
     Given I have project module "Module 1"
-    And I have server only files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I requested the android server file list for Module 1
-    Then I should see files
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
+    And I upload server file "<file>" to Module 1 succeeds
+    Then I should have stored server file "<file>" for Module 1
+  Examples:
+    | file                        |
+    | file1.tar.gz                |
+    | file2.sqlite3               |
+    | file3.txt                   |
+    | dir1/dir2/dir3/file4.tar.gz |
 
-  Scenario: See server files archive info for project module
+  Scenario Outline: Cannot upload server files is module does not exist
     Given I have project module "Module 1"
-    And I have server only files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I requested the android server files archive info for Module 1
-    Then I should see json for "Module 1" server files archive
+    And I upload server file "<file>" to Module 2 fails
+  Examples:
+    | file                        |
+    | file1.tar.gz                |
 
-  Scenario: See new server files archive info for project module
-    Given I have project module "Module 1"
-    And I have server only files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I request for the android server files archive info for Module 1 with files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
-    Then I should see json for "Module 1" server files archive given I already have files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
-
-  Scenario: Cannot see server files archive info if project module doesn't exist
-    Given I have project module "Module 1"
-    And I requested the android server files archive info for Module 2
-    Then I should see bad request page
-
-  Scenario: Download server files
-    Given I have project module "Module 1"
-    And I have server only files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    Then I archive and download server files for "Module 1"
-
-  Scenario: Download new server files
-    Given I have project module "Module 1"
-    And I have server only files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    Then I archive and download server files for "Module 1" given I already have files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
-
-  Scenario: Cannot download server files no new files to download
-    Given I have project module "Module 1"
-    And I requested the android server files download link for Module 1
-    Then I should see bad request page
-
-  Scenario: Cannot download server files if project module doesn't exist
-    Given I have project module "Module 1"
-    And I requested the android server files download link for Module 2
-    Then I should see bad request page
-
-  Scenario: Upload server files
-    Given I have project module "Module 1"
-    And I upload server files "test_files.tar.gz" to Module 1 succeeds
-    Then I should have stored server files "test_files.tar.gz" for Module 1
-
-  Scenario: Cannot upload server files if project module doesn't exist
-    Given I have project module "Module 1"
-    And I upload server files "test_files.tar.gz" to Module 2 fails
-
-  Scenario: Show empty app file list
-    Given I have project module "Module 1"
-    And I requested the android app file list for Module 1
-    Then I should see empty file list
-
-  Scenario: Cannot see app file list if project module doesn't exist
-    Given I have project module "Module 1"
-    And I requested the android app file list for Module 2
-    Then I should see bad request page
-
-  Scenario: Show full app file list
+  Scenario: See app files info for project module
     Given I have project module "Module 1"
     And I have app files for "Module 1"
       | file                        |
@@ -238,45 +213,17 @@ Feature: Android
       | file2.sqlite3               |
       | file3.txt                   |
       | dir1/dir2/dir3/file4.tar.gz |
-    And I requested the android app file list for Module 1
-    Then I should see files
+    And I requested the android app files info for Module 1
+    Then I should see json for "Module 1" app files with
       | file                        |
       | file1.tar.gz                |
       | file2.sqlite3               |
       | file3.txt                   |
       | dir1/dir2/dir3/file4.tar.gz |
-
-  Scenario: See app files archive info for project module
-    Given I have project module "Module 1"
-    And I have app files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I requested the android app files archive info for Module 1
-    Then I should see json for "Module 1" app files archive
-
-  Scenario: See new app files archive info for project module
-    Given I have project module "Module 1"
-    And I have app files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I request for the android app files archive info for Module 1 with files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
-    Then I should see json for "Module 1" app files archive given I already have files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
 
   Scenario: Cannot see app files archive info if project module doesn't exist
     Given I have project module "Module 1"
-    And I requested the android app files archive info for Module 2
+    And I requested the android app files info for Module 2
     Then I should see bad request page
 
   Scenario: Download app files
@@ -288,19 +235,6 @@ Feature: Android
       | file3.txt                   |
       | dir1/dir2/dir3/file4.tar.gz |
     Then I archive and download app files for "Module 1"
-
-  Scenario: Download new app files
-    Given I have project module "Module 1"
-    And I have app files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    Then I archive and download app files for "Module 1" given I already have files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
 
   Scenario: Cannot download app files no new files to download
     Given I have project module "Module 1"
@@ -321,32 +255,6 @@ Feature: Android
     Given I have project module "Module 1"
     And I upload app files "test_files.tar.gz" to Module 2 fails
 
-  Scenario: Show empty data file list
-    Given I have project module "Module 1"
-    And I requested the android data file list for Module 1
-    Then I should see empty file list
-
-  Scenario: Cannot see data file list if project module doesn't exist
-    Given I have project module "Module 1"
-    And I requested the android data file list for Module 2
-    Then I should see bad request page
-
-  Scenario: Show full data file list
-    Given I have project module "Module 1"
-    And I have data files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I requested the android data file list for Module 1
-    Then I should see files
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-
   Scenario: See data files archive info for project module
     Given I have project module "Module 1"
     And I have data files for "Module 1"
@@ -357,23 +265,6 @@ Feature: Android
       | dir1/dir2/dir3/file4.tar.gz |
     And I requested the android data files archive info for Module 1
     Then I should see json for "Module 1" data files archive
-
-  Scenario: See new data files archive info for project module
-    Given I have project module "Module 1"
-    And I have data files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    And I request for the android data files archive info for Module 1 with files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
-    Then I should see json for "Module 1" data files archive given I already have files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
 
   Scenario: Cannot see data files archive info if project module doesn't exist
     Given I have project module "Module 1"
@@ -389,19 +280,6 @@ Feature: Android
       | file3.txt                   |
       | dir1/dir2/dir3/file4.tar.gz |
     Then I archive and download data files for "Module 1"
-
-  Scenario: Download new data files
-    Given I have project module "Module 1"
-    And I have data files for "Module 1"
-      | file                        |
-      | file1.tar.gz                |
-      | file2.sqlite3               |
-      | file3.txt                   |
-      | dir1/dir2/dir3/file4.tar.gz |
-    Then I archive and download data files for "Module 1" given I already have files
-      | file          |
-      | file1.tar.gz  |
-      | file2.sqlite3 |
 
   Scenario: Cannot download data files no new files to download
     Given I have project module "Module 1"
@@ -421,12 +299,3 @@ Feature: Android
   Scenario: Cannot upload data files if project module doesn't exist
     Given I have project module "Module 1"
     And I upload app files "test_files.tar.gz" to Module 2 fails
-
-  Scenario: Pull a list of project modules
-    Given I have project modules
-      | name      |
-      | Module 1 |
-      | Module 2 |
-      | Module 3 |
-    And I requested the android project modules page
-    Then I should see json for project modules

@@ -9,8 +9,10 @@ class SpatialiteDB
     @db.execute("select load_extension('#{SpatialiteDB.spatialite_library}')")
   end
 
-  def execute(sql, *bind_vars)
-    @db.execute(sql, bind_vars)
+  def transaction
+    @db.transaction do |db|
+      return yield db
+    end
   end
 
   def get_first_row(sql, *bind_vars)
@@ -21,12 +23,16 @@ class SpatialiteDB
     @db.get_first_value(sql, bind_vars)
   end
 
-  def execute_batch(sql, *bind_vars)
-    @db.execute_batch(sql, bind_vars)
-  end
-
   def last_insert_row_id
     @db.last_insert_row_id
+  end
+
+  def execute(sql, *bind_vars)
+    @db.execute(sql, bind_vars)
+  end
+
+  def execute_batch(sql, *bind_vars)
+    @db.execute_batch(sql, bind_vars)
   end
 
   def path

@@ -46,6 +46,8 @@ describe ProjectModule do
       p1.save.should == true
       p2.save.should == false
     end
+
+    # TODO add validations for data_schema, ui_schema, ui_logic, arch16n, validation_schema
   end
 
   describe 'Should order by name' do
@@ -61,115 +63,28 @@ describe ProjectModule do
     end
   end
 
-  it 'Archiving settings' do
-    begin
-      project_module = make_project_module('Module 1')
-      tmp_dir = Dir.mktmpdir
-      `tar zxf #{project_module.get_path(:settings_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir)
-      entries.include?(project_module.get_name(:ui_schema)).should be_true
-      entries.include?(project_module.get_name(:ui_logic)).should be_true
-      entries.include?(project_module.get_name(:settings)).should be_true
-      entries.include?(project_module.get_name(:properties)).should be_true
-    rescue Exception => e
-      raise e
-    ensure
-      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
-    end
-
-  end
-
-  it 'Archiving settings with project_module properties' do
-    begin
-      project_module = make_project_module('Module 1')
-      project_module.generate_archives
-      tmp_dir = Dir.mktmpdir
-      `tar zxf #{project_module.get_path(:settings_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir)
-      entries.include?(project_module.get_name(:ui_schema)).should be_true
-      entries.include?(project_module.get_name(:ui_logic)).should be_true
-      entries.include?(project_module.get_name(:settings)).should be_true
-      entries.include?(project_module.get_name(:properties)).should be_true
-    rescue Exception => e
-      raise e
-    ensure
-      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
-    end
-
-  end
-
-  it 'Archiving data directory' do
-    begin
-      project_module = make_project_module('Module 1')
-      FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test1')
-      FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test2')
-      FileUtils.mkdir_p project_module.get_path(:data_files_dir) + 'dir1/dir2'
-      FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'dir1/dir2/test3')
-      project_module.generate_archives
-      tmp_dir = Dir.mktmpdir
-      `tar zxf #{project_module.get_path(:data_files_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir)
-      entries.include?('test1').should be_true
-      entries.include?('test2').should be_true
-      entries.include?('dir1/dir2/test3').should be_true
-    rescue Exception => e
-      raise e
-    ensure
-      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
-    end
-  end
-
-  it 'Archiving data directory' do
-    begin
-      project_module = make_project_module('Module 1')
-      FileHelper.touch_file(project_module.get_path(:app_files_dir) + 'test1')
-      FileHelper.touch_file(project_module.get_path(:app_files_dir) + 'test2')
-      FileUtils.mkdir_p project_module.get_path(:app_files_dir) + 'dir1/dir2'
-      FileHelper.touch_file(project_module.get_path(:app_files_dir) + 'dir1/dir2/test3')
-      project_module.generate_archives
-      tmp_dir = Dir.mktmpdir
-      `tar zxf #{project_module.get_path(:app_files_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir)
-      entries.include?('test1').should be_true
-      entries.include?('test2').should be_true
-      entries.include?('dir1/dir2/test3').should be_true
-    rescue Exception => e
-      raise e
-    ensure
-      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
-    end
-  end
-
-  it 'Archiving database' do
-    begin
-      project_module = make_project_module('Module 1')
-      tmp_dir = Dir.mktmpdir
-      `tar zxf #{project_module.get_path(:db_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir)
-      entries.include?(project_module.get_name(:db)).should be_true
-    rescue Exception => e
-      raise e
-    ensure
-      FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
-    end
+  it 'Creating project_module initialise directory' do
+    project_module = make_project_module('Module 1')
+    File.exists?(project_module.get_path(:project_module_dir)).should be_true
+    File.exists?(project_module.get_path(:tmp_dir)).should be_true
+    File.exists?(project_module.get_path(:server_files_dir)).should be_true
+    File.exists?(project_module.get_path(:app_files_dir)).should be_true
   end
 
   it 'Create temp data archive for directory' do
     begin
       project_module = make_project_module('Module 1')
-      FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test1')
-      FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'test2')
+      FileUtils.touch(project_module.get_path(:data_files_dir) + 'test1')
+      FileUtils.touch(project_module.get_path(:data_files_dir) + 'test2')
       FileUtils.mkdir_p project_module.get_path(:data_files_dir) + 'dir1/dir2'
-      FileHelper.touch_file(project_module.get_path(:data_files_dir) + 'dir1/dir2/test3')
-      archive = project_module.create_temp_dir_archive(project_module.get_path(:data_files_dir))
+      FileUtils.touch(project_module.get_path(:data_files_dir) + 'dir1/dir2/test3')
+      archive = project_module.create_data_archive(project_module.get_path(:data_files_dir))
       tmp_dir = Dir.mktmpdir
       `tar zxf #{archive} -C #{tmp_dir}`
       entries = FileHelper.get_file_list(tmp_dir)
       entries.include?('test1').should be_true
       entries.include?('test2').should be_true
       entries.include?('dir1/dir2/test3').should be_true
-    rescue Exception => e
-      raise e
     ensure
       FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
     end
@@ -178,17 +93,18 @@ describe ProjectModule do
   it 'Packaging project module' do
     begin
       project_module = make_project_module('Module 1')
-      FileHelper.touch_file(project_module.get_path(:project_module_dir) + 'test1')
-      FileHelper.touch_file(project_module.get_path(:project_module_dir) + 'test2')
+      sleep(1)
+      FileUtils.touch(project_module.get_path(:project_module_dir) + 'test1')
+      FileUtils.touch(project_module.get_path(:project_module_dir) + 'test2')
       FileUtils.mkdir_p project_module.get_path(:project_module_dir) + 'dir1/dir2'
-      FileHelper.touch_file(project_module.get_path(:project_module_dir) + 'dir1/dir2/test3')
-      FileHelper.touch_file(project_module.get_path(:project_module_dir) + '.lock')
-      FileHelper.touch_file(project_module.get_path(:project_module_dir) + '.dirt')
-      FileHelper.touch_file(project_module.get_path(:project_module_dir) + 'tmp')
-      project_module.generate_archives
+      FileUtils.touch(project_module.get_path(:project_module_dir) + 'dir1/dir2/test3')
+      FileUtils.touch(project_module.get_path(:project_module_dir) + '.lock')
+      FileUtils.touch(project_module.get_path(:project_module_dir) + '.dirt')
+      FileUtils.touch(project_module.get_path(:project_module_dir) + 'tmp')
+      project_module.archive_project_module
       tmp_dir = Dir.mktmpdir
       `tar jxf #{project_module.get_path(:package_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir + '/module')
+      entries = FileHelper.get_file_list(tmp_dir)
       entries.include?(project_module.get_name(:db)).should be_true
       entries.include?(project_module.get_name(:ui_schema)).should be_true
       entries.include?(project_module.get_name(:ui_logic)).should be_true
@@ -210,85 +126,77 @@ describe ProjectModule do
 
   end
 
-  it 'Creating project_module initialise directory' do
-    project_module = make_project_module('Module 1')
-    File.exists?(project_module.get_path(:project_module_dir)).should be_true
-    File.exists?(project_module.get_path(:tmp_dir)).should be_true
-    File.exists?(project_module.get_path(:server_files_dir)).should be_true
-    File.exists?(project_module.get_path(:app_files_dir)).should be_true
-  end
-
   it 'Updating settings causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
-    project_module.settings_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
-    project_module.package_dirty?.should be_true
+    project_module.settings_mgr.absolute_file_list.each {|f| FileUtils.touch f}
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Updating database causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
-    project_module.db_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
-    project_module.package_dirty?.should be_true
+    project_module.db_mgr.absolute_file_list.each {|f| FileUtils.touch f}
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Adding data files causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
     FileUtils.touch project_module.get_path(:data_files_dir) + '/temp'
-    project_module.package_dirty?.should be_true
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Updating data files causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     FileUtils.touch project_module.get_path(:data_files_dir) + '/temp'
-    project_module.update_archives
-    project_module.package_dirty?.should be_false
+    project_module.archive_project_module
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
-    project_module.data_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
-    project_module.package_dirty?.should be_true
+    project_module.data_mgr.absolute_file_list.each {|f| FileUtils.touch f}
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Adding app files causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
     FileUtils.touch project_module.get_path(:app_files_dir) + '/temp'
-    project_module.package_dirty?.should be_true
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Updating app files causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     FileUtils.touch project_module.get_path(:app_files_dir) + '/temp'
-    project_module.update_archives
-    project_module.package_dirty?.should be_false
+    project_module.archive_project_module
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
-    project_module.app_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
-    project_module.package_dirty?.should be_true
+    project_module.app_mgr.absolute_file_list.each {|f| FileUtils.touch f}
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Adding server files causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
     FileUtils.touch project_module.get_path(:server_files_dir) + '/temp'
-    project_module.package_dirty?.should be_true
+    project_module.package_mgr.has_changes?.should be_true
   end
 
   it 'Updating server files causes package to rearchive' do
     project_module = make_project_module('Module 1')
-    project_module.package_dirty?.should be_false
+    project_module.package_mgr.has_changes?.should be_false
     FileUtils.touch project_module.get_path(:server_files_dir) + '/temp'
-    project_module.update_archives
-    project_module.package_dirty?.should be_false
+    project_module.archive_project_module
+    project_module.package_mgr.has_changes?.should be_false
     sleep(1)
-    project_module.server_mgr.file_list.each {|f| FileUtils.touch f if File.exists? f}
-    project_module.package_dirty?.should be_true
+    project_module.server_mgr.absolute_file_list.each {|f| FileUtils.touch f}
+    project_module.package_mgr.has_changes?.should be_true
   end
 
 end

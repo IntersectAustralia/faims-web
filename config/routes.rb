@@ -56,7 +56,7 @@ FaimsWeb::Application.routes.draw do
   get 'project_modules/:id/list_arch_ent_records/', :to => 'project_modules#list_arch_ent_records', :as => 'list_arch_ent_records'
   get 'project_modules/:id/list_typed_arch_ent_records/', :to => 'project_modules#list_typed_arch_ent_records', :as => 'list_typed_arch_ent_records'
   get 'project_modules/:id/delete_arch_ent_records/:uuid', :to => 'project_modules#delete_arch_ent_records', :as => 'delete_arch_ent_records'
-  get 'project_modules/:id/undelete_arch_ent_records/:uuid', :to => 'project_modules#undelete_arch_ent_records', :as => 'undelete_arch_ent_records'
+  get 'project_modules/:id/restore_arch_ent_records/:uuid', :to => 'project_modules#restore_arch_ent_records', :as => 'restore_arch_ent_records'
   get 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_modules#edit_arch_ent_records', :as => 'edit_arch_ent_records'
   post 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_modules#update_arch_ent_records', :as => 'update_arch_ent_records'
   get 'project_modules/:id/show_arch_ent_history/:uuid', :to => 'project_modules#show_arch_ent_history', :as => 'show_arch_ent_history'
@@ -67,7 +67,7 @@ FaimsWeb::Application.routes.draw do
   get 'project_modules/:id/list_rel_records/', :to => 'project_modules#list_rel_records', :as => 'list_rel_records'
   get 'project_modules/:id/list_typed_rel_records/', :to => 'project_modules#list_typed_rel_records', :as => 'list_typed_rel_records'
   get 'project_modules/:id/delete_rel_records/:relationshipid', :to => 'project_modules#delete_rel_records', :as => 'delete_rel_records'
-  get 'project_modules/:id/undelete_rel_records/:relationshipid', :to => 'project_modules#undelete_rel_records', :as => 'undelete_rel_records'
+  get 'project_modules/:id/restore_rel_records/:relationshipid', :to => 'project_modules#restore_rel_records', :as => 'restore_rel_records'
   get 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_modules#edit_rel_records', :as => 'edit_rel_records'
   post 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_modules#update_rel_records', :as => 'update_rel_records'
   get 'project_modules/:id/show_rel_history/:relationshipid', :to => 'project_modules#show_rel_history', :as => 'show_rel_history'
@@ -103,25 +103,20 @@ FaimsWeb::Application.routes.draw do
 
   get 'android/modules', :to => 'android#project_modules', :as => 'android_project_modules'
 
-  get 'android/module/:key/settings_archive', :to => 'android#settings_archive', :as => 'android_settings_archive'
+  get 'android/module/:key/settings_info', :to => 'android#settings_info', :as => 'android_settings_info'
   get 'android/module/:key/settings_download', :to => 'android#settings_download', :as => 'android_settings_download'
 
-  get 'android/module/:key/db_archive', :to => 'android#db_archive', :as => 'android_project_module_db_archive'
+  get 'android/module/:key/db_info', :to => 'android#db_info', :as => 'android_project_module_db_info'
   get 'android/module/:key/db_download', :to => 'android#db_download', :as => 'android_project_module_db_download'
   post 'android/module/:key/db_upload', :to => 'android#db_upload', :as => 'android_project_module_db_upload'
 
-  get 'android/module/:key/data_file_list', :to => 'android#data_file_list', :as => 'android_data_file_list'
-  get 'android/module/:key/data_file_archive', :to => 'android#data_file_archive', :as => 'android_data_file_archive'
+  get 'android/module/:key/data_file_info', :to => 'android#data_file_info', :as => 'android_data_file_info'
   get 'android/module/:key/data_file_download', :to => 'android#data_file_download', :as => 'android_data_file_download'
   post 'android/module/:key/data_file_upload', :to => 'android#data_file_upload', :as => 'android_data_file_upload'
 
-  get 'android/module/:key/server_file_list', :to => 'android#server_file_list', :as => 'android_server_file_list'
-  get 'android/module/:key/server_file_archive', :to => 'android#server_file_archive', :as => 'android_server_file_archive'
-  get 'android/module/:key/server_file_download', :to => 'android#server_file_download', :as => 'android_server_file_download'
   post 'android/module/:key/server_file_upload', :to => 'android#server_file_upload', :as => 'android_server_file_upload'
 
-  get 'android/module/:key/app_file_list', :to => 'android#app_file_list', :as => 'android_app_file_list'
-  get 'android/module/:key/app_file_archive', :to => 'android#app_file_archive', :as => 'android_app_file_archive'
+  get 'android/module/:key/app_file_info', :to => 'android#app_file_info', :as => 'android_app_file_info'
   get 'android/module/:key/app_file_download', :to => 'android#app_file_download', :as => 'android_app_file_download'
   post 'android/module/:key/app_file_upload', :to => 'android#app_file_upload', :as => 'android_app_file_upload'
 

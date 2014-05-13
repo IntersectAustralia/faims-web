@@ -65,3 +65,5 @@ Cucumber::Rails::Database.javascript_strategy = :transaction
 
 Capybara.match = :prefer_exact
 
+FileManager::LOCK_TIMEOUT = 1
+

@@ -5,69 +5,24 @@ class ProjectModulesController < ApplicationController
   before_filter :crumbs
   before_filter :authenticate_user!
   load_and_authorize_resource
-  
-  WAIT_TIMEOUT = Rails.env == 'test' ? 1 : 20
 
-  def wait_for_project_module
-    (1..WAIT_TIMEOUT).each do
-      break unless @project_module.locked?
-      sleep(1)
-    end
-
-    if @project_module.locked?
-      flash[:error] = 'Could not process request as module is currently locked'
-      return false
-    end
-
-    return true
+  class MemberException < Exception
   end
 
-  def wait_for_settings
-    (1..WAIT_TIMEOUT).each do
-      break unless @project_module.settings_mgr.locked?
-      sleep(1)
+  def get_error_message(exception)
+    if instance_of? MemberException
+      'You are not a member of the module you are editing. Please ask a member to add you to the module before continuing.'
+    else instance_of? TimeoutException
+    'Could not process request as project is current locked.'
     end
-
-    if @project_module.settings_mgr.locked?
-      flash[:error] = 'Could not process request as module is currently locked'
-      return false
-    end
-
-    return true
-  end
-
-  def wait_for_db
-    (1..WAIT_TIMEOUT).each do
-      break unless @project_module.db_mgr.locked?
-      sleep(1)
-    end
-
-    if @project_module.db_mgr.locked?
-      flash[:error] = 'Could not process request as database is currently locked'
-      return false
-    end
-
-    return true
   end
 
   def authenticate_project_module_user
     @project_module = ProjectModule.find(params[:id])
-
     redirect_to :project_modules unless @project_module
+
     user_emails = @project_module.db.get_list_of_users.map { |x| x.last }
-
-    unless user_emails.include? current_user.email
-      flash[:error] = 'Only module users can edit the database. Please get a module user to add you to the module'
-      return false
-    end
-
-    return true
-  end
-
-  def can_edit_db
-    return false unless authenticate_project_module_user
-    return false unless wait_for_db
-    return true
+    raise MemberException unless user_emails.include? current_user.email
   end
 
   def index
@@ -76,55 +31,51 @@ class ProjectModulesController < ApplicationController
 
   def new
     page_crumbs :pages_home, :project_modules_index, :project_modules_create
-
+    
     @project_module = ProjectModule.new
+    
     @spatial_list = Database.get_spatial_ref_list
 
-    # make temp directory and store its path in session
-    create_tmp_dir
+    create_project_module_tmp_dir
   end
 
   def create
     page_crumbs :pages_home, :project_modules_index, :project_modules_create
 
     @project_module = ProjectModule.new
+    
     @spatial_list = Database.get_spatial_ref_list
 
-    parse_parameter_for_project_module(params)
+    parse_settings_from_params(params)
 
     # check if spatialite exists?
     unless SpatialiteDB.library_exists?
       flash.now[:error] = 'Cannot find library libspatialite. Please install library to create module.'
       return render 'new'
     end
-    valid = create_project_module_if_valid(@tmpdir)
-    if valid
-      has_exception = nil
 
+    if create_project_module(@tmpdir)
       begin
         @project_module.save
         @project_module.update_settings(params)
         @project_module.create_project_module_from(@tmpdir, current_user)
         @project_module.created = true
         @project_module.save
+
+        flash[:notice] = 'New module created.'
       rescue Exception => e
-        has_exception = e
         # cleanup
         safe_delete_directory @project_module.get_path(:project_module_dir) if File.directory? @project_module.get_path(:project_module_dir)
         @project_module.destroy
+
+        flash[:error] = 'Failed to create module.'
       ensure
         FileUtils.remove_entry_secure @tmpdir
       end
-
-      if has_exception.nil?
-        flash[:notice] = 'New module created'
-      else
-        flash[:error] = 'Failed to create module'
-      end
-
+      
       redirect_to :project_modules
     else
-      flash.now[:error] = t 'modules.new.failure'
+      flash.now[:error] = 'Please correct the errors in this form.'
       render 'new'
     end
   end
@@ -133,7 +84,6 @@ class ProjectModulesController < ApplicationController
     page_crumbs :pages_home, :project_modules_index, :project_modules_show
 
     @project_module = ProjectModule.find(params[:id])
-    session[:has_attached_files] = @project_module.has_attached_files
   end
 
   def edit_project_module_user
@@ -150,21 +100,24 @@ class ProjectModulesController < ApplicationController
     page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_users
 
     @project_module = ProjectModule.find(params[:id])
+    
+    authenticate_project_module_user
 
     user = User.find(params[:user_id])
-
-    if can_edit_db
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.update_list_of_users(user, @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Successfully updated user'
-      return redirect_to :edit_project_module_user
+
+      redirect_to :edit_project_module_user
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+    flash.now[:error] = get_error_message(e)
 
     @users = @project_module.db.get_list_of_users
     user_transpose = @users.transpose
     @server_user = User.all.select { |x| user_transpose.empty? or !user_transpose.last.include? x.email }
-
-    flash.now[:error] = flash[:error]
     render 'edit_project_module_user'
   end
 
@@ -175,6 +128,7 @@ class ProjectModulesController < ApplicationController
 
     @project_module = ProjectModule.find(params[:id])
     @type = @project_module.db.get_arch_ent_types
+    
     session.delete(:values)
     session.delete(:type)
     session.delete(:query)
@@ -193,7 +147,7 @@ class ProjectModulesController < ApplicationController
     @offset = params[:offset] ? params[:offset] : '0'
 
     type = params[:type]
-    show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
+    show_deleted = !params[:show_deleted].blank?
     @uuid = @project_module.db.load_arch_entity(type, @limit, @offset, show_deleted)
     @total = @project_module.db.total_arch_entity(type, show_deleted)
 
@@ -209,7 +163,6 @@ class ProjectModulesController < ApplicationController
       @entity_forked_map[row[0]] = @project_module.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
 
-    # TODO these need to be query params
     session[:type] = type
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:action] = 'list_typed_arch_ent_records'
@@ -237,7 +190,7 @@ class ProjectModulesController < ApplicationController
     @offset = params[:offset] ? params[:offset] : '0'
 
     query = params[:query]
-    show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
+    show_deleted = !params[:show_deleted].blank?
     @uuid = @project_module.db.search_arch_entity(@limit, @offset, query, show_deleted)
     @total = @project_module.db.total_search_arch_entity(query, show_deleted)
 
@@ -253,7 +206,6 @@ class ProjectModulesController < ApplicationController
       @entity_forked_map[row[0]] = @project_module.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
     end
 
-    # TODO these need to be query params
     session[:query] = query
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:action] = 'show_arch_ent_records'
@@ -303,60 +255,77 @@ class ProjectModulesController < ApplicationController
 
   def update_arch_ent_records
     @project_module = ProjectModule.find(params[:id])
-
+    
     uuid = params[:uuid]
     vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
     attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
     measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
     freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
     certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
-
     ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.update_arch_entity_attribute(uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
 
       # TODO add new query to return attributes dirty flag and reason
       @attributes = @project_module.db.get_arch_entity_attributes(uuid)
       errors = @attributes.select { |a| a[1] == attribute_id }.map { |a| a[11] }.first
-    end
 
-    render json: { result: flash[:error] ? 'failure' : 'success', message: flash[:error], errors: errors }
+      render json: { result: 'success', errors: errors }
+    end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    render json: { result: 'failure', message: get_error_message(e) }
   end
 
   def delete_arch_ent_records
     @project_module = ProjectModule.find(params[:id])
 
     uuid = params[:uuid]
+    
+    authenticate_project_module_user
 
-    if can_edit_db
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_arch_entity(uuid, @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Deleted Archaeological Entity'
 
       show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
       if session[:type]
-        return redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+        redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
       else
-        return redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+        redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
       end
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :edit_arch_ent_records, id: @project_module.id, uuid: uuid
   end
 
-  def undelete_arch_ent_records
+  def restore_arch_ent_records
     @project_module = ProjectModule.find(params[:id])
 
     uuid = params[:uuid]
+    
+    authenticate_project_module_user
 
-    if can_edit_db
-      @project_module.db.undelete_arch_entity(uuid, @project_module.db.get_project_module_user_id(current_user.email))
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.restore_arch_entity(uuid, @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Restored Archaeological Entity'
 
-      return redirect_to action: :edit_arch_ent_records, id: @project_module.id, uuid: uuid
+      redirect_to action: :edit_arch_ent_records, id: @project_module.id, uuid: uuid
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :edit_arch_ent_records, id: @project_module.id, uuid: uuid
   end
@@ -375,7 +344,8 @@ class ProjectModulesController < ApplicationController
     @second_uuid = ids[1]
 
     unless @project_module.db.is_arch_ent_same_type(@first_uuid, @second_uuid)
-      flash[:error] = "Cannot compare Archaeological Entities of different types"
+      flash[:error] = 'Cannot compare Archaeological Entities of different types'
+
       redirect_to @project_module
     end
   end
@@ -383,7 +353,9 @@ class ProjectModulesController < ApplicationController
   def merge_arch_ents
     @project_module = ProjectModule.find(params[:id])
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.merge_arch_ents(params[:deleted_id], params[:uuid], params[:vocab_id], params[:attribute_id], params[:measure], params[:freetext], params[:certainty], @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Merged Archaeological Entities'
@@ -397,8 +369,10 @@ class ProjectModulesController < ApplicationController
 
       return render :json => { result: 'success', url: url }
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
 
-    return render :json => { result: 'failure', message: flash[:error] }
+    return render :json => { result: 'failure', message: get_error_message(e) }
   end
 
   def show_arch_ent_history
@@ -417,11 +391,17 @@ class ProjectModulesController < ApplicationController
     entity = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.revert_arch_ent(entity[:uuid], entity[:timestamp], attributes, params[:resolve] == 'true', @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Reverted Archaeological Entity'
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :show_arch_ent_history, id: @project_module.id, uuid: params[:uuid]
   end
@@ -466,7 +446,6 @@ class ProjectModulesController < ApplicationController
       @rel_forked_map[row[0]] = @project_module.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
 
-    # TODO these need to be query params
     session[:type] = type
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:action] = 'list_typed_rel_records'
@@ -509,7 +488,6 @@ class ProjectModulesController < ApplicationController
       @rel_forked_map[row[0]] = @project_module.db.is_relationship_forked(row[0]) unless @rel_forked_map[row[0]]
     end
 
-    # TODO these need to be query params
     session[:query] = query
     session[:show_deleted] = show_deleted ? 'true' : nil
     session[:action] = 'show_rel_records'
@@ -550,18 +528,23 @@ class ProjectModulesController < ApplicationController
     attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
     freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
     certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
-
     ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.update_rel_attribute(relationshipid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, freetext, certainty, ignore_errors)
 
       # TODO add new query to return attributes dirty flag and reason
       @attributes = @project_module.db.get_rel_attributes(relationshipid)
       errors = @attributes.select { |a| a[2] == attribute_id }.map { |a| a[11] }.first
-    end
 
-    render json: { result: flash[:error] ? 'failure' : 'success', message: flash[:error], errors: errors }
+      render json: { result: 'success', errors: errors }
+    end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    render json: { result: 'failure', message: get_error_message(e) }
   end
 
   def show_rel_history
@@ -580,11 +563,17 @@ class ProjectModulesController < ApplicationController
     rel = data.select { |x| x[:attributeid] == nil }.first
     attributes = data.select { |x| x[:attributeid] != nil }
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.revert_rel(rel[:relationshipid], rel[:timestamp], attributes, params[:resolve] == 'true', @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Reverted Relationship'
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :show_rel_history, id: @project_module.id, relationshipid: params[:relationshipid]
   end
@@ -594,7 +583,9 @@ class ProjectModulesController < ApplicationController
 
     relationshipid = params[:relationshipid]
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_relationship(relationshipid, @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Deleted Relationship'
@@ -606,22 +597,32 @@ class ProjectModulesController < ApplicationController
         return redirect_to action: :show_rel_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
       end
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
 
-     redirect_to action: :edit_rel_records, id: @project_module.id, relationshipid: relationshipid
+    flash[:error] = get_error_message(e)
+
+    redirect_to action: :edit_rel_records, id: @project_module.id, relationshipid: relationshipid
   end
 
-  def undelete_rel_records
+  def restore_rel_records
     @project_module = ProjectModule.find(params[:id])
 
     relationshipid = params[:relationshipid]
 
-    if can_edit_db
-      @project_module.db.undelete_relationship(relationshipid, @project_module.db.get_project_module_user_id(current_user.email))
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.restore_relationship(relationshipid, @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Restored Relationship'
 
       return redirect_to action: :edit_rel_records, id: @project_module.id, relationshipid: relationshipid
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :edit_rel_records, id: @project_module.id, relationshipid: relationshipid
   end
@@ -667,11 +668,19 @@ class ProjectModulesController < ApplicationController
     relntypeid = params[:relntypeid]
     uuid = params[:uuid]
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_member(relationshipid, @project_module.db.get_project_module_user_id(current_user.email), uuid)
 
       flash[:notice] = 'Removed Archaeological Entity from Relationship'
+
+      return redirect_to action: :show_rel_members, id: @project_module.id, relationshipid: relationshipid, relntypeid: relntypeid
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     return redirect_to action: :show_rel_members, id: @project_module.id, relationshipid: relationshipid, relntypeid: relntypeid
   end
@@ -714,11 +723,19 @@ class ProjectModulesController < ApplicationController
   def add_arch_ent_member
     @project_module = ProjectModule.find(params[:id])
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.add_member(params[:relationshipid], @project_module.db.get_project_module_user_id(current_user.email), params[:uuid], params[:verb])
 
       flash[:notice] = 'Added Archaeological Entity as member of Relationship'
+
+      return redirect_to action: :show_rel_members, id: @project_module.id, relationshipid: params[:relationshipid], relntypeid: params[:relntypeid]
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     return redirect_to action: :show_rel_members, id: @project_module.id, relationshipid: params[:relationshipid], relntypeid: params[:relntypeid]
   end
@@ -761,11 +778,19 @@ class ProjectModulesController < ApplicationController
     relationshipid = params[:relationshipid]
     uuid = params[:uuid]
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_member(relationshipid, @project_module.db.get_project_module_user_id(current_user.email), uuid)
 
       flash[:notice] = 'Removed Archaeological Entity from Relationship'
+
+      redirect_to action: :show_rel_association, id: @project_module.id, uuid: uuid
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :show_rel_association, id: @project_module.id, uuid: uuid
   end
@@ -814,11 +839,19 @@ class ProjectModulesController < ApplicationController
   def add_rel_association
     @project_module = ProjectModule.find(params[:id])
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.add_member(params[:relationshipid], @project_module.db.get_project_module_user_id(current_user.email), params[:uuid], params[:verb])
 
       flash[:notice] = 'Added Archaeological Entity as member of Relationship'
+
+      redirect_to action: :show_rel_association, id: @project_module.id, uuid: params[:uuid]
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
 
     redirect_to action: :show_rel_association, id: @project_module.id, uuid: params[:uuid]
   end
@@ -874,7 +907,7 @@ class ProjectModulesController < ApplicationController
     @second_rel_id = ids[1]
 
     unless @project_module.db.is_rel_same_type(@first_rel_id, @second_rel_id)
-      flash[:error] = "Cannot compare Relationships of different types"
+      flash[:error] = 'Cannot compare Relationships of different types'
       redirect_to @project_module
     end
   end
@@ -882,7 +915,9 @@ class ProjectModulesController < ApplicationController
   def merge_rel
     @project_module = ProjectModule.find(params[:id])
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       @project_module.db.merge_rel(params[:deleted_id], params[:rel_id], params[:vocab_id], params[:attribute_id], params[:freetext], params[:certainty], @project_module.db.get_project_module_user_id(current_user.email))
 
       flash[:notice] = 'Merged Relationships'
@@ -896,8 +931,10 @@ class ProjectModulesController < ApplicationController
 
       return render :json => { result: 'success', url: url }
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
 
-    render :json => { result: 'failure', message: flash[:error] }
+    render :json => { result: 'failure', message: get_error_message(e) }
   end
 
   def list_attributes_with_vocab
@@ -934,7 +971,9 @@ class ProjectModulesController < ApplicationController
     vocab_description = params[:vocab_description]
     picture_url = params[:picture_url]
 
-    if can_edit_db
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
       if vocab_name.select { |x| x.blank? }.size > 0
          flash[:error] = 'Please correct the errors in this form. Vocabulary name cannot be empty'
       else
@@ -945,6 +984,10 @@ class ProjectModulesController < ApplicationController
         return redirect_to list_attributes_with_vocab_path(@project_module, {attribute_id:@attribute_id})
       end
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
+
+    flash.now[:error] = get_error_message(e)
 
     @attribute_vocabs = {}
 
@@ -961,7 +1004,6 @@ class ProjectModulesController < ApplicationController
       @attribute_vocabs[attribute_id] = vocabs.map { |v| {vocab_id:v[1], vocab_name:v[2], vocab_description:v[3].nil? ? '' : v[3], picture_url: v[4].nil? ? '' : v[4], parent_vocab_id: v[5].blank? ? nil : v[5], temp_id: v[6].nil? ? '' : v[6], temp_parent_id: v[7].nil? ? '' : v[7]} }
     end
 
-    flash.now[:error] = flash[:error]
     render 'list_attributes_with_vocab'
   end
 
@@ -971,8 +1013,7 @@ class ProjectModulesController < ApplicationController
     @project_module = ProjectModule.find(params[:id])
     @spatial_list = Database.get_spatial_ref_list
 
-    # make temp directory and store its path in session
-    create_tmp_dir
+    create_project_module_tmp_dir
 
     project_module_setting = JSON.parse(safe_file_read(@project_module.get_path(:settings)))
     @name = @project_module.name
@@ -997,85 +1038,64 @@ class ProjectModulesController < ApplicationController
     @project_module = ProjectModule.find(params[:id])
     @spatial_list = Database.get_spatial_ref_list
 
-    parse_parameter_for_project_module(params)
+    parse_settings_from_params(params)
 
-    if wait_for_settings
-      valid = update_project_module_if_valid(@tmpdir)
-      if valid
-        has_exception = nil
+    @project_module.settings_mgr.with_shared_lock do
+      if update_project_module(@tmpdir)
         begin
           @project_module.save
           @project_module.update_settings(params)
           @project_module.update_project_module_from(@tmpdir)
+          flash[:notice] = 'Updated module'
         rescue Exception => e
-          has_exception = e
+          flash[:error] = 'Failed to update module'
         ensure
           FileUtils.remove_entry_secure @tmpdir
         end
 
-        if has_exception.nil?
-          flash[:notice] = 'Updated module'
-        else
-          flash[:error] = 'Failed to update module'
-        end
-
         return redirect_to :project_module
       else
-        flash.now[:error] = t 'modules.new.failure'
+        flash.now[:error] = 'Please correct the errors in this form.'
         return render 'edit_project_module'
       end
-    else
-      return render 'edit_project_module'
     end
-  end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
 
-  def download_attached_file
-    safe_send_file safe_root_join("modules/#{ProjectModule.find(params[:id]).key}/#{params[:path]}"), :filename => params[:name]
-  end
+    flash.now[:error] = 'Could not process request as project is current locked.'
 
-  def update
-
+    return render 'edit_project_module'
   end
 
   def archive_project_module
     @project_module = ProjectModule.find(params[:id])
-
-    if @project_module.locked?
-      return render json: { result: 'failure', message: 'Could not process request as module is currently locked' }
+    if @project_module.package_mgr.has_changes?
+      job = @project_module.delay.archive_project_module
+      render json: { result: 'waiting', jobid: job.id }
+    else
+      render json: { result: 'success', url: download_project_module_path(@project_module) }
     end
-
-    begin
-      if @project_module.package_dirty?
-        job = @project_module.delay.update_archives
-
-        return render json: { result: 'waiting', jobid: job.id }
-      end
-    rescue Exception => e
-      return render json: { result: 'failure', message: 'Error occurred while trying to archive module' }
-    end
-
-    render json: { result: 'success', url: download_project_module_path(@project_module) }
   end
 
   def check_archive_status
     @project_module = ProjectModule.find(params[:id])
 
-    jobid = params[:job]
-
-    render json: { result: (Delayed::Job.exists?(jobid) or @project_module.locked?) ?  nil : 'success', url: download_project_module_path(@project_module) }
+    job = Delayed::Job.find(params[:job])
+    render json: { result: job.blank? ? 'success' : (job.last_error ? 'failure' : nil), url: download_project_module_path(@project_module) }
   end
 
   def download_project_module
     @project_module = ProjectModule.find(params[:id])
 
-    if wait_for_project_module
-      @project_module.with_lock do
-        safe_send_file @project_module.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
-      end
-    else
-      return redirect_to project_module_path(@project_module)
+    @project_module.with_shared_lock do
+      safe_send_file @project_module.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
     end
+  rescue MemberException, TimeoutException => e
+    logger.warn e
 
+    flash.now[:error] = 'Could not process request as project is current locked.'
+
+    redirect_to project_module_path(@project_module)
   end
 
   def upload_project_module
@@ -1110,9 +1130,14 @@ class ProjectModulesController < ApplicationController
       render 'upload_project_module'
     end
   end
+
+  def download_attached_file
+    safe_send_file safe_root_join("modules/#{ProjectModule.find(params[:id]).key}/#{params[:path]}"), :filename => params[:name]
+  end
+  
   private
 
-  def create_tmp_dir
+  def create_project_module_tmp_dir
     @tmpdir = Dir.mktmpdir
     session[:data_schema] = false
     session[:ui_schema] = false
@@ -1121,21 +1146,33 @@ class ProjectModulesController < ApplicationController
     session[:validation_schema] = false
   end
 
-  def create_project_module_if_valid(tmpdir)
-    valid = false
-
+  def create_project_module(tmpdir)
     if params[:project_module]
       @project_module = ProjectModule.new(:name => params[:project_module][:name], :key => SecureRandom.uuid) if params[:project_module]
-      valid = @project_module.valid?
+      @project_module.valid?
     end
 
+    validate_project_module_files(tmpdir)
+    
+    @project_module.errors.empty?
+  end
+
+  def update_project_module(tmpdir)
+    if params[:project_module]
+      @project_module.assign_attributes(:name => params[:project_module][:name]) if params[:project_module]
+      @project_module.valid?
+    end
+
+    validate_project_module_files(tmpdir)
+
+    @project_module.errors.empty?
+  end
+
+  def validate_project_module_files(tmpdir)
     # check if data schema is valid
     if !session[:data_schema]
-      error = ProjectModule.validate_data_schema(params[:project_module][:data_schema])
-      if error
-        @project_module.errors.add(:data_schema, error)
-        valid = false
-      else
+      @project_module.validate_data_schema(params[:project_module][:data_schema])
+      if @project_module.errors[:data_schema].empty?
         create_temp_file(@project_module.get_name(:data_schema), params[:project_module][:data_schema], tmpdir)
         session[:data_schema] = true
       end
@@ -1143,11 +1180,8 @@ class ProjectModulesController < ApplicationController
 
     # check if ui schema is valid
     if !session[:ui_schema]
-      error = ProjectModule.validate_ui_schema(params[:project_module][:ui_schema])
-      if error
-        @project_module.errors.add(:ui_schema, error)
-        valid = false
-      else
+      @project_module.validate_ui_schema(params[:project_module][:ui_schema])
+      if @project_module.errors[:ui_schema].empty?
         create_temp_file(@project_module.get_name(:ui_schema), params[:project_module][:ui_schema], tmpdir)
         session[:ui_schema] = true
       end
@@ -1155,11 +1189,8 @@ class ProjectModulesController < ApplicationController
 
     # check if ui logic is valid
     if !session[:ui_logic]
-      error = ProjectModule.validate_ui_logic(params[:project_module][:ui_logic])
-      if error
-        @project_module.errors.add(:ui_logic, error)
-        valid = false
-      else
+      @project_module.validate_ui_logic(params[:project_module][:ui_logic])
+      if @project_module.errors[:ui_logic].empty?
         create_temp_file(@project_module.get_name(:ui_logic), params[:project_module][:ui_logic], tmpdir)
         session[:ui_logic] = true
       end
@@ -1167,11 +1198,8 @@ class ProjectModulesController < ApplicationController
 
     # check if arch16n is valid
     if !session[:arch16n]
-      error = ProjectModule.validate_arch16n(params[:project_module][:arch16n])
-      if error
-        @project_module.errors.add(:arch16n, error)
-        valid = false
-      else
+      @project_module.validate_arch16n(params[:project_module][:arch16n])
+      if @project_module.errors[:arch16n].empty?
         if !params[:project_module][:arch16n].nil?
           create_temp_file(@project_module.get_name(:properties), params[:project_module][:arch16n], tmpdir)
           session[:arch16n] = true
@@ -1181,82 +1209,14 @@ class ProjectModulesController < ApplicationController
 
     # check if validation schema is valid
     if !session[:validation_schema]
-      error = ProjectModule.validate_validation_schema(params[:project_module][:validation_schema])
-      if error
-        @project_module.errors.add(:validation_schema, error)
-        valid = false
-      else
+      @project_module.validate_validation_schema(params[:project_module][:validation_schema])
+      if @project_module.errors[:validation_schema].empty?
         if !params[:project_module][:validation_schema].nil?
           create_temp_file(@project_module.get_name(:validation_schema), params[:project_module][:validation_schema], tmpdir)
           session[:validation_schema] = true
         end
       end
     end
-
-    valid
-  end
-
-  def update_project_module_if_valid(tmpdir)
-    valid = false
-
-    if params[:project_module]
-      @project_module.assign_attributes(:name => params[:project_module][:name]) if params[:project_module]
-      valid = @project_module.valid?
-    end
-
-    # check if ui schema is valid
-    if !session[:ui_schema] and !params[:project_module][:ui_schema].nil?
-      error = ProjectModule.validate_ui_schema(params[:project_module][:ui_schema])
-      if error
-        @project_module.errors.add(:ui_schema, error)
-        valid = false
-      else
-        create_temp_file(@project_module.get_name(:ui_schema), params[:project_module][:ui_schema], tmpdir)
-        session[:ui_schema] = true
-      end
-    end
-
-    # check if ui logic is valid
-    if !session[:ui_logic] and !params[:project_module][:ui_logic].nil?
-      error = ProjectModule.validate_ui_logic(params[:project_module][:ui_logic])
-      if error
-        @project_module.errors.add(:ui_logic, error)
-        valid = false
-      else
-        create_temp_file(@project_module.get_name(:ui_logic), params[:project_module][:ui_logic], tmpdir)
-        session[:ui_logic] = true
-      end
-    end
-
-    # check if arch16n is valid
-    if !session[:arch16n] and !params[:project_module][:arch16n].nil?
-      error = ProjectModule.validate_arch16n(params[:project_module][:arch16n])
-      if error
-        @project_module.errors.add(:arch16n, error)
-        valid = false
-      else
-        if !params[:project_module][:arch16n].nil?
-          create_temp_file(@project_module.get_name(:properties), params[:project_module][:arch16n], tmpdir)
-          session[:arch16n] = true
-        end
-      end
-    end
-
-    # check if validation schema is valid
-    if !session[:validation_schema] and !params[:project_module][:validation_schema].nil?
-      error = ProjectModule.validate_validation_schema(params[:project_module][:validation_schema])
-      if error
-        @project_module.errors.add(:validation_schema, error)
-        valid = false
-      else
-        if !params[:project_module][:validation_schema].nil?
-          create_temp_file(@project_module.get_name(:validation_schema), params[:project_module][:validation_schema], tmpdir)
-          session[:validation_schema] = true
-        end
-      end
-    end
-
-    valid
   end
 
   def create_temp_file(filename, upload, tmpdir)
@@ -1267,9 +1227,7 @@ class ProjectModulesController < ApplicationController
     end
   end
 
-  private
-
-  def parse_parameter_for_project_module(params)
+  def parse_settings_from_params(params)
     @tmpdir = params[:project_module][:tmpdir]
     @name = params[:project_module][:name]
     @season = params[:project_module][:season]

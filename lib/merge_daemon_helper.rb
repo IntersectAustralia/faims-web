@@ -2,23 +2,6 @@ require Rails.root.join('config/environment')
 
 class MergeDaemon
 
-  def self.match_file(file)
-    /^(?<key>[^_]+)_v(?<version>\d+)$/.match(file)
-  end
-
-  def self.sort_files_by_version(files)
-    # sort files by version
-    sorted_files = files.sort do |a, b|
-      ma = match_file a
-      mb = match_file b
-      s = 1
-      s = -1 if ma[:version] < mb[:version]
-      s = 0 if ma[:version] == mb[:version]
-      s
-    end
-    sorted_files
-  end
-
   def self.init
     # make uploads directory
     Dir.mkdir(Rails.application.config.server_uploads_directory) unless File.directory? Rails.application.config.server_uploads_directory
@@ -59,6 +42,23 @@ class MergeDaemon
     ensure
       FileUtils.remove_entry_secure db_file_path if db_file_path
     end
+  end
+
+  def self.match_file(file)
+    /^(?<key>[^_]+)_v(?<version>\d+)$/.match(file)
+  end
+
+  def self.sort_files_by_version(files)
+    # sort files by version
+    sorted_files = files.sort do |a, b|
+      ma = match_file a
+      mb = match_file b
+      s = 1
+      s = -1 if ma[:version] < mb[:version]
+      s = 0 if ma[:version] == mb[:version]
+      s
+    end
+    sorted_files
   end
 
 end

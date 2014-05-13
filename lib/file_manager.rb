@@ -1,103 +1,128 @@
 class FileManager
 
-	def initialize(name, base_dir, args, archive)
-		@name = name.gsub(/\s+/, '_')
-		@base_dir = base_dir
-		@dirty_file = @base_dir + '.dirty_' + @name
-		@lock_file = @base_dir + '.lock_' + @name
-		@files = []
-    @args = args
-    @archive = archive
-	end
-
-	def add_dir(full_dir_path)
-    fs = FileHelper.get_file_list(full_dir_path)
-    fs.each do |file|
-      add_file(File.join(full_dir_path, file), File.dirname(file))
-    end
-    file_list
-	end
-
-	def add_file(full_file_path, relative_base_dir = nil)
-		f = { file: full_file_path, dir:relative_base_dir }
-		@files.push(f) unless @files.include? f
-	end
-
-	def dirty?
-		return true if File.exists? @dirty_file
-    !@files.empty? and !File.exists? @archive
-	end
-
-	def make_dirt
-		FileHelper.touch_file @dirty_file
-		dirty?
-	end
-
-	def clean_dirt
-		FileUtils.remove_entry_secure @dirty_file if dirty?
-		!dirty?
-	end
-
-	def locked?
-		File.exists? @lock_file
-	end
-
-	def with_lock
-		wait_for_lock
-		return yield
-	ensure
-		clear_lock
-	end
-
-	def wait_for_lock
-		loop do
-			break unless locked?
-			sleep 1
-    end
-		FileHelper.touch_file @lock_file
-		locked?
-	end
-
-	def clear_lock
-		FileUtils.remove_entry_secure @lock_file if locked?
-		!locked?
-	end
-
-	def file_list
-		@files.map { |f| f[:file] }
-	end
-
-	def archive_list
-		@files.map { |f| f[:dir] + '/' + File.basename(f[:file]) }
-	end
-
-	def update_archive
-    if @files.empty?
-      clean_dirt
-      return true
-    end
-		return true unless dirty?
-    FileUtils.remove_entry_secure @archive if File.exists? @archive
-    tmp_dir = Dir.mktmpdir
-    with_lock do
-      @files.each do |f|
-        next unless File.exists? f[:file]
-        dir = f[:dir] ? f[:dir] + '/' : '/'
-        FileUtils.mkdir_p(tmp_dir + '/' + dir) if f[:dir]
-        file = tmp_dir + '/' + dir + File.basename(f[:file])
-        FileUtils.cp_r(f[:file], file)
-      end
-      files = FileHelper.get_file_list(tmp_dir)
-      TarHelper.tar(@args, @archive, files, tmp_dir)
-      clean_dirt
-    end
-	ensure
-		FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
+  class TimeoutException < Exception
   end
 
-  def last_modified
-    return File.ctime(@archive) if File.exists? @archive
-    nil
+  LOCK_TIMEOUT = 20
+
+	def initialize(name, module_dir, base_dir)
+		@name = name.gsub(/\s+/, '_')
+    @module_dir = module_dir
+    @base_dir = base_dir
+		@timestamp_file = File.open(File.join(module_dir, ".#{name}"), File::CREAT)
+    @files = []
+    @dirs = []
+    @ignore_files = []
+    @ignore_dirs = []
+  end
+
+  def name
+    @name
+  end
+
+  def module_dir
+    @module_dir
+  end
+
+  def base_dir
+    @base_dir
+  end
+
+  def timestamp_file
+    @timestamp_file
+  end
+
+  def add_dir(full_dir_path)
+    @dirs.push(full_dir_path)
+  end
+
+	def add_file(full_file_path)
+		@files.push(full_file_path)
+  end
+
+  def ignore_dir(relative_dir_path)
+    @ignore_dirs.push(relative_dir_path)
+  end
+
+  def ignore_file(relative_file_path)
+    @ignore_files.push(full_file_path)
+  end
+
+  def file_list
+    files = []
+    @dirs.each do |d|
+      path = Pathname.new(d).relative_path_from(Pathname.new(@base_dir)).to_s
+      FileHelper.get_file_list(d, path == '.' ? nil : path).each do |f|
+        files.push(f)
+      end
+    end
+    @files.each do |f|
+      path = Pathname.new(f).relative_path_from(Pathname.new(@base_dir)).to_s
+      files.push(path)
+    end
+    files - ignore_file_list
+  end
+
+  def absolute_file_list
+    file_list.map { |f| File.join(base_dir, f) }
+  end
+
+  def ignore_file_list
+    files = []
+    @ignore_dirs.each do |d|
+      path = Pathname.new(d).relative_path_from(Pathname.new(@base_dir)).to_s
+      FileHelper.get_file_list(d, path).each do |f|
+        files.push(f)
+      end
+    end
+    @ignore_files.each do |f|
+      path = Pathname.new(f).relative_path_from(Pathname.new(@base_dir)).to_s
+      files.push(path)
+    end
+    files
+  end
+
+	def has_changes?
+    not file_list.select { |f| File.mtime("#{@base_dir}/#{f}") > File.mtime(@timestamp_file.path) }.empty?
+	end
+
+	def reset_changes
+    FileUtils.touch @timestamp_file.path
+	end
+
+	def with_shared_lock
+    wait_for_lock(File::LOCK_SH)
+    return yield
+  ensure
+    clear_lock
+  end
+
+  def with_exclusive_lock
+    wait_for_lock(File::LOCK_SH)
+    return yield
+  ensure
+    clear_lock
+  end
+
+  def wait_for_lock(lock)
+    count = 0
+    loop do
+      break if acquire_lock(lock)
+      count = count + 1
+      break if count >= LOCK_TIMEOUT
+      sleep 1
+    end
+    raise TimeoutException if count >= LOCK_TIMEOUT
+  end
+
+  def acquire_lock(lock)
+    #p "locked(#{name})", lock
+    @timestamp_file.flock(File::LOCK_NB | lock)
+  end
+
+  def clear_lock
+    #p "unlocked(#{name})"
+    @timestamp_file.flock(File::LOCK_UN)
   end
 
 end
