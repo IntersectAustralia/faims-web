@@ -60,7 +60,7 @@ Feature: Manage project module users
     And database is locked for "Module 1"
     And I select "User1 Last1" from the user list
     Then I click on "Add"
-    And I should see "Could not process request as database is currently locked"
+    And I should see "Could not process request as project is currently locked."
     And I should have user for project module
       | first_name | last_name |
       | Fred       | Bloggs    |
@@ -87,7 +87,7 @@ Feature: Manage project module users
     And database is locked for "Module 1"
     And I select "User1 Last1" from the user list
     Then I click on "Add"
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I should have user for project module
       | first_name | last_name |
       | Fred       | Bloggs    |

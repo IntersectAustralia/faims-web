@@ -40,7 +40,7 @@ Feature: View and Revert entity history
     Then I history should have conflicts
     And database is locked for "Resolve Conflicts"
     And I click on "Revert and Resolve Conflicts"
-    And I should see "Could not process request as database is currently locked"
+    And I should see "Could not process request as project is currently locked."
     Then I history should have conflicts
 
   @ignore_jenkins
@@ -60,5 +60,5 @@ Feature: View and Revert entity history
     And I follow "Show History"
     Then I history should have conflicts
     And I click on "Revert and Resolve Conflicts"
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     Then I history should have conflicts

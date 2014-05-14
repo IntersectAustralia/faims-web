@@ -109,7 +109,7 @@ Feature: Merge relationships
       | name  | right  |
     And I click on "Merge"
     And I wait for popup to close
-    Then I should see dialog "Could not process request as database is currently locked"
+    Then I should see dialog "Could not process request as project is currently locked."
     And I confirm
 
   @javascript
@@ -132,7 +132,7 @@ Feature: Merge relationships
       | field | column |
       | name  | right  |
     And I click on "Merge"
-    Then I should see dialog "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see dialog "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I confirm
 
   # TODO Scenario: Cannot compare relationships of different types

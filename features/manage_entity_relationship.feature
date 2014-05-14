@@ -76,7 +76,7 @@ Feature: Manage entity relationships
     Then I delete the first record
     And I confirm
     And I wait for page
-    Then I should see "Could not process request as database is currently locked"
+    Then I should see "Could not process request as project is currently locked."
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -100,7 +100,7 @@ Feature: Manage entity relationships
       | AboveBelow 2 |
     Then I delete the first record
     And I confirm
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -139,16 +139,16 @@ Feature: Manage entity relationships
     And I press "Filter"
     Then I follow "Small 2"
     And I follow "Show Relationship Association"
-    And database is locked for "Sync Example"
     And I should see records
       | name         |
       | AboveBelow 1 |
       | AboveBelow 2 |
     And I press "Add Member"
     And I click on "Search"
+    And database is locked for "Sync Example"
     And I select the first record
     And I press "Add Member"
-    Then I should see "Could not process request as database is currently locked"
+    Then I should see "Could not process request as project is currently locked."
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -177,7 +177,7 @@ Feature: Manage entity relationships
     And I click on "Search"
     And I select the first record
     And I press "Add Member"
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     Then I should see records
       | name         |
       | AboveBelow 1 |
@@ -239,7 +239,7 @@ Feature: Manage entity relationships
     Then I delete the first record
     And I confirm
     And I wait for page
-    Then I should see "Could not process request as database is currently locked"
+    Then I should see "Could not process request as project is currently locked."
     Then I should see records
       | name    |
       | Small 2 |
@@ -263,7 +263,7 @@ Feature: Manage entity relationships
       | Small 4 |
     Then I delete the first record
     And I confirm
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     Then I should see records
       | name    |
       | Small 2 |
@@ -302,16 +302,16 @@ Feature: Manage entity relationships
     And I press "Filter"
     Then I follow "AboveBelow 1"
     And I follow "Show Relationship Member"
-    And database is locked for "Sync Example"
     And I should see records
       | name    |
       | Small 2 |
       | Small 4 |
     And I press "Add Member"
     And I click on "Search"
+    And database is locked for "Sync Example"
     And I select the first record
     And I press "Add Member"
-    Then I should see "Could not process request as database is currently locked"
+    Then I should see "Could not process request as project is currently locked."
     Then I should see records
       | name    |
       | Small 2 |
@@ -340,7 +340,7 @@ Feature: Manage entity relationships
     And I click on "Search"
     And I select the first record
     And I press "Add Member"
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     Then I should see records
       | name    |
       | Small 2 |

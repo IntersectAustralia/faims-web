@@ -2,6 +2,10 @@ require Rails.root.join('config/environment')
 
 class MergeDaemon
 
+  class MergeException < Exception
+
+  end
+
   def self.init
     # make uploads directory
     Dir.mkdir(Rails.application.config.server_uploads_directory) unless File.directory? Rails.application.config.server_uploads_directory
@@ -21,13 +25,13 @@ class MergeDaemon
 
         # match file name for key and version
         match = match_file(db_file)
-        raise Exception unless match
+        raise MergeException unless match
 
         key = match[:key]
         version = match[:version]
 
         project_module = ProjectModule.find_by_key(key)
-        raise Exception unless project_module
+        raise MergeException unless project_module
 
         puts "Merging #{db_file}"
 

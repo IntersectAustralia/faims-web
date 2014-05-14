@@ -38,7 +38,7 @@ Feature: Manage project modules
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
-    And I have project module files for "Module 1"
+    And I can find project module files for "Module 1"
 
   Scenario: Create a new project module without validation schema
     Given I am on the home page
@@ -54,7 +54,7 @@ Feature: Manage project modules
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
-    And I have project module files for "Module 1"
+    And I can find project module files for "Module 1"
 
   Scenario: Create a new project module and set SRID
     Given I am on the home page
@@ -72,7 +72,7 @@ Feature: Manage project modules
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
-    And I have project module files for "Module 1"
+    And I can find project module files for "Module 1"
     And I should have setting "srid" for "Module 1" as "4326"
 
   Scenario Outline: Cannot create project module due to field validation errors
@@ -116,57 +116,6 @@ Feature: Manage project modules
     | Validation Schema | data_schema_error1.xml    | invalid xml at line             |
     | UI Logic          |                           | can't be blank                  |
     | Arch16n           | faims_Module_2.properties | invalid properties file at line |
-
-  Scenario: Upload Module
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "module.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I should be on the project modules page
-    And I have project module files for "Simple Project"
-
-  Scenario: Upload Module fails if module already exists
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "module.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module has been successfully uploaded"
-    And I follow "Upload Module"
-    And I pick file "module.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "This module already exists in the system"
-
-  Scenario: Upload Module fails if checksum is wrong
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "module_corrupted1.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Wrong hash sum for the module"
-
-  Scenario: Upload Module fails if file is corrupted
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "module_corrupted2.tar.bz2" for "Module File"
-    And I press "Upload"
-    Then I should see "Module failed to upload"
-
-  Scenario: Upload Module fails if file is not a module
-    Given I am on the home page
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Upload Module"
-    And I pick file "module.tar" for "Module File"
-    And I press "Upload"
-    Then I should see "Module failed to upload"
 
   Scenario Outline: Edit module static data
     Given I am on the home page
@@ -213,10 +162,10 @@ Feature: Manage project modules
     And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Module 1"
-    Then I follow "Edit Module"
     And settings is locked for "Module 1"
+    Then I follow "Edit Module"
     And I press "Update"
-    Then I should see "Could not process request as module is currently locked"
+    Then I should see "Could not process request as project is currently locked."
 
   Scenario: Edit project module with new files
     Given I am on the home page
@@ -266,22 +215,73 @@ Feature: Manage project modules
     | Validation Schema | data_schema_error1.xml    | invalid xml at line             |
     | Arch16n           | faims_Module_2.properties | invalid properties file at line |
 
-  Scenario: Download package
-    Given I have project module "Module 1"
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Module 1"
-    And I automatically archive project module package "Module 1"
-    And I automatically download project module package "Module 1"
-    Then I should download project module package file for "Module 1"
-
-  @javascript
-  Scenario: Cannot download package if project module is locked
-    Given I have project module "Module 1"
-    And I follow "Show Modules"
-    Then I should be on the project modules page
-    And I follow "Module 1"
-    And database is locked for "Module 1"
-    And I follow "Download Module"
-    Then I should see dialog "Could not process request as module is currently locked"
-    And I confirm
+#  Scenario: Download package
+#    Given I have project module "Module 1"
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Module 1"
+#    And I automatically archive project module package "Module 1"
+#    And I automatically download project module package "Module 1"
+#    Then I should download project module package file for "Module 1"
+#
+#  @javascript
+#  Scenario: Cannot download package if project module is locked
+#    Given I have project module "Module 1"
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Module 1"
+#    And database is locked for "Module 1"
+#    And I follow "Download Module"
+#    Then I should see dialog "Could not process request as project is currently locked."
+#    And I confirm
+#
+#  Scenario: Upload Module
+#    Given I am on the home page
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Upload Module"
+#    And I pick file "module.tar.bz2" for "Module File"
+#    And I press "Upload"
+#    Then I should see "Module has been successfully uploaded"
+#    And I should be on the project modules page
+#    And I can find project module files for "Simple Project"
+#
+#  Scenario: Upload Module fails if module already exists
+#    Given I am on the home page
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Upload Module"
+#    And I pick file "module.tar.bz2" for "Module File"
+#    And I press "Upload"
+#    Then I should see "Module has been successfully uploaded"
+#    And I follow "Upload Module"
+#    And I pick file "module.tar.bz2" for "Module File"
+#    And I press "Upload"
+#    Then I should see "This module already exists in the system"
+#
+#  Scenario: Upload Module fails if checksum is wrong
+#    Given I am on the home page
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Upload Module"
+#    And I pick file "module_corrupted1.tar.bz2" for "Module File"
+#    And I press "Upload"
+#    Then I should see "Wrong hash sum for the module"
+#
+#  Scenario: Upload Module fails if file is corrupted
+#    Given I am on the home page
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Upload Module"
+#    And I pick file "module_corrupted2.tar.bz2" for "Module File"
+#    And I press "Upload"
+#    Then I should see "Module failed to upload"
+#
+#  Scenario: Upload Module fails if file is not a module
+#    Given I am on the home page
+#    And I follow "Show Modules"
+#    Then I should be on the project modules page
+#    And I follow "Upload Module"
+#    And I pick file "module.tar" for "Module File"
+#    And I press "Upload"
+#    Then I should see "Module failed to upload"

@@ -173,14 +173,14 @@ Feature: Project module file manager
   Scenario: Cannot add project module file if files locked
     Given I have project module "Module 1"
     And I am on upload data files page for Module 1
-    And files are locked for "Module 1"
+    And data files are locked for "Module 1"
     And I upload project module files
       | dir  | file         |
       | data | file1.tar.gz |
     Then I should not see project module files
       | dir  | file         |
       | data | file1.tar.gz |
-    And I should see "Could not upload file. Files are currently locked"
+    And I should see "Could not process request as project is currently locked"
 
   @javascript
   Scenario: Cannot add directory if directory already exists
@@ -199,14 +199,14 @@ Feature: Project module file manager
   Scenario: Cannot add directory if directory if files are locked
     Given I have project module "Module 1"
     And I am on upload data files page for Module 1
-    And files are locked for "Module 1"
+    And data files are locked for "Module 1"
     And I create project module directories
       | dir  | child_dir |
       | data | test1     |
     Then I should not see project module directories
       | dir  | child_dir |
       | data | test1     |
-    And I should see "Could not create directory. Files are currently locked"
+    And I should see "Could not process request as project is currently locked"
 
   @javascript
   Scenario: Cannot delete file if files are locked
@@ -215,14 +215,14 @@ Feature: Project module file manager
     And I upload project module files
       | dir  | file          |
       | data | file1.tar.gz  |
-    And files are locked for "Module 1"
+    And data files are locked for "Module 1"
     And I delete project module files
       | dir  | file          |
       | data | file1.tar.gz  |
     Then I should see project module files
       | dir  | file          |
       | data | file1.tar.gz  |
-    And I should see "Could not delete file. Files are currently locked"
+    And I should see "Could not process request as project is currently locked"
 
   @javascript
   Scenario: Cannot delete directory if files are locked
@@ -231,14 +231,14 @@ Feature: Project module file manager
     And I create project module directories
       | dir   | child_dir |
       | data  | test1     |
-    And files are locked for "Module 1"
+    And data files are locked for "Module 1"
     And I delete project module directories
       | dir   | child_dir |
       | data  | test1     |
     Then I should see project module directories
       | dir   | child_dir |
       | data  | test1     |
-    And I should see "Could not delete directory. Files are currently locked"
+    And I should see "Could not process request as project is currently locked"
 
   Scenario: I upload batch file
     Given I have project module "Module 1"
@@ -264,10 +264,10 @@ Feature: Project module file manager
   Scenario: Cannot upload batch file if files are locked
     Given I have project module "Module 1"
     And I am on upload data files page for Module 1
-    And files are locked for "Module 1"
+    And data files are locked for "Module 1"
     And I pick file "batch.tar.gz" for "project_module_file"
     And I press "Upload"
-    And I should see "Could not upload archive. Files are currently locked"
+    And I should see "Could not process request as project is currently locked"
     Then I should not see project module files
       | dir   | file  |
       | test1 | test3 |

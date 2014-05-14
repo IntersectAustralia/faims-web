@@ -58,7 +58,7 @@ describe 'Web Database Queries' do
           deleted:'true',
           uuid:random_uuid
       }
-      result = run_query(WebQuery.delete_or_undelete_arch_entity, params)
+      result = run_query(WebQuery.delete_or_restore_arch_entity, params)
       result
     }.should_not raise_error
   end
@@ -106,7 +106,7 @@ describe 'Web Database Queries' do
           deleted:'true',
           relationshipid:random_relationship_id
       }
-      result = run_query(WebQuery.delete_or_undelete_relationship, params)
+      result = run_query(WebQuery.delete_or_restore_relationship, params)
       result
     }.should_not raise_error
   end

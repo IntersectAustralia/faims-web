@@ -141,7 +141,7 @@ class Database
   end
 
   def get_arch_entity_deleted_status(uuid)
-    @db.get_first_value(WebQuery.get_arch_entity_deleted_status, uuid).first
+    @db.execute(WebQuery.get_arch_entity_deleted_status, uuid).first
   end
 
   def get_arch_entity_attributes(uuid)
@@ -334,7 +334,7 @@ class Database
         uuid:uuid,
         parenttimestamp: db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
     }
-    db.execute(WebQuery.delete_or_undelete_arch_entity, params)
+    db.execute(WebQuery.delete_or_restore_arch_entity, params)
   end
 
   def restore_arch_entity(uuid, userid)
@@ -346,7 +346,7 @@ class Database
           uuid:uuid,
           parenttimestamp: db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
       }
-      db.execute(WebQuery.delete_or_undelete_arch_entity, params)
+      db.execute(WebQuery.delete_or_restore_arch_entity, params)
     end
   end
 
@@ -407,8 +407,7 @@ class Database
   end
 
   def get_rel_deleted_status(relationshipid)
-    deleted = @db.execute(WebQuery.get_rel_deleted_status, relationshipid).first
-    deleted
+    @db.execute(WebQuery.get_rel_deleted_status, relationshipid).first
   end
 
   def get_rel_attributes(relationshipid)
@@ -526,7 +525,7 @@ class Database
 
   def revert_rel(relid, revert_timestamp, attributes, resolve, userid)
     @db.transaction do |db|
-      timestamp = db.current_timestamp
+      timestamp = current_timestamp
 
       db.execute(WebQuery.insert_version, timestamp, userid)
 
@@ -571,21 +570,21 @@ class Database
     db.execute(WebQuery.clear_relnvalue_fork, relid)
   end
 
-  def delete_relationship(db, relationshipid, userid)
+  def delete_relationship(relationshipid, userid)
     @db.transaction do |db|
       db.execute(WebQuery.insert_version, current_timestamp, userid)
       delete_relationship_no_transaction(db, relationshipid, userid)
     end
   end
 
-  def delete_relationship_no_lock(db, relationshipid, userid)
+  def delete_relationship_no_transaction(db, relationshipid, userid)
     params = {
         userid:userid,
         deleted:'true',
         relationshipid:relationshipid,
         parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
     }
-    db.execute(WebQuery.delete_or_undelete_relationship, params)
+    db.execute(WebQuery.delete_or_restore_relationship, params)
   end
 
   def restore_relationship(relationshipid, userid)
@@ -597,7 +596,7 @@ class Database
           relationshipid:relationshipid,
           parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
       }
-      db.execute(WebQuery.delete_or_undelete_relationship, params)
+      db.execute(WebQuery.delete_or_restore_relationship, params)
     end
   end
 
@@ -765,10 +764,13 @@ class Database
     @db.transaction do |db|
       db.execute(WebQuery.insert_version, current_timestamp, userid)
       temp_id_vocab_mapping = {}
+
       vocab_id.length.times do |i|
         vocab_id[i] = vocab_id[i].blank? ? nil : vocab_id[i]
+
         parent_vocab_ids = parent_vocab_id[i].blank? ? temp_id_vocab_mapping[temp_parent_id[i]] : parent_vocab_id[i]
         db.execute(WebQuery.update_attributes_vocab, vocab_id[i], attribute_id,vocab_name[i], vocab_description[i], picture_url[i], parent_vocab_ids)
+
         if !temp_id[i].blank?
           new_vocab_id = db.last_insert_row_id
           temp_id_vocab_mapping[temp_id[i]] = new_vocab_id
@@ -805,10 +807,11 @@ class Database
 
   def validate_reln_value(db, relationshipid, relnvaluetimestamp, attributeid)
     return unless File.exists? @project_module.get_path(:validation_schema)
+
     begin
       db_validator = DatabaseValidator.new(self, @project_module.get_path(:validation_schema))
 
-      result = @db.execute(WebQuery.get_reln_value, relationshipid, relnvaluetimestamp, attributeid)
+      result = db.execute(WebQuery.get_reln_value, relationshipid, relnvaluetimestamp, attributeid)
       result.each do |row|
         begin
           relationshipid = row[0]
@@ -825,16 +828,14 @@ class Database
 
           result = db_validator.validate_reln_value(relationshipid, relnvaluetimestamp, attributename, fields)
           if result
-            update_reln_value_as_dirty(relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], versionnum, 1, result)
+            update_reln_value_as_dirty(db, relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
-          puts e.to_s
-          puts e.backtrace
+          logger.error e
         end
       end
     rescue Exception => e
-      puts e.to_s
-      puts e.backtrace
+      logger.error e
     end
   end
 
@@ -863,7 +864,7 @@ class Database
 
           result = db_validator.validate_aent_value(uuid, valuetimestamp, attributename, fields)
           if result
-            update_aent_value_as_dirty(uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], versionnum, 1, result)
+            update_aent_value_as_dirty(db, uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
           logger.error e

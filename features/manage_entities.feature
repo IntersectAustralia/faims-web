@@ -46,7 +46,7 @@ Feature: Manage entities
     And I follow "Small 2"
     And I update field "name" of type "freetext" with values "test"
     And I click on update for attribute with field "name"
-    Then I should see dialog "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see dialog "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I confirm
 
   @javascript
@@ -98,7 +98,7 @@ Feature: Manage entities
       | field    | type  | values                 |
       | location | vocab | Location A; Location C |
     And I wait for popup to close
-    Then I should see dialog "Could not process request as database is currently locked"
+    Then I should see dialog "Could not process request as project is currently locked."
     And I confirm
 
   # TODO Scenario: Update entity attribute with multiple values causes validation error
@@ -205,7 +205,7 @@ Feature: Manage entities
     And I click on "Delete"
     And I confirm
     And I wait for page
-    Then I should see "Could not process request as database is currently locked"
+    Then I should see "Could not process request as project is currently locked."
     And I follow "Back"
     Then I should see records
       | name    |
@@ -224,7 +224,7 @@ Feature: Manage entities
     Then I follow "Small 3"
     And I click on "Delete"
     And I confirm
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I follow "Back"
     Then I should see records
       | name    |
@@ -268,7 +268,7 @@ Feature: Manage entities
     And database is locked for "Sync Example"
     Then I click on "Restore"
     And I wait for page
-    And I should see "Could not process request as database is currently locked"
+    And I should see "Could not process request as project is currently locked."
     And I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records
@@ -289,7 +289,7 @@ Feature: Manage entities
     Then I click on "Show Deleted"
     Then I follow "Small 1"
     Then I click on "Restore"
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records

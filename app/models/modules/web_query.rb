@@ -376,7 +376,7 @@ EOF
     )
   end
 
-  def self.delete_or_undelete_arch_entity
+  def self.delete_or_restore_arch_entity
     cleanup_query(<<EOF
 INSERT INTO archentity (uuid, userid, AEntTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
 SELECT uuid, :userid, AEntTypeID,
@@ -1097,7 +1097,7 @@ EOF
     )
   end
 
-  def self.delete_or_undelete_relationship
+  def self.delete_or_restore_relationship
     cleanup_query(<<EOF
 INSERT INTO relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
 SELECT relationshipid, :userid, RelnTypeID,

@@ -43,7 +43,7 @@ Then /^I should see project modules$/ do |table|
   end
 end
 
-Then /^I have project module files for "([^"]*)"$/ do |name|
+Then /^I can find project module files for "([^"]*)"$/ do |name|
   dir_name = ProjectModule.find_by_name(name).get_name(:project_module_dir)
   File.directory?(Rails.root.join('tmp/modules', dir_name)).should be_true
   File.exists?(Rails.root.join('tmp/modules', dir_name, 'db.sqlite3')).should be_true
@@ -645,23 +645,23 @@ And /^I perform HTTP authentication$/ do
 end
 
 And /^app files are locked for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  project_module.app_mgr.wait_for_lock(File::LOCK_EX)
+  @lock_module = ProjectModule.find_by_name(name)
+  @lock_module.app_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^data files are locked for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  project_module.data_mgr.wait_for_lock(File::LOCK_EX)
+  @lock_module = ProjectModule.find_by_name(name)
+  @lock_module.data_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^database is locked for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  project_module.db_mgr.wait_for_lock(File::LOCK_EX)
+  @lock_module = ProjectModule.find_by_name(name)
+  @lock_module.db_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^settings is locked for "([^"]*)"$/ do |name|
-  project_module = ProjectModule.find_by_name(name)
-  project_module.settings_mgr.wait_for_lock(File::LOCK_EX)
+  @lock_module = ProjectModule.find_by_name(name)
+  @lock_module.settings_mgr.wait_for_lock(File::LOCK_EX)
 end
 
 And /^I select records$/ do |table|

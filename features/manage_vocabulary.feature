@@ -151,12 +151,12 @@ Feature: Manage vocabulary
     Given I have project module "Vocabulary"
     And I am on the project modules page
     And I follow "Vocabulary"
-    Then I follow "Edit Vocabulary"
     And database is locked for "Vocabulary"
+    Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
     Then I click on "Update"
-    And I should see "Could not process request as database is currently locked"
+    And I should see "Could not process request as project is currently locked."
     And I should see vocabularies
       | name | description | pictureURL |
       | Red  |             |            |
@@ -175,7 +175,7 @@ Feature: Manage vocabulary
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
     Then I click on "Update"
-    Then I should see "Only module users can edit the database. Please get a module user to add you to the module"
+    Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I should see vocabularies
       | name | description | pictureURL |
       | Red  |             |            |

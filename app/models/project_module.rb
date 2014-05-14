@@ -4,6 +4,10 @@ class ProjectModule < ActiveRecord::Base
   include XSDValidator
   include MD5Checksum
 
+  class ProjectModuleException < Exception
+
+  end
+
   DEFAULT_SRID = 4326
 
   default_scope order: 'name COLLATE NOCASE'
@@ -25,7 +29,8 @@ class ProjectModule < ActiveRecord::Base
                 :copyright_holder,
                 :client_sponsor,
                 :land_owner,
-                :has_sensitive_data
+                :has_sensitive_data,
+                :tmpdir
 
   attr_accessible :name,
                   :key,
@@ -47,7 +52,8 @@ class ProjectModule < ActiveRecord::Base
                   :copyright_holder,
                   :client_sponsor,
                   :land_owner,
-                  :has_sensitive_data
+                  :has_sensitive_data,
+                  :tmpdir
 
   validates :name, :presence => true, :length => {:maximum => 255},
             :format => {:with => /\A(\s*[^\/\\\?\%\*\:\|\"\'\<\>\.]+\s*)*\z/i} # do not allow file name reserved characters
@@ -80,8 +86,8 @@ class ProjectModule < ActiveRecord::Base
     end
   end
 
-  def self.validate_data_schema(schema)
-    errors.add(:data_schema, "can't be blank") if schema.blank?
+  def validate_data_schema(schema)
+    return errors.add(:data_schema, "can't be blank") if schema.blank?
     errors.add(:data_schema, 'must be xml file') unless schema.content_type =~ /xml/
 
     file = schema.tempfile
@@ -98,13 +104,13 @@ class ProjectModule < ActiveRecord::Base
     end
   end
 
-  def self.validate_ui_schema(schema)
-    errors.add(:ui_schema, "can't be blank") if schema.blank?
+  def validate_ui_schema(schema)
+    return errors.add(:ui_schema, "can't be blank") if schema.blank?
     errors.add(:ui_schema, 'must be xml file') unless schema.content_type =~ /xml/
 
     file = schema.tempfile
     begin
-      xml_errors = XSDValidator.validate_ui_schema_(file.path)
+      xml_errors = XSDValidator.validate_ui_schema(file.path)
     rescue => e
       xml_errors = [e]
     end
@@ -116,11 +122,11 @@ class ProjectModule < ActiveRecord::Base
     end
   end
 
-  def self.validate_ui_logic(schema)
-    errors.add(:ui_logic, "can't be blank") if schema.blank?
+  def validate_ui_logic(schema)
+    return errors.add(:ui_logic, "can't be blank") if schema.blank?
   end
 
-  def self.validate_arch16n(arch16n)
+  def validate_arch16n(arch16n)
     return if arch16n.blank?
 
     file = arch16n.tempfile
@@ -264,12 +270,29 @@ class ProjectModule < ActiveRecord::Base
     server_mgr.wait_for_lock(File::LOCK_SH)
     app_mgr.wait_for_lock(File::LOCK_SH)
     data_mgr.wait_for_lock(File::LOCK_SH)
+    db_mgr.wait_for_lock(File::LOCK_SH)
     return yield
   ensure
     settings_mgr.clear_lock
     server_mgr.clear_lock
     app_mgr.clear_lock
     data_mgr.clear_lock
+    db_mgr.clear_lock
+  end
+
+  def with_exclusive_lock
+    settings_mgr.wait_for_lock(File::LOCK_EX)
+    server_mgr.wait_for_lock(File::LOCK_EX)
+    app_mgr.wait_for_lock(File::LOCK_EX)
+    data_mgr.wait_for_lock(File::LOCK_EX)
+    db_mgr.wait_for_lock(File::LOCK_EX)
+    return yield
+  ensure
+    settings_mgr.clear_lock
+    server_mgr.clear_lock
+    app_mgr.clear_lock
+    data_mgr.clear_lock
+    db_mgr.clear_lock
   end
   
   # project module android info
@@ -364,81 +387,74 @@ class ProjectModule < ActiveRecord::Base
 
   def get_request_file(base_dir, file)
     request_file = File.join(base_dir, file)
-    raise Exception, 'file not found' unless File.exists? request_file
+    raise ProjectModuleException, 'file not found' unless File.exists? request_file
     request_file
   end
   
   def add_server_file(path, file)
-    raise Exception, 'filename is not valid' unless is_valid_filename?(path)
-    dest_path = File.join(get_path(:server_files_dir), path)
-    FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
-    FileUtils.mv file.path, dest_path
+    add_file(get_path(:server_files_dir), path, file)
   end
   
   def add_app_file(path, file)
-    raise Exception, 'filename is not valid' unless is_valid_filename?(path)
-    dest_path = File.join(get_path(:app_files_dir), path)
-    FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
-    FileUtils.mv file.path, dest_path
+    add_file(get_path(:app_files_dir), path, file)
   end
 
   def add_data_file(path, file)
-    raise Exception, 'filename is not valid' unless is_valid_filename?(path)
-    dest_path = File.join(get_path(:data_files_dir), path)
+    add_file(get_path(:data_files_dir), path, file)
+  end
+
+  def add_file(base_dir, path, file)
+    raise ProjectModuleException, 'Filename is not valid.' unless is_valid_filename?(path)
+    dest_path = File.join(base_dir, path)
+    raise ProjectModuleException, 'File already exists.' if File.exists? dest_path
     FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
     FileUtils.mv file.path, dest_path
   end
 
   def add_data_dir(dir)
-    raise Exception, 'dirname is not valid' unless is_valid_filename?(path)
-    FileUtils.mkdir_p File.join(get_path(:data_files_dir), dir)
+    raise ProjectModuleException, 'Directory name is not valid.' unless is_valid_filename?(dir)
+    dest_path = File.join(get_path(:data_files_dir), dir)
+    raise ProjectModuleException, 'Directory already exists.' if File.exists? dest_path and dir != '.'
+    FileUtils.mkdir_p dest_path
   end
 
   def add_data_batch_file(file)
     begin
-      success = nil
-      data_mgr.with_exclusive_lock do
-        success = TarHelper.untar('zxf', file, get_path(:data_files_dir))
-      end
-      raise Exception, 'Could not upload file. Please ensure file is a valid archive.' unless success == 0
+      success = TarHelper.untar('zxf', file, get_path(:data_files_dir))
+      raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.' unless success == 0
     rescue
-      raise Exception, 'Could not upload file. Please ensure file is a valid archive.'
+      raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.'
     end
   end
 
   def is_valid_filename?(file)
     return false if file.blank?
-    # TODO add regexp for filename format
     true
   end
 
   # project module settings getter and setter
   
   def get_settings
-    settings_mgr.with_shared_lock do
-      JSON.parse(File.read(get_path(:settings).as_json))
+    JSON.parse(File.read(get_path(:settings).as_json))
     end
-  end
 
   def set_settings(args)
-    settings_mgr.with_exclusive_lock do
-      File.open(get_path(:settings), 'w') do |file|
-        file.write({:name => args[:name],
-                    :key => key,
-                    :season => args[:season],
-                    :description => args[:description],
-                    :permit_no => args[:permit_no],
-                    :permit_holder => args[:permit_holder],
-                    :permit_issued_by => args[:permit_issued_by],
-                    :permit_type => args[:permit_type],
-                    :contact_address => args[:contact_address],
-                    :participant => args[:participant],
-                    :srid => args[:srid],
-                    :copyright_holder => args[:copyright_holder],
-                    :client_sponsor => args[:client_sponsor],
-                    :land_owner => args[:land_owner],
-                    :has_sensitive_data => args[:has_sensitive_data]}.to_json)
-      end
+    File.open(get_path(:settings), 'w') do |file|
+      file.write({:name => args[:name],
+                  :key => key,
+                  :season => args[:season],
+                  :description => args[:description],
+                  :permit_no => args[:permit_no],
+                  :permit_holder => args[:permit_holder],
+                  :permit_issued_by => args[:permit_issued_by],
+                  :permit_type => args[:permit_type],
+                  :contact_address => args[:contact_address],
+                  :participant => args[:participant],
+                  :srid => args[:srid],
+                  :copyright_holder => args[:copyright_holder],
+                  :client_sponsor => args[:client_sponsor],
+                  :land_owner => args[:land_owner],
+                  :has_sensitive_data => args[:has_sensitive_data]}.to_json)
     end
   end
 
@@ -479,18 +495,16 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def update_project_module_from(tmp_dir)
-    settings_mgr.with_exclusive_lock do
-      begin
-        # copy files from temp directory to project_modules directory
-        FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir))
+    begin
+      # copy files from temp directory to project_modules directory
+      FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir))
 
-        generate_temp_files
-      rescue Exception => e
-        FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
-        raise e
-      ensure
-        # ignore
-      end
+      generate_temp_files
+    rescue Exception => e
+      FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
+      raise e
+    ensure
+      # ignore
     end
   end
 
@@ -532,7 +546,6 @@ class ProjectModule < ActiveRecord::Base
     data_mgr.reset_changes
     package_mgr.reset_changes
     generate_database_cache
-    archive_project_module
   end
 
   def generate_database_cache(version = 0)
@@ -568,9 +581,9 @@ class ProjectModule < ActiveRecord::Base
       settings = JSON.parse(File.read(tmp_dir + 'module.settings').as_json)
 
       if !validate_checksum_for_project_archive(tmp_dir)
-        raise Exception, 'Wrong hash sum for the module'
+        raise ProjectModuleException, 'Wrong hash sum for the module'
       elsif !ProjectModule.find_by_key(project_module_settings['key']).blank?
-        raise Exception, 'This module already exists in the system'
+        raise ProjectModuleException, 'This module already exists in the system'
       else
         project_module = ProjectModule.new(name: settings['name'], key: settings['key'])
         begin
@@ -586,7 +599,7 @@ class ProjectModule < ActiveRecord::Base
       end
 
     rescue Exception
-      raise Exception, 'Module failed to upload'
+      raise ProjectModuleException, 'Module failed to upload'
     ensure
       FileUtils.remove_entry_secure tmp_dir if tmp_dir
     end

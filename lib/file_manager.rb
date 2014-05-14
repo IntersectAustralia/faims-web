@@ -98,7 +98,7 @@ class FileManager
   end
 
   def with_exclusive_lock
-    wait_for_lock(File::LOCK_SH)
+    wait_for_lock(File::LOCK_EX)
     return yield
   ensure
     clear_lock
@@ -116,7 +116,7 @@ class FileManager
   end
 
   def acquire_lock(lock)
-    #p "locked(#{name})", lock
+    #p "locked(#{name})"
     @timestamp_file.flock(File::LOCK_NB | lock)
   end
 
