@@ -82,6 +82,10 @@ class FileManager
     files
   end
 
+  def init
+    reset_changes
+  end
+
 	def has_changes?
     not file_list.select { |f| File.mtime("#{@base_dir}/#{f}") > File.mtime(@timestamp_file.path) }.empty?
 	end

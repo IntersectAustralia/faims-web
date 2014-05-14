@@ -77,7 +77,6 @@ Feature: Manage project modules
 
   Scenario Outline: Cannot create project module due to field validation errors
     Given I am on the home page
-    And I have project module "Module 1"
     And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
@@ -95,27 +94,25 @@ Feature: Manage project modules
 
   Scenario Outline: Cannot create project module due to file validation errors
     Given I am on the home page
-    And I have project module "Module 1"
     And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
-    And I fill in "Module Name" with "Module 2"
     And I pick file "<value>" for "<field>"
     And I press "Submit"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field             | value                     | error                           |
-    | Data Schema       |                           | can't be blank                  |
-    | Data Schema       | garbage                   | must be xml file                |
-    | Data Schema       | data_schema_error1.xml    | invalid xml at line             |
-    | UI Schema         |                           | can't be blank                  |
-    | UI Schema         | garbage                   | must be xml file                |
-    | UI Schema         | ui_schema_error1.xml      | invalid xml at line             |
-    | Validation Schema | garbage                   | must be xml file                |
-    | Validation Schema | data_schema_error1.xml    | invalid xml at line             |
-    | UI Logic          |                           | can't be blank                  |
-    | Arch16n           | faims_Module_2.properties | invalid properties file at line |
+    | field             | value                     | error                                    |
+    | Data Schema       |                           | can't be blank                           |
+    | Data Schema       | garbage                   | must be xml file                         |
+    | Data Schema       | data_schema_error1.xml    | Premature end of data in tag test line 1 |
+    | UI Schema         |                           | can't be blank                           |
+    | UI Schema         | garbage                   | must be xml file                         |
+    | UI Schema         | ui_schema_error1.xml      | Premature end of data in tag test line 1 |
+    | Validation Schema | garbage                   | must be xml file                         |
+    | Validation Schema | data_schema_error1.xml    | Premature end of data in tag test line 1 |
+    | UI Logic          |                           | can't be blank                           |
+    | Arch16n           | faims_Module_2.properties | invalid properties file at line          |
 
   Scenario Outline: Edit module static data
     Given I am on the home page
@@ -208,12 +205,12 @@ Feature: Manage project modules
     And I press "Update"
     Then I should see "<field>" with error "<error>"
   Examples:
-    | field             | value                     | error                           |
-    | UI Schema         | garbage                   | must be xml file                |
-    | UI Schema         | ui_schema_error1.xml      | invalid xml at line             |
-    | Validation Schema | garbage                   | must be xml file                |
-    | Validation Schema | data_schema_error1.xml    | invalid xml at line             |
-    | Arch16n           | faims_Module_2.properties | invalid properties file at line |
+    | field             | value                     | error                                    |
+    | UI Schema         | garbage                   | must be xml file                         |
+    | UI Schema         | ui_schema_error1.xml      | Premature end of data in tag test line 1 |
+    | Validation Schema | garbage                   | must be xml file                         |
+    | Validation Schema | data_schema_error1.xml    | Premature end of data in tag test line 1 |
+    | Arch16n           | faims_Module_2.properties | invalid properties file at line          |
 
 #  Scenario: Download package
 #    Given I have project module "Module 1"

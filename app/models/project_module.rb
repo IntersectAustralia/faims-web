@@ -64,62 +64,25 @@ class ProjectModule < ActiveRecord::Base
 
   def validate_validation_schema(schema)
     return if schema.blank?
-    errors.add(:validation_schema, 'must be xml file') unless schema.content_type =~ /xml/
-
-    file = schema.tempfile
-    begin
-      xml_errors = XSDValidator.validate_validation_schema(file.path)
-    rescue => e
-      xml_errors = [e]
-    end
-
-    if xml_errors
-      xml_errors.map do |x|
-        errors.add(:validation_schema, "invalid xml at line #{x.line}")
-      end
-    end
+    validate_schema('validation_schema', schema)
 
     begin
-      DatabaseValidator.new(nil, file)
-    rescue Exception
+      DatabaseValidator.new(nil, schema.tempfile)
+    rescue Exception => e
+      logger.error e
+
       errors.add(:validation_schema, 'error initialising validation rules')
     end
   end
 
   def validate_data_schema(schema)
     return errors.add(:data_schema, "can't be blank") if schema.blank?
-    errors.add(:data_schema, 'must be xml file') unless schema.content_type =~ /xml/
-
-    file = schema.tempfile
-    begin
-      xml_errors = XSDValidator.validate_data_schema(file.path)
-    rescue => e
-      xml_errors = [e]
-    end
-
-    if xml_errors
-      xml_errors.map do |x|
-        errors.add(:data_schema, "invalid xml at line #{x.line}")
-      end
-    end
+    validate_schema('data_schema', schema)
   end
 
   def validate_ui_schema(schema)
     return errors.add(:ui_schema, "can't be blank") if schema.blank?
-    errors.add(:ui_schema, 'must be xml file') unless schema.content_type =~ /xml/
-
-    file = schema.tempfile
-    begin
-      xml_errors = XSDValidator.validate_ui_schema(file.path)
-    rescue => e
-      xml_errors = [e]
-    end
-
-    if xml_errors
-      xml_errors.map do |x|
-        errors.add(:ui_schema, "invalid xml at line #{x.line}")
-      end
-    end
+    validate_schema('ui_schema', schema)
   end
 
   def validate_ui_logic(schema)
@@ -139,8 +102,29 @@ class ProjectModule < ActiveRecord::Base
         errors.add(:arch16n, "invalid properties file at line #{line_num}") if !i
         errors.add(:arch16n, "invalid properties file at line #{line_num}") if line[0..i] =~ /\s/
       end
-    rescue Exception
+    rescue Exception => e
+      logger.error e
+
       errors.add(:arch16n, 'invalid properties file')
+    end
+  end
+
+  # validation helper
+
+  def validate_schema(attribute, schema)
+    errors.add(attribute.to_sym, 'must be xml file') unless schema.content_type =~ /xml/
+
+    begin
+      xml_errors = XSDValidator.send("validate_#{attribute}", schema.tempfile.path)
+
+      if xml_errors
+        xml_errors.map do |x|
+          errors.add(attribute.to_sym, "invalid xml at line #{x.line}")
+        end
+      end
+    rescue => e
+      logger.error e
+      errors.add(attribute.to_sym, e.message)
     end
   end
 
@@ -429,6 +413,7 @@ class ProjectModule < ActiveRecord::Base
 
   def is_valid_filename?(file)
     return false if file.blank?
+    # TODO add regex for filename
     true
   end
 
@@ -473,10 +458,11 @@ class ProjectModule < ActiveRecord::Base
 
       generate_temp_files
     rescue Exception => e
+      logger.error e
+
       FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
-      raise e
-    ensure
-      # ignore
+
+      raise ProjectModuleException, 'Failed to create project module.'
     end
   end
 
@@ -487,10 +473,11 @@ class ProjectModule < ActiveRecord::Base
 
       generate_temp_files
     rescue Exception => e
+      logger.error e
+
       FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
-      raise e
-    ensure
-      # ignore
+
+      raise ProjectModuleException, 'Failed to create module from archive.'
     end
   end
 
@@ -501,10 +488,11 @@ class ProjectModule < ActiveRecord::Base
 
       generate_temp_files
     rescue Exception => e
+      logger.error e
+
       FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
-      raise e
-    ensure
-      # ignore
+
+      raise ProjectModuleException, 'Failed to update project module.'
     end
   end
 
@@ -518,33 +506,24 @@ class ProjectModule < ActiveRecord::Base
 
       FileUtils.mv(file.path, stored_file)
     rescue Exception => e
-      raise e
+      logger.error e
+
+      raise ProjectModuleException, 'Failed to store database from android.'
     ensure
-      # ignore
+      # TODO remove last db version?
     end
-  end
-
-  # static
-
-  def self.project_modules_path
-    return Rails.root.to_s + '/tmp/modules' if Rails.env == 'test'
-    Rails.application.config.server_project_modules_directory
-  end
-
-  def self.uploads_path
-    return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
-    Rails.application.config.server_uploads_directory
   end
 
   # Project archive helpers
 
   def generate_temp_files
-    settings_mgr.reset_changes
-    db_mgr.reset_changes
-    server_mgr.reset_changes
-    app_mgr.reset_changes
-    data_mgr.reset_changes
-    package_mgr.reset_changes
+    settings_mgr.init
+    db_mgr.init
+    server_mgr.init
+    app_mgr.init
+    data_mgr.init
+    package_mgr.init
+
     generate_database_cache
   end
 
@@ -581,25 +560,31 @@ class ProjectModule < ActiveRecord::Base
       settings = JSON.parse(File.read(tmp_dir + 'module.settings').as_json)
 
       if !validate_checksum_for_project_archive(tmp_dir)
-        raise ProjectModuleException, 'Wrong hash sum for the module'
+        raise ProjectModuleException, 'Wrong hash sum for the module.'
       elsif !ProjectModule.find_by_key(project_module_settings['key']).blank?
-        raise ProjectModuleException, 'This module already exists in the system'
+        raise ProjectModuleException, 'This module already exists in the system.'
       else
         project_module = ProjectModule.new(name: settings['name'], key: settings['key'])
+
         begin
           project_module.save
           project_module.create_project_module_from_archive_file(tmp_dir)
           project_module.created = true
           project_module.save
-        rescue Exception
+        rescue Exception => e
+          logger.error e
+
           File.rm_rf project_module.get_path(:project_module_dir) if File.directory? project_module.get_path(:project_module_dir)
           project_module.destroy
+
+          raise ProjectModuleException, 'Failed to upload module.'
         end
+
         return project_module
       end
-
-    rescue Exception
-      raise ProjectModuleException, 'Module failed to upload'
+    rescue Exception => e
+      logger.error e
+      raise ProjectModuleException, 'Failed to upload module.'
     ensure
       FileUtils.remove_entry_secure tmp_dir if tmp_dir
     end
@@ -616,8 +601,23 @@ class ProjectModule < ActiveRecord::Base
     tmp_file = Tempfile.new(['data_', '.tar.gz'])
     TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
     tmp_file.path
+  rescue Exception => e
+    logger.error e
+    raise ProjectModuleException, 'Failed to create archive.'
   ensure
     FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
+  end
+
+  # static
+
+  def self.project_modules_path
+    return Rails.root.to_s + '/tmp/modules' if Rails.env == 'test'
+    Rails.application.config.server_project_modules_directory
+  end
+
+  def self.uploads_path
+    return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
+    Rails.application.config.server_uploads_directory
   end
 
 end
