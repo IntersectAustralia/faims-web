@@ -1070,6 +1070,7 @@ class ProjectModulesController < ApplicationController
 
   def archive_project_module
     @project_module = ProjectModule.find(params[:id])
+
     if @project_module.package_mgr.has_changes?
       job = @project_module.delay.archive_project_module
       render json: { result: 'waiting', jobid: job.id }
@@ -1081,20 +1082,26 @@ class ProjectModulesController < ApplicationController
   def check_archive_status
     @project_module = ProjectModule.find(params[:id])
 
-    job = Delayed::Job.find(params[:job])
-    render json: { result: job.blank? ? 'success' : (job.last_error ? 'failure' : nil), url: download_project_module_path(@project_module) }
+    job = Delayed::Job.find_by_id(params[:jobid])
+    render json: { result: job.nil? ? 'success' : (job.last_error ? 'failure' : nil), url: download_project_module_path(@project_module) }
   end
 
   def download_project_module
     @project_module = ProjectModule.find(params[:id])
 
-    @project_module.with_shared_lock do
-      safe_send_file @project_module.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
+    if File.exists? @project_module.get_path(:package_archive)
+      @project_module.with_shared_lock do
+        safe_send_file @project_module.get_path(:package_archive), :type => 'application/bzip2', :x_sendfile => true, :stream => false
+      end
+    else
+      flash[:error] = 'Failed to archive module.'
+
+      redirect_to project_module_path(@project_module)
     end
   rescue MemberException, FileManager::TimeoutException => e
     logger.warn e
 
-    flash.now[:error] = get_error_message(e)
+    flash[:error] = get_error_message(e)
 
     redirect_to project_module_path(@project_module)
   end

@@ -37,7 +37,9 @@ class MergeDaemon
 
         # merge database
 
-        project_module.db.merge_database(db_file_path, version)
+        project_module.db.with_shared_lock do
+          project_module.db.merge_database(db_file_path, version)
+        end
 
         puts 'Finished merging database'
       end

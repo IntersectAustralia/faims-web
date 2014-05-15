@@ -263,15 +263,26 @@ Feature: Manage project modules
     And I press "Upload"
     Then I should see "Failed to upload module"
 
-#  Scenario: Download package
-#    Given I have project module "Module 1"
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I follow "Module 1"
-#    And I automatically archive project module package "Module 1"
-#    And I automatically download project module package "Module 1"
-#    Then I should download project module package file for "Module 1"
-#
+  Scenario: Download package
+    Given I have project module "Module 1"
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Module 1"
+    And I follow "Download Module"
+    And I automatically download project module package "Module 1"
+    Then I should download project module package file for "Module 1"
+
+  Scenario: Changes cause package to re archive before download
+    Given I have project module "Module 1"
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Module 1"
+    And I make changes to "Module 1"
+    And I follow "Download Module"
+    And I process delayed jobs
+    And I automatically download project module package "Module 1"
+    Then I should download project module package file for "Module 1"
+
 #  @javascript
 #  Scenario: Cannot download package if project module is locked
 #    Given I have project module "Module 1"
@@ -280,6 +291,6 @@ Feature: Manage project modules
 #    And I follow "Module 1"
 #    And database is locked for "Module 1"
 #    And I follow "Download Module"
+#    And I process delayed jobs
 #    Then I should see dialog "Could not process request as project is currently locked."
 #    And I confirm
-#

@@ -183,6 +183,18 @@ Then /^I should see bad request page$/ do
   page.status_code.should == 400
 end
 
+And /^I process delayed jobs$/ do
+  Delayed::Job.all.each { |job| Delayed::Worker.new.run(job)  }
+  Delayed::Job.all.size.should == 0
+end
+
+And /^I make changes to "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  sleep(1)
+  FileUtils.touch project_module.get_path(:db)
+  File.delete(project_module.get_path(:package_archive))
+end
+
 Then /^I should download project module package file for "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
   page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project_module.get_name(:package_archive) + "\""
@@ -192,7 +204,7 @@ end
 
 Then /^I automatically archive project module package "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
-  project_module.package_project_module
+  project_module.archive_project_module
 end
 
 Then /^I automatically download project module package "([^"]*)"$/ do |name|

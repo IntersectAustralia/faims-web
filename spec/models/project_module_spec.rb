@@ -104,7 +104,7 @@ describe ProjectModule do
       project_module.archive_project_module
       tmp_dir = Dir.mktmpdir
       `tar jxf #{project_module.get_path(:package_archive)} -C #{tmp_dir}`
-      entries = FileHelper.get_file_list(tmp_dir)
+      entries = FileHelper.get_file_list(File.join(tmp_dir, "Module_1"))
       entries.include?(project_module.get_name(:db)).should be_true
       entries.include?(project_module.get_name(:ui_schema)).should be_true
       entries.include?(project_module.get_name(:ui_logic)).should be_true

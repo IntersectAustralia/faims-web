@@ -240,7 +240,7 @@ class ProjectModule < ActiveRecord::Base
   def package_mgr
     return @package_mgr if @package_mgr
     @package_mgr = ArchiveManager.new('module', get_path(:project_module_dir), get_path(:project_module_dir),
-                             'jcf', get_path(:package_archive))
+                             'jcf', get_path(:package_archive), name.gsub(/\s/, '_'))
     @package_mgr.add_dir(get_path(:project_module_dir))
     @package_mgr.ignore_dir(get_path(:tmp_dir))
     @package_mgr
@@ -485,7 +485,7 @@ class ProjectModule < ActiveRecord::Base
       # copy files from temp directory to project_modules directory
       FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir))
 
-      generate_temp_files
+      generate_database_cache
     rescue Exception => e
       logger.error e
 
@@ -524,6 +524,8 @@ class ProjectModule < ActiveRecord::Base
     package_mgr.init
 
     generate_database_cache
+
+    archive_project_module
   end
 
   def generate_database_cache(version = 0)
@@ -533,7 +535,7 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def archive_project_module
-    with_shared_lock do
+    with_exclusive_lock do
       success = package_mgr.update_archive(true)
       raise ProjectModuleException, 'Failed to archive module.' unless success
     end
