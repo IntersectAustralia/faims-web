@@ -1116,18 +1116,19 @@ class ProjectModulesController < ApplicationController
     end
 
     if params[:project_module]
-      project_module_or_error = ProjectModule.upload_project_module(params)
-      if project_module_or_error.class == String
-        flash.now[:error] = project_module_or_error
-        render 'upload_project_module'
-      else
-        flash[:notice] = 'Module has been successfully uploaded.'
-        redirect_to :project_modules
-      end
+      ProjectModule.upload_project_module(params[:project_module][:project_module_file])
+      flash[:notice] = 'Module has been successfully uploaded.'
+      redirect_to :project_modules
     else
       flash.now[:error] = 'Please upload an archive of the module.'
       render 'upload_project_module'
     end
+  rescue ProjectModule::ProjectModuleException => e
+    logger.error e
+
+    flash.now[:error] = e.message
+
+    render 'upload_project_module'
   end
 
   def download_attached_file

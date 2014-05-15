@@ -212,6 +212,57 @@ Feature: Manage project modules
     | Validation Schema | data_schema_error1.xml    | Premature end of data in tag test line 1 |
     | Arch16n           | faims_Module_2.properties | invalid properties file at line          |
 
+  Scenario: Upload Module
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "module.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I should be on the project modules page
+    And I can find project module files for "Simple Project"
+
+  Scenario: Upload Module fails if module already exists
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "module.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I follow "Upload Module"
+    And I pick file "module.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "This module already exists in the system"
+
+  Scenario: Upload Module fails if checksum is wrong
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "module_corrupted1.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Wrong hash sum for the module"
+
+  Scenario: Upload Module fails if file is corrupted
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "module_corrupted2.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Failed to upload module"
+
+  Scenario: Upload Module fails if file is not a module
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "module.tar" for "Module File"
+    And I press "Upload"
+    Then I should see "Failed to upload module"
+
 #  Scenario: Download package
 #    Given I have project module "Module 1"
 #    And I follow "Show Modules"
@@ -232,53 +283,3 @@ Feature: Manage project modules
 #    Then I should see dialog "Could not process request as project is currently locked."
 #    And I confirm
 #
-#  Scenario: Upload Module
-#    Given I am on the home page
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I follow "Upload Module"
-#    And I pick file "module.tar.bz2" for "Module File"
-#    And I press "Upload"
-#    Then I should see "Module has been successfully uploaded"
-#    And I should be on the project modules page
-#    And I can find project module files for "Simple Project"
-#
-#  Scenario: Upload Module fails if module already exists
-#    Given I am on the home page
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I follow "Upload Module"
-#    And I pick file "module.tar.bz2" for "Module File"
-#    And I press "Upload"
-#    Then I should see "Module has been successfully uploaded"
-#    And I follow "Upload Module"
-#    And I pick file "module.tar.bz2" for "Module File"
-#    And I press "Upload"
-#    Then I should see "This module already exists in the system"
-#
-#  Scenario: Upload Module fails if checksum is wrong
-#    Given I am on the home page
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I follow "Upload Module"
-#    And I pick file "module_corrupted1.tar.bz2" for "Module File"
-#    And I press "Upload"
-#    Then I should see "Wrong hash sum for the module"
-#
-#  Scenario: Upload Module fails if file is corrupted
-#    Given I am on the home page
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I follow "Upload Module"
-#    And I pick file "module_corrupted2.tar.bz2" for "Module File"
-#    And I press "Upload"
-#    Then I should see "Module failed to upload"
-#
-#  Scenario: Upload Module fails if file is not a module
-#    Given I am on the home page
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I follow "Upload Module"
-#    And I pick file "module.tar" for "Module File"
-#    And I press "Upload"
-#    Then I should see "Module failed to upload"

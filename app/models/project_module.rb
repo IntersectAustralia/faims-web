@@ -123,7 +123,6 @@ class ProjectModule < ActiveRecord::Base
         end
       end
     rescue => e
-      logger.error e
       errors.add(attribute.to_sym, e.message)
     end
   end
@@ -405,7 +404,7 @@ class ProjectModule < ActiveRecord::Base
   def add_data_batch_file(file)
     begin
       success = TarHelper.untar('zxf', file, get_path(:data_files_dir))
-      raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.' unless success == 0
+      raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.' unless success
     rescue
       raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.'
     end
@@ -535,13 +534,13 @@ class ProjectModule < ActiveRecord::Base
 
   def archive_project_module
     with_shared_lock do
-      package_mgr.update_archive(true)
-      package_mgr.reset_changes
+      success = package_mgr.update_archive(true)
+      raise ProjectModuleException, 'Failed to archive module.' unless success
     end
   end
 
   def self.validate_checksum_for_project_archive(dir)
-    hash_sum = JSON.parse(File.read(dir + '/hash_sum').as_json)
+    hash_sum = JSON.parse(File.read(File.join(dir, "hash_sum")).as_json)
 
     result = FileHelper.get_file_list(dir).each do |file|
       next if file == 'hash_sum'
@@ -554,56 +553,55 @@ class ProjectModule < ActiveRecord::Base
 
   def self.upload_project_module(file)
     tmp_dir = Dir.mktmpdir + '/'
-    begin
-      TarHelper.untar('xjf', tar_file.tempfile.to_path.to_s, tmp_dir)
 
-      settings = JSON.parse(File.read(tmp_dir + 'module.settings').as_json)
+    success = TarHelper.untar('xjf', file.tempfile.to_path.to_s, tmp_dir)
+    raise ProjectModuleException, 'Failed to upload module.' unless success
 
-      if !validate_checksum_for_project_archive(tmp_dir)
-        raise ProjectModuleException, 'Wrong hash sum for the module.'
-      elsif !ProjectModule.find_by_key(project_module_settings['key']).blank?
-        raise ProjectModuleException, 'This module already exists in the system.'
-      else
-        project_module = ProjectModule.new(name: settings['name'], key: settings['key'])
+    module_dir = File.join(tmp_dir, Dir.entries(tmp_dir).select { |d| d != '.' and d != '..' }.first)
+    settings = JSON.parse(File.read(File.join(module_dir, "module.settings")).as_json)
 
-        begin
-          project_module.save
-          project_module.create_project_module_from_archive_file(tmp_dir)
-          project_module.created = true
-          project_module.save
-        rescue Exception => e
-          logger.error e
+    if !validate_checksum_for_project_archive(module_dir)
+      raise ProjectModuleException, 'Wrong hash sum for the module.'
+    elsif !ProjectModule.find_by_key(settings['key']).blank?
+      raise ProjectModuleException, 'This module already exists in the system.'
+    else
+      project_module = ProjectModule.new(name: settings['name'], key: settings['key'])
 
-          File.rm_rf project_module.get_path(:project_module_dir) if File.directory? project_module.get_path(:project_module_dir)
-          project_module.destroy
+      begin
+        project_module.save
+        project_module.create_project_module_from_archive_file(module_dir)
+        project_module.created = true
+        project_module.save
+      rescue Exception => e
+        logger.error e
 
-          raise ProjectModuleException, 'Failed to upload module.'
-        end
+        File.rm_rf project_module.get_path(:project_module_dir) if File.directory? project_module.get_path(:project_module_dir)
+        project_module.destroy
 
-        return project_module
+        raise ProjectModuleException, 'Failed to upload module.'
       end
-    rescue Exception => e
-      logger.error e
-      raise ProjectModuleException, 'Failed to upload module.'
-    ensure
-      FileUtils.remove_entry_secure tmp_dir if tmp_dir
+
+      return project_module
     end
+  ensure
+    FileUtils.remove_entry_secure tmp_dir if tmp_dir
   end
 
   # Data archive helpers
 
   def create_data_archive(dir)
     tmp_dir = Dir.mktmpdir
+
     files = FileHelper.get_file_list(dir).each do |file|
       FileUtils.mkdir_p File.join(tmp_dir, File.dirname(file))
       FileUtils.cp File.join(dir, file), File.join(tmp_dir, file)
     end
     tmp_file = Tempfile.new(['data_', '.tar.gz'])
-    TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
+
+    success = TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
+    raise ProjectModuleException, 'Failed to archive data.' unless success
+
     tmp_file.path
-  rescue Exception => e
-    logger.error e
-    raise ProjectModuleException, 'Failed to create archive.'
   ensure
     FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
   end

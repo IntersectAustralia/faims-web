@@ -40,7 +40,8 @@ class ArchiveManager < FileManager
       end
 
       files = FileHelper.get_file_list(tmp_dir)
-      TarHelper.tar(@args, @archive, files, tmp_dir)
+      success = TarHelper.tar(@args, @archive, files, tmp_dir)
+      return false unless success
 
       reset_changes
     end

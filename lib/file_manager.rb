@@ -92,6 +92,7 @@ class FileManager
 
 	def reset_changes
     FileUtils.touch @timestamp_file.path
+    true
 	end
 
 	def with_shared_lock
