@@ -291,12 +291,12 @@ class ProjectModule < ActiveRecord::Base
     get_request_file(get_path(:project_module_dir), file)
   end
 
-  # def server_files_info
-  #   {
-  #       files: file_mgr_info(server_mgr)
-  #   }
-  # end
-  #
+  def server_files_info
+    {
+        files: file_mgr_info(server_mgr)
+    }
+  end
+
   # def server_request_file(file)
   #   get_request_file(get_path(:server_files_dir), file)
   # end
@@ -342,7 +342,7 @@ class ProjectModule < ActiveRecord::Base
     full_path = db_version_file_path(version_num)
     {
       files: [{
-                file: File.basename(full_path),
+                file: 'db.sqlite',
                 size: File.size(full_path),
                 md5: MD5Checksum.compute_checksum(full_path)
               }],
@@ -516,6 +516,7 @@ class ProjectModule < ActiveRecord::Base
   # Project archive helpers
 
   def generate_temp_files
+    # initialise file managers
     settings_mgr.init
     db_mgr.init
     server_mgr.init
@@ -523,15 +524,18 @@ class ProjectModule < ActiveRecord::Base
     data_mgr.init
     package_mgr.init
 
+    # cache current database
     generate_database_cache
 
+    # cache current module
     archive_project_module
   end
 
   def generate_database_cache(version = 0)
     version ||= 0
     file = db_version_file_path(version)
-    db.create_app_database_from_version(file, version) unless File.exists? file
+    return if File.exists? file
+    db.create_app_database_from_version(file, version)
   end
 
   def archive_project_module

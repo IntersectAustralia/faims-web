@@ -36,7 +36,7 @@ class AndroidController < ApplicationController
 
   def db_info
     version = params[:version]
-    version = nil if version.blank?
+    version = version.blank? ? nil : version.to_i
 
     return render :json => { message: 'bad request' }.to_json, :status => 400 if @project_module.db_version_invalid?(version)
 
@@ -50,7 +50,7 @@ class AndroidController < ApplicationController
 
   def db_download
     version = params[:version]
-    version = nil if version.blank?
+    version = version.blank? ? nil : version.to_i
 
     return render :json => { message: 'bad request' }.to_json, :status => 400 if @project_module.db_version_invalid?(version)
 
@@ -69,9 +69,9 @@ class AndroidController < ApplicationController
 
     return render :json => { message: 'bad request' }.to_json, :status => 400 if file.blank? or user.blank? or md5.blank?
 
-    if MD5Checksum.compute_checksum(file) == md5
+    if MD5Checksum.compute_checksum(file.tempfile.path) == md5
       begin
-        @project_module.store_database_from_android(file, user)
+        @project_module.store_database_from_android(file.tempfile, user)
         render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
       rescue Exception => e
         logger.error e
@@ -82,17 +82,21 @@ class AndroidController < ApplicationController
     end
   end
 
+  def server_files_info
+    render :json => @project_module.server_files_info.to_json, :status => 200
+  end
+
   def server_file_upload
     file = params[:file]
-    path = params[:path]
+    request_file = params[:request_file]
     md5 = params[:md5]
 
-    return render :json => { message: 'bad request' }.to_json, :status => 400 if file.blank? or path.blank? or md5.blank?
+    return render :json => { message: 'bad request' }.to_json, :status => 400 if file.blank? or request_file.blank? or md5.blank?
 
-    if MD5Checksum.compute_checksum(file) == md5
+    if MD5Checksum.compute_checksum(file.tempfile.path) == md5
       begin
         @project_module.server_mgr.with_shared_lock do
-          @project_module.add_server_file(path, file)
+          @project_module.add_server_file(request_file, file.tempfile)
           render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
         end
       rescue FileManager::TimeoutException => e
@@ -107,7 +111,7 @@ class AndroidController < ApplicationController
     end
   end
 
-  def app_file_info
+  def app_files_info
     render :json => @project_module.app_files_info.to_json, :status => 200
   end
 
@@ -126,15 +130,15 @@ class AndroidController < ApplicationController
 
   def app_file_upload
     file = params[:file]
-    path = params[:path]
+    request_file = params[:request_file]
     md5 = params[:md5]
 
-    return render :json => { message: 'bad request' }.to_json, :status => 400 if file.blank? or path.blank? or md5.blank?
+    return render :json => { message: 'bad request' }.to_json, :status => 400 if file.blank? or request_file.blank? or md5.blank?
 
-    if MD5Checksum.compute_checksum(file) == md5
+    if MD5Checksum.compute_checksum(file.tempfile.path) == md5
       begin
         @project_module.app_mgr.with_shared_lock do
-          @project_module.add_app_file(path, file)
+          @project_module.add_app_file(request_file, file.tempfile)
           render :json => { message: 'successfully uploaded file' }.to_json, :status => 200
         end
       rescue FileManager::TimeoutException => e
@@ -149,7 +153,7 @@ class AndroidController < ApplicationController
     end
   end
 
-  def data_file_info
+  def data_files_info
     render :json => @project_module.data_files_info.to_json, :status => 200
   end
 

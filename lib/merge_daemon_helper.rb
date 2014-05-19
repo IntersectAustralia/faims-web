@@ -37,16 +37,16 @@ class MergeDaemon
 
         # merge database
 
-        project_module.db.with_shared_lock do
+        project_module.db_mgr.with_shared_lock do
           project_module.db.merge_database(db_file_path, version)
         end
 
         puts 'Finished merging database'
       end
 
-      !sorted_files.empty?
-    ensure
       FileUtils.remove_entry_secure db_file_path if db_file_path
+
+      !sorted_files.empty?
     end
   end
 

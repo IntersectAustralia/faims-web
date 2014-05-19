@@ -892,9 +892,12 @@ class Database
 
   def create_app_database_from_version(toDB, version)
     generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
-    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB # clone template db
-
-    @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
+    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB
+    if version.to_i == 0
+      @db.execute_batch(WebQuery.create_full_database(toDB))
+    else
+      @db.execute_batch(WebQuery.create_sync_database_from_version(toDB, version))
+    end
   end
 
   # static

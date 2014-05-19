@@ -128,6 +128,7 @@ describe ProjectModule do
 
   it 'Updating settings causes package to rearchive' do
     project_module = make_project_module('Module 1')
+    project_module.archive_project_module
     project_module.package_mgr.has_changes?.should be_false
     sleep(1)
     project_module.settings_mgr.absolute_file_list.each {|f| FileUtils.touch f}

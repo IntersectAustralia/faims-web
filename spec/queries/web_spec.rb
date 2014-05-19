@@ -204,11 +204,11 @@ describe 'Web Database Queries' do
     lambda {
       begin
         temp_file = Tempfile.new('db')
-        fromDB = test_db
-        toDB = temp_file.path
-        db = SpatialiteDB.new(toDB)
-        db = SpatialiteDB.new(fromDB)
-        db.execute_batch(WebQuery.create_app_database(toDB))
+        from = test_db
+        to = temp_file.path
+        toDB = SpatialiteDB.new(to)
+        fromDB = SpatialiteDB.new(from)
+        fromDB.execute_batch(WebQuery.create_full_database(to))
       rescue Exception => e
         raise e
       ensure
@@ -221,12 +221,12 @@ describe 'Web Database Queries' do
     lambda {
       begin
         temp_file = Tempfile.new('db')
-        version = nil
-        fromDB = test_db
-        toDB = temp_file.path
-        db = SpatialiteDB.new(toDB)
-        db = SpatialiteDB.new(fromDB)
-        db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
+        from = test_db
+        to = temp_file.path
+        toDB = SpatialiteDB.new(to)
+        fromDB = SpatialiteDB.new(from)
+        FileUtils.cp from, to
+        fromDB.execute_batch(WebQuery.create_sync_database_from_version(to, nil))
       rescue Exception => e
         raise e
       ensure

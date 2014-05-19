@@ -1759,7 +1759,7 @@ EOF
     )
   end
 
-  def self.create_app_database(toDB)
+  def self.create_full_database(toDB)
     cleanup_query(<<EOF
 attach database "#{toDB}" as export;
 create table export.user as select * from user;
@@ -1778,7 +1778,7 @@ EOF
     )
   end
 
-  def self.create_app_database_from_version(toDB, version)
+  def self.create_sync_database_from_version(toDB, version)
     cleanup_query(<<EOF
 attach database "#{toDB}" as export;
 create table export.archentity as select * from archentity where versionnum >= '#{version}';

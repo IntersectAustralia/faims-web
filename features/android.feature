@@ -187,6 +187,27 @@ Feature: Android
     | version |
     | 0       |
 
+  Scenario: See server files info for project module
+    Given I have project module "Module 1"
+    And I have server files for "Module 1"
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+    And I requested the android server files info for Module 1
+    Then I should see json for "Module 1" server files with
+      | file                        |
+      | file1.tar.gz                |
+      | file2.sqlite3               |
+      | file3.txt                   |
+      | dir1/dir2/dir3/file4.tar.gz |
+
+  Scenario: Cannot see server files archive info if project module doesn't exist
+    Given I have project module "Module 1"
+    And I requested the android server files info for Module 2
+    Then I should see bad request page
+
   Scenario Outline: Upload server files
     Given I have project module "Module 1"
     And I upload server file "<file>" to Module 1 succeeds

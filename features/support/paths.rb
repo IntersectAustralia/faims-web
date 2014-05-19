@@ -86,13 +86,17 @@ module NavigationHelpers
         project_module = ProjectModule.find_by_name($1)
         android_project_module_db_download_path(project_module ? project_module.key : 'na')
 
+      when /the android server files info for (.*)$/
+        project_module = ProjectModule.find_by_name($1)
+        android_server_files_info_path(project_module ? project_module.key : 'na')
+
       when /the android server upload file link for (.*)$/
         project_module = ProjectModule.find_by_name($1)
         android_server_file_upload_path(project_module ? project_module.key : 'na')
 
       when /the android app files info for (.*)$/
         project_module = ProjectModule.find_by_name($1)
-        android_app_file_info_path(project_module ? project_module.key : 'na')
+        android_app_files_info_path(project_module ? project_module.key : 'na')
 
       when /the android app file download "(.*)" link for (.*)$/
         project_module = ProjectModule.find_by_name($2)
@@ -104,7 +108,7 @@ module NavigationHelpers
 
       when /the android data files info for (.*)$/
         project_module = ProjectModule.find_by_name($1)
-        android_data_file_info_path(project_module ? project_module.key : 'na')
+        android_data_files_info_path(project_module ? project_module.key : 'na')
 
       when /the android data file download "(.*)" link for (.*)$/
         project_module = ProjectModule.find_by_name($2)

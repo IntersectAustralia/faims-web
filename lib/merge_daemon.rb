@@ -13,7 +13,7 @@ loop do
     exit(0)
   rescue Exception => e
     puts 'Error merging database'
-    puts e.to_s
+    puts e.message
   end
 
 end
