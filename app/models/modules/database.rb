@@ -891,8 +891,6 @@ class Database
   end
 
   def create_app_database_from_version(toDB, version)
-    generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
-    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB
     if version.to_i == 0
       FileUtils.cp path, toDB
     else

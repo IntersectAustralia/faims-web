@@ -535,7 +535,11 @@ class ProjectModule < ActiveRecord::Base
     version ||= 0
     file = db_version_file_path(version)
     return if File.exists? file
-    db.create_app_database_from_version(file, version)
+
+    # need to use exclusive lock because database may be directly cloned
+    db_mgr.with_exclusive_lock do
+      db.create_app_database_from_version(file, version)
+    end
   end
 
   def archive_project_module

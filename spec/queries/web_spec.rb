@@ -225,7 +225,6 @@ describe 'Web Database Queries' do
         to = temp_file.path
         toDB = SpatialiteDB.new(to)
         fromDB = SpatialiteDB.new(from)
-        FileUtils.cp from, to
         fromDB.execute_batch(WebQuery.create_sync_database_from_version(to, nil))
       rescue Exception => e
         raise e
