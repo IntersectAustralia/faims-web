@@ -3,6 +3,7 @@ require Rails.root.join('app/models/modules/database')
 class ProjectModule < ActiveRecord::Base
   include XSDValidator
   include MD5Checksum
+  include SecurityHelper
 
   class ProjectModuleException < Exception
 
@@ -165,6 +166,12 @@ class ProjectModule < ActiveRecord::Base
     FileUtils.mkdir_p @file_map[:server_files_dir][:path] unless File.directory? @file_map[:server_files_dir][:path]
     FileUtils.mkdir_p @file_map[:app_files_dir][:path] unless File.directory? @file_map[:app_files_dir][:path]
     FileUtils.mkdir_p @file_map[:data_files_dir][:path] unless File.directory? @file_map[:data_files_dir][:path]
+  end
+
+  before_destroy :cleanup_module
+
+  def cleanup_module
+    safe_delete_directory @project_module.get_path(:project_module_dir)
   end
   
   # project module attributes
@@ -547,6 +554,10 @@ class ProjectModule < ActiveRecord::Base
       success = package_mgr.update_archive(true)
       raise ProjectModuleException, 'Failed to archive module.' unless success
     end
+  end
+
+  def destroy_project_module_archive
+     safe_delete_file get_path(:package_archive)
   end
 
   def self.validate_checksum_for_project_archive(dir)

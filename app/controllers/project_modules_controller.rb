@@ -67,7 +67,6 @@ class ProjectModulesController < ApplicationController
         logger.error e
 
         # cleanup
-        safe_delete_directory @project_module.get_path(:project_module_dir) if File.directory? @project_module.get_path(:project_module_dir)
         @project_module.destroy
 
         flash[:error] = 'Failed to create module.'

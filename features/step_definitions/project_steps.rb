@@ -611,6 +611,21 @@ Then /^I delete project module directories$/ do |table|
   end
 end
 
+And /^I have package archive for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  project_module.archive_project_module
+end
+
+And /^I should have package archive for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  File.exists?(project_module.get_path(:package_archive)).should be_true
+end
+
+And /^I should not have package archive for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  File.exists?(project_module.get_path(:package_archive)).should be_false
+end
+
 And /^I confirm$/ do
   checked = nil
   WAIT_RANGE.each do

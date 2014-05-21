@@ -106,6 +106,8 @@ class FileManagerController < ApplicationController
             safe_delete_file file
             flash.now[:notice] = 'Deleted file.'
           end
+
+          @project_module.destroy_project_module_archive
         end
       end
     end

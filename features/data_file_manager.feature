@@ -75,6 +75,8 @@ Feature: Project module file manager
       | data | file1.tar.gz  |
       | data | file2.sqlite3 |
       | data | file3.txt     |
+    And I have package archive for "Module 1"
+    And I should have package archive for "Module 1"
     And I delete project module files
       | dir  | file          |
       | data | file1.tar.gz  |
@@ -87,6 +89,7 @@ Feature: Project module file manager
       | data | file1.tar.gz  |
       | data | file2.sqlite3 |
     And I should see "Deleted file"
+    And I should not have package archive for "Module 1"
 
   @javascript
   Scenario: Delete project module directories
@@ -100,6 +103,8 @@ Feature: Project module file manager
       | data  | test5     |
       | test5 | test6     |
       | test6 | test7     |
+    And I have package archive for "Module 1"
+    And I should have package archive for "Module 1"
     And I delete project module directories
       | dir   | child_dir |
       | data  | test1     |
@@ -114,6 +119,7 @@ Feature: Project module file manager
       | data  | test4     |
       | test5 | test6     |
     And I should see "Deleted directory"
+    And I should not have package archive for "Module 1"
 
   @javascript
   Scenario: Delete root directory
@@ -127,6 +133,8 @@ Feature: Project module file manager
       | data  | test5     |
       | test5 | test6     |
       | test6 | test7     |
+    And I have package archive for "Module 1"
+    And I should have package archive for "Module 1"
     And I delete root directory
     Then I should not see project module directories
       | dir   | child_dir |
@@ -134,6 +142,7 @@ Feature: Project module file manager
       | data  | test4     |
       | data  | test5     |
     And I should see "Deleted directory"
+    And I should not have package archive for "Module 1"
 
   @javascript
   Scenario: Can delete dir if files in directory
@@ -145,6 +154,8 @@ Feature: Project module file manager
     And I upload project module files
       | dir   | file          |
       | test1 | file2.sqlite3 |
+    And I have package archive for "Module 1"
+    And I should have package archive for "Module 1"
     And I delete project module directories
       | dir  | child_dir |
       | data | test1     |
@@ -155,6 +166,7 @@ Feature: Project module file manager
       | dir   | child_dir |
       | data  | test1     |
     And I should see "Deleted directory"
+    And I should not have package archive for "Module 1"
 
   @javascript
   Scenario: Cannot add project module file if file already exists
