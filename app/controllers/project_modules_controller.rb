@@ -2,6 +2,7 @@ class ProjectModulesController < ProjectModuleBaseController
 
   def index
     page_crumbs :pages_home, :project_modules_index
+    @project_modules = ProjectModule.created
   end
 
   def new
@@ -125,7 +126,45 @@ class ProjectModulesController < ProjectModuleBaseController
   end
 
   def delete_project_module
+    @project_module = ProjectModule.find(params[:id])
 
+    if not @project_module.deleted
+      @project_module.with_exclusive_lock do
+        @project_module.deleted = true
+        @project_module.save
+
+        flash[:notice] = 'Module Deleted.'
+        redirect_to :project_modules
+      end
+    else
+      flash[:error] = 'Cannot delete module.'
+      redirect_to :project_modules
+    end
+  rescue FileManager::TimeoutException => e
+    logger.warn e
+    flash[:notice] = get_error_message(e)
+    redirect_to :project_modules
+  end
+
+  def list_deleted_modules
+    page_crumbs :pages_home, :project_modules_index, :project_modules_deleted
+    @project_modules = ProjectModule.deleted
+  end
+
+  def restore_project_module
+    logger.debug params
+    @project_module = ProjectModule.deleted.find(params[:restore_id])
+
+    if @project_module.deleted
+      @project_module.deleted = false
+      @project_module.save
+
+      flash[:notice] = 'Module Restored.'
+      redirect_to :project_modules
+    else
+      flash[:error] = 'Cannot restore module.'
+      redirect_to :project_modules
+    end
   end
 
   def archive_project_module

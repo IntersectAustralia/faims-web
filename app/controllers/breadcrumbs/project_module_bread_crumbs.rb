@@ -27,6 +27,7 @@ module ProjectModuleBreadCrumbs
             :project_modules_vocabulary => {title: 'Vocabulary', url: project_module ? list_attributes_with_vocab_path(project_module) : nil},
             :project_modules_users => {title: 'Users', url: project_module ? edit_project_module_user_path(project_module) : nil},
             :project_modules_files => {title: 'Files', url: project_module ? project_module_file_list_path(project_module) : nil},
+            :project_modules_deleted => {title: 'Deleted', url: nil},
 
             :project_modules_search_or_list_arch_ent => !list_arch_ent ? {title: 'Search Entity', url: project_module ? search_arch_ent_records_path(project_module) : nil} : {title: 'List Entity', url: project_module ? list_arch_ent_records_path(project_module) : nil},
             :project_modules_search_arch_ent => {title: 'Search Entity', url: project_module ? search_arch_ent_records_path(project_module) : nil},

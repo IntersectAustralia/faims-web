@@ -295,34 +295,106 @@ Feature: Manage project modules
 #    Then I should see dialog "Could not process request as project is currently locked."
 #    And I confirm
 
+  @javascript
   Scenario: Delete project module
     Given I have project module "Module 1"
+    And I have project module "Module 2"
     And I follow "Show Modules"
     Then I should be on the project modules page
+    And I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
     And I follow "Module 1"
     And I press "Delete"
     Then I should see dialog "Are you sure you want to delete module?"
     And I confirm
-    Then I should not have project module "Module 1"
+    Then I should be on the project modules page
+    And I should see "Module Deleted."
+    And I should not see project modules
+      | name     |
+      | Module 1 |
+    And I should see project modules
+      | name     |
+      | Module 2 |
 
+  @javascript
   Scenario: Cancel deleting project module
     Given I have project module "Module 1"
+    And I have project module "Module 2"
     And I follow "Show Modules"
     Then I should be on the project modules page
+    And I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
     And I follow "Module 1"
     And I press "Delete"
     Then I should see dialog "Are you sure you want to delete module?"
     And I cancel
-    Then I should have project module "Module 1"
+    And I am on the project modules page
+    Then I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
 
+  @javascript
   Scenario: Cannot delete project module if project module is locked
     Given I have project module "Module 1"
+    And I have project module "Module 2"
     And I follow "Show Modules"
     Then I should be on the project modules page
+    And I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
     And I follow "Module 1"
     And settings is locked for "Module 1"
     And I press "Delete"
     Then I should see dialog "Are you sure you want to delete module?"
     And I confirm
-    Then I should see ""
-    And I should have project module "Module 1"
+    Then I should be on the project modules page
+    And I should see "Could not process request as project is currently locked."
+    And I am on the project modules page
+    Then I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
+
+  @javascript
+  Scenario: Restore project module
+    Given I have project module "Module 1"
+    And I have project module "Module 2"
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |
+    And I follow "Module 1"
+    And I press "Delete"
+    Then I should see dialog "Are you sure you want to delete module?"
+    And I confirm
+    Then I should be on the project modules page
+    And I should see "Module Deleted."
+    And I am on the project modules page
+    And I should not see project modules
+      | name     |
+      | Module 1 |
+    And I should see project modules
+      | name     |
+      | Module 2 |
+    Then I am on the restore project modules page
+    And I should see project modules
+      | name     |
+      | Module 1 |
+    And I should not see project modules
+      | name     |
+      | Module 2 |
+    And I click restore for "Module 1"
+    Then I should be on the project modules page
+    And I should see "Module Restored."
+    And I should see project modules
+      | name     |
+      | Module 1 |
+      | Module 2 |

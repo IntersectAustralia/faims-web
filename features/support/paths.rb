@@ -56,6 +56,9 @@ module NavigationHelpers
       when /the project modules page/
         project_modules_path
 
+      when /the restore project modules page/
+        list_deleted_modules_path
+
       when /the new project modules page/
         new_project_module_path
 

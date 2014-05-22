@@ -27,14 +27,6 @@ And /^I have project module "([^"]*)"$/ do |name|
   make_project_module name
 end
 
-And /^I should have project module "([^"]*)"$/ do |name|
-  ProjectModule.find_by_name(name).should_not be_nil
-end
-
-And /^I should not have project module "([^"]*)"$/ do |name|
-  ProjectModule.find_by_name(name).should be_nil
-end
-
 Then /^I should see "([^"]*)" with error "([^"]*)"$/ do |field, error|
   page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and contains(text(),\"#{error}\")]")
 end
@@ -45,9 +37,16 @@ Given /^I have project modules$/ do |table|
   end
 end
 
-Then /^I should see project modules$/ do |table|
-  table.hashes.each do |hash|
-    ProjectModule.find_by_name(hash[:name]).should_not be_nil
+Then /^I should (not )?see project modules$/ do |is_nil, table|
+  module_names = table.hashes.map { |hash| hash[:name] }
+  find('table#project-modules').all('tr')[1..-1].each do |row|
+    module_names.include?(row.find('td.project-name').text).should == (is_nil ? false : true)
+  end
+end
+
+And /^I click restore for "([^"]*)"$/ do |name|
+  find('table#project-modules').all('tr')[1..-1].each do |row|
+    row.find('input[type="submit"]').click if row.find('td.project-name').text.strip == name
   end
 end
 

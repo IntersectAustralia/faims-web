@@ -32,11 +32,13 @@ FaimsWeb::Application.routes.draw do
   get 'project_modules/new', :to => 'project_modules#new', :as => 'new_project_module'
   get 'project_modules/upload_project_module', :to => 'project_modules#upload_project_module', :as => 'upload_project_module'
   post 'project_modules/upload_new_project_module', :to => 'project_modules#upload_new_project_module', :as => 'upload_new_project_module'
+  get 'project_modules/deleted', :to => 'project_modules#list_deleted_modules', :as => 'list_deleted_modules'
+  post 'project_modules/restore', :to => 'project_modules#restore_project_module', :as => 'restore_project_module'
   get 'project_modules/:id', :to => 'project_modules#show', :as => 'project_module'
 
   get 'project_modules/:id/edit_project_module', :to => 'project_modules#edit_project_module', :as => 'edit_project_module'
   post 'project_modules/:id/update_project_module', :to => 'project_modules#update_project_module', :as => 'update_project_module'
-  post 'project_modules/:id/delete_project_module', :to => 'project_modules#delete_project_module', :as => 'delete_project_module'
+  delete 'project_modules/:id/delete_project_module', :to => 'project_modules#delete_project_module', :as => 'delete_project_module'
 
   get 'project_modules/:id/archive_project_module', :to => 'project_modules#archive_project_module', :as => 'archive_project_module'
   get 'project_modules/:id/download_project_module', :to => 'project_modules#download_project_module', :as => 'download_project_module'

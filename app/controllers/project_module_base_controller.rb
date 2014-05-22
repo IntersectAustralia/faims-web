@@ -11,7 +11,7 @@ class ProjectModuleBaseController < ApplicationController
     if exception.instance_of? MemberException
       'You are not a member of the module you are editing. Please ask a member to add you to the module before continuing.'
     else exception.instance_of? FileManager::TimeoutException
-    'Could not process request as project is currently locked.'
+      'Could not process request as project is currently locked.'
     end
   end
 

@@ -6,12 +6,17 @@ class ProjectModule < ActiveRecord::Base
   include SecurityHelper
 
   class ProjectModuleException < Exception
-
   end
 
   DEFAULT_SRID = 4326
 
+  # SCOPES
+
   default_scope order: 'name COLLATE NOCASE'
+  default_scope where(deleted: false)
+
+  scope :created, where(created: true, deleted: false)
+  scope :deleted, where(deleted: true)
 
   attr_accessor :data_schema,
                 :ui_schema,
@@ -171,7 +176,7 @@ class ProjectModule < ActiveRecord::Base
   before_destroy :cleanup_module
 
   def cleanup_module
-    safe_delete_directory @project_module.get_path(:project_module_dir)
+    safe_delete_directory get_path(:project_module_dir)
   end
   
   # project module attributes

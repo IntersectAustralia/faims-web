@@ -1,8 +1,5 @@
-- title "Modules"
+- title "Deleted Modules"
 = breadcrumbs
-.well
-  = link_to "<i class='icon-pencil icon-white'></i> Create Module".html_safe, new_project_module_path, :class => "btn btn-inverse"
-  = link_to "<i class='icon-upload'></i> Upload Module".html_safe, upload_project_module_path, :class => "btn"
 .clear
 - if @project_modules
   %table.table#project-modules
@@ -10,6 +7,7 @@
       %th No.
       %th Name
       %th Created
+      %th
     - index = 0
     - for project_module in @project_modules
       - index = index + 1
@@ -17,7 +15,8 @@
         %td
           = index.to_s + "."
         %td.project-name
-          %a.project_module{href:project_module_path(project_module)}
-            = project_module.name
+          = project_module.name
         %td
           = project_module.created_at.localtime.strftime("%d/%m/%Y %I:%M%p")
+        %td.restore-btn
+          = button_to "Restore", { action: :restore_project_module, controller: :project_modules, restore_id: project_module.id }, method: :post, class: 'btn'

@@ -63,6 +63,48 @@ describe ProjectModule do
     end
   end
 
+  describe 'Scopes' do
+
+    it 'should find created' do
+      p1 = FactoryGirl.create(:project_module)
+      p2 = FactoryGirl.create(:project_module)
+      ProjectModule.all.to_set.should == [p1,p2].to_set
+      p1.created = true
+      p1.save
+      ProjectModule.created.to_set.should == [p1].to_set
+    end
+
+    it 'should find deleted' do
+      p1 = FactoryGirl.create(:project_module)
+      p2 = FactoryGirl.create(:project_module)
+      ProjectModule.all.to_set.should == [p1,p2].to_set
+      p1.deleted = true
+      p1.save
+      ProjectModule.deleted.to_set.should == [p1].to_set
+    end
+
+    it 'should not find if deleted' do
+      p1 = FactoryGirl.create(:project_module)
+      p2 = FactoryGirl.create(:project_module)
+      ProjectModule.all.to_set.should == [p1,p2].to_set
+      p1.deleted = true
+      p1.save
+      ProjectModule.all.to_set.should == [p2].to_set
+    end
+
+    it 'should not find created if deleted' do
+      p1 = FactoryGirl.create(:project_module)
+      p2 = FactoryGirl.create(:project_module)
+      ProjectModule.all.to_set.should == [p1,p2].to_set
+      p1.created = true
+      p1.deleted = true
+      p1.save
+      p2.created = true
+      p2.save
+      ProjectModule.created.to_set.should == [p2].to_set
+    end
+  end
+
   it 'Creating project_module initialise directory' do
     project_module = make_project_module('Module 1')
     File.exists?(project_module.get_path(:project_module_dir)).should be_true
