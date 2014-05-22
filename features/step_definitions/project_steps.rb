@@ -27,6 +27,14 @@ And /^I have project module "([^"]*)"$/ do |name|
   make_project_module name
 end
 
+And /^I should have project module "([^"]*)"$/ do |name|
+  ProjectModule.find_by_name(name).should_not be_nil
+end
+
+And /^I should not have project module "([^"]*)"$/ do |name|
+  ProjectModule.find_by_name(name).should be_nil
+end
+
 Then /^I should see "([^"]*)" with error "([^"]*)"$/ do |field, error|
   page.should have_selector(:xpath, "//label[contains(., '#{field}')]/../span[@class='help-inline' and contains(text(),\"#{error}\")]")
 end
@@ -638,6 +646,20 @@ And /^I confirm$/ do
     end
   end
   page.driver.browser.switch_to.alert.accept unless checked
+end
+
+And /^I cancel/ do
+  checked = nil
+  WAIT_RANGE.each do
+    begin
+      page.driver.browser.switch_to.alert.dismiss
+      checked = true
+      break
+    rescue
+      sleep(1)
+    end
+  end
+  page.driver.browser.switch_to.alert.dismiss unless checked
 end
 
 And /^I should see dialog "([^"]*)"$/ do |message|

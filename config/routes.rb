@@ -6,10 +6,10 @@ FaimsWeb::Application.routes.draw do
     put '/users/update', :to => 'user_registers#update'
     get '/users/edit_password', :to => 'user_registers#edit_password' #allow users to edit their own password
     put '/users/update_password', :to => 'user_registers#update_password' #allow users to edit their own password
-
     get '/users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
   end
 
+  # manager users
   resources :users, :only => [:show, :new, :create, :destroy] do
 
     collection do
@@ -26,24 +26,17 @@ FaimsWeb::Application.routes.draw do
     end
   end
 
-  devise_scope :project_module do
-    get 'project_modules/upload_project_module', :to => 'project_modules#upload_project_module', :as => 'upload_project_module'
-    post 'project_modules/upload_new_project_module', :to => 'project_modules#upload_new_project_module', :as => 'upload_new_project_module'
-  end
-
-  resources :project_modules
-
-  get 'users/password/forgot', :to => 'user_passwords#forgot_password', :as => 'forgot_user_password'
-
-  get 'project_modules/:id/file_list', :to => 'file_manager#file_list', :as => 'project_module_file_list'
-  get 'project_modules/:id/download_file', :to => 'file_manager#download_file', :as => 'download_project_module_file'
-  post 'project_modules/:id/upload_file', :to => 'file_manager#upload_file', :as => 'upload_project_module_file'
-  post 'project_modules/:id/create_dir', :to => 'file_manager#create_dir', :as => 'project_module_create_dir'
-  match 'project_modules/:id/delete_file', :to => 'file_manager#delete_file', :as => 'delete_project_module_file'
-  post 'project_modules/:id/batch_upload_file', :to => 'file_manager#batch_upload_file', :as => 'batch_upload_file'
+  # projeect module
+  get 'project_modules', :to => 'project_modules#index', :as => 'project_modules'
+  post 'project_modules', :to => 'project_modules#create', :as => 'project_modules'
+  get 'project_modules/new', :to => 'project_modules#new', :as => 'new_project_module'
+  get 'project_modules/upload_project_module', :to => 'project_modules#upload_project_module', :as => 'upload_project_module'
+  post 'project_modules/upload_new_project_module', :to => 'project_modules#upload_new_project_module', :as => 'upload_new_project_module'
+  get 'project_modules/:id', :to => 'project_modules#show', :as => 'project_module'
 
   get 'project_modules/:id/edit_project_module', :to => 'project_modules#edit_project_module', :as => 'edit_project_module'
   post 'project_modules/:id/update_project_module', :to => 'project_modules#update_project_module', :as => 'update_project_module'
+  post 'project_modules/:id/delete_project_module', :to => 'project_modules#delete_project_module', :as => 'delete_project_module'
 
   get 'project_modules/:id/archive_project_module', :to => 'project_modules#archive_project_module', :as => 'archive_project_module'
   get 'project_modules/:id/download_project_module', :to => 'project_modules#download_project_module', :as => 'download_project_module'
@@ -51,56 +44,68 @@ FaimsWeb::Application.routes.draw do
 
   get 'project_modules/:id/download_attached_file', :to => 'project_modules#download_attached_file', :as => 'download_attached_file'
 
-  get 'project_modules/:id/search_arch_ent_records/', :to => 'project_modules#search_arch_ent_records', :as => 'search_arch_ent_records'
-  get 'project_modules/:id/show_arch_ent_records/', :to => 'project_modules#show_arch_ent_records', :as => 'show_arch_ent_records'
-  get 'project_modules/:id/list_arch_ent_records/', :to => 'project_modules#list_arch_ent_records', :as => 'list_arch_ent_records'
-  get 'project_modules/:id/list_typed_arch_ent_records/', :to => 'project_modules#list_typed_arch_ent_records', :as => 'list_typed_arch_ent_records'
-  get 'project_modules/:id/delete_arch_ent_records/:uuid', :to => 'project_modules#delete_arch_ent_records', :as => 'delete_arch_ent_records'
-  get 'project_modules/:id/restore_arch_ent_records/:uuid', :to => 'project_modules#restore_arch_ent_records', :as => 'restore_arch_ent_records'
-  get 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_modules#edit_arch_ent_records', :as => 'edit_arch_ent_records'
-  post 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_modules#update_arch_ent_records', :as => 'update_arch_ent_records'
-  get 'project_modules/:id/show_arch_ent_history/:uuid', :to => 'project_modules#show_arch_ent_history', :as => 'show_arch_ent_history'
-  post 'project_modules/:id/revert_arch_ent_to_timestamp/:uuid', :to => 'project_modules#revert_arch_ent_to_timestamp', :as => 'revert_arch_ent_to_timestamp'
+  # project module file
+  get 'project_modules/:id/file_list', :to => 'project_module_file#file_list', :as => 'project_module_file_list'
+  get 'project_modules/:id/download_file', :to => 'project_module_file#download_file', :as => 'download_project_module_file'
+  post 'project_modules/:id/upload_file', :to => 'project_module_file#upload_file', :as => 'upload_project_module_file'
+  post 'project_modules/:id/create_dir', :to => 'project_module_file#create_dir', :as => 'project_module_create_dir'
+  match 'project_modules/:id/delete_file', :to => 'project_module_file#delete_file', :as => 'delete_project_module_file'
+  post 'project_modules/:id/batch_upload_file', :to => 'project_module_file#batch_upload_file', :as => 'batch_upload_file'
 
-  get 'project_modules/:id/search_rel_records/', :to => 'project_modules#search_rel_records', :as => 'search_rel_records'
-  get 'project_modules/:id/show_rel_records/', :to => 'project_modules#show_rel_records', :as => 'show_rel_records'
-  get 'project_modules/:id/list_rel_records/', :to => 'project_modules#list_rel_records', :as => 'list_rel_records'
-  get 'project_modules/:id/list_typed_rel_records/', :to => 'project_modules#list_typed_rel_records', :as => 'list_typed_rel_records'
-  get 'project_modules/:id/delete_rel_records/:relationshipid', :to => 'project_modules#delete_rel_records', :as => 'delete_rel_records'
-  get 'project_modules/:id/restore_rel_records/:relationshipid', :to => 'project_modules#restore_rel_records', :as => 'restore_rel_records'
-  get 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_modules#edit_rel_records', :as => 'edit_rel_records'
-  post 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_modules#update_rel_records', :as => 'update_rel_records'
-  get 'project_modules/:id/show_rel_history/:relationshipid', :to => 'project_modules#show_rel_history', :as => 'show_rel_history'
-  post 'project_modules/:id/revert_rel_to_timestamp/:relationshipid', :to => 'project_modules#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
+  # project module entity
+  get 'project_modules/:id/search_arch_ent_records/', :to => 'project_module_entity#search_arch_ent_records', :as => 'search_arch_ent_records'
+  get 'project_modules/:id/show_arch_ent_records/', :to => 'project_module_entity#show_arch_ent_records', :as => 'show_arch_ent_records'
+  get 'project_modules/:id/list_arch_ent_records/', :to => 'project_module_entity#list_arch_ent_records', :as => 'list_arch_ent_records'
+  get 'project_modules/:id/list_typed_arch_ent_records/', :to => 'project_module_entity#list_typed_arch_ent_records', :as => 'list_typed_arch_ent_records'
+  get 'project_modules/:id/delete_arch_ent_records/:uuid', :to => 'project_module_entity#delete_arch_ent_records', :as => 'delete_arch_ent_records'
+  get 'project_modules/:id/restore_arch_ent_records/:uuid', :to => 'project_module_entity#restore_arch_ent_records', :as => 'restore_arch_ent_records'
+  get 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_module_entity#edit_arch_ent_records', :as => 'edit_arch_ent_records'
+  post 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_module_entity#update_arch_ent_records', :as => 'update_arch_ent_records'
+  get 'project_modules/:id/show_arch_ent_history/:uuid', :to => 'project_module_entity#show_arch_ent_history', :as => 'show_arch_ent_history'
+  post 'project_modules/:id/revert_arch_ent_to_timestamp/:uuid', :to => 'project_module_entity#revert_arch_ent_to_timestamp', :as => 'revert_arch_ent_to_timestamp'
+  post 'project_modules/:id/compare_arch_ents', :to => 'project_module_entity#compare_arch_ents', :as => 'compare_arch_ents'
+  post 'project_modules/:id/merge_arch_ents', :to => 'project_module_entity#merge_arch_ents', :as => 'merge_arch_ents'
 
-  get 'project_modules/:id/show_rel_members/:relationshipid', :to => 'project_modules#show_rel_members', :as => 'show_rel_members'
-  post 'project_modules/:id/remove_arch_ent_member/', :to => 'project_modules#remove_arch_ent_member', :as => 'remove_arch_ent_member'
-  get 'project_modules/:id/search_arch_ent_member/:relationshipid', :to => 'project_modules#search_arch_ent_member', :as => 'search_arch_ent_member'
-  post 'project_modules/:id/add_arch_ent_member/', :to => 'project_modules#add_arch_ent_member', :as => 'add_arch_ent_member'
+  # project module relationship
+  get 'project_modules/:id/search_rel_records/', :to => 'project_module_relationship#search_rel_records', :as => 'search_rel_records'
+  get 'project_modules/:id/show_rel_records/', :to => 'project_module_relationship#show_rel_records', :as => 'show_rel_records'
+  get 'project_modules/:id/list_rel_records/', :to => 'project_module_relationship#list_rel_records', :as => 'list_rel_records'
+  get 'project_modules/:id/list_typed_rel_records/', :to => 'project_module_relationship#list_typed_rel_records', :as => 'list_typed_rel_records'
+  get 'project_modules/:id/delete_rel_records/:relationshipid', :to => 'project_module_relationship#delete_rel_records', :as => 'delete_rel_records'
+  get 'project_modules/:id/restore_rel_records/:relationshipid', :to => 'project_module_relationship#restore_rel_records', :as => 'restore_rel_records'
+  get 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_module_relationship#edit_rel_records', :as => 'edit_rel_records'
+  post 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_module_relationship#update_rel_records', :as => 'update_rel_records'
+  get 'project_modules/:id/show_rel_history/:relationshipid', :to => 'project_module_relationship#show_rel_history', :as => 'show_rel_history'
+  post 'project_modules/:id/revert_rel_to_timestamp/:relationshipid', :to => 'project_module_relationship#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
+  post 'project_modules/:id/compare_rel', :to => 'project_module_relationship#compare_rel', :as => 'compare_rel'
+  post 'project_modules/:id/merge_rel', :to => 'project_module_relationship#merge_rel', :as => 'merge_rel'
 
-  get 'project_modules/:id/show_rel_association/:uuid', :to => 'project_modules#show_rel_association', :as => 'show_rel_association'
-  post 'project_modules/:id/remove_rel_association/', :to => 'project_modules#remove_rel_association', :as => 'remove_rel_association'
-  get 'project_modules/:id/search_rel_association/:uuid', :to => 'project_modules#search_rel_association', :as => 'search_rel_association'
-  post 'project_modules/:id/add_rel_association/', :to => 'project_modules#add_rel_association', :as => 'add_rel_association'
+  # merge helpers
+  post 'project_modules/:id/add_record_to_compare/', :to => 'project_module_association#add_record_to_compare', :as => 'add_record_to_compare'
+  post 'project_modules/:id/remove_record_to_compare/', :to => 'project_module_association#remove_record_to_compare', :as => 'remove_record_to_compare'
 
-  get 'project_modules/:id/get_verbs_for_rel_association', :to => 'project_modules#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
+  # project module association
+  get 'project_modules/:id/show_rel_members/:relationshipid', :to => 'project_module_association#show_rel_members', :as => 'show_rel_members'
+  post 'project_modules/:id/remove_arch_ent_member/', :to => 'project_module_association#remove_arch_ent_member', :as => 'remove_arch_ent_member'
+  get 'project_modules/:id/search_arch_ent_member/:relationshipid', :to => 'project_module_association#search_arch_ent_member', :as => 'search_arch_ent_member'
+  post 'project_modules/:id/add_arch_ent_member/', :to => 'project_module_association#add_arch_ent_member', :as => 'add_arch_ent_member'
 
-  post 'project_modules/:id/add_entity_to_compare/', :to => 'project_modules#add_entity_to_compare', :as => 'add_entity_to_compare'
-  post 'project_modules/:id/remove_entity_to_compare/', :to => 'project_modules#remove_entity_to_compare', :as => 'remove_entity_to_compare'
+  get 'project_modules/:id/show_rel_association/:uuid', :to => 'project_module_association#show_rel_association', :as => 'show_rel_association'
+  post 'project_modules/:id/remove_rel_association/', :to => 'project_module_association#remove_rel_association', :as => 'remove_rel_association'
+  get 'project_modules/:id/search_rel_association/:uuid', :to => 'project_module_association#search_rel_association', :as => 'search_rel_association'
+  post 'project_modules/:id/add_rel_association/', :to => 'project_module_association#add_rel_association', :as => 'add_rel_association'
 
-  post 'project_modules/:id/compare_arch_ents', :to => 'project_modules#compare_arch_ents', :as => 'compare_arch_ents'
-  post 'project_modules/:id/merge_arch_ents', :to => 'project_modules#merge_arch_ents', :as => 'merge_arch_ents'
+  get 'project_modules/:id/get_verbs_for_rel_association', :to => 'project_module_association#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
 
-  post 'project_modules/:id/compare_rel', :to => 'project_modules#compare_rel', :as => 'compare_rel'
-  post 'project_modules/:id/merge_rel', :to => 'project_modules#merge_rel', :as => 'merge_rel'
+  # project module vocabulary
+  get 'project_modules/:id/list_attributes_with_vocab', :to => 'project_module_vocabulary#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
+  post 'project_modules/:id/update_attributes_vocab', :to => 'project_module_vocabulary#update_attributes_vocab', :as => 'update_attributes_vocab'
 
-  get 'project_modules/:id/list_attributes_with_vocab', :to => 'project_modules#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'
-  get 'project_modules/:id/list_vocab_for_attribute/:attribute_id', :to => 'project_modules#list_vocab_for_attribute', :as => 'list_vocab_for_attribute'
-  post 'project_modules/:id/update_attributes_vocab', :to => 'project_modules#update_attributes_vocab', :as => 'update_attributes_vocab'
+  # project module user
+  get 'project_module/:id/edit_project_module_user' , :to => 'project_module_user#edit_project_module_user', :as => 'edit_project_module_user'
+  post 'project_module/:id/update_project_module_user' , :to => 'project_module_user#update_project_module_user', :as => 'update_project_module_user'
 
-  get 'project_module/:id/edit_project_module_user' , :to => 'project_modules#edit_project_module_user', :as => 'edit_project_module_user'
-  post 'project_module/:id/update_project_module_user' , :to => 'project_modules#update_project_module_user', :as => 'update_project_module_user'
-
+  # android api
   get 'android/modules', :to => 'android#project_modules', :as => 'android_project_modules'
 
   get 'android/module/:key/settings_info', :to => 'android#settings_info', :as => 'android_settings_info'
@@ -121,6 +126,7 @@ FaimsWeb::Application.routes.draw do
   get 'android/module/:key/app_file_download', :to => 'android#app_file_download', :as => 'android_app_file_download'
   post 'android/module/:key/app_file_upload', :to => 'android#app_file_upload', :as => 'android_app_file_upload'
 
+  # home
   root :to => 'pages#home'
 
   get 'pages/home'

@@ -12,7 +12,7 @@ end
 
 module FaimsWeb
   class Application < Rails::Application
-    config.autoload_paths += %W( #{config.root}/lib )
+    config.autoload_paths += %W( #{config.root}/lib #{config.root}/app/controllers/breadcrumbs )
     config.generators do |g|
       g.stylesheets false
       g.test_framework :rspec
@@ -81,11 +81,6 @@ module FaimsWeb
     config.server_project_modules_directory = Rails.root.join("modules").to_s
 
     config.server_uploads_directory = Rails.root.join("uploads").to_s
-
-    config.after_initialize do
-      require 'find'
-      Find.find(Rails.root.join('modules').to_s) { |path| FileUtils.remove_entry_secure Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('modules')
-    end
 
     config.i18n.enforce_available_locales = true
   end

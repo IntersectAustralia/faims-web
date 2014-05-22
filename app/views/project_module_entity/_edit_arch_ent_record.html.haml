@@ -26,4 +26,4 @@
         = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'restore-record'
       %input{:type => 'hidden',:id => 'identifier', :value=> uuids[1].to_s}
 .paging
-  = render :partial => 'pagination'
+  = render :partial => 'shared/pagination'

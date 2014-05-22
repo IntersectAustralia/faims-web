@@ -30,7 +30,7 @@
                     %span
                       =uuids[1].to_s
           .paging.search
-            = render :partial => 'pagination'
+            = render :partial => 'shared/pagination'
         -else
           - if @status.eql?('init')
             %p Please enter keywords to search for a particular entity or leave the search empty to show all entities

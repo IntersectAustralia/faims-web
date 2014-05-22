@@ -2,8 +2,8 @@
 = breadcrumbs
 .content
   - if (!@uuid.empty?)
-    %input{:type => 'hidden', :value => add_entity_to_compare_path(@project_module), :id => 'add-entity'}
-    %input{:type => 'hidden', :value => remove_entity_to_compare_path(@project_module), :id => 'remove-sentity'}
+    %input{:type => 'hidden', :value => add_record_to_compare_path(@project_module), :id => 'add-entity'}
+    %input{:type => 'hidden', :value => remove_record_to_compare_path(@project_module), :id => 'remove-sentity'}
     %form{:method => 'post', :id => 'compare'}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       - if session[:values]

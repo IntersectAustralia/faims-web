@@ -15,7 +15,7 @@
               =relationships[1].to_s
           .clear
       .paging.search
-        = render :partial => 'pagination'
+        = render :partial => 'shared/pagination'
     %input{:type => 'button',:id => 'search-member', :value=> 'Add Member', :class => 'add-member btn', :src=> search_rel_association_path(@project_module,session[:uuid])}
     .form-actions
       = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn'

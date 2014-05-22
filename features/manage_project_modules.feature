@@ -294,3 +294,35 @@ Feature: Manage project modules
 #    And I process delayed jobs
 #    Then I should see dialog "Could not process request as project is currently locked."
 #    And I confirm
+
+  Scenario: Delete project module
+    Given I have project module "Module 1"
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Module 1"
+    And I press "Delete"
+    Then I should see dialog "Are you sure you want to delete module?"
+    And I confirm
+    Then I should not have project module "Module 1"
+
+  Scenario: Cancel deleting project module
+    Given I have project module "Module 1"
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Module 1"
+    And I press "Delete"
+    Then I should see dialog "Are you sure you want to delete module?"
+    And I cancel
+    Then I should have project module "Module 1"
+
+  Scenario: Cannot delete project module if project module is locked
+    Given I have project module "Module 1"
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Module 1"
+    And settings is locked for "Module 1"
+    And I press "Delete"
+    Then I should see dialog "Are you sure you want to delete module?"
+    And I confirm
+    Then I should see ""
+    And I should have project module "Module 1"
