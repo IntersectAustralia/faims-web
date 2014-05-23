@@ -26,7 +26,7 @@
   .btn-group
     = link_to "Delete Module", delete_project_module_path(@project_module), :class => 'btn btn-danger', :method => :delete, confirm: "Are you sure you want to delete module?"
 .form-actions
-  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_modules_path, :class => 'btn '
+  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_modules_path, :class => 'btn'
 
 #loading.hidden.indicator
   = image_tag "loading.gif"
