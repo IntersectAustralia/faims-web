@@ -306,7 +306,7 @@ Feature: Manage project modules
       | Module 1 |
       | Module 2 |
     And I follow "Module 1"
-    And I press "Delete"
+    And I follow "Delete Module"
     Then I should see dialog "Are you sure you want to delete module?"
     And I confirm
     Then I should be on the project modules page
@@ -329,7 +329,7 @@ Feature: Manage project modules
       | Module 1 |
       | Module 2 |
     And I follow "Module 1"
-    And I press "Delete"
+    And I follow "Delete Module"
     Then I should see dialog "Are you sure you want to delete module?"
     And I cancel
     And I am on the project modules page
@@ -350,7 +350,7 @@ Feature: Manage project modules
       | Module 2 |
     And I follow "Module 1"
     And settings is locked for "Module 1"
-    And I press "Delete"
+    And I follow "Delete Module"
     Then I should see dialog "Are you sure you want to delete module?"
     And I confirm
     Then I should be on the project modules page
@@ -372,7 +372,7 @@ Feature: Manage project modules
       | Module 1 |
       | Module 2 |
     And I follow "Module 1"
-    And I press "Delete"
+    And I follow "Delete Module"
     Then I should see dialog "Are you sure you want to delete module?"
     And I confirm
     Then I should be on the project modules page
