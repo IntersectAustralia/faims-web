@@ -1,3 +1,0 @@
-discovery_server: bundle exec rake discovery:start RAILS_ENV=production
-merge_daemon: bundle exec rake merge_daemon:start RAILS_ENV=production
-worker: bundle exec rake jobs:work RAILS_ENV=production
