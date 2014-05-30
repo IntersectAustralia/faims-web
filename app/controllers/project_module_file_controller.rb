@@ -29,10 +29,12 @@ class ProjectModuleFileController < ProjectModuleBaseController
   rescue FileManager::TimeoutException => e
     logger.warn e
     flash.now[:error] = 'Could not process request as project is currently locked.'
+
+    render_file_list
   rescue ProjectModule::ProjectModuleException => e
     logger.error e
     flash.now[:error] = e.message
-  ensure
+
     render_file_list
   end
 
