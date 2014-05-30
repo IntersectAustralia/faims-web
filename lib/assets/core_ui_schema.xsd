@@ -146,6 +146,7 @@
     <xsd:attribute name="faims_annotation" type="xsd:boolean" use="optional"/>
     <xsd:attribute name="faims_info" type="xsd:boolean" use="optional"/>
     <xsd:attribute name="faims_map" type="xsd:string" use="optional"/>
+    <xsd:attribute name="faims_table" type="xsd:string" use="optional"/>
     <xsd:attribute name="faims_read_only" type="xsd:boolean" use="optional"/>
     <xsd:attribute name="faims_sync" type="xsd:boolean" use="optional"/>
   </xsd:attributeGroup>
