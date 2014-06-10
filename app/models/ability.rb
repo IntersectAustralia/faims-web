@@ -9,6 +9,7 @@ class Ability
     if user
       can [:read], User
       can [:manage], ProjectModule
+      can [:manage], ProjectExporter
       if user.admin?
         can [:edit_role, :update_role, :edit_user, :create, :destroy], User
       else

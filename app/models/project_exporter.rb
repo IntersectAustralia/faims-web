@@ -22,6 +22,7 @@ class ProjectExporter
 
     config_json = get_config_json
 
+    errors.add(:config, 'Config is missing exporter key') if config_json['key'].blank?
     errors.add(:config, 'Config is missing exporter name') if config_json['name'].blank?
     errors.add(:config, 'Config is missing exporter version') if config_json['version'].blank?
   end
@@ -44,6 +45,11 @@ class ProjectExporter
 
   def dir
     @dir
+  end
+
+  def key
+    config_json = get_config_json
+    return config_json['key'] if config_json
   end
 
   def name
@@ -72,7 +78,7 @@ class ProjectExporter
     raise ProjectExporterException, "Exporter doesn't contain install.sh script" unless File.exists? get_path(:install_script)
 
     # check if exporter already exists then version is greater
-    exporter = ProjectExporter.find_by_name(name)
+    exporter = ProjectExporter.find_by_key(key)
     raise ProjectExporterException, "Exporter '#{exporter.name}' already exists with version '#{exporter.version}'" if exporter and version <= exporter.version
 
     # delete old exporter
@@ -135,6 +141,10 @@ class ProjectExporter
 
     def find_by_name(name)
       all.select{ |exporter| exporter.name == name }.first
+    end
+
+    def find_by_key(key)
+      all.select{ |exporter| exporter.key == key }.first
     end
 
     def extract_exporter(exporter_tarball)

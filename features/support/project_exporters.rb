@@ -3,7 +3,8 @@ def make_exporter_tarball(name, config = nil, options = nil)
 
   config ||= {
       name: name,
-      version: 0
+      version: 0,
+      key: SecureRandom.uuid
   }
 
   unless options and options[:skip_config]

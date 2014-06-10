@@ -18,7 +18,7 @@ describe ProjectExporter do
     end
 
     it 'should check if exporter name exists' do
-      tarball = make_exporter_tarball('Exporter 1', {version:0})
+      tarball = make_exporter_tarball('Exporter 1', {version:0,key:SecureRandom.uuid})
       dir = ProjectExporter.extract_exporter(tarball)
       exporter = ProjectExporter.new(dir)
       exporter.valid?
@@ -26,11 +26,19 @@ describe ProjectExporter do
     end
 
     it 'should check if exporter version exists' do
-      tarball = make_exporter_tarball('Exporter 1', {name:"Exporter 1"})
+      tarball = make_exporter_tarball('Exporter 1', {name:"Exporter 1",key:SecureRandom.uuid})
       dir = ProjectExporter.extract_exporter(tarball)
       exporter = ProjectExporter.new(dir)
       exporter.valid?
       exporter.errors.messages[:config].should == ['Config is missing exporter version']
+    end
+
+    it 'should check if exporter key exists' do
+      tarball = make_exporter_tarball('Exporter 1', {name:"Exporter 1",version:0})
+      dir = ProjectExporter.extract_exporter(tarball)
+      exporter = ProjectExporter.new(dir)
+      exporter.valid?
+      exporter.errors.messages[:config].should == ['Config is missing exporter key']
     end
 
     it 'should check if install script exists' do
@@ -128,14 +136,15 @@ describe ProjectExporter do
     end
 
     it 'should re-install exporter is updated' do
-      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 1})
+      key = SecureRandom.uuid
+      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 1, key: key})
       dir = ProjectExporter.extract_exporter(tarball)
       exporter = ProjectExporter.new(dir)
       exporter.install.should be_true
       exporter = ProjectExporter.find_by_name('Exporter 1')
       exporter.version.should == 1
 
-      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 2})
+      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 2, key: key})
       dir = ProjectExporter.extract_exporter(tarball)
       exporter = ProjectExporter.new(dir)
       exporter.install.should be_true
@@ -151,13 +160,14 @@ describe ProjectExporter do
     end
 
     it 'should raise exception if exporter already exists' do
-      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 1})
+      key = SecureRandom.uuid
+      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 1, key: key})
       dir = ProjectExporter.extract_exporter(tarball)
       exporter = ProjectExporter.new(dir)
       exporter.install.should be_true
       ProjectExporter.find_by_name('Exporter 1').should_not be_nil
 
-      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 1})
+      tarball = make_exporter_tarball('Exporter 1', {name: 'Exporter 1', version: 1, key: key})
       dir = ProjectExporter.extract_exporter(tarball)
       exporter = ProjectExporter.new(dir)
       lambda { exporter.install }.should raise_exporter_exception("Exporter 'Exporter 1' already exists with version '1'")
