@@ -203,4 +203,12 @@ class webapp {
     require => [File["/etc/init.d/god"], File["/etc/god.conf"], Exec["setup app"]]
   }
 
+  # create exporter user
+  user { "exporter":
+      ensure => "present",
+      home => "/home/exporter",
+      shell => "/bin/bash",
+      managehome => "true"
+  }
+
 }

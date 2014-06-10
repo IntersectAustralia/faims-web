@@ -22,7 +22,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
 
     @limit = Database::LIMIT
     @offset = params[:offset] ? params[:offset] : '0'
-    ''
+
     type = params[:type]
     show_deleted = params[:show_deleted].nil? || params[:show_deleted].empty? ? false : true
     @uuid = @project_module.db.load_arch_entity(type, @limit, @offset, show_deleted)
