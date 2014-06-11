@@ -831,11 +831,11 @@ class Database
             update_reln_value_as_dirty(db, relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
-          logger.error e
+          @project_modulelogger.error e
         end
       end
     rescue Exception => e
-      logger.error e
+      @project_modulelogger.error e
     end
   end
 
@@ -867,11 +867,11 @@ class Database
             update_aent_value_as_dirty(db, uuid, valuetimestamp, userid, attributeid, vocabid, fields['measure'], fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
-          logger.error e
+          @project_module.logger.error e
         end
       end
     rescue Exception => e
-      logger.error e
+      @project_module.logger.error e
     end
   end
 

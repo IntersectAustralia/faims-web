@@ -19,6 +19,12 @@ And /^I have a project modules dir$/ do
   Dir.mkdir('tmp/uploads')
 end
 
+And /^I have a project exporters dir$/ do
+  Dir.mkdir('tmp') unless File.directory? 'tmp'
+  FileUtils.remove_entry_secure('tmp/exporters')
+  Dir.mkdir('tmp/exporters')
+end
+
 And /^I should not see errors for upload "([^"]*)"$/ do |field|
   page.should have_no_selector(:xpath, "//label[contains(., '#{field}')]/../../span[@class='help-inline']")
 end
@@ -37,10 +43,43 @@ Given /^I have project modules$/ do |table|
   end
 end
 
-Then /^I should (not )?see project modules$/ do |is_nil, table|
-  module_names = table.hashes.map { |hash| hash[:name] }
-  find('table#project-modules').all('tr')[1..-1].each do |row|
-    module_names.include?(row.find('td.project-name').text).should == (is_nil ? false : true)
+Given /^I have project exporters/ do |table|
+  table.hashes.each do |hash|
+    tarball = make_exporter_tarball hash[:name]
+    dir = ProjectExporter.extract_exporter tarball
+    ProjectExporter.new(dir).install.should be_true
+  end
+end
+
+Then /^I should (not )?see project modules$/ do |not_exist, table|
+  found_modules =  find('table#project-modules').all('tr')[1..-1].map do |row|
+    row.find('td.project-name').text
+  end
+
+  table.hashes.each do |hash|
+    matched_modules = found_modules.select do |module_name|
+      hash[:name] == module_name
+    end
+
+    matched_modules.empty?.should == (not_exist ? true : false)
+  end
+end
+
+Then /^I should (not )?see project exporters/ do |not_exist, table|
+  found_exporters = find('table#project-exporters').all('tr')[1..-1].map do |row|
+    name = row.find('td.project-exporter-name').text
+    version = row.find('td.project-exporter-version').text
+    {name: name, version: version}
+  end
+
+  table.hashes.each do |hash|
+    matched_exporters = found_exporters.select do |exporter|
+      has_name = hash[:name] == exporter[:name]
+      has_version = hash[:version].nil? || hash[:version] == exporter[:version]
+      has_name and has_version
+    end
+
+    matched_exporters.empty?.should == (not_exist ? true : false)
   end
 end
 
@@ -803,4 +842,53 @@ end
 
 And /^I refresh page$/ do
   visit(current_path)
+end
+
+And /^I upload exporter "([^"]*)"$/ do |file|
+  find('#project_exporter_tarball').set Rails.root.join("features/assets/#{file}").to_s
+  find('input[type="submit"]').click
+end
+
+And /^I upload exporter "([^"]*)" without "([^"]*)"$/ do |name, skip|
+  options = {}
+  options[skip.to_sym] = true
+  tarball = make_exporter_tarball(name, nil, options)
+
+  find('#project_exporter_tarball').set tarball
+  find('input[type="submit"]').click
+end
+
+And /^I upload exporter "([^"]*)" setting "([^"]*)" as "([^"]*)"$/ do |name, setting, value|
+  config = {}
+  config[setting.to_sym] = value
+  tarball = make_exporter_tarball(name, config)
+
+  find('#project_exporter_tarball').set tarball
+  find('input[type="submit"]').click
+end
+
+And /^I upload exporter with$/ do |table|
+  hash = table.hashes.first
+  name = hash[:name]
+  config = {
+      name: name,
+      version: hash[:version] ? hash[:version] : 1,
+      key: hash[:key] ? hash[:key] : SecureRandom.uuid
+  }
+  options = {
+      skip_installer: hash[:skip_installer],
+      skip_uninstaller: hash[:skip_uninstaller],
+      skip_exporter: hash[:skip_exporter],
+      install_script: hash[:install_script] ? hash[:install_script] : 'install.sh',
+      uninstall_script: hash[:uninstall_script] ? hash[:uninstall_script] : 'uninstall.sh',
+      export_script: hash[:export_script] ? hash[:export_script] : 'export.sh'
+  }
+  tarball = make_exporter_tarball(name, config, options)
+
+  find('#project_exporter_tarball').set tarball
+  find('input[type="submit"]').click
+end
+
+And /^I press "([^"]*)" for exporter "([^"]*)"$/ do |label, name|
+  find(:xpath, "//*[contains(text(), \"#{name}\")]/..").find('input[type="submit"]').click
 end

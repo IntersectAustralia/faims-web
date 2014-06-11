@@ -39,7 +39,7 @@ class ProjectExporter
     return errors.add(:export_script, 'Cannot find export script') unless File.exists? get_path(:export_script)
   end
 
-  def initialize(dir)
+  def initialize(dir = nil)
     @dir = dir
   end
 
@@ -63,7 +63,13 @@ class ProjectExporter
   end
 
   def get_config_json
-    JSON.parse(File.open(get_path(:config), 'r').read)
+    JSON.parse(get_raw_config)
+  rescue JSON::ParserError
+    raise ProjectExporterException, 'Cannot parse config as json'
+  end
+
+  def get_raw_config
+    File.open(get_path(:config), 'r').read
   end
 
   def get_path(type)

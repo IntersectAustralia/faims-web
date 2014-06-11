@@ -1,0 +1,24 @@
+- title "Exporters"
+= breadcrumbs
+.well
+  = link_to "<i class='icon-upload'></i> Upload Exporter".html_safe, new_project_exporter_path, :class => "btn"
+.clear
+- if @project_exporters
+  %table.table#project-exporters
+    %tr
+      %th No.
+      %th Name
+      %th Version
+      %th
+    - index = 0
+    - for project_exporter in @project_exporters
+      - index = index + 1
+      %tr
+        %td
+          = index.to_s + "."
+        %td.project-exporter-name
+          = project_exporter.name
+        %td.project-exporter-version
+          = project_exporter.version
+        %td
+          = button_to "Uninstall", delete_project_exporter_path(project_exporter.key), method: :post, confirm: "Are you sure you want to uninstall exporter?", class: 'btn'

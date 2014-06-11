@@ -109,9 +109,9 @@ FaimsWeb::Application.routes.draw do
 
   # project exporters
   get 'project_exporters', :to => 'project_exporter#index', :as => 'project_exporters'
-  get 'project_exporter/:key', :to => 'project_exporter#show', :as => 'project_exporter'
-  get 'project_exporter/:key/new', :to => 'project_exporter#new', :as => 'new_project_exporter'
-  post 'project_exporter/:key/new', :to => 'project_exporter#create', :as => 'new_project_exporter'
+  get 'project_exporters/new', :to => 'project_exporter#new', :as => 'new_project_exporter'
+  post 'project_exporters/new', :to => 'project_exporter#create', :as => 'new_project_exporter'
+  #get 'project_exporter/:key', :to => 'project_exporter#show', :as => 'project_exporter'
   post 'project_exporter/:key/delete', :to => 'project_exporter#delete', :as => 'delete_project_exporter'
 
   # android api

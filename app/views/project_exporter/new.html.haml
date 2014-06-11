@@ -1,0 +1,17 @@
+- title 'Upload Exporter'
+= breadcrumbs
+= simple_form_for 'project_exporter', :url => new_project_exporter_path, :method => "post", :multipart => true do |f|
+  .well
+    %h3 Please select exporter
+    .btn-group
+      = f.label :tarball, 'File format (tar.gz)'
+      = f.file_field :tarball
+      .clear
+      = f.submit "Upload", :class => "btn btn-inverse"
+
+  - if @project_exporter and @project_exporter.errors
+    .well
+      %ul
+        - @project_exporter.errors.messages.each do |key, messages|
+          - messages.each do |message|
+            %li.form-attribute-error= message

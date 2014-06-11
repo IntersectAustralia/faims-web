@@ -125,6 +125,12 @@ module NavigationHelpers
         project_module = ProjectModule.find_by_name($1)
         project_module_file_list_path(project_module ? project_module.id : 'na')
 
+      when /the project exporters page/
+        project_exporters_path
+
+      when /the upload project exporters page/
+        new_project_exporter_path
+
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:
 #

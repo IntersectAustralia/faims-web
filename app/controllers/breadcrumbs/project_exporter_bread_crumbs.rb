@@ -1,7 +1,7 @@
 module ProjectExporterBreadCrumbs
 
   def crumbs
-    exporter = ProjectExporter.find_by_id(params[:key]) if params[:key]
+    exporter = ProjectExporter.find_by_key(params[:key]) if params[:key]
 
     @crumbs =
         {
