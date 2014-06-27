@@ -590,6 +590,8 @@ class ProjectModule < ActiveRecord::Base
       raise ProjectModuleException, 'Wrong hash sum for the module.'
     elsif !ProjectModule.find_by_key(settings['key']).blank?
       raise ProjectModuleException, 'This module already exists in the system.'
+    elsif !ProjectModule.deleted.find_by_key(settings['key']).blank?
+      raise ProjectModuleException, 'This module is deleted but already exists in the system.'
     else
       project_module = ProjectModule.new(name: settings['name'], key: settings['key'])
 

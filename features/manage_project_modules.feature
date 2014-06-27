@@ -236,6 +236,25 @@ Feature: Manage project modules
     And I press "Upload"
     Then I should see "This module already exists in the system"
 
+  @javascript
+  Scenario: Upload Module fails if module is deleted but already exists
+    Given I am on the home page
+    And I follow "Show Modules"
+    Then I should be on the project modules page
+    And I follow "Upload Module"
+    And I pick file "module.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "Module has been successfully uploaded"
+    And I follow "Simple Project"
+    And I follow "Delete Module"
+    Then I should see dialog "Are you sure you want to delete module?"
+    And I confirm
+    And I should see "Module Deleted."
+    And I follow "Upload Module"
+    And I pick file "module.tar.bz2" for "Module File"
+    And I press "Upload"
+    Then I should see "This module is deleted but already exists in the system"
+
   Scenario: Upload Module fails if checksum is wrong
     Given I am on the home page
     And I follow "Show Modules"

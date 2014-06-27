@@ -8,6 +8,10 @@ class ArchiveManager < FileManager
     @archive_directory = archive_directory
   end
 
+  def has_changes?
+    not File.exists? @archive or not file_list.select { |f| File.mtime("#{@base_dir}/#{f}") > File.mtime(@timestamp_file.path) }.empty?
+  end
+
   # Note: archives will not include dot files
   def update_archive(compute_checksum = false)
     return true unless has_changes?
