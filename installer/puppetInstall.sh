@@ -31,4 +31,4 @@ if [ ! -h "/etc/puppet/hiera.yaml" ]; then
 fi
 
 # Run puppet site.pp
-sudo puppet apply $APP_ROOT/puppet/site.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
+sudo puppet apply --pluginsync $APP_ROOT/puppet/site.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules

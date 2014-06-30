@@ -12,15 +12,13 @@ class webapp {
   # Install common packages
   $common_packages = ["git"]
   package { $common_packages:
-    ensure  => "present",
-    timeout => 300
+    ensure  => "present"
   }
 
   # Install Spatialite
   $spatialite_packages = ["build-essential","sqlite3","libproj-dev","libgeos++-dev","libfreexl-dev","libspatialite-dev"]
   package { $spatialite_packages:
-    ensure  => "present",
-    timeout => 300
+    ensure  => "present"
   }
 
   # Install rbenv
@@ -60,10 +58,9 @@ class webapp {
   }
 
   # Build ruby version
-  $ruby_packages =["libssl-dev","libxslt1-dev"]
+  $ruby_packages =["libssl-dev","zlib1g-dev","libreadline-dev"]
   package { $ruby_packages:
-    ensure  => "present",
-    timeout => 300
+    ensure  => "present"
   }
 
   exec { "build ruby version":
@@ -176,7 +173,7 @@ class webapp {
   service { "apache2":
     ensure  => "running",
     enable  => "true",
-    require => [Exec["install passenger module"], File["/etc/apache2/conf-enabled/faims.conf"], Exec["setup app"]]
+    require => [File["/etc/apache2/conf-enabled/faims.conf"], Exec["setup app"]]
   }
 
   # Install god
@@ -208,14 +205,6 @@ class webapp {
     ensure  => "running",
     enable  => "true",
     require => [File["/etc/init.d/god"], File["/etc/god.conf"], Exec["setup app"]]
-  }
-
-  # create exporter user
-  user { "exporter":
-      ensure => "present",
-      home => "/home/exporter",
-      shell => "/bin/bash",
-      managehome => "true"
   }
 
 }
