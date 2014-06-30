@@ -3,6 +3,10 @@ require Rails.root.join('features/support/project_exporters')
 
 describe ProjectExporter do
 
+  before(:all) do
+    init_exporters
+  end
+
   def raise_exporter_exception(message)
     raise_error(ProjectExporter::ProjectExporterException, message)
   end

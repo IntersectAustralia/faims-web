@@ -20,9 +20,7 @@ And /^I have a project modules dir$/ do
 end
 
 And /^I have a project exporters dir$/ do
-  Dir.mkdir('tmp') unless File.directory? 'tmp'
-  FileUtils.remove_entry_secure('tmp/exporters')
-  Dir.mkdir('tmp/exporters')
+  init_exporters
 end
 
 And /^I should not see errors for upload "([^"]*)"$/ do |field|

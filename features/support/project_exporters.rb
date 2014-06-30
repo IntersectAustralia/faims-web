@@ -1,5 +1,14 @@
+def init_exporters
+  exporters_dir = Rails.root.join('tmp/exporters')
+  FileUtils.rm_rf exporters_dir if Dir.exists? exporters_dir
+end
+
 def make_exporter_tarball(name, config = nil, options = nil)
-  tmp_dir = Dir.mktmpdir
+  exporters_dir = Rails.root.join('tmp/exporters')
+  FileUtils.mkdir exporters_dir unless Dir.exists? exporters_dir
+
+  tmp_dir = File.join(exporters_dir, SecureRandom.uuid)
+  FileUtils.mkdir tmp_dir
 
   config ||= {
       name: name,
@@ -24,9 +33,9 @@ def make_exporter_tarball(name, config = nil, options = nil)
   FileUtils.cp Rails.root.join("features/assets/exporter_template/#{export_script}"),
                File.join(tmp_dir, ProjectExporter::EXPORT_SCRIPT) unless options and options[:skip_exporter]
 
-  tarball = Tempfile.new(['exporter', '.tar.gz'])
-  TarHelper.tar('zcf', tarball.path, File.basename(tmp_dir), File.dirname(tmp_dir))
-  tarball.path
+  tarball = File.join(exporters_dir, SecureRandom.uuid)
+  TarHelper.tar('zcf', tarball, File.basename(tmp_dir), File.dirname(tmp_dir))
+  tarball
 ensure
   FileUtils.rm_rf tmp_dir if Dir.exists? tmp_dir
 end
