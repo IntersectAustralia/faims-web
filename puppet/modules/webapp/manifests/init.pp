@@ -12,13 +12,15 @@ class webapp {
   # Install common packages
   $common_packages = ["git"]
   package { $common_packages:
-    ensure  => "present"
+    ensure  => "present",
+    timeout => 300
   }
 
   # Install Spatialite
   $spatialite_packages = ["build-essential","sqlite3","libproj-dev","libgeos++-dev","libfreexl-dev","libspatialite-dev"]
   package { $spatialite_packages:
-    ensure  => "present"
+    ensure  => "present",
+    timeout => 300
   }
 
   # Install rbenv
@@ -60,18 +62,19 @@ class webapp {
   # Build ruby version
   $ruby_packages =["libssl-dev","libxslt1-dev"]
   package { $ruby_packages:
-    ensure  => "present"
+    ensure  => "present",
+    timeout => 300
   }
 
   exec { "build ruby version":
     path        => $rbenv_path,
     command     => "rbenv install ${ruby_version}",
     environment => $rbenv_env,
-    timeout     => "3000",
     unless      => "test -d ${rbenv_root}/versions/${ruby_version}",
     logoutput   => "on_failure",
     require     => [Exec["clone ruby-build"], Package[$ruby_packages]],
-    user        => $webapp_user
+    user        => $webapp_user,
+    timeout     => 1800
   }
 
   exec { "configure ruby version":
@@ -99,7 +102,8 @@ class webapp {
     unless      => "su - ${webapp_user} -c \"cd ${app_root} && bundle check\"",
     environment => $rbenv_env,
     logoutput   => "on_failure",
-    require     => Exec["install bundler gem"]
+    require     => Exec["install bundler gem"],
+    timeout     => 1800
   }
 
   exec { "setup app":
@@ -107,7 +111,8 @@ class webapp {
     command   => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:migrate db:seed modules:clean modules:setup assets:precompile\"",
     environment => $rbenv_env,
     logoutput => "on_failure",
-    require   => Exec["install webapp gems"]
+    require   => Exec["install webapp gems"],
+    timeout   => 300
   }
 
   # Install apache & passenger
@@ -122,7 +127,8 @@ class webapp {
     unless      => "su - ${webapp_user} -c \"gem list passenger -i\"",
     environment => $rbenv_env,
     logoutput   => "on_failure",
-    require     => [Exec["configure ruby version"], Package[$apache_packages], File_line["configure rbenv shell"]]
+    require     => [Exec["configure ruby version"], Package[$apache_packages], File_line["configure rbenv shell"]],
+    timeout     => 300
   }
 
   exec { "link passenger gem":
@@ -140,7 +146,8 @@ class webapp {
     unless      => "test -f /etc/apache2/passenger/buildout/apache2/mod_passenger.so",
     environment => $rbenv_env,
     logoutput   => "on_failure",
-    require     => Exec["link passenger gem"]
+    require     => Exec["link passenger gem"],
+    timeout     => 1800
   }
 
   file { "/etc/apache2/conf-enabled/faims.conf":
