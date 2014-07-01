@@ -58,7 +58,7 @@ class webapp {
   }
 
   # Build ruby version
-  $ruby_packages =["libssl-dev","zlib1g-dev","libreadline-dev"]
+  $ruby_packages =["libssl-dev","zlib1g-dev"]
   package { $ruby_packages:
     ensure  => "present"
   }
