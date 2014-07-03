@@ -252,10 +252,10 @@ class ProjectModulesController < ProjectModuleBaseController
   def run_export_project_module
     @project_module = ProjectModule.find(params[:id])
 
-    input = params[:exporter_interface].present? ? params[:exporter_interface] : nil
-
     exporter = ProjectExporter.find_by_key(params[:exporter_key])
-    config = exporter.get_config_json
+    input = params[:exporter_interface].present? ? params[:exporter_interface] : nil
+    attributes = exporter.parse_interface_inputs(input)
+
     download_dir = File.join("/tmp", "download_export_" + SecureRandom.uuid)
     Dir.mkdir(download_dir)
     markup_file = File.open(File.join("/tmp", "export_markup_" + SecureRandom.uuid), "w+").path
@@ -263,7 +263,7 @@ class ProjectModulesController < ProjectModuleBaseController
     session[:export_download] = download_dir
     session[:export_markup] = markup_file
 
-    job = @project_module.delay.export_project_module(exporter, input, download_dir, markup_file)
+    job = @project_module.delay.export_project_module(exporter, attributes, download_dir, markup_file)
     render json: { result: 'waiting', jobid: job.id }
   end
 

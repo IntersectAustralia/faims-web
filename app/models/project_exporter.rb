@@ -125,6 +125,30 @@ class ProjectExporter
     execute_script(File.basename(get_path(:export_script)), params)
   end
 
+  def parse_interface_inputs(input)
+    attributes = {}
+    config = get_config_json
+    if config and input
+      if config['interface']
+        config['interface'].each do |field|
+          if field['type'] == 'checkbox'
+            values = []
+            if field['items']
+              field['items'].each do |item|
+                checked = input["#{field['label']}:#{item}"]
+                values << item if checked
+              end
+            end
+            attributes[field['label']] = values
+          else
+            attributes[field['label']] = input[field['label']]
+          end
+        end
+      end
+    end
+    attributes
+  end
+
   class << self
 
     def all

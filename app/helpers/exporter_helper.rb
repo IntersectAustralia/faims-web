@@ -22,6 +22,7 @@ module ExporterHelper
   end
 
   def render_checkbox(config, form)
+    @label = config["label"]
     @checks = config["items"]
     @form = form
     render(:partial => "checkbox")
