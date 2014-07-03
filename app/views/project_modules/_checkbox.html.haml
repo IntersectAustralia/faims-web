@@ -1,4 +1,4 @@
 - @checks.each do |check|
   .checkbox
     = @form.check_box("#{@label}:#{check}", {}, "true", "false")
-    = @form.label("#{@label}:#{check}", class: "checkbox inline")
+    = @form.label(check, class: "checkbox inline")

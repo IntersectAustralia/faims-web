@@ -289,7 +289,7 @@ class ProjectModulesController < ProjectModuleBaseController
     end
 
     download_entries = (Dir.entries(session[:export_download]) - %w{ . .. })
-    @has_download_file = !download_entries.nil? or !download_entries.empty?
+    @has_download_file = !download_entries.nil? && !download_entries.empty?
 
     if params[:code].to_i == 1
       flash.now[:notice] = "Module exported successfully"

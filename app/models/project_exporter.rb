@@ -136,7 +136,7 @@ class ProjectExporter
             if field['items']
               field['items'].each do |item|
                 checked = input["#{field['label']}:#{item}"]
-                values << item if checked
+                values << item if checked == "true"
               end
             end
             attributes[field['label']] = values
