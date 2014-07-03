@@ -1,0 +1,42 @@
+-title 'Export Module'
+= breadcrumbs
+
+%input{:type => 'hidden', :value => check_export_status_path(@project_module), :id=> 'check-export'}
+
+= collection_select("select", "exporter", @exporters, :key, :name, {:prompt => "Please select an exporter"})
+.well
+  - @exporters.each do |exporter|
+    - config = exporter.get_config_json
+    %div.exporter_interface{:id => exporter.key}
+      = form_for(:exporter_interface, url: run_export_project_module_path, :method => :post) do |f|
+        = hidden_field_tag("exporter_key", exporter.key)
+        - if !config["interface"].nil?
+          - config["interface"].each do |item|
+            = label_tag(item["label"], nil, :class => "exporter_interface_label")
+            = render_exporter_interface_item(item, f)
+        - else
+          No interface specified for this exporter
+          %br
+        %br
+        = submit_tag "Export", :class => 'btn-primary btn', :id => "export_module_#{exporter.key}"
+
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Exporting Module
+
+
+:javascript
+
+  $(document).ready(function () {
+    $('.exporter_interface').hide()
+    $('#select_exporter').find('option:first').attr('selected', 'selected');
+  });
+
+  $('#select_exporter').change(function() {
+    $('.exporter_interface').hide()
+    chosen = $('#select_exporter').val()
+    if(chosen != "") {
+      $('#' + chosen).show()
+    }
+  });

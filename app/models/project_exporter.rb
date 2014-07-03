@@ -96,7 +96,7 @@ class ProjectExporter
     @dir = File.join(ProjectExporter.exporters_dir, File.basename(dir))
 
     # run the install script
-    result = execute_script(get_path(:install_script))
+    result = execute_script(File.basename(get_path(:install_script)))
     FileUtils.rm_rf @dir unless result
 
     result
@@ -107,7 +107,7 @@ class ProjectExporter
     raise ProjectExporterException, "Exporter doesn't contain uninstall.sh script" unless File.exists? get_path(:uninstall_script)
 
     # run the uninstall script
-    result = execute_script(get_path(:uninstall_script))
+    result = execute_script(File.basename(get_path(:uninstall_script)))
 
     # delete the exporter from the exporters_dir
     FileUtils.rm_rf dir if result and Dir.exists? dir
@@ -115,20 +115,14 @@ class ProjectExporter
     result
   end
 
-  def export(module_tarball)
+  def export(module_tarball, input_json, download_dir, markup_file)
     # check if export script exists
-    raise ProjectExporterException, "Exporter doesn't contain export.sh script" unless File.exists? get_path(:export)
+    raise ProjectExporterException, "Exporter doesn't contain export.sh script" unless File.exists? get_path(:export_script)
+
+    params = [module_tarball, input_json, download_dir, markup_file].join(" ")
 
     # run the export script
-    execute_script(get_path(:export_script))
-  end
-
-  def result_markup
-    # return result markup if markup exists
-  end
-
-  def result_file
-    # return result file if file exists
+    execute_script(File.basename(get_path(:export_script)), params)
   end
 
   class << self
@@ -183,8 +177,8 @@ class ProjectExporter
 
   private
 
-  def execute_script(script)
-    system("bash #{script} >> #{ProjectExporter.exporter_log} 2>&1")
+  def execute_script(script, params = nil)
+    system("cd #{dir} && bash #{script} #{params.to_s} >> #{ProjectExporter.exporter_log} 2>&1")
   end
 
 end

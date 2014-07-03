@@ -153,6 +153,7 @@ GEM
     rb-readline (0.5.1)
     rdoc (3.12.2)
       json (~> 1.4)
+    redcarpet (3.1.2)
     ref (1.0.5)
     rspec-core (2.14.8)
     rspec-expectations (2.14.5)
@@ -248,6 +249,7 @@ DEPENDENCIES
   nokogiri
   rails (~> 3.2.17)
   rb-readline
+  redcarpet
   rspec-rails
   sass-rails
   selenium-webdriver

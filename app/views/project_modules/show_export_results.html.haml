@@ -1,0 +1,10 @@
+-title 'Export Module Results'
+= breadcrumbs
+
+.well
+  - if @markup and !@markup.empty?
+    = raw(@markup)
+  - else
+    Nothing to display
+- if @has_download_file
+  = link_to "Download file", download_export_file_path, :class => 'btn-primary btn'

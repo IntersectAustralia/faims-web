@@ -43,6 +43,11 @@ FaimsWeb::Application.routes.draw do
   get 'project_modules/:id/archive_project_module', :to => 'project_modules#archive_project_module', :as => 'archive_project_module'
   get 'project_modules/:id/download_project_module', :to => 'project_modules#download_project_module', :as => 'download_project_module'
   get 'project_modules/:id/check_archive_status', :to => 'project_modules#check_archive_status', :as => 'check_archive_status'
+  get 'project_modules/:id/export_project_module', :to => 'project_modules#export_project_module', :as => 'export_project_module'
+  post 'project_modules/:id/export_project_module', :to => 'project_modules#run_export_project_module', :as => 'run_export_project_module'
+  get 'project_modules/:id/check_export_status', :to => 'project_modules#check_export_status', :as => 'check_export_status'
+  get 'project_modules/:id/export_project_module/results', :to => 'project_modules#show_export_results', :as => 'show_export_results'
+  get 'project_modules/:id/export_project_module/results/download_file', :to => 'project_modules#download_export_file', :as => 'download_export_file'
 
   get 'project_modules/:id/download_attached_file', :to => 'project_modules#download_attached_file', :as => 'download_attached_file'
 

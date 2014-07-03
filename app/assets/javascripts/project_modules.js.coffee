@@ -91,6 +91,53 @@ check_archive = (jobid) ->
       return
   return
 
+show_export_modal_dialog = ->
+  $("[id^=export_module_]").click(
+    ->
+      $('#loading').dialog({
+        autoOpen: false,
+        closeOnEscape: false,
+        draggable: false,
+        title: "Message",
+        width: 300,
+        minHeight: 50,
+        modal: true,
+        buttons: {},
+        resizable: false
+      });
+      $('#loading').removeClass('hidden')
+      $('#loading').dialog('open')
+      form = $(this).attr('id').replace("export_module_","")
+      postData = $("#" + form).find('form').serializeArray()
+      $.ajax $(this).attr('href'),
+        type: 'POST'
+        dataType: 'json'
+        data: postData
+        success: (data, textStatus, jqXHR) ->
+          if data.result == "success" || data.result == "failure"
+            window.location = data.url
+          else if data.result == "waiting"
+            setTimeout (-> check_export(data.jobid)), 5000
+          else
+            alert("Error trying to export module. Please refresh page")
+          return
+      return false
+  )
+  return
+
+check_export = (jobid) ->
+  $.ajax $('#check-export').val(),
+    type: 'GET'
+    dataType: 'json'
+    data: {jobid: jobid}
+    success: (data, textStatus, jqXHR) ->
+      if data.result != "waiting"
+        window.location = data.url
+      else
+        setTimeout (-> check_export(jobid)), 5000
+      return
+  return
+
 compare_input_checked_handler = ->
   $('#compare input:checkbox').change(
     ->
@@ -540,6 +587,7 @@ $(document).ready(
     show_submit_modal_dialog()
     show_upload_modal_dialog()
     show_archive_modal_dialog()
+    show_export_modal_dialog()
     compare_records()
     compare_input_checked_handler()
     aent_rel_management()

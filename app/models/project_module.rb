@@ -634,6 +634,24 @@ class ProjectModule < ActiveRecord::Base
     FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 
+  # Export project module helpers
+
+  def export_project_module(exporter, input, download_dir, markup_file)
+    # Archive module first if required
+    if self.package_mgr.has_changes?
+      self.archive_project_module
+    end
+
+    archive = self.get_path(:package_archive)
+    input_json = File.open(File.join("/tmp", "input_" + SecureRandom.uuid + ".json"), "w+")
+    input_json.write(input.to_json)
+    input_json.close
+
+    success = exporter.export(archive, input_json.path, download_dir, markup_file)
+
+    raise ProjectModuleException, 'Failed to export module.' unless success
+  end
+
   # static
 
   def self.project_modules_path

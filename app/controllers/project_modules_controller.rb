@@ -182,7 +182,11 @@ class ProjectModulesController < ProjectModuleBaseController
     @project_module = ProjectModule.find(params[:id])
 
     job = Delayed::Job.find_by_id(params[:jobid])
-    render json: { result: job.nil? ? 'success' : (job.last_error ? 'failure' : nil), url: download_project_module_path(@project_module) }
+    if !job.nil? and job.last_error?
+      logger.error job.last_error
+      job.destroy
+    end
+    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : nil), url: download_project_module_path(@project_module) }
   end
 
   def download_project_module
@@ -235,6 +239,79 @@ class ProjectModulesController < ProjectModuleBaseController
     flash.now[:error] = e.message
 
     render 'upload_project_module'
+  end
+
+  def export_project_module
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_export
+
+    @exporters = ProjectExporter.all.sort_by &:name
+
+    render 'export_project_module'
+  end
+
+  def run_export_project_module
+    @project_module = ProjectModule.find(params[:id])
+
+    input = params[:exporter_interface].present? ? params[:exporter_interface] : nil
+
+    exporter = ProjectExporter.find_by_key(params[:exporter_key])
+    config = exporter.get_config_json
+    download_dir = File.join("/tmp", "download_export_" + SecureRandom.uuid)
+    Dir.mkdir(download_dir)
+    markup_file = File.open(File.join("/tmp", "export_markup_" + SecureRandom.uuid), "w+").path
+
+    session[:export_download] = download_dir
+    session[:export_markup] = markup_file
+
+    job = @project_module.delay.export_project_module(exporter, input, download_dir, markup_file)
+    render json: { result: 'waiting', jobid: job.id }
+  end
+
+  def check_export_status
+    @project_module = ProjectModule.find(params[:id])
+
+    job = Delayed::Job.find_by_id(params[:jobid])
+    code = 1 if job.nil?
+    if !job.nil? and job.last_error?
+      logger.error job.last_error
+      job.destroy
+    end
+    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : nil), url: show_export_results_path(@project_module, :code => code) }
+  end
+
+  def show_export_results
+    page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_export, :project_modules_export_results
+
+    markup_file = session[:export_markup]
+    if markup_file.present? and File.exist? markup_file
+      markdown = Redcarpet::Markdown.new(Redcarpet::Render::HTML.new(escape_html: true))
+      @markup = markdown.render(File.open(session[:export_markup], "r").read)
+    end
+
+    download_entries = (Dir.entries(session[:export_download]) - %w{ . .. })
+    @has_download_file = !download_entries.nil? or !download_entries.empty?
+
+    if params[:code].to_i == 1
+      flash.now[:notice] = "Module exported successfully"
+    else
+      flash[:error] = "Failed to export module"
+      redirect_to export_project_module_path(@project_module) and return
+    end
+
+    render 'show_export_results'
+  end
+
+  def download_export_file
+    @project_module = ProjectModule.find(params[:id])
+    if session[:export_download].present? and File.exist? session[:export_download] and File.directory? session[:export_download]
+      download_file = (Dir.entries(session[:export_download]) - %w{ . .. }).first
+      if download_file.present?
+        send_file File.join(session[:export_download], download_file), :filename => download_file
+        return
+      end
+    end
+    flash[:error] = 'Export file does not exist'
+    redirect_to export_project_module_path(@project_module)
   end
 
   def download_attached_file

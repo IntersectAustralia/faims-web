@@ -13,6 +13,7 @@
   .btn-group
     = link_to "Upload Files", project_module_file_list_path(@project_module), :class => 'btn', :id => 'project-module-file-list-btn'
     = link_to "Download Module", archive_project_module_path(@project_module), :class => 'btn', :id => 'archive-project-module-btn'
+    = link_to "Export Module", export_project_module_path(@project_module), :class => 'btn', :id => 'export-project-module-btn'
 .well
   %h3 Module Details
   .btn-group
