@@ -16,10 +16,10 @@
           %a.brand{:href => root_path } FAIMS
           - if user_signed_in?
             %ul.nav
-              %li= link_to "Users", users_path
               %li= link_to "Modules", project_modules_path
+              %li= link_to "User Management", users_path
               - if current_user.admin?
-                %li= link_to "Exporters", project_exporters_path
+                %li= link_to "Plugin Management", project_exporters_path
           = render 'layouts/user_menu'
 
     .container.main_content

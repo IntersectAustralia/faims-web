@@ -3,12 +3,3 @@
   - if !user_signed_in?
     = simple_form_for("user", :url => user_session_path) do |f|
       = render(:partial => 'devise/sessions/form', :locals => { :f => f })
-  - else
-    = breadcrumbs
-    .well
-      %h3 Server Actions
-      .btn-group
-        = link_to "Show Modules", project_modules_path, :class => "btn"
-      .btn-group
-        = link_to "Show Users", users_path, :class => "btn"
-
