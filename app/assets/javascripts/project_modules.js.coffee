@@ -61,7 +61,7 @@ show_archive_modal_dialog = ->
         type: 'GET'
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
-          if data.result == "success"
+          if data.result == "success" || data.result == "failure"
             $('#loading').addClass('hidden')
             $('#loading').dialog('destroy')
             window.location = data.url
@@ -70,7 +70,7 @@ show_archive_modal_dialog = ->
           else
             $('#loading').addClass('hidden')
             $('#loading').dialog('destroy')
-            alert(data.message)
+            alert("Error trying to archive module. Please refresh page")
           return
       return false
   )
@@ -82,7 +82,7 @@ check_archive = (jobid) ->
     dataType: 'json'
     data: {jobid: jobid}
     success: (data, textStatus, jqXHR) ->
-      if data.result == "success"
+      if data.result != "waiting"
         $('#loading').addClass('hidden')
         $('#loading').dialog('destroy')
         window.location = data.url
