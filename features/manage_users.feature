@@ -12,7 +12,7 @@ Feature: Manage users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I am logged in as "faimsadmin@intersect.org.au"
-    And I follow "Show Users"
+    And I follow "User Management"
 
   Scenario: View users list
     Then I should see "users" table with
@@ -186,7 +186,7 @@ Feature: Manage users
   Scenario: Cannot delete user if not admin
     Given I logout
     And I am logged in as "user1@intersect.org.au"
-    And I follow "Show Users"
+    And I follow "User Management"
     And I cannot delete user "user2@intersect.org.au"
 
   Scenario: Cannot delete logged in user

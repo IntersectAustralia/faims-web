@@ -16,7 +16,7 @@ Feature: Manage project module users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I have project module "Module 1"
-    Then I follow "Show Modules"
+    And I am on the home page
     And I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit Users"
@@ -33,7 +33,7 @@ Feature: Manage project module users
       | User2      | Last2     | user2@intersect.org.au |
     And I have project module "Module 1"
     And I add "faimsadmin@intersect.org.au" to "Module 1"
-    Then I follow "Show Modules"
+    And I am on the home page
     And I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit User"
@@ -53,7 +53,7 @@ Feature: Manage project module users
       | User2      | Last2     | user2@intersect.org.au |
     And I have project module "Module 1"
     And I add "faimsadmin@intersect.org.au" to "Module 1"
-    Then I follow "Show Modules"
+    And I am on the home page
     And I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit User"
@@ -77,10 +77,9 @@ Feature: Manage project module users
     And I logout
     And I have a user "other@intersect.org.au" with role "superuser"
     And I am logged in as "other@intersect.org.au"
-    And I am on the home page
     And I have project module "Module 1"
     And I add "faimsadmin@intersect.org.au" to "Module 1"
-    Then I follow "Show Modules"
+    And I am on the home page
     And I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit User"

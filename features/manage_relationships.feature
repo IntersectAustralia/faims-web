@@ -129,24 +129,6 @@ Feature: Manage relationships
       | Screenshot_2013-04-29-16-38-51.png     |
       | Screenshot_2013-04-29-16-38-51 (1).png |
 
-#  @javascript
-#  Scenario: Download attached file for relationship
-#    Given I am on the home page
-#    And I follow "Show Modules"
-#    Then I should be on the project modules page
-#    And I wait
-#    And I follow "Upload Module"
-#    And I pick file "Sync_Test.tar.bz2" for "Module File"
-#    And I press "Upload"
-#    Then I should see "Module has been successfully uploaded"
-#    And I should be on the project modules page
-#    And I click on "Sync Test"
-#    Then I follow "Search Relationship Records"
-#    And I enter "" and submit the form
-#    And I select the first record
-#    Then I click file with name "Screenshot_2013-04-29-16-38-51(1).png"
-#    And I should download attached file with name "Screenshot_2013-04-29-16-38-51(1).png"
-
   Scenario: View relationship list
     Given I have project module "Sync Example"
     And I am on the project modules page

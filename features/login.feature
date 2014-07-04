@@ -22,7 +22,7 @@ Feature: Logging In
     And I fill in "Password" with "Pas$w0rd"
     And I press "Log in"
     Then I should see "Logged in successfully."
-    And I should be on the home page
+    And I should be on the project modules page
 
   Scenario: Successful login from home page
     Given I am on the home page
@@ -30,7 +30,7 @@ Feature: Logging In
     And I fill in "Password" with "Pas$w0rd"
     And I press "Log in"
     Then I should see "Logged in successfully."
-    And I should be on the home page
+    And I should be on the project modules page
 
   Scenario: Should be redirected to the login page when trying to access a secure page
     Given I am on the list users page

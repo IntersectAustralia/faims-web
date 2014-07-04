@@ -14,7 +14,7 @@ Feature: Edit my details
     And I fill in "Last Name" with "Bloggs"
     And I press "Update"
     Then I should see "Your account details have been successfully updated."
-    And I should be on the home page
+    And I should be on the project modules page
     And I follow "Edit My Details"
     And the "First Name" field should contain "Fred"
     And the "Last Name" field should contain "Bloggs"

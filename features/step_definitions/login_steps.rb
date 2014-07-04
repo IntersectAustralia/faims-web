@@ -58,7 +58,7 @@ Then /^I should be able to log in with "([^"]*)" and "([^"]*)"$/ do |email, pass
   fill_in("user_password", :with => password)
   click_button("Log in")
   page.should have_content('Logged in successfully.')
-  current_path.should == path_to('the home page')
+  current_path.should == path_to('the project modules page')
 end
 
 When /^I attempt to login with "([^"]*)" and "([^"]*)"$/ do |email, password|

@@ -10,13 +10,12 @@ Feature: Manage project modules
     And I have a project modules dir
 
   Scenario: View project modules list
-    Given I am on the home page
     And I have project modules
       | name     |
       | Module 1 |
       | Module 2 |
       | Module 3 |
-    And I follow "Show Modules"
+    Given I am on the home page
     Then I should see project modules
       | name     |
       | Module 1 |
@@ -25,7 +24,6 @@ Feature: Manage project modules
 
   Scenario: Create a new project module
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
@@ -42,7 +40,6 @@ Feature: Manage project modules
 
   Scenario: Create a new project module without validation schema
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
@@ -58,7 +55,6 @@ Feature: Manage project modules
 
   Scenario: Create a new project module and set SRID
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
@@ -77,7 +73,6 @@ Feature: Manage project modules
 
   Scenario Outline: Cannot create project module due to field validation errors
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
@@ -94,7 +89,6 @@ Feature: Manage project modules
 
   Scenario Outline: Cannot create project module due to file validation errors
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Create Module"
     Then I should be on the new project modules page
@@ -115,9 +109,8 @@ Feature: Manage project modules
     | Arch16n           | faims_Module_2.properties | invalid properties file at line          |
 
   Scenario Outline: Edit module static data
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit Module"
@@ -129,9 +122,8 @@ Feature: Manage project modules
     | Module SRID | EPSG:4326 - WGS 84 | srid    | 4326          |
 
   Scenario Outline: Edit static data fails due to validation errors
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit Module"
@@ -144,9 +136,8 @@ Feature: Manage project modules
     | Module Name | Module * | is invalid     |
 
   Scenario: Edit project module with no new files
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit Module"
@@ -154,9 +145,8 @@ Feature: Manage project modules
     Then I should see "Updated module"
 
   Scenario: Cannot edit project module if project module is locked
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     And settings is locked for "Module 1"
@@ -165,9 +155,8 @@ Feature: Manage project modules
     Then I should see "Could not process request as project is currently locked."
 
   Scenario: Edit project module with new files
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit Module"
@@ -183,9 +172,8 @@ Feature: Manage project modules
     And Module "Module 1" should have the same file "faims.properties"
 
   Scenario: Edit project module with new file
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     Then I follow "Edit Module"
@@ -195,9 +183,8 @@ Feature: Manage project modules
     And Module "Module 1" should have the same file "faims.properties"
 
   Scenario Outline: Cannot edit project module due to file validation errors
-    Given I am on the home page
-    And I have project module "Module 1"
-    And I follow "Show Modules"
+    Given I have project module "Module 1"
+    And I am on the home page
     Then I should be on the project modules page
     And I click on "Module 1"
     Then I follow "Edit Module"
@@ -214,7 +201,6 @@ Feature: Manage project modules
 
   Scenario: Upload Module
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Upload Module"
     And I pick file "module.tar.bz2" for "Module File"
@@ -225,7 +211,6 @@ Feature: Manage project modules
 
   Scenario: Upload Module fails if module already exists
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Upload Module"
     And I pick file "module.tar.bz2" for "Module File"
@@ -239,7 +224,6 @@ Feature: Manage project modules
   @javascript
   Scenario: Upload Module fails if module is deleted but already exists
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Upload Module"
     And I pick file "module.tar.bz2" for "Module File"
@@ -257,7 +241,6 @@ Feature: Manage project modules
 
   Scenario: Upload Module fails if checksum is wrong
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Upload Module"
     And I pick file "module_corrupted1.tar.bz2" for "Module File"
@@ -266,7 +249,6 @@ Feature: Manage project modules
 
   Scenario: Upload Module fails if file is corrupted
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Upload Module"
     And I pick file "module_corrupted2.tar.bz2" for "Module File"
@@ -275,7 +257,6 @@ Feature: Manage project modules
 
   Scenario: Upload Module fails if file is not a module
     Given I am on the home page
-    And I follow "Show Modules"
     Then I should be on the project modules page
     And I follow "Upload Module"
     And I pick file "module.tar" for "Module File"
@@ -284,7 +265,7 @@ Feature: Manage project modules
 
   Scenario: Download package
     Given I have project module "Module 1"
-    And I follow "Show Modules"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     And I follow "Download Module"
@@ -293,7 +274,7 @@ Feature: Manage project modules
 
   Scenario: Changes cause package to re archive before download
     Given I have project module "Module 1"
-    And I follow "Show Modules"
+    And I am on the home page
     Then I should be on the project modules page
     And I follow "Module 1"
     And I make changes to "Module 1"
@@ -318,7 +299,7 @@ Feature: Manage project modules
   Scenario: Delete project module
     Given I have project module "Module 1"
     And I have project module "Module 2"
-    And I follow "Show Modules"
+    And I am on the home page
     Then I should be on the project modules page
     And I should see project modules
       | name     |
@@ -341,7 +322,7 @@ Feature: Manage project modules
   Scenario: Cancel deleting project module
     Given I have project module "Module 1"
     And I have project module "Module 2"
-    And I follow "Show Modules"
+    And I am on the home page
     Then I should be on the project modules page
     And I should see project modules
       | name     |
@@ -361,7 +342,7 @@ Feature: Manage project modules
   Scenario: Cannot delete project module if project module is locked
     Given I have project module "Module 1"
     And I have project module "Module 2"
-    And I follow "Show Modules"
+    And I am on the home page
     Then I should be on the project modules page
     And I should see project modules
       | name     |
@@ -384,7 +365,7 @@ Feature: Manage project modules
   Scenario: Restore project module
     Given I have project module "Module 1"
     And I have project module "Module 2"
-    And I follow "Show Modules"
+    And I am on the home page
     Then I should be on the project modules page
     And I should see project modules
       | name     |

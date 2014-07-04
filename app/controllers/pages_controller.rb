@@ -4,7 +4,10 @@ class PagesController < ApplicationController
 
   def home
     page_crumbs :pages_home
-    redirect_to project_modules_path if user_signed_in?
+    if user_signed_in?
+      flash.keep
+      redirect_to project_modules_path
+    end
   end
 
 end

@@ -8,7 +8,7 @@ Feature: Show users
       | User1      | Last1     | user1@intersect.org.au |
       | User2      | Last2     | user2@intersect.org.au |
     And I am logged in as "user1@intersect.org.au"
-    And I follow "Show Users"
+    And I follow "User Management"
 
   Scenario: View users list
     Then I should see "users" table with
