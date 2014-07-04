@@ -12,10 +12,10 @@
         = hidden_field_tag("exporter_key", exporter.key)
         - if !config["interface"].nil?
           - config["interface"].each do |item|
-            = label_tag(item["label"], nil, :class => "exporter_interface_label")
+            = f.label(item["label"], nil, :class => "exporter_interface_label")
             = render_exporter_interface_item(item, f)
         - else
-          No interface specified for this exporter
+          No interface to display for this exporter
           %br
         %br
         = submit_tag "Export", :class => 'btn-primary btn', :id => "export_module_#{exporter.key}"

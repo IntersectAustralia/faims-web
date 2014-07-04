@@ -13,8 +13,8 @@ end
 
 And /^I have a project modules dir$/ do
   Dir.mkdir('tmp') unless File.directory? 'tmp'
-  FileUtils.remove_entry_secure('tmp/modules')
-  FileUtils.remove_entry_secure('tmp/uploads')
+  FileUtils.remove_entry_secure('tmp/modules') if File.exists?('tmp/modules')
+  FileUtils.remove_entry_secure('tmp/uploads') if File.exists?('tmp/uploads')
   Dir.mkdir('tmp/modules')
   Dir.mkdir('tmp/uploads')
 end
@@ -228,7 +228,9 @@ Then /^I should see bad request page$/ do
 end
 
 And /^I process delayed jobs$/ do
-  Delayed::Job.all.each { |job| Delayed::Worker.new.run(job)  }
+  sleep(4)
+  Delayed::Job.all.each { |job| Delayed::Worker.new.run(job) }
+  sleep(2)
   Delayed::Job.all.size.should == 0
 end
 
@@ -254,6 +256,10 @@ end
 Then /^I automatically download project module package "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
   visit ("/project_modules/" + project_module.id.to_s + "/download_project_module")
+end
+
+Then(/^I should download the export result containing "(.*?)"$/) do |text|
+  page.source == text
 end
 
 And /^I upload (.*) file "([^"]*)" to (.*) succeeds$/ do |type, file, name|

@@ -131,6 +131,14 @@ module NavigationHelpers
       when /the upload project exporters page/
         new_project_exporter_path
 
+      when /the export module page for (.*)$/
+        project_module = ProjectModule.find_by_name($1)
+        export_project_module_path(project_module ? project_module.id : 'na')
+
+      when /the export module results page for (.*)$/
+        project_module = ProjectModule.find_by_name($1)
+        show_export_results_path(project_module ? project_module.id : 'na')
+
 # Add more mappings here.
 # Here is an example that pulls values out of the Regexp:
 #
