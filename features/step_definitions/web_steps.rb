@@ -278,10 +278,6 @@ And /^I wait$/ do
   sleep(10)
 end
 
-And /^I wait (.*)?$/ do |time|
-  sleep(time.to_i)
-end
-
 And /^I wait for page$/ do
   WAIT_RANGE.each do
     begin
