@@ -109,6 +109,10 @@ show_export_modal_dialog = ->
       $('#loading').dialog('open')
       form = $(this).attr('id').replace("export_module_","")
       postData = $("#" + form).find('form').serializeArray()
+      if $("#" + form).find("*").filter('[required]:visible').filter(-> return $(this).val().trim() == ""; ).size() != 0
+        $('#loading').addClass('hidden')
+        $('#loading').dialog('destroy')
+        return
       $.ajax $(this).attr('href'),
         type: 'POST'
         dataType: 'json'

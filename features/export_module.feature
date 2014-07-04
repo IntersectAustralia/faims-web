@@ -49,7 +49,7 @@ Feature: Export project module
     And I follow "Export Module"
     And I select "Exporter 1" from "select_exporter"
     And I should see "No interface to display for this exporter"
-    And I press "Export" within the exporter interface 
+    And I press "Export" within the exporter interface
     And I process delayed jobs
     Then I should see "Nothing to display"
 
@@ -67,3 +67,18 @@ Feature: Export project module
     And I press "Export" within the exporter interface 
     And I process delayed jobs
     Then I should see "Failed to export module"
+
+  @javascript
+  Scenario: Exporter with required field
+    Given I am on the the upload project exporters page
+    And I upload exporter "exporter_with_interface.tar.gz"
+    And I have project modules
+      | name     |
+      | Module 1 |
+    And I am on the project modules page
+    And I follow "Module 1"
+    And I follow "Export Module"
+    And I select "Interface Test" from "select_exporter"
+    And I press "Export" within the exporter interface 
+    Then I should not see "Exporting module"
+    And I should be on the export module page for Module 1
