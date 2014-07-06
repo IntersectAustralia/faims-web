@@ -172,13 +172,3 @@ Feature: Manage exporters
     Given I am on the project exporters page
     Then I should see "You are not authorized to access this page."
 
-#  Scenario: Export module
-#
-#  Scenario: Export module and display markup
-#
-#  Scenario: Export module and download file
-#
-#  Scenario: Cannot export module due to exporter error
-#
-#  Scenario: Cannot export module due if project is locked
-
