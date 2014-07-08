@@ -186,7 +186,7 @@ class ProjectModulesController < ProjectModuleBaseController
       logger.error job.last_error
       job.destroy
     end
-    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : nil), url: download_project_module_path(@project_module) }
+    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : 'waiting'), url: download_project_module_path(@project_module) }
   end
 
   def download_project_module
@@ -276,7 +276,7 @@ class ProjectModulesController < ProjectModuleBaseController
       logger.error job.last_error
       job.destroy
     end
-    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : nil), url: show_export_results_path(@project_module, :code => code) }
+    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : 'waiting'), url: show_export_results_path(@project_module, :code => code) }
   end
 
   def show_export_results

@@ -1,5 +1,11 @@
 module ExporterHelper
 
+  def render_exporter_interface_label(config, form)
+    label_class = 'exporter_interface_label'
+    label_class << ' required' if config['type'] == "text" and config["required"]
+    form.label(config["label"], nil, :class => label_class)
+  end
+
   def render_exporter_interface_item(config, form)
     case config["type"]
     when "text"
