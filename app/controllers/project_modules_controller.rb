@@ -288,7 +288,7 @@ class ProjectModulesController < ProjectModuleBaseController
       @markup = markdown.render(File.open(session[:export_markup], "r").read)
     end
 
-    download_entries = (Dir.entries(session[:export_download]) - %w{ . .. })
+    download_entries = (Dir.entries(session[:export_download]) - %w{ . .. }) unless !File.exist? session[:export_download]
     @has_download_file = !download_entries.nil? && !download_entries.empty?
 
     if params[:code].to_i == 1
