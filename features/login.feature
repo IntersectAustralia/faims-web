@@ -90,3 +90,11 @@ Feature: Logging In
     | deact@intersect.org.au   | pa       |
     | spammer@intersect.org.au | pa       |
     | pending@intersect.org.au | pa       |
+
+  @javascript
+  Scenario: Failed login error message doesn't disappear
+    Given I am on the login page
+    And I press "Log in"
+    Then I should see "Invalid email or password."
+    And I wait
+    Then I should see "Invalid email or password."

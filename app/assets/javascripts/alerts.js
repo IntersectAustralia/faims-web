@@ -5,9 +5,11 @@ $(window).load(function () {
         if (alert.length > 0) {
             alert.slideDown();
 
-            var alerttimer = window.setTimeout(function () {
-                alert.slideUp();
-            }, 9000);
+            if (!alert.hasClass("alert-error")) {
+                var alerttimer = window.setTimeout(function () {
+                    alert.slideUp();
+                }, 9000);
+            }
             $(".alert").click(function () {
                 window.clearTimeout(alerttimer);
                 alert.slideUp();
