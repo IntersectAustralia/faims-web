@@ -1,12 +1,12 @@
 module ProjectExporterBreadCrumbs
 
   def crumbs
-    exporter = ProjectExporter.find_by_key(params[:key]) if params[:key]
-
     @crumbs =
         {
             :pages_home => {title: 'Home', url: pages_home_path},
 
+            :exporters_index => {title: 'Exporters', url: project_exporters_path},
+            :exporters_add => {title: 'Add', url: new_project_exporter_path}
         }
   end
 

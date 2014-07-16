@@ -5,10 +5,12 @@ class ProjectExporterController < ApplicationController
   load_and_authorize_resource :project_exporter
 
   def index
+    page_crumbs :pages_home, :exporters_index
     @project_exporters = ProjectExporter.all
   end
 
   def new
+    page_crumbs :pages_home, :exporters_index, :exporters_add
     @project_exporter = ProjectExporter.new
   end
 
