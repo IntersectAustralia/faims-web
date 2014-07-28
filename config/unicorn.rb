@@ -1,6 +1,6 @@
 worker_processes 3
 preload_app true
-timeout 3000
+timeout 3600 * 1000
 
 # setting the below code because of the preload_app true setting above:
 # http://unicorn.bogomips.org/Unicorn/Configurator.html#preload_app-method
