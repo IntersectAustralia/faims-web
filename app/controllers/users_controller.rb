@@ -63,10 +63,10 @@ class UsersController < ApplicationController
   end
 
   def update_role
-    if params[:user][:role].blank?
+    if params[:user][:role_id].blank?
       redirect_to(edit_role_user_path(@user), :alert => "Please select a role for the user.")
     else
-      @user.role_id = params[:user][:role]
+      @user.role_id = params[:user][:role_id]
       if !@user.check_number_of_superusers(params[:id], current_user.id)
         redirect_to(edit_role_user_path(@user), :alert => "Only one superuser exists. You cannot change this role.")
       elsif @user.save

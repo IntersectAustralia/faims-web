@@ -2,7 +2,7 @@
 = breadcrumbs
 = simple_form_for(@user, :url => update_role_user_path(@user)) do |f|
   = render "shared/error_messages", :target => @user
-  = f.input :role, :collection => @roles
+  = f.input :role_id, :collection => @roles
   .form-actions
     = f.submit "Save", :class => 'btn btn-inverse'
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, @user, :class => "btn"
