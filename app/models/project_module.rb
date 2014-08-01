@@ -23,6 +23,7 @@ class ProjectModule < ActiveRecord::Base
                 :ui_logic,
                 :arch16n,
                 :validation_schema,
+                :css_style,
                 :srid,
                 :season,
                 :description,
@@ -46,6 +47,7 @@ class ProjectModule < ActiveRecord::Base
                   :ui_logic,
                   :arch16n,
                   :validation_schema,
+                  :css_style,
                   :srid,
                   :season,
                   :description,
@@ -93,6 +95,12 @@ class ProjectModule < ActiveRecord::Base
 
   def validate_ui_logic(schema)
     return errors.add(:ui_logic, "can't be blank") if schema.blank?
+  end
+
+  def validate_css_style(schema)
+    return if schema.blank?
+
+    errors.add(:css_style, 'must be css file') unless schema.content_type =~ /css/
   end
 
   def validate_arch16n(arch16n)
@@ -149,6 +157,7 @@ class ProjectModule < ActiveRecord::Base
         ui_schema: { name: 'ui_schema.xml', path: project_module_dir + 'ui_schema.xml' },
         ui_logic: { name: 'ui_logic.bsh', path: project_module_dir + 'ui_logic.bsh' },
         validation_schema: { name: 'validation_schema.xml', path: project_module_dir + 'validation_schema.xml' },
+        css_style: { name: 'style.css', path: project_module_dir + 'style.css' },
         db: { name: 'db.sqlite3', path: project_module_dir + 'db.sqlite3' },
         settings: { name: 'module.settings', path: project_module_dir + 'module.settings' },
         properties: { name: 'faims.properties', path: project_module_dir + 'faims.properties' },

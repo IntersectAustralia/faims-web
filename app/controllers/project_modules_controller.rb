@@ -327,6 +327,7 @@ class ProjectModulesController < ProjectModuleBaseController
     session[:ui_logic] = false
     session[:arch16n] = false
     session[:validation_schema] = false
+    session[:css_style] = false
   end
 
   def create_project_module(tmpdir)
@@ -340,6 +341,7 @@ class ProjectModulesController < ProjectModuleBaseController
     validate_ui_logic(tmpdir)
     validate_arch16n(tmpdir)
     validate_validation_schema(tmpdir)
+    validate_css_style(tmpdir)
     
     @project_module.errors.empty?
   end
@@ -354,6 +356,7 @@ class ProjectModulesController < ProjectModuleBaseController
     validate_ui_logic(tmpdir) unless params[:project_module][:ui_logic].blank?
     validate_arch16n(tmpdir) unless params[:project_module][:arch16n].blank?
     validate_validation_schema(tmpdir) unless params[:project_module][:validation_schema].blank?
+    validate_css_style(tmpdir) unless params[:project_module][:css_style].blank?
 
     @project_module.errors.empty?
   end
@@ -372,6 +375,10 @@ class ProjectModulesController < ProjectModuleBaseController
 
   def validate_validation_schema(tmpdir)
     validate_file(:validation_schema, :validation_schema, tmpdir)
+  end
+
+  def validate_css_style(tmpdir)
+    validate_file(:css_style, :css_style, tmpdir)
   end
 
   def validate_arch16n(tmpdir)

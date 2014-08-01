@@ -33,12 +33,13 @@ Feature: Manage project modules
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I pick file "ui_logic.bsh" for "UI Logic"
     And I pick file "faims.properties" for "Arch16n"
+    And I pick file "style.css" for "CSS"
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
     And I can find project module files for "Module 1"
 
-  Scenario: Create a new project module without validation schema
+  Scenario: Create a new project module without validation schema or CSS
     Given I am on the home page
     Then I should be on the project modules page
     And I follow "Create Module"
@@ -107,6 +108,7 @@ Feature: Manage project modules
     | Validation Schema | data_schema_error1.xml    | Premature end of data in tag test line 1 |
     | UI Logic          |                           | can't be blank                           |
     | Arch16n           | faims_Module_2.properties | invalid properties file at line          |
+    | CSS               | faims_Module_2.properties | must be css file                         |
 
   Scenario Outline: Edit module static data
     Given I have project module "Module 1"

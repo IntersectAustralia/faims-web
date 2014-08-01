@@ -90,6 +90,14 @@
             = f.label :arch16n, 'Arch16n:'
             = f.file_field :arch16n
             = f.error :arch16n
+        .well
+          %h4 Upload CSS file
+          - if session[:css_style]
+            %span.uploaded-inline CSS Uploaded!
+          - else
+            = f.label :css_style, 'CSS:'
+            = f.file_field :css_style
+            = f.error :css_style
     .form-actions
       = f.submit 'Submit', :class => 'btn btn-inverse', :id => 'submit-project-module-btn'
       = link_to 'Clear', new_project_module_path, :class => 'btn'
