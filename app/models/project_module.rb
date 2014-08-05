@@ -227,6 +227,7 @@ class ProjectModule < ActiveRecord::Base
     @settings_mgr.add_file(get_path(:ui_logic))
     @settings_mgr.add_file(get_path(:settings))
     @settings_mgr.add_file(get_path(:properties))
+    @settings_mgr.add_file(get_path(:css_style)) if File.exists? get_path(:css_style)
     @settings_mgr
   end
 
