@@ -589,9 +589,11 @@ class ProjectModule < ActiveRecord::Base
   def self.upload_project_module(file)
     tmp_dir = Dir.mktmpdir + '/'
 
-    success = TarHelper.untar('xjf', file.tempfile.to_path.to_s, tmp_dir)
+    logger.info "Untarring project module"
+    success = TarHelper.untar('xjf', file, tmp_dir)
     raise ProjectModuleException, 'Failed to upload module.' unless success
 
+    logger.info "Validating project module files and settings"
     module_dir = File.join(tmp_dir, Dir.entries(tmp_dir).select { |d| d != '.' and d != '..' }.first)
     settings = JSON.parse(File.read(File.join(module_dir, "module.settings")).as_json)
 
@@ -602,6 +604,7 @@ class ProjectModule < ActiveRecord::Base
     elsif !ProjectModule.deleted.find_by_key(settings['key']).blank?
       raise ProjectModuleException, 'This module is deleted but already exists in the system.'
     else
+      logger.info "Creating and saving project module"
       project_module = ProjectModule.new(name: settings['name'], key: settings['key'])
 
       begin

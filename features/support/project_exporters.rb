@@ -39,3 +39,11 @@ def make_exporter_tarball(name, config = nil, options = nil)
 ensure
   FileUtils.rm_rf tmp_dir if Dir.exists? tmp_dir
 end
+
+def make_project_exporter(name)
+  tarball = make_exporter_tarball name
+  dir = ProjectExporter.extract_exporter tarball
+  exporter = ProjectExporter.new(dir)
+  exporter.install
+  exporter
+end

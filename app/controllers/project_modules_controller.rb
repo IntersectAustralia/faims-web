@@ -226,7 +226,7 @@ class ProjectModulesController < ProjectModuleBaseController
     end
 
     if params[:project_module]
-      ProjectModule.upload_project_module(params[:project_module][:project_module_file])
+      ProjectModule.upload_project_module(params[:project_module][:project_module_file].tempfile.to_path.to_s)
       flash[:notice] = 'Module has been successfully uploaded.'
       redirect_to :project_modules
     else
