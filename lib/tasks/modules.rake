@@ -71,7 +71,10 @@ begin
 
       project_module = ProjectModule.find_by_key(module_key)
       if project_module
-        project_module.destroy
+        project_module.with_exclusive_lock do
+          project_module.deleted = true
+          project_module.save
+        end
       else
         puts "Module does not exist"
       end
