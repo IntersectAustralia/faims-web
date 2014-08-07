@@ -9,13 +9,12 @@ describe ProjectModule do
 
   before :each do
     load File.expand_path("../../../lib/tasks/modules.rake", __FILE__)
-    Rake::Task.define_task(:environment)
     ProjectModule.destroy_all
   end
 
   it 'creates a project module from a tarball' do
     ENV['module'] = File.absolute_path("./features/assets/module.tar.bz2")
-    Rake::Task["modules:create"].invoke
+    create_module
     ProjectModule.all.count.should == 1
     mod = ProjectModule.first
     mod.name.should == "Simple Project"
@@ -23,9 +22,8 @@ describe ProjectModule do
 
   it "doesn't create a module if incorrect argument" do
     output = capture(:stdout) do
-      Rake::Task["modules:create"].invoke
       ENV['module'] = "./invalid_path"
-      Rake::Task["modules:create"].invoke
+      create_module
     end
     expect(output).to include "Usage: rake modules:create module=<module tarball>"
     ProjectModule.all.count.should == 0
@@ -36,7 +34,7 @@ describe ProjectModule do
       project_module = make_project_module('Module 1')
       FileUtils.remove_entry_secure project_module.get_path(:package_archive)
       ENV['key'] = project_module.key
-      Rake::Task["modules:archive"].invoke
+      archive
       tmp_dir = Dir.mktmpdir
       `tar jxf #{project_module.get_path(:package_archive)} -C #{tmp_dir}`
       entries = FileHelper.get_file_list(File.join(tmp_dir, "Module_1"))
@@ -54,7 +52,7 @@ describe ProjectModule do
   it "archives a non-existing project module" do
     ENV['key'] = "fake_key"
     output = capture(:stdout) do
-      Rake::Task["modules:archive"].invoke
+      archive
     end
     expect(output).to include "Module does not exist"
   end
@@ -62,14 +60,14 @@ describe ProjectModule do
   it "deletes a project module" do
     project_module = make_project_module('Module 1')
     ENV['key'] = project_module.key
-    Rake::Task["modules:delete"].invoke
+    delete_module
     ProjectModule.all.count.should == 0
   end
 
   it "deletes a non-existing project module" do
     ENV['key'] = "fake_key"
     output = capture(:stdout) do
-      Rake::Task["modules:delete"].invoke
+      delete_module
     end
     expect(output).to include "Module does not exist"
   end
@@ -79,7 +77,7 @@ describe ProjectModule do
     make_project_module('Module 2')
     make_project_module('Module 3')
     ProjectModule.all.count.should == 3
-    Rake::Task["modules:clear"].invoke
+    clear_project_modules
     ProjectModule.all.count.should == 0
   end
 
@@ -90,13 +88,12 @@ describe ProjectExporter do
 
   before :each do
     load File.expand_path("../../../lib/tasks/exporters.rake", __FILE__)
-    Rake::Task.define_task(:environment)
     FileUtils.remove_entry_secure ProjectExporter.exporters_dir if File.exist? ProjectExporter.exporters_dir
   end
 
   it 'installs a project exporter from a tarball' do
     ENV['exporter'] = File.absolute_path("./features/assets/exporter.tar.gz")
-    Rake::Task["exporters:install"].invoke
+    install_exporter
     ProjectExporter.all.count.should == 1
     exporter = ProjectExporter.all.first
     exporter.name.should == "Exporter 1"
@@ -105,7 +102,7 @@ describe ProjectExporter do
   it 'installs a project exporter with invalid install script' do
     ENV['exporter'] = File.absolute_path("./features/assets/exporter_fail.tar.gz")
     output = capture(:stdout) do
-      Rake::Task["exporters:install"].invoke
+      install_exporter
     end
     ProjectExporter.all.count.should == 0
     expect(output).to include "Exporter failed to install. Please correct the errors in the install script."
@@ -115,14 +112,14 @@ describe ProjectExporter do
     exporter = make_project_exporter "Exporter 1"
     ProjectExporter.all.count.should == 1
     ENV['key'] = exporter.key
-    Rake::Task["exporters:uninstall"].invoke
+    uninstall_exporter
     ProjectExporter.all.count.should == 0
   end
 
   it 'uninstalls a non-existing project exporter' do
     ENV['key'] = "fake_key"
     output = capture(:stdout) do
-      Rake::Task["exporters:uninstall"].invoke
+      uninstall_exporter
     end
     expect(output).to include "Exporter does not exist"
   end
@@ -132,7 +129,7 @@ describe ProjectExporter do
     make_project_exporter "Exporter 2"
     make_project_exporter "Exporter 3"
     ProjectExporter.all.count.should == 3
-    Rake::Task["exporters:clear"].invoke
+    clear_exporters
     ProjectExporter.all.count.should == 0
   end
 
@@ -142,13 +139,11 @@ describe User do
 
   before :each do
     load File.expand_path("../../../lib/tasks/users.rake", __FILE__)
-    Rake::Task.define_task(:environment)
-    # User.find_by_email("test@intersect.org.au").destroy if User.find_by_email("test@intersect.org.au") != nil
   end
 
   it 'creates a user' do
     $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test@intersect.org.au\n", "Pass.123\n", "Pass.123\n")
-    Rake::Task["users:create"].invoke
+    create_user
     new_user = User.last
     new_user.first_name.should == "Joe"
     new_user.last_name.should == "Bloggs"
@@ -157,8 +152,8 @@ describe User do
 
   it 'creates a user with non-matching passwords' do
     $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test@intersect.org.au\n", "Pass.123\n", "Pass.234\n")
-    output = capture(:stderr) do
-      Rake::Task["users:create"].invoke
+    output = capture(:stdout) do
+      create_user
     end
     User.all.count.should == 0
     expect(output).to include "Passwords don't match"
@@ -167,7 +162,7 @@ describe User do
   it 'creates a user with invalid arguments' do
     $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test\n", "Pass.123\n", "Pass.123\n")
     output = capture(:stdout) do
-      Rake::Task["users:create"].invoke
+      create_user
     end
     User.all.count.should == 0
     expect(output).to include "Error creating user."
@@ -176,7 +171,15 @@ describe User do
   it 'deletes a user' do
     user = make_user "Joe", "Bloggs", "test@intersect.org.au", "Pass.123"
     ENV['email'] = user.email
-    Rake::Task["users:delete"].invoke
+    delete_user
     User.find_by_email("test@intersect.org.au").should == nil
+  end
+
+  it 'deletes a non-existing user' do
+    ENV['email'] = "invalid_email"
+    output = capture(:stdout) do
+      delete_user
+    end
+    expect(output).to include "User does not exist"
   end
 end
