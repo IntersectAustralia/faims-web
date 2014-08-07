@@ -36,9 +36,9 @@ Feature: Merge entities
       | Small 3 |
     And I follow "Small 2"
     And I should see fields with values
-      | field  | type     | values  |
-      | entity | freetext | Small 2 |
-      | name   | freetext | test3   |
+      | field  | type       | values  |
+      | entity | Annotation | Small 2 |
+      | name   | Annotation | test3   |
 
   @javascript
   Scenario: Merge entities (second)
@@ -69,9 +69,9 @@ Feature: Merge entities
     And I follow "Small 3"
     And I wait
     And I should see fields with values
-      | field  | type     | values  |
-      | entity | freetext | Small 3 |
-      | name   | freetext | test2   |
+      | field  | type       | values  |
+      | entity | Annotation | Small 3 |
+      | name   | Annotation | test2   |
 
   @javascript
   Scenario: Can only compare 2 entities
