@@ -11,21 +11,7 @@ begin
 
     desc 'Archive a specific or all project modules'
     task :archive => :environment do
-      module_key = ENV['key'] unless ENV['key'].nil?
-      begin
-        if module_key
-          project_module = ProjectModule.find_by_key(module_key)
-          if project_module
-            project_module.archive_project_module
-          else
-            puts "Module does not exist"
-          end
-        else
-          ProjectModule.all.each { |p| p.archive_project_module }
-        end
-      rescue ProjectModule::ProjectModuleException => e
-        puts e
-      end
+      archive
     end
 
     desc 'Setup project module assets'
@@ -46,38 +32,12 @@ begin
 
     desc 'Create module from tarball'
     task :create => :environment do
-      module_tarball = ENV['module'] unless ENV['module'].nil?
-
-      if (module_tarball.nil?) || (!File.exists?(module_tarball))
-        puts "Usage: rake modules:create module=<module tarball>"
-        next
-      end
-
-      begin
-        ProjectModule.upload_project_module(module_tarball)
-      rescue ProjectModule::ProjectModuleException => e
-        puts e
-      end
+      create_module
     end
 
     desc 'Delete module'
     task :delete => :environment do
-      module_key = ENV['key'] unless ENV['key'].nil?
-
-      if (module_key.nil?) || (module_key.blank?)
-        puts "Usage: rake modules:delete key=<module key>"
-        next
-      end
-
-      project_module = ProjectModule.find_by_key(module_key)
-      if project_module
-        project_module.with_exclusive_lock do
-          project_module.deleted = true
-          project_module.save
-        end
-      else
-        puts "Module does not exist"
-      end
+      delete_module
     end
 
   end
@@ -95,4 +55,54 @@ def clear_project_modules
   uploads_dir = Rails.application.config.server_uploads_directory
   FileUtils.remove_entry_secure Rails.root.join(uploads_dir) if File.directory? uploads_dir
   Dir.mkdir(Rails.root.join(uploads_dir))
+end
+
+def create_module
+  module_tarball = ENV['module'] unless ENV['module'].nil?
+  if (module_tarball.nil?) || (!File.exists?(module_tarball))
+    puts "Usage: rake modules:create module=<module tarball>"
+    return
+  end
+
+  begin
+    ProjectModule.upload_project_module(module_tarball)
+  rescue ProjectModule::ProjectModuleException => e
+    puts e
+  end
+end
+
+def archive 
+  module_key = ENV['key'] unless ENV['key'].nil?
+  begin
+    if module_key
+      project_module = ProjectModule.find_by_key(module_key)
+      if project_module
+        project_module.archive_project_module
+      else
+        puts "Module does not exist"
+      end
+    else
+      ProjectModule.all.each { |p| p.archive_project_module }
+    end
+  rescue ProjectModule::ProjectModuleException => e
+    puts e
+  end
+end
+
+def delete_module
+  module_key = ENV['key'] unless ENV['key'].nil?
+  if (module_key.nil?) || (module_key.blank?)
+    puts "Usage: rake modules:delete key=<module key>"
+    return
+  end
+
+  project_module = ProjectModule.find_by_key(module_key)
+  if project_module
+    project_module.with_exclusive_lock do
+      project_module.deleted = true
+      project_module.save
+    end
+  else
+    puts "Module does not exist"
+  end
 end
