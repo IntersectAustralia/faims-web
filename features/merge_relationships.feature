@@ -36,9 +36,9 @@ Feature: Merge relationships
       | AboveBelow 2 |
     And I follow "AboveBelow 1"
     And I should see fields with values
-      | field        | type     | values       |
-      | relationship | freetext | AboveBelow 1 |
-      | name         | freetext | rel2         |
+      | field        | type       | values       |
+      | relationship | Annotation | AboveBelow 1 |
+      | name         | Annotation | rel2         |
 
   @javascript
   Scenario: Merge relationships (second)
@@ -67,9 +67,9 @@ Feature: Merge relationships
       | AboveBelow 1 |
     And I follow "AboveBelow 2"
     And I should see fields with values
-      | field        | type     | values       |
-      | relationship | freetext | AboveBelow 2 |
-      | name         | freetext | rel1         |
+      | field        | type       | values       |
+      | relationship | Annotation | AboveBelow 2 |
+      | name         | Annotation | rel1         |
 
   @javascript
   Scenario: Can only compare 2 relationships

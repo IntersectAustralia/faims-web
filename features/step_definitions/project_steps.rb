@@ -771,11 +771,12 @@ And /^I select merge fields$/ do |table|
   end
 end
 
-And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, type, values_str|
+And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
   values = values_str.split(';')
   values = [''] if values.empty?
   values.each_with_index do |value, index|
     value.strip!
+    type = get_field_type(field_type)
     if type == 'vocab'
       WAIT_RANGE.each do
         break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
@@ -802,11 +803,12 @@ And /^I update fields with values$/ do |table|
   end
 end
 
-And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, type, values_str|
+And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
   values = values_str.split(';')
   values = [''] if values.empty?
   values.each_with_index do |value, index|
     value.strip!
+    type = get_field_type(field_type)
     if type == 'vocab'
       WAIT_RANGE.each do
         break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
@@ -895,4 +897,17 @@ end
 
 And /^I press "([^"]*)" for exporter "([^"]*)"$/ do |label, name|
   find(:xpath, "//*[contains(text(), \"#{name}\")]/..").find('input[type="submit"]').click
+end
+
+
+def get_field_type(type)
+  if type == 'Annotation'
+    'freetext'
+  elsif type == 'Constrained Data'
+    'vocab'
+  elsif type == 'Unconstrained Data'
+    'measure'
+  else
+    'certainty'
+  end
 end

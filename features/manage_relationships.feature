@@ -18,16 +18,16 @@ Feature: Manage relationships
     And I press "Filter"
     And I follow "AboveBelow 1"
     And I update fields with values
-      | field    | type      | values                 |
-      | location | vocab     | Location A; Location C |
-      | name     | freetext  | rel2                   |
-      | name     | certainty |                        |
+      | field    | type             | values                 |
+      | location | Constrained Data | Location A; Location C |
+      | name     | Annotation       | rel2                   |
+      | name     | Certainty        |                        |
     And I refresh page
     And I should see fields with values
-      | field    | type      | values                 |
-      | location | vocab     | Location A; Location C |
-      | name     | freetext  | rel2                   |
-      | name     | certainty |                        |
+      | field    | type             | values                 |
+      | location | Constrained Data | Location A; Location C |
+      | name     | Annotation       | rel2                   |
+      | name     | Certainty        |                        |
 
   @javascript
   Scenario: Cannot update relationship if not member of module
@@ -40,7 +40,7 @@ Feature: Manage relationships
     And I follow "List Relationship Records"
     And I press "Filter"
     And I follow "AboveBelow 1"
-    And I update field "name" of type "freetext" with values "test"
+    And I update field "name" of type "Annotation" with values "test"
     And I click on update for attribute with field "name"
     Then I should see dialog "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I confirm
@@ -54,12 +54,12 @@ Feature: Manage relationships
     And I press "Filter"
     And I follow "AboveBelow 2"
     And I update fields with values
-      | field | type  | values                                       |
-      | type  | vocab | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
+      | field | type             | values                                       |
+      | type  | Constrained Data | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
     And I refresh page
     And I should see fields with values
-      | field | type  | values                                       |
-      | type  | vocab | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
+      | field | type             | values                                       |
+      | type  | Constrained Data | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
 
   @javascript
   Scenario: Update relationship attribute causes validation error
@@ -74,8 +74,8 @@ Feature: Manage relationships
     And I press "Filter"
     And I follow "AboveBelow 1"
     And I update fields with values
-      | field | type     | values |
-      | name  | freetext |        |
+      | field | type       | values |
+      | name  | Annotation |        |
     And I should see fields with errors
       | field | error                |
       | name  | Field value is blank |
@@ -91,8 +91,8 @@ Feature: Manage relationships
     And I follow "AboveBelow 1"
     And database is locked for "Sync Example"
     And I update fields with values
-      | field    | type  | values                 |
-      | location | vocab | Location A; Location C |
+      | field    | type             | values                 |
+      | location | Constrained Data | Location A; Location C |
     And I wait for popup to close
     Then I should see dialog "Could not process request as project is currently locked."
     And I confirm
