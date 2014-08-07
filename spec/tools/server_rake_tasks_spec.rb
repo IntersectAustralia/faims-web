@@ -141,7 +141,7 @@ describe User do
     load File.expand_path("../../../lib/tasks/users.rake", __FILE__)
   end
 
-  it 'creates a user' do
+  it 'creates a user', :ignore_jenkins => true do
     $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test@intersect.org.au\n", "Pass.123\n", "Pass.123\n")
     create_user
     new_user = User.last
@@ -150,7 +150,7 @@ describe User do
     new_user.email.should == "test@intersect.org.au"
   end
 
-  it 'creates a user with non-matching passwords' do
+  it 'creates a user with non-matching passwords', :ignore_jenkins => true do
     $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test@intersect.org.au\n", "Pass.123\n", "Pass.234\n")
     output = capture(:stdout) do
       create_user
@@ -159,7 +159,7 @@ describe User do
     expect(output).to include "Passwords don't match"
   end
 
-  it 'creates a user with invalid arguments' do
+  it 'creates a user with invalid arguments', :ignore_jenkins => true do
     $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test\n", "Pass.123\n", "Pass.123\n")
     output = capture(:stdout) do
       create_user
