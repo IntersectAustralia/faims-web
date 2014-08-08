@@ -48,11 +48,11 @@ end
 def clear_project_modules
   ProjectModule.unscoped.destroy_all
 
-  project_modules_dir = Rails.application.config.server_project_modules_directory
+  project_modules_dir = ProjectModule.project_modules_path
   FileUtils.remove_entry_secure Rails.root.join(project_modules_dir) if File.directory? project_modules_dir
   Dir.mkdir(Rails.root.join(project_modules_dir))
 
-  uploads_dir = Rails.application.config.server_uploads_directory
+  uploads_dir = ProjectModule.uploads_path
   FileUtils.remove_entry_secure Rails.root.join(uploads_dir) if File.directory? uploads_dir
   Dir.mkdir(Rails.root.join(uploads_dir))
 end

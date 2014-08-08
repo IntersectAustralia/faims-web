@@ -49,5 +49,5 @@ gem 'daemons'
 gem 'rb-readline'
 gem 'foreman'
 gem 'god'
-
 gem 'redcarpet'
+gem 'highline'

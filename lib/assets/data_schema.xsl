@@ -1,5 +1,8 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="2.0">
   <xsl:key name="properties" match="property" use="@name"/>
+
+
+
   <xsl:template match="/">
     <html>
       <body>
@@ -17,16 +20,16 @@
           <!--</li>-->
           <xsl:for-each select="//property[count(. | key('properties', @name)[1]) = 1]">
             <li>
-INSERT INTO AttributeKey(AttributeID, AttributeType, AttributeName<xsl:if test="description != ''">, AttributeDescription</xsl:if>)
-VALUES('<xsl:value-of select="substring(generate-id(key('properties',@name)),4)"/>', '<xsl:value-of select="normalize-space(@type)"/>', '<xsl:value-of select="normalize-space(@name)"/>'<xsl:if test="description != ''">, '<xsl:value-of select="normalize-space(description)"/>'</xsl:if>);
+INSERT INTO AttributeKey(AttributeID, AttributeType, AttributeName<xsl:if test="description != ''">, AttributeDescription</xsl:if><xsl:if test="formatString != ''">, formatString</xsl:if>)
+VALUES('<xsl:value-of select="substring(generate-id(key('properties',@name)),4)"/>', '<xsl:value-of select="normalize-space(@type)"/>', '<xsl:value-of select="normalize-space(@name)"/>'<xsl:if test="description != ''">, '<xsl:value-of select="normalize-space(description)"/>'</xsl:if><xsl:if test="formatString != ''">, '<xsl:value-of select="normalize-space(formatString)"/>'</xsl:if>);
             </li>
             <ul>
               <xsl:for-each select="lookup">
                 <xsl:for-each select="descendant::term">
                   <li>
 
-  INSERT INTO Vocabulary (vocabId, attributeid, vocabname<xsl:if test="@pictureURL != ''">, pictureURL</xsl:if><xsl:if test="description != ''">, vocabdescription</xsl:if><xsl:if test="@semanticMapURL != ''">, semanticMapURL</xsl:if><xsl:if test="ancestor::term">, parentVocabID</xsl:if>)
-  VALUES('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of select="substring(generate-id(key('properties',ancestor::property/@name)),4)"/>', '<xsl:value-of select="normalize-space(./text())"/>'<xsl:if test="@pictureURL != ''">, '<xsl:value-of select="normalize-space(@pictureURL)"/>'</xsl:if><xsl:if test="description != ''">, '<xsl:value-of select="normalize-space(description)"/>'</xsl:if><xsl:if test="@semanticMapURL != ''">, '<xsl:value-of select="normalize-space(@semanticMapURL)"/>'</xsl:if><xsl:if test="ancestor::term">, <xsl:value-of select="substring(generate-id(..),4)"/></xsl:if>);
+  INSERT INTO Vocabulary (vocabId, attributeid, vocabname<xsl:if test="@pictureURL != ''">, pictureURL</xsl:if><xsl:if test="description != ''">, vocabdescription</xsl:if><xsl:if test="@semanticMapURL != ''">, semanticMapURL</xsl:if><xsl:if test="ancestor::term">, parentVocabID</xsl:if>, countOrder)
+  VALUES('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of select="substring(generate-id(key('properties',ancestor::property/@name)),4)"/>', '<xsl:value-of select="normalize-space(./text())"/>'<xsl:if test="@pictureURL != ''">, '<xsl:value-of select="normalize-space(@pictureURL)"/>'</xsl:if><xsl:if test="description != ''">, '<xsl:value-of select="normalize-space(description)"/>'</xsl:if><xsl:if test="@semanticMapURL != ''">, '<xsl:value-of select="normalize-space(@semanticMapURL)"/>'</xsl:if><xsl:if test="ancestor::term">, <xsl:value-of select="substring(generate-id(..),4)"/></xsl:if>, <xsl:number count="term" format="1"/>);
                   </li>
                 </xsl:for-each>
               </xsl:for-each>
@@ -56,9 +59,12 @@ VALUES ('<xsl:value-of select="substring(generate-id(.),4)"/>', '<xsl:value-of s
             <ul>
               <xsl:for-each select="property">
                 <li>
-INSERT INTO IdealAEnt(AEntTypeID, AttributeID, MinCardinality, MaxCardinality, isIdentifier)
-VALUES('<xsl:value-of select="substring(generate-id(..),4)"/>', '<xsl:value-of select="substring(generate-id(key('properties',@name)),4)"/>', '<xsl:value-of select="normalize-space(@minCardinality)"/>', '<xsl:value-of select="normalize-space(@maxCardinality)"/>', '<xsl:value-of select="normalize-space(@isIdentifier)"/>');
+INSERT INTO IdealAEnt(AEntTypeID, AttributeID, MinCardinality, MaxCardinality, isIdentifier, countOrder)
+VALUES('<xsl:value-of select="substring(generate-id(..),4)"/>', '<xsl:value-of select="substring(generate-id(key('properties',@name)),4)"/>', '<xsl:value-of select="normalize-space(@minCardinality)"/>', '<xsl:value-of select="normalize-space(@maxCardinality)"/>', '<xsl:value-of select="normalize-space(@isIdentifier)"/>', '<xsl:number count="property" format="1"/>');
                 </li>
+
+
+
               </xsl:for-each>
             </ul>
           </xsl:for-each>

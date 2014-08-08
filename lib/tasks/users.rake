@@ -1,3 +1,5 @@
+require 'highline/import'
+
 begin
   namespace :users do
 
@@ -17,19 +19,14 @@ rescue LoadError
 end
 
 def create_user
-  puts "First name of user:"
-  firstname = $stdin.gets.chomp
-  puts "Last name of user:"
-  lastname = $stdin.gets.chomp
-  puts "Email of user:"
-  email = $stdin.gets.chomp
-  puts "Password:"
-  password = $stdin.noecho(&:gets).chomp
-  puts "Confirm password:"
-  password2 = $stdin.noecho(&:gets).chomp
+  firstname = ask("First name of user: ")
+  lastname = ask("Last name of user:")
+  email = ask("Email of user:")
+  password = ask("Password:  ") { |q| q.echo = false }
+  password2 = ask("Confirm Password:  ") { |q| q.echo = false }
 
   if password != password2
-    puts "Passwords don't match"
+    raise Exception, "Passwords don't match"
     return
   end
 
@@ -40,7 +37,7 @@ def create_user
     user.role = Role.find_by_name('user')
     user.save
   else
-    puts "Error creating user. Check the entered email is valid and that the password is between 6-20 characters " + 
+    raise Exception, "Error creating user. Check the entered email is valid and that the password is between 6-20 characters " +
     "and contains at least one uppercase letter, one lowercase letter, one digit and one symbol"
   end
 end
@@ -48,7 +45,7 @@ end
 def delete_user
   user_email = ENV['email'] unless ENV['email'].nil?
   if user_email.nil? || user_email.blank?
-    puts "Usage: rake users:delete email=<user email>"
+    raise Exception, "Usage: rake users:delete email=<user email>"
     return
   end
 
@@ -57,6 +54,6 @@ def delete_user
   if user
     user.destroy
   else
-    puts "User does not exist"
+    raise Exception, "User does not exist"
   end
 end

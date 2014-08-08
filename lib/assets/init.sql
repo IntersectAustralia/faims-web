@@ -9,7 +9,8 @@ CREATE TABLE User (
 	UserID					INTEGER PRIMARY KEY,
 	FName               	TEXT NOT NULL,
 	LName               	TEXT NOT NULL,
-	Email                 TEXT NOT NULL
+	Email                   TEXT NOT NULL,
+	Deleted 				BOOLEAN
  );
 
 
@@ -46,7 +47,8 @@ CREATE TABLE AttributeKey (
 	AttributeID           	INTEGER PRIMARY KEY,
 	AttributeType		 	TEXT, -- this is typing for external tools. It has no bearing internally
 	AttributeName         	TEXT NOT NULL, -- effectively column name
-	AttributeDescription  	TEXT -- human-entered description for the "column"
+	AttributeDescription  	TEXT, -- human-entered description for the "column"
+	FormatString			TEXT
  );
 
 -- TODO tweak indexes for performance
@@ -67,6 +69,8 @@ CREATE TABLE Vocabulary (
 	SemanticMapURL	     	TEXT,
 	PictureURL				TEXT, -- relative path.
 	VocabDescription	    TEXT,
+	countOrder				INTEGER,
+	Deleted 				TEXT,
 	ParentVocabID			INTEGER REFERENCES Vocabulary (VocabID)
 
  );
@@ -100,6 +104,7 @@ CREATE TABLE IdealAEnt (
 									 -- what subset of rows
 	MinCardinality		 	INTEGER, -- It is theoretically possible to use these to power script-level validation
 	MaxCardinality		 	INTEGER,
+	countOrder				INTEGER,
 	CONSTRAINT IdealAEntPK PRIMARY KEY(AEntTypeID, AttributeID)
  );
 
@@ -153,6 +158,8 @@ CREATE TABLE AentValue (
 
 
 create index aentvalueindex on AentValue (uuid, attributeid, valuetimestamp desc);
+create index aentvaluelookupindex on AentValue (uuid, attributeid, valuetimestamp desc, freetext, vocabid, measure);
+
 
 CREATE TABLE Relationship (
 	RelationshipID       	INTEGER NOT NULL,

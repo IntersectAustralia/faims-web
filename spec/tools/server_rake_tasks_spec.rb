@@ -141,8 +141,8 @@ describe User do
     load File.expand_path("../../../lib/tasks/users.rake", __FILE__)
   end
 
-  it 'creates a user', :ignore_jenkins => true do
-    $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test@intersect.org.au\n", "Pass.123\n", "Pass.123\n")
+  it 'creates a user' do
+    should_receive(:ask).and_return("Joe", "Bloggs", "test@intersect.org.au", "Pass.123", "Pass.123")
     create_user
     new_user = User.last
     new_user.first_name.should == "Joe"
@@ -150,22 +150,19 @@ describe User do
     new_user.email.should == "test@intersect.org.au"
   end
 
-  it 'creates a user with non-matching passwords', :ignore_jenkins => true do
-    $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test@intersect.org.au\n", "Pass.123\n", "Pass.234\n")
-    output = capture(:stdout) do
+  it 'creates a user with non-matching passwords' do
+    should_receive(:ask).and_return("Joe", "Bloggs", "test@intersect.org.au", "Pass.123", "Pass.234")
+    lambda do
       create_user
-    end
-    User.all.count.should == 0
-    expect(output).to include "Passwords don't match"
+    end.should raise_error("Passwords don't match")
   end
 
-  it 'creates a user with invalid arguments', :ignore_jenkins => true do
-    $stdin.should_receive(:gets).and_return("Joe\n", "Bloggs\n", "test\n", "Pass.123\n", "Pass.123\n")
-    output = capture(:stdout) do
+  it 'creates a user with invalid arguments' do
+    should_receive(:ask).and_return("Joe", "Bloggs", "test", "Pass.123", "Pass.123")
+    lambda do
       create_user
-    end
-    User.all.count.should == 0
-    expect(output).to include "Error creating user."
+    end.should raise_error("Error creating user. Check the entered email is valid and that the password is between 6-20 characters " +
+                                   "and contains at least one uppercase letter, one lowercase letter, one digit and one symbol")
   end
 
   it 'deletes a user' do
@@ -177,9 +174,8 @@ describe User do
 
   it 'deletes a non-existing user' do
     ENV['email'] = "invalid_email"
-    output = capture(:stdout) do
+    lambda do
       delete_user
-    end
-    expect(output).to include "User does not exist"
+    end.should raise_error("User does not exist")
   end
 end
