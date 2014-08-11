@@ -1687,7 +1687,7 @@ EOF
     cleanup_query(<<EOF
 attach database '#{fromDB}' as import;
 
-insert into archentity (
+insert or replace into archentity (
          uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
   select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
   from import.archentity
@@ -1700,7 +1700,7 @@ insert into archentity (
   from main.archentity;
 
 
-insert into aentvalue (
+insert or replace into aentvalue (
          uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
   select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
   from import.aentvalue
@@ -1713,7 +1713,7 @@ insert into aentvalue (
   from main.aentvalue;
 
 
-insert into relationship (
+insert or replace into relationship (
          relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
   select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
   from import.relationship
@@ -1726,7 +1726,7 @@ insert into relationship (
   from main.relationship;
 
 
-insert into relnvalue (
+insert or replace into relnvalue (
          relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
   select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
   from import.relnvalue
@@ -1739,7 +1739,7 @@ insert into relnvalue (
   from main.relnvalue;
 
 
-insert into aentreln (
+insert or replace into aentreln (
          uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
   select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
   from import.aentreln
