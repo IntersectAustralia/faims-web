@@ -46,7 +46,7 @@ class ArchiveManager < FileManager
         end
       end
 
-      success = TarHelper.tar(@args, @archive, base_dir)
+      success = TarHelper.tar(@args, @archive, tmp_dir, File.basename(base_dir))
       return false unless success
 
       reset_changes

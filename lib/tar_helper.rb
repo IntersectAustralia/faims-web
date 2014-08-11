@@ -7,8 +7,8 @@ module TarHelper
     $?.success?
   end
 
-  def self.tar(args, tar_file, file_or_dir)
-    `tar #{args} "#{tar_file}" -C "#{File.dirname(file_or_dir)}" "#{File.basename(file_or_dir)}"`
+  def self.tar(args, tar_file, base_dir, *files)
+    `tar #{args} "#{tar_file}" -C "#{base_dir}" #{files.map {|f| "#{f}"}.join(' ')}`
     $?.success?
   end
 
