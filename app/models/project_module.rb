@@ -315,10 +315,6 @@ class ProjectModule < ActiveRecord::Base
     }
   end
 
-  # def server_request_file(file)
-  #   get_request_file(get_path(:server_files_dir), file)
-  # end
-
   def app_files_info
     {
         files: file_mgr_info(app_mgr)
