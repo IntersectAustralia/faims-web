@@ -15,7 +15,7 @@ module SecurityHelper
 
   def safe_delete_directory(path)
     sanitized_path = SecurityHelper.sanitize_file_path(path)
-    FileUtils.remove_entry_secure(sanitized_path) if File.directory? path
+    FileUtils.remove_entry_secure(sanitized_path, true) if File.directory? path
   end
 
   def safe_create_directory(path)

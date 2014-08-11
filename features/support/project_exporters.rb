@@ -34,7 +34,7 @@ def make_exporter_tarball(name, config = nil, options = nil)
                File.join(tmp_dir, ProjectExporter::EXPORT_SCRIPT) unless options and options[:skip_exporter]
 
   tarball = File.join(exporters_dir, SecureRandom.uuid)
-  TarHelper.tar('zcf', tarball, File.basename(tmp_dir), File.dirname(tmp_dir))
+  TarHelper.tar('zcf', tarball, tmp_dir)
   tarball
 ensure
   FileUtils.rm_rf tmp_dir if Dir.exists? tmp_dir

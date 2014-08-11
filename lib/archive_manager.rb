@@ -19,11 +19,10 @@ class ArchiveManager < FileManager
     FileUtils.remove_entry_secure @archive if File.exists? @archive
 
     tmp_dir = Dir.mktmpdir
-    base_dir = @archive_directory ? File.join(tmp_dir, @archive_directory) : tmp_dir
+    base_dir = @archive_directory ? File.join(tmp_dir, @archive_directory) : File.join(tmp_dir, 'archive')
     FileUtils.mkdir base_dir unless Dir.exists? base_dir
 
     with_exclusive_lock do
-
       absolute_file_list.each do |f|
         next unless File.exists? f
         next if File.basename(f) =~ /^\./ # ignore dot files
@@ -47,8 +46,7 @@ class ArchiveManager < FileManager
         end
       end
 
-      files = FileHelper.get_file_list(tmp_dir)
-      success = TarHelper.tar(@args, @archive, files, tmp_dir)
+      success = TarHelper.tar(@args, @archive, base_dir)
       return false unless success
 
       reset_changes
