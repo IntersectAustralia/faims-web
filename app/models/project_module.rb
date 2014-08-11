@@ -198,10 +198,6 @@ class ProjectModule < ActiveRecord::Base
     write_attribute(:name, value.strip.squish) if value
   end
 
-  # def has_attached_files
-  #   server_mgr.file_list.size > 0 or app_mgr.file_list.size > 0
-  # end
-
   # project_module database
   
   def db

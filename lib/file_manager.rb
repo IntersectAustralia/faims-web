@@ -45,7 +45,7 @@ class FileManager
   end
 
   def ignore_file(relative_file_path)
-    @ignore_files.push(full_file_path)
+    @ignore_files.push(relative_file_path)
   end
 
   def file_list
@@ -121,12 +121,10 @@ class FileManager
   end
 
   def acquire_lock(lock)
-    #p "locked(#{name})"
     @timestamp_file.flock(File::LOCK_NB | lock)
   end
 
   def clear_lock
-    #p "unlocked(#{name})"
     @timestamp_file.flock(File::LOCK_UN)
   end
 
