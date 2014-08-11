@@ -111,19 +111,19 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def server_mgr
-    mgr = FileManager.new('server', get_path(:project_module_dir), 'zcf', get_path(:server_files_archive))
+    mgr = FileManager.new('server', get_path(:server_files_dir), 'zcf', get_path(:server_files_archive))
     mgr.add_dir(get_path(:server_files_dir))
     mgr
   end
 
   def app_mgr
-    mgr = FileManager.new('app', get_path(:project_module_dir), 'zcf', get_path(:app_files_archive))
+    mgr = FileManager.new('app', get_path(:app_files_dir), 'zcf', get_path(:app_files_archive))
     mgr.add_dir(get_path(:app_files_dir))
     mgr
   end
 
   def data_mgr
-    mgr = FileManager.new('data', get_path(:project_module_dir), 'zcf', get_path(:data_files_archive))
+    mgr = FileManager.new('data', get_path(:data_files_dir), 'zcf', get_path(:data_files_archive))
     mgr.add_dir(get_path(:data_files_dir))
     mgr
   end
@@ -138,68 +138,141 @@ class ProjectModule < ActiveRecord::Base
         FileHelper.get_file_list(get_path(:app_files_dir)).size > 0
   end
 
-  def settings_archive_info
-    settings_mgr.update_archive
-
-    info = nil
-
-    settings_mgr.with_lock do
-      info = {
-          :file => get_path(:settings_archive),
-          :size => File.size(get_path(:settings_archive)),
-          :md5 => MD5Checksum.compute_checksum(get_path(:settings_archive))
-      }
-    end
-
-    v = db.current_version.to_i
-    info = info.merge({ :version => v.to_s }) if v > 0
-    info
+  def settings_info
+    {
+        files: file_mgr_info(settings_mgr),
+        version: db.current_version.to_s
+    }
   end
 
-  def db_archive_info
-    db_mgr.update_archive
-
-    info = nil
-
-    db_mgr.with_lock do
-      info = {
-          :file => get_path(:db_archive),
-          :size => File.size(get_path(:db_archive)),
-          :md5 => MD5Checksum.compute_checksum(get_path(:db_archive))
-      }
-    end
-
-    v = db.current_version.to_i
-    info = info.merge({ :version => v.to_s }) if v > 0
-    info
+  def settings_request_file(file)
+    get_request_file(get_path(:project_module_dir), file)
   end
 
-  def temp_db_version_file_path(to_version)
-    db_version_file_path(to_version, db.current_version)
+  def server_files_info
+    {
+        files: file_mgr_info(server_mgr)
+    }
   end
 
+  def app_files_info
+    {
+        files: file_mgr_info(app_mgr)
+    }
+  end
+
+  def app_request_file(file)
+    get_request_file(get_path(:app_files_dir), file)
+  end
+
+  def data_files_info
+    {
+        files: file_mgr_info(data_mgr)
+    }
+  end
+
+  def data_request_file(file)
+    get_request_file(get_path(:data_files_dir), file)
+  end
+
+  # database use versions when sending info
   def db_version_file_name(from_version, to_version)
-    "db_v#{from_version}-#{to_version}.tar.gz"
+    "db_v#{from_version}-#{to_version}.sqlite"
   end
 
-  def db_version_file_path(from_version, to_version)
-    get_path(:tmp_dir) + db_version_file_name(from_version, to_version)
+  def db_version_file_path(version_num = 0)
+    version_num ||= 0
+    File.join(get_path(:tmp_dir), db_version_file_name(version_num, db.current_version))
   end
 
-  def db_version_archive_info(version_num)
-      # create temporary archive of database
-      temp_path = db_version_file_path(version_num, db.current_version)
-      archive_database_version(version_num, temp_path) unless File.exists? temp_path
+  def db_version_invalid?(version_num)
+    version_num ||= 0
+    version_num = version_num.to_i
+    version_num < 0 or version_num > db.current_version.to_i
+  end
 
-      info = {
-        :file => temp_path,
-        :size => File.size(temp_path),
-        :md5 => MD5Checksum.compute_checksum(temp_path)
-      }
+  def db_version_info(version_num = 0)
+    version_num ||= 0
+    full_path = db_version_file_path(version_num)
+    {
+        files: [{
+                    file: 'db.sqlite3',
+                    size: File.size(full_path),
+                    md5: MD5Checksum.compute_checksum(full_path)
+                }],
+        version: db.current_version.to_s
+    }
+  end
 
-      v = db.current_version.to_i
-      info = info.merge({ :version => v.to_s }) if v > 0
-      info
+  # file info helper function
+  def file_mgr_info(file_mgr)
+    files = []
+    file_mgr.with_lock do
+      file_mgr.file_list.each do |f|
+        f = f.gsub(/^#{file_mgr.base_dir}/, '')
+        next if /\.lock/ =~ f
+        next if /\.dirty/ =~ f
+        full_path = File.join(file_mgr.base_dir, f)
+        files.push(
+            {
+                file: f,
+                size: File.size(full_path),
+                md5: MD5Checksum.compute_checksum(full_path)
+            }
+        )
+      end
+    end
+    files
+  end
+
+  def get_request_file(base_dir, file)
+    request_file = File.join(base_dir, file)
+    raise Exception, 'file not found' unless File.exists? request_file
+    request_file
+  end
+
+  def add_server_file(path, file)
+    add_file(get_path(:server_files_dir), path, file)
+  end
+
+  def add_app_file(path, file)
+    add_file(get_path(:app_files_dir), path, file)
+  end
+
+  def add_data_file(path, file)
+    add_file(get_path(:data_files_dir), path, file)
+  end
+
+  def add_file(base_dir, path, file)
+    return 'Filename is not valid.' unless is_valid_filename?(path)
+    dest_path = File.join(base_dir, path)
+    return 'File already exists.' if File.exists? dest_path
+    FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
+    FileUtils.mv file.path, dest_path
+    nil
+  end
+
+  def add_data_dir(dir)
+    return 'Directory name is not valid.' unless is_valid_filename?(dir)
+    dest_path = File.join(get_path(:data_files_dir), dir)
+    return 'Directory already exists.' if File.exists? dest_path and dir != '.'
+    FileUtils.mkdir_p dest_path
+    nil
+  end
+
+  def add_data_batch_file(file)
+    begin
+      success = TarHelper.untar('zxf', file, get_path(:data_files_dir))
+      return 'Could not upload file. Please ensure file is a valid archive.' unless success
+    rescue
+      return 'Could not upload file. Please ensure file is a valid archive.'
+    end
+  end
+
+  def is_valid_filename?(file)
+    return false if file.blank?
+    # TODO add regex for filename
+    true
   end
 
   def dirty?
@@ -246,32 +319,23 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def generate_archives
-    db_mgr.make_dirt
-    settings_mgr.make_dirt
-    app_mgr.make_dirt
-    data_mgr.make_dirt
+    generate_database_cache
     update_archives
   end
 
   def update_archives
-    settings_mgr.update_archive
-    app_mgr.update_archive
-    data_mgr.update_archive
-
-    # custom update archive for database
-    archive_database
-
-    # custom update archive for package
     package_project_module
   end
 
-  def update_android_archives
-    settings_mgr.update_archive
-    app_mgr.update_archive
-    data_mgr.update_archive
+  def generate_database_cache(version = 0)
+    version ||= 0
+    file = db_version_file_path(version)
+    return if File.exists? file
 
-    # custom update archive for database
-    archive_database
+    # need to use exclusive lock because database may be directly cloned
+    db_mgr.with_lock do
+      db.create_app_database_from_version(file, version)
+    end
   end
 
   def get_settings
@@ -360,26 +424,19 @@ class ProjectModule < ActiveRecord::Base
 
   def store_database(file, user)
     begin
-      tmp_dir = Dir.mktmpdir + '/'
-
-      TarHelper.untar('xfz', file.path, tmp_dir)
-
       # add new version
       version = db.add_version(user)
 
-      unarchived_file = tmp_dir + Dir.entries(tmp_dir).select { |f| f unless File.directory? tmp_dir + f }.first
-      stored_file = "#{ProjectModule.uploads_path}/#{key}_v#{version}"
-
       # move file to upload directory
-      FileUtils.mv(unarchived_file, stored_file)
+      stored_file = File.join(ProjectModule.uploads_path, "#{key}_v#{version}")
 
+      FileUtils.mv(file.path, stored_file)
     rescue Exception => e
-      raise e
+      logger.error e
 
-      # TODO remove added version in database if created
+      raise Exception, 'Failed to store database from android.'
     ensure
-      # cleanup
-      FileUtils.rm_rf tmp_dir if File.directory? tmp_dir
+      # TODO remove last db version?
     end
 
   end
@@ -467,164 +524,6 @@ class ProjectModule < ActiveRecord::Base
     return version.to_i <= v
   end
 
-  def server_file_list(exclude_files = nil)
-    return [] unless File.directory? get_path(:server_files_dir)
-    file_list = FileHelper.get_file_list(get_path(:server_files_dir))
-    return file_list unless exclude_files
-    file_list.select { |f| !exclude_files.include? f }
-  end
-
-  def add_server_file(file, path)
-    full_path = make_path(get_path(:server_files_dir), path)
-    FileUtils.cp(file.path, full_path)
-  end
-
-  def server_file_archive_info(exclude_files = nil)
-    file_archive_info(get_path(:server_files_dir), server_file_list(exclude_files))
-  end
-
-  def server_file_upload(file)
-    # don't need to lock server files as server files cannot be downloaded
-    TarHelper.untar('xfz', file.path, get_path(:server_files_dir))
-  end
-
-  def app_file_list(exclude_files = nil)
-    app_mgr.with_lock do
-      non_locking_app_file_list(exclude_files)
-    end
-  end
-
-  def non_locking_app_file_list(exclude_files = nil)
-    return [] unless File.directory? get_path(:app_files_dir)
-    file_list = FileHelper.get_file_list(get_path(:app_files_dir))
-    return file_list unless exclude_files
-    file_list.select { |f| !exclude_files.include? f }
-  end
-
-  def add_app_file(file, path)
-    app_mgr.with_lock do
-      full_path = make_path(get_path(:app_files_dir), path)
-      FileUtils.cp(file.path, full_path)
-      app_mgr.make_dirt
-    end
-  end
-
-  def app_file_archive_info(exclude_files = nil)
-    if exclude_files
-      app_mgr.with_lock do
-       file_archive_info(get_path(:app_files_dir), non_locking_app_file_list(exclude_files))
-      end
-    else
-      app_mgr.update_archive
-
-      app_mgr.with_lock do
-        {
-            :file => get_path(:app_files_archive),
-            :size => File.size(get_path(:app_files_archive)),
-            :md5 => MD5Checksum.compute_checksum(get_path(:app_files_archive))
-        }
-      end
-    end
-  end
-
-  def app_file_upload(file)
-    app_mgr.with_lock do
-      TarHelper.untar('xfz', file.path, get_path(:app_files_dir))
-      app_mgr.make_dirt
-    end
-  end
-
-  def data_file_list(exclude_files = nil)
-    data_mgr.with_lock do
-      non_locking_data_file_list(exclude_files)
-    end
-  end
-
-  def non_locking_data_file_list(exclude_files = nil)
-    return [] unless File.directory? get_path(:data_files_dir)
-    file_list = FileHelper.get_file_list(get_path(:data_files_dir))
-    return file_list unless exclude_files
-    file_list.select { |f| !exclude_files.include? f }
-  end
-
-  def add_data_file(file, path)
-    file_path = File.join(get_path(:data_files_dir), path)
-    return 'File already exists' if File.exists? file_path
-    data_mgr.with_lock do
-      dir = (File.directory? file_path) ? file_path : File.dirname(file_path)
-      FileUtils.mkdir_p dir
-      FileUtils.cp(file.path, file_path)
-      data_mgr.make_dirt
-    end
-    nil
-  end
-
-  def add_batch_file(file)
-    begin
-      success = nil
-      data_mgr.with_lock do
-        success = `tar zxf #{file.path} -C #{get_path(:data_files_dir)}; echo $?`.strip
-        data_mgr.make_dirt
-      end
-      return nil if success == '0'
-      return 'Could not upload file. Please ensure file is a valid archive.'
-    rescue
-      return 'Could not upload file. Please ensure file is a valid archive.'
-    end
-  end
-
-  def data_file_archive_info(exclude_files = nil)
-    if exclude_files
-      data_mgr.with_lock do
-        file_archive_info(get_path(:data_files_dir), non_locking_data_file_list(exclude_files))
-      end
-    else
-      data_mgr.update_archive
-
-      data_mgr.with_lock do
-        {
-            :file => get_path(:data_files_archive),
-            :size => File.size(get_path(:data_files_archive)),
-            :md5 => MD5Checksum.compute_checksum(get_path(:data_files_archive))
-        }
-      end
-    end
-  end
-
-  def data_file_upload(file)
-    data_mgr.with_lock do
-      TarHelper.untar('xfz', file.path, get_path(:data_files_dir))
-      data_mgr.make_dirt
-    end
-  end
-
-  def create_data_dir(dir)
-    full_dir = File.join(get_path(:data_files_dir), dir)
-    return 'Directory already exists' if File.directory? full_dir
-    FileUtils.mkdir_p full_dir
-    nil
-  end
-
-  def make_path(dir, path)
-    FileUtils.mkdir_p dir unless File.directory? dir
-    full_path = dir + '/' + File.dirname(path)
-    FileUtils.mkdir_p full_path
-    full_path
-  end
-
-  def file_archive_info(dir, files)
-    tmp_dir = Dir.mktmpdir + '/'
-    temp_file = tmp_dir + 'files_archive.tar.gz'
-
-    TarHelper.tar('zcf', temp_file, files, dir)
-
-    {
-        :file => temp_file,
-        :size => File.size(temp_file),
-        :md5 => MD5Checksum.compute_checksum(temp_file)
-    }
-  end
-
   # static
 
   def self.project_modules_path
@@ -660,7 +559,7 @@ class ProjectModule < ActiveRecord::Base
           file.write(hash_sum.to_json)
         end
 
-        TarHelper.tar('jcf', get_path(:package_archive), File.basename(project_module_dir), tmp_dir)
+        TarHelper.tar('jcf', get_path(:package_archive), tmp_dir, File.basename(project_module_dir))
 
         package_mgr.clean_dirt
       rescue Exception => e
@@ -680,7 +579,7 @@ class ProjectModule < ActiveRecord::Base
         # create app database
         db.create_app_database(tmp_dir + get_name(:db))
 
-        TarHelper.tar('zcf', get_path(:db_archive), get_name(:db), tmp_dir)
+        TarHelper.tar('zcf', get_path(:db_archive), tmp_dir, get_name(:db))
       rescue Exception => e
         raise e
       ensure
@@ -700,7 +599,7 @@ class ProjectModule < ActiveRecord::Base
         # create app database
         db.create_app_database_from_version(tmp_dir + get_name(:db), version)
 
-        TarHelper.tar('zcf', temp_path, get_name(:db), tmp_dir)
+        TarHelper.tar('zcf', temp_path, tmp_dir, get_name(:db))
       rescue Exception => e
         raise e
       ensure
@@ -754,12 +653,13 @@ class ProjectModule < ActiveRecord::Base
 
   def create_temp_dir_archive(dir)
     tmp_dir = Dir.mktmpdir
-    files = FileHelper.get_file_list(dir).each do |file|
-      FileUtils.mkdir_p File.join(tmp_dir, File.dirname(file))
-      FileUtils.cp File.join(dir, file), File.join(tmp_dir, file)
+    base_dir = File.join(tmp_dir, 'data')
+    FileHelper.get_file_list(dir).each do |file|
+      FileUtils.mkdir_p File.join(base_dir, File.dirname(file))
+      FileUtils.cp File.join(dir, file), File.join(base_dir, file)
     end
     tmp_file = Tempfile.new(['data_', '.tar.gz'])
-    TarHelper.tar('zcf', tmp_file.path, files, tmp_dir)
+    TarHelper.tar('zcf', tmp_file.path, tmp_dir, 'data')
     tmp_file.path
   ensure
     FileUtils.rm_rf tmp_dir if tmp_dir and File.directory? tmp_dir

@@ -8,7 +8,11 @@ class FileManager
 		@files = []
     @args = args
     @archive = archive
-	end
+  end
+
+  def base_dir
+    @base_dir
+  end
 
 	def add_dir(full_dir_path)
     fs = FileHelper.get_file_list(full_dir_path)
@@ -88,7 +92,7 @@ class FileManager
         FileUtils.cp_r(f[:file], file)
       end
       files = FileHelper.get_file_list(tmp_dir)
-      TarHelper.tar(@args, @archive, files, tmp_dir)
+      TarHelper.tar(@args, @archive, tmp_dir, files)
       clean_dirt
     end
 	ensure

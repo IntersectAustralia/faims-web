@@ -60,7 +60,7 @@ class FileManagerController < ApplicationController
       redirect_to :action => 'file_list', :error => 'Could not upload file. Files are currently locked'
     else
       file = params[:file_manager][:file]
-      error = @project_module.add_data_file(file.tempfile, File.join(params[:path], file.original_filename))
+      error = @project_module.add_data_file(File.join(params[:path], file.original_filename), file.tempfile)
 
       if error
         redirect_to :action => 'file_list', :error => error
@@ -79,7 +79,7 @@ class FileManagerController < ApplicationController
       redirect_to :action => 'file_list', :error => 'Could not create directory. Files are currently locked'
     else
       dir = params[:file_manager][:dir].strip
-      error = @project_module.create_data_dir(File.join(File.join(params[:path], dir)))
+      error = @project_module.add_data_dir(File.join(File.join(params[:path], dir)))
 
       if error
         redirect_to :action => 'file_list', :error => error
@@ -131,7 +131,7 @@ class FileManagerController < ApplicationController
       redirect_to :action => 'file_list', :error => 'Could not upload archive. Files are currently locked'
     else
       file = params[:project_module][:file]
-      error = @project_module.add_batch_file(file.tempfile)
+      error = @project_module.add_data_batch_file(file.path)
       if error
         redirect_to :action => 'file_list', :error => error
       else

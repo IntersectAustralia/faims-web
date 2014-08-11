@@ -101,27 +101,24 @@ FaimsWeb::Application.routes.draw do
   get 'project_module/:id/edit_project_module_user' , :to => 'project_modules#edit_project_module_user', :as => 'edit_project_module_user'
   post 'project_module/:id/update_project_module_user' , :to => 'project_modules#update_project_module_user', :as => 'update_project_module_user'
 
+  # android api
   get 'android/modules', :to => 'android#project_modules', :as => 'android_project_modules'
 
-  get 'android/module/:key/settings_archive', :to => 'android#settings_archive', :as => 'android_settings_archive'
+  get 'android/module/:key/settings_info', :to => 'android#settings_info', :as => 'android_settings_info'
   get 'android/module/:key/settings_download', :to => 'android#settings_download', :as => 'android_settings_download'
 
-  get 'android/module/:key/db_archive', :to => 'android#db_archive', :as => 'android_project_module_db_archive'
+  get 'android/module/:key/db_info', :to => 'android#db_info', :as => 'android_project_module_db_info'
   get 'android/module/:key/db_download', :to => 'android#db_download', :as => 'android_project_module_db_download'
   post 'android/module/:key/db_upload', :to => 'android#db_upload', :as => 'android_project_module_db_upload'
 
-  get 'android/module/:key/data_file_list', :to => 'android#data_file_list', :as => 'android_data_file_list'
-  get 'android/module/:key/data_file_archive', :to => 'android#data_file_archive', :as => 'android_data_file_archive'
+  get 'android/module/:key/data_files_info', :to => 'android#data_files_info', :as => 'android_data_files_info'
   get 'android/module/:key/data_file_download', :to => 'android#data_file_download', :as => 'android_data_file_download'
   post 'android/module/:key/data_file_upload', :to => 'android#data_file_upload', :as => 'android_data_file_upload'
 
-  get 'android/module/:key/server_file_list', :to => 'android#server_file_list', :as => 'android_server_file_list'
-  get 'android/module/:key/server_file_archive', :to => 'android#server_file_archive', :as => 'android_server_file_archive'
-  get 'android/module/:key/server_file_download', :to => 'android#server_file_download', :as => 'android_server_file_download'
+  get 'android/module/:key/server_files_info', :to => 'android#server_files_info', :as => 'android_server_files_info'
   post 'android/module/:key/server_file_upload', :to => 'android#server_file_upload', :as => 'android_server_file_upload'
 
-  get 'android/module/:key/app_file_list', :to => 'android#app_file_list', :as => 'android_app_file_list'
-  get 'android/module/:key/app_file_archive', :to => 'android#app_file_archive', :as => 'android_app_file_archive'
+  get 'android/module/:key/app_files_info', :to => 'android#app_files_info', :as => 'android_app_files_info'
   get 'android/module/:key/app_file_download', :to => 'android#app_file_download', :as => 'android_app_file_download'
   post 'android/module/:key/app_file_upload', :to => 'android#app_file_upload', :as => 'android_app_file_upload'
 

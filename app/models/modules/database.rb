@@ -811,10 +811,11 @@ class Database
   end
 
   def create_app_database_from_version(toDB, version)
-    generate_template_db unless File.exists? Rails.root.join('lib/assets/template_db.sqlite3')
-    FileUtils.cp Rails.root.join('lib/assets/template_db.sqlite3'), toDB # clone template db
-      
-    @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
+    if version.to_i == 0
+      FileUtils.cp path, toDB
+    else
+      @db.execute_batch(WebQuery.create_app_database_from_version(toDB, version))
+    end
   end
 
   def validate_reln_value(relationshipid, relnvaluetimestamp, attributeid)
