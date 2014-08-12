@@ -43,7 +43,7 @@ Then /^I should see project modules$/ do |table|
   end
 end
 
-Then /^I have project module files for "([^"]*)"$/ do |name|
+Then /^I have project module files for module "([^"]*)"$/ do |name|
   dir_name = ProjectModule.find_by_name(name).get_name(:project_module_dir)
   File.directory?(Rails.root.join('tmp/modules', dir_name)).should be_true
   File.exists?(Rails.root.join('tmp/modules', dir_name, 'db.sqlite3')).should be_true
@@ -73,39 +73,38 @@ Then /^I should download settings for "([^"]*)"$/ do |name|
 end
 
 And /^I upload database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-  md5 = MD5Checksum.compute_checksum(upload_db_file)
-  project_module.check_sum(upload_db_file,md5).should be_true
+  # TODO post database to controller action
 end
 
 And /^I upload sync database "([^"]*)" to (.*) succeeds$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-  md5 = MD5Checksum.compute_checksum(upload_db_file)
-  project_module.check_sum(upload_db_file,md5).should be_true
+  # TODO post database to controller action
 end
 
 And /^I upload database "([^"]*)" to (.*) fails/ do |db_file, name|
-  lambda {
-    project_module = ProjectModule.find_by_name(name)
-    upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__))
-    md5 = MD5Checksum.compute_checksum(upload_db_file)
-    project_module.check_sum(upload_db_file,md5).should be_true
-  }.should raise_error
+  # TODO post database to controller action
+end
+
+And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
+  # TODO post database to controller action
 end
 
 Then /^I should have stored "([^"]*)" into (.*)$/ do |db_file, name|
   project_module = ProjectModule.find_by_name(name)
-  uploaded_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
+
+  db = File.read(Rails.root.join("features/assets/db.sqlite3"))
+
+  uploaded_file = Tempfile.new("db")
+  uploaded_file.write(db)
+  uploaded_file.close
+
   project_module.store_database(uploaded_file, 0)
   stored_file = ProjectModule.uploads_path + '/' + Dir.entries(ProjectModule.uploads_path).select { |f| f unless File.directory? f }.first
 
-  # check stored file format (TODO why can't i use merge daemon)
-  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
+  # check file matches
+  File.read(stored_file).should == db
 
-  # check if uploaded_file unarchived matches stored_file
-  archived_file_match(uploaded_file.path, stored_file).should be_true
+  # check stored filename matches
+  /^(?<key>[^_]+)_v(?<version>\d+)$/.match(File.basename(stored_file)).should_not be_nil
 end
 
 Then /^I should have stored sync "([^"]*)" into (.*)$/ do |db_file, name|
@@ -131,13 +130,6 @@ Then /^I should not have stored "([^"]*)" into (.*)$/ do |db_file, name|
 
   # check if uploaded_file unarchived matches stored_file
   archived_file_match(uploaded_file.path, stored_file).should be_true
-end
-
-And /^I upload corrupted database "([^"]*)" to (.*) fails$/ do |db_file, name|
-  project_module = ProjectModule.find_by_name(name)
-  upload_db_file = File.open(File.expand_path("../../assets/" + db_file + ".tar.gz", __FILE__), 'r+')
-  md5 = MD5Checksum.compute_checksum(upload_db_file) + '55'
-  project_module.check_sum(upload_db_file,md5).should be_false
 end
 
 Then /^I should see json for "([^"]*)" db$/ do |name|

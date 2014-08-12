@@ -40,7 +40,7 @@ Feature: Manage project modules
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
-    And I have project module files for "Module 1"
+    And I have project module files for module "Module 1"
 
   Scenario: Optional validation schema
     Given I am on the home page
@@ -56,7 +56,7 @@ Feature: Manage project modules
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
-    And I have project module files for "Module 1"
+    And I have project module files for module "Module 1"
 
   Scenario: Set srid on project module creation
     Given I am on the home page
@@ -74,7 +74,7 @@ Feature: Manage project modules
     And I press "Submit"
     Then I should see "New module created"
     And I should be on the project modules page
-    And I have project module files for "Module 1"
+    And I have project module files for module "Module 1"
     And I should have setting "srid" for "Module 1" as "4326"
 
   Scenario Outline: Cannot create project module due to errors
@@ -128,7 +128,7 @@ Feature: Manage project modules
     And I press "Upload"
     Then I should see "Module has been successfully uploaded"
     And I should be on the project modules page
-    And I have project module files for "Simple Project"
+    And I have project module files for module "Simple Project"
 
   Scenario: Upload Module if project module already exists should fail
     Given I am on the home page
