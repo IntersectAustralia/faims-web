@@ -1,6 +1,6 @@
 - title @project_module.name + " - Archaeological Entity"
 = breadcrumbs
-- get_files(@attributes,8,6)
+- get_files(@attributes,8,5)
 .form-actions
   - if !session[:prev_id].nil? and !session[:prev_id].empty?
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module,session[:prev_id][-1]), :class => 'btn'
@@ -27,9 +27,9 @@
       %label 
     .span2
       %label Constrained Data:
-    .span1
-      %label Unconstrained Data:
     .span2
+      %label Unconstrained Data:
+    .span1
       %label Annotation:
     .span1
       %label Certainty:
@@ -57,9 +57,9 @@
                     = f.input :vocab_id, collection: vocabs, label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
               - else
                 .span2
-              .span1
-                = f.text_field :measure, :value => attribute[5], name: 'attr[measure][]'
               .span2
+                = f.text_field :measure, :value => attribute[5], name: 'attr[measure][]'
+              .span1
                 = f.text_field :freetext, :value => attribute[6], name: 'attr[freetext][]'
               .span1
                 = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'

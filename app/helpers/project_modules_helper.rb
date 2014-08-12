@@ -1,6 +1,6 @@
 module ProjectModulesHelper
   
-  def get_files(attributes,type_index, value_index)
+  def get_files(attributes, type_index, value_index)
     @files = {}
     for attribute in attributes
       if attribute[type_index].to_s.downcase.eql?("file")
