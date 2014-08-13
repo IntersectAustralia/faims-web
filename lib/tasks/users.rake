@@ -20,10 +20,10 @@ end
 
 def create_user
   firstname = ask("First name of user: ")
-  lastname = ask("Last name of user:")
-  email = ask("Email of user:")
-  password = ask("Password:  ") { |q| q.echo = false }
-  password2 = ask("Confirm Password:  ") { |q| q.echo = false }
+  lastname = ask("Last name of user: ")
+  email = ask("Email of user: ")
+  password = ask("Password: ") { |q| q.echo = false }
+  password2 = ask("Confirm Password: ") { |q| q.echo = false }
 
   if password != password2
     raise Exception, "Passwords don't match"
