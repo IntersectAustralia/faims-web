@@ -624,7 +624,7 @@ class ProjectModule < ActiveRecord::Base
 
   def create_data_archive(dir)
     tmp_dir = Dir.mktmpdir
-    base_dir = File.join(tmp_dir, 'data')
+    base_dir = File.join(tmp_dir, File.basename(dir))
 
     FileHelper.get_file_list(dir).each do |file|
       FileUtils.mkdir_p File.join(base_dir, File.dirname(file))
@@ -632,7 +632,7 @@ class ProjectModule < ActiveRecord::Base
     end
     tmp_file = Tempfile.new(['data_', '.tar.gz'])
 
-    success = TarHelper.tar('zcf', tmp_file.path, tmp_dir, 'data')
+    success = TarHelper.tar('zcf', tmp_file.path, tmp_dir, File.basename(dir))
     raise ProjectModuleException, 'Failed to archive data.' unless success
 
     tmp_file.path
