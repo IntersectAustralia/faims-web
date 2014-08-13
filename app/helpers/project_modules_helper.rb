@@ -5,6 +5,7 @@ module ProjectModulesHelper
     for attribute in attributes
       if attribute[type_index].to_s.downcase.eql?("file")
         path = attribute[value_index]
+        next unless path
         name = File.basename(path)[File.basename(path).to_s.index('_')+1..-1]
         @files[path] = name
       end
