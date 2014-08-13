@@ -123,7 +123,7 @@ describe ProjectModule do
       archive = project_module.create_data_archive(project_module.get_path(:data_files_dir))
       tmp_dir = Dir.mktmpdir
       `tar zxf #{archive} -C #{tmp_dir}`
-      data_dir = Dir.glob('data').first
+      data_dir = Dir.glob(File.join(tmp_dir, 'data')).first
       entries = FileHelper.get_file_list(data_dir)
       entries.include?('test1').should be_true
       entries.include?('test2').should be_true
