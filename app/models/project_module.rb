@@ -397,13 +397,21 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def add_data_file(path, file)
-    add_file(get_path(:data_files_dir), path, file)
+    add_file!(get_path(:data_files_dir), path, file)
+  end
+
+  def add_file!(base_dir, path, file)
+    raise ProjectModuleException, 'Filename is not valid.' unless is_valid_filename?(path)
+    dest_path = File.join(base_dir, path)
+    raise ProjectModuleException, 'File already exists.' if File.exists? dest_path
+    FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
+    FileUtils.mv file.path, dest_path
   end
 
   def add_file(base_dir, path, file)
     raise ProjectModuleException, 'Filename is not valid.' unless is_valid_filename?(path)
     dest_path = File.join(base_dir, path)
-    raise ProjectModuleException, 'File already exists.' if File.exists? dest_path
+    return if File.exists? dest_path
     FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
     FileUtils.mv file.path, dest_path
   end
@@ -668,6 +676,11 @@ class ProjectModule < ActiveRecord::Base
   def self.uploads_path
     return Rails.root.to_s + '/tmp/uploads' if Rails.env == 'test'
     Rails.application.config.server_uploads_directory
+  end
+
+  def self.upload_failures_path
+    return Rails.root.to_s + '/tmp/upload_failures' if Rails.env == 'test'
+    Rails.application.config.server_upload_failures_directory
   end
 
 end

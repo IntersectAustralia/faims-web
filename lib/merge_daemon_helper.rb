@@ -9,10 +9,12 @@ class MergeDaemon
   def self.init
     # make uploads directory
     Dir.mkdir(Rails.application.config.server_uploads_directory) unless File.directory? Rails.application.config.server_uploads_directory
+    Dir.mkdir(Rails.application.config.server_upload_failures_directory) unless File.directory? Rails.application.config.server_upload_failures_directory
   end
 
   def self.do_merge(uploads_dir = nil)
     uploads_dir ||= Rails.application.config.server_uploads_directory
+    upload_failures_dir ||= Rails.application.config.server_upload_failures_directory
 
     begin
       db_file_path = nil
@@ -25,28 +27,37 @@ class MergeDaemon
 
         # match file name for key and version
         match = match_file(db_file)
-        raise MergeException unless match
+        raise MergeException, "Error cannot find module key and version for file #{db_file}" unless match
 
         key = match[:key]
         version = match[:version]
 
         project_module = ProjectModule.find_by_key(key)
-        raise MergeException unless project_module
+        raise MergeException, "Error cannot find module with key #{key}" unless project_module
 
         puts "Merging #{db_file}"
 
         # merge database
 
-        project_module.db_mgr.with_shared_lock do
-          project_module.db.merge_database(db_file_path, version)
+        begin
+          project_module.db_mgr.with_shared_lock do
+            project_module.db.merge_database(db_file_path, version)
+          end
+        rescue Exception => e
+          puts e.to_s
+
+          # move file to failures directory
+          FileUtils.mv db_file_path, upload_failures_dir
+
+          raise MergeException, "Error cannot merge database file #{db_file}"
         end
 
         puts 'Finished merging database'
       end
 
-      FileUtils.remove_entry_secure db_file_path if db_file_path
-
       !sorted_files.empty?
+    ensure
+      FileUtils.remove_entry_secure db_file_path if db_file_path
     end
   end
 

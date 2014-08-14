@@ -82,6 +82,8 @@ module FaimsWeb
 
     config.server_uploads_directory = Rails.root.join("uploads").to_s
 
+    config.server_upload_failures_directory = Rails.root.join("upload_failures").to_s
+
     config.i18n.enforce_available_locales = true
   end
 end

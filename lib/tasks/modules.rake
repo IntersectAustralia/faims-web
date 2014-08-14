@@ -40,6 +40,11 @@ begin
       delete_module
     end
 
+    desc 'Restore module'
+    task :restore => :environment do
+      restore_module
+    end
+
   end
 rescue LoadError
   puts 'It looks like some Gems are missing: please run bundle install'
@@ -55,6 +60,10 @@ def clear_project_modules
   uploads_dir = ProjectModule.uploads_path
   FileUtils.remove_entry_secure Rails.root.join(uploads_dir) if File.directory? uploads_dir
   Dir.mkdir(Rails.root.join(uploads_dir))
+
+  upload_failures_dir = ProjectModule.upload_failures_path
+  FileUtils.remove_entry_secure Rails.root.join(upload_failures_dir) if File.directory? upload_failures_dir
+  Dir.mkdir(Rails.root.join(upload_failures_dir))
 end
 
 def create_module
@@ -100,6 +109,24 @@ def delete_module
   if project_module
     project_module.with_exclusive_lock do
       project_module.deleted = true
+      project_module.save
+    end
+  else
+    puts "Module does not exist"
+  end
+end
+
+def restore_module
+  module_key = ENV['key'] unless ENV['key'].nil?
+  if (module_key.nil?) || (module_key.blank?)
+    puts "Usage: rake modules:restore key=<module key>"
+    return
+  end
+
+  project_module = ProjectModule.unscoped.find_by_key(module_key)
+  if project_module
+    project_module.with_exclusive_lock do
+      project_module.deleted = false
       project_module.save
     end
   else

@@ -72,6 +72,24 @@ describe ProjectModule do
     expect(output).to include "Module does not exist"
   end
 
+  it "restores a project module" do
+    project_module = make_project_module('Module 1')
+    ENV['key'] = project_module.key
+    ProjectModule.all.count.should == 1
+    delete_module
+    ProjectModule.all.count.should == 0
+    restore_module
+    ProjectModule.all.count.should == 1
+  end
+
+  it "restores a non-existing project module" do
+    ENV['key'] = "fake_key"
+    output = capture(:stdout) do
+      restore_module
+    end
+    expect(output).to include "Module does not exist"
+  end
+
   it "clears all project modules" do
     make_project_module('Module 1')
     make_project_module('Module 2')
