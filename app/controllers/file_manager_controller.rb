@@ -60,7 +60,13 @@ class FileManagerController < ApplicationController
       redirect_to :action => 'file_list', :error => 'Could not upload file. Files are currently locked'
     else
       file = params[:file_manager][:file]
-      error = @project_module.add_data_file(File.join(params[:path], file.original_filename), file.tempfile)
+
+      error = nil
+      begin
+        @project_module.add_data_file(File.join(params[:path], file.original_filename), file.tempfile)
+      rescue Exception => e
+        error = e.to_s
+      end
 
       if error
         redirect_to :action => 'file_list', :error => error

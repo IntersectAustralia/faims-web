@@ -240,13 +240,22 @@ class ProjectModule < ActiveRecord::Base
   end
 
   def add_data_file(path, file)
-    add_file(get_path(:data_files_dir), path, file)
+    add_file!(get_path(:data_files_dir), path, file)
+  end
+
+  def add_file!(base_dir, path, file)
+    raise Exception, 'Filename is not valid.' unless is_valid_filename?(path)
+    dest_path = File.join(base_dir, path)
+    raise Exception, 'File already exists.' if File.exists? dest_path
+    FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
+    FileUtils.mv file.path, dest_path
+    nil
   end
 
   def add_file(base_dir, path, file)
-    return 'Filename is not valid.' unless is_valid_filename?(path)
+    raise Exception, 'Filename is not valid.' unless is_valid_filename?(path)
     dest_path = File.join(base_dir, path)
-    return 'File already exists.' if File.exists? dest_path
+    return if File.exists? dest_path
     FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
     FileUtils.mv file.path, dest_path
     nil
