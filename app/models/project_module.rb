@@ -536,6 +536,11 @@ class ProjectModule < ActiveRecord::Base
     Rails.application.config.server_uploads_directory
   end
 
+  def self.upload_failures_path
+    return Rails.root.to_s + '/tmp/upload_failures' if Rails.env == 'test'
+    Rails.application.config.server_upload_failures_directory
+  end
+
   def package_project_module
     with_lock do
       begin

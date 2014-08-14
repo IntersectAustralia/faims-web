@@ -82,6 +82,8 @@ module FaimsWeb
 
     config.server_uploads_directory = Rails.root.join("uploads").to_s
 
+    config.server_upload_failures_directory = Rails.root.join("upload_failures").to_s
+
     config.after_initialize do
       require 'find'
       Find.find(Rails.root.join('modules').to_s) { |path| FileUtils.rm Rails.root.join(path) if path =~ /\.lock.*/ } if Dir.exists? Rails.root.join('modules')

@@ -55,4 +55,8 @@ def clean_project_modules
   uploads_dir = Rails.application.config.server_uploads_directory
   FileUtils.rm_rf Rails.root.join(uploads_dir) if File.directory? uploads_dir
   Dir.mkdir(Rails.root.join(uploads_dir))
+
+  upload_failures_dir = Rails.application.config.server_upload_failures_directory
+  FileUtils.rm_rf Rails.root.join(upload_failures_dir) if File.directory? upload_failures_dir
+  Dir.mkdir(Rails.root.join(upload_failures_dir))
 end
