@@ -511,8 +511,6 @@ class ProjectModule < ActiveRecord::Base
     rescue Exception => e
       logger.error e
 
-      FileUtils.remove_entry_secure get_path(:project_module_dir) if File.directory? get_path(:project_module_dir) # cleanup directory
-
       raise ProjectModuleException, 'Failed to update project module.'
     end
   end
@@ -625,7 +623,7 @@ class ProjectModule < ActiveRecord::Base
       return project_module
     end
   ensure
-    FileUtils.remove_entry_secure tmp_dir if tmp_dir
+    FileUtils.remove_entry_secure tmp_dir if tmp_dir and File.directory? tmp_dir
   end
 
   # Data archive helpers

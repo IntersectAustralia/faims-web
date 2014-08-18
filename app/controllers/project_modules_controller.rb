@@ -107,8 +107,6 @@ class ProjectModulesController < ProjectModuleBaseController
           logger.error e
 
           flash[:error] = 'Failed to update module.'
-        ensure
-          FileUtils.remove_entry_secure @tmpdir
         end
 
         return redirect_to :project_module
