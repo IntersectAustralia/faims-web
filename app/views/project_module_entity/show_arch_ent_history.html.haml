@@ -11,8 +11,8 @@
         %tr
           %th
           - @history_keys.each do |names|
-            %th
-              = names.capitalize
+            %th.attribute-name
+              = names
         - @timestamps.each_with_index do |timestamp, row_index|
           %tr
             %td= link_to 'Select Row', '', :class => 'btn history-select-btn'

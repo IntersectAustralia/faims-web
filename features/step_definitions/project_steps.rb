@@ -363,6 +363,16 @@ When(/^I should download attached file with name "([^"]*)"$/) do |name|
   pending
 end
 
+Then /^I move vocab "([^"]*)" up$/ do |vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../..").find(:css, ".move-up").click
+end
+
+Then /^I move vocab "([^"]*)" down$/ do |vocab_name|
+  attribute_id = find(:css, '#attribute')[:value]
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../..").find(:css, ".move-down").click
+end
+
 When(/^I select "([^"]*)" for the attribute$/) do |name|
   select name, :from => 'attribute_id'
   sleep(1)
@@ -375,6 +385,13 @@ Then(/^I should see vocabularies$/) do |table|
     page.should have_css(".vocab-list-#{attribute_id} input[name='vocab_description[]'][value='#{hash[:description]}']")
     page.should have_css(".vocab-list-#{attribute_id} input[name='picture_url[]'][value='#{hash[:pictureURL]}']")
   end
+end
+
+Then(/^I should see vocabularies in order$/) do |table|
+  attribute_id = find(:css, '#attribute')[:value]
+  vocabs1 = all(".vocab-list-#{attribute_id} input[name='vocab_name[]']").map {|n| n.value}
+  vocabs2 = table.hashes.map {|hash| hash[:name]}
+  vocabs1.should == vocabs2
 end
 
 Then(/^I click on "([^"]*)" for the attribute$/) do |name|
@@ -407,37 +424,58 @@ end
 
 Then(/^I click add child for vocabulary "([^"]*)"$/) do |vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../a").click()
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../..").find(".add-child").click
 end
 
 Then(/^I click insert for vocabulary "([^"]*)"$/) do |vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../div/a").click()
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(1)").find(:css, ".insert-new-vocab").click
 end
 
 When(/^I add "([^"]*)" as child for "([^"]*)"$/) do |value, vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").all(:xpath, ".//input[@value='#{vocab_name}']/../div/div").last.find(:css, "input[name='vocab_name[]']").set value
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(2)").find(:css, "input[name='vocab_name[]']").set value
 end
 
 When(/^I add "([^"]*)" as child description for "([^"]*)"$/) do |value, vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").all(:xpath, ".//input[@value='#{vocab_name}']/../div/div").last.find(:css, "input[name='vocab_description[]']").set value
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(2)").find(:css, "input[name='vocab_description[]']").set value
 end
 
 When(/^I add "([^"]*)" as child picture url for "([^"]*)"$/) do |value, vocab_name|
   attribute_id = find(:css, '#attribute')[:value]
-  find(:css, ".vocab-list-#{attribute_id}").all(:xpath, ".//input[@value='#{vocab_name}']/../div/div").last.find(:css, "input[name='picture_url[]']").set value
+  find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(2)").find(:css, "input[name='picture_url[]']").set value
 end
 
 When(/^I should see child vocabularies for "([^"]*)"$/) do |vocab_name, table|
   attribute_id = find(:css, '#attribute')[:value]
-  div = find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../div")
+  body = find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody")
   table.hashes.each do |hash|
-    div.should have_css("input[name='vocab_name[]'][value='#{hash[:name]}']")
-    div.should have_css("input[name='vocab_description[]'][value='#{hash[:description]}']")
-    div.should have_css("input[name='picture_url[]'][value='#{hash[:pictureURL]}']")
+    body.should have_css("input[name='vocab_name[]'][value='#{hash[:name]}']")
+    body.should have_css("input[name='vocab_description[]'][value='#{hash[:description]}']")
+    body.should have_css("input[name='picture_url[]'][value='#{hash[:pictureURL]}']")
   end
+end
+
+And /^I add child vocabs for "([^"]*)"$/ do |vocab_name, table|
+  attribute_id = find(:css, '#attribute')[:value]
+  table.hashes.each_with_index do |hash, index|
+    if index == 0
+      find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../..").find(".add-child").click
+    else
+      find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(1)").find(:css, ".insert-new-vocab").click
+    end
+    find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(2)").find(:css, "input[name='vocab_name[]']").set hash[:name]
+    find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(2)").find(:css, "input[name='vocab_description[]']").set hash[:description]
+    find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").find(:css, "tr:nth-last-child(2)").find(:css, "input[name='picture_url[]']").set hash[:picture_url]
+  end
+end
+
+Then /^I should see child vocabularies for "([^"]*)" in order$/ do |vocab_name, table|
+  attribute_id = find(:css, '#attribute')[:value]
+  vocabs1 = find(:css, ".vocab-list-#{attribute_id}").find(:xpath, ".//input[@value='#{vocab_name}']/../../table/tbody").all("input[name='vocab_name[]']").map {|n| n.value}
+  vocabs2 = table.hashes.map {|hash| hash[:name]}
+  vocabs1.should == vocabs2
 end
 
 When(/^Module "([^"]*)" should have the same file "([^"]*)"$/) do |project_module_name, file_name|
@@ -767,32 +805,8 @@ end
 
 And /^I select merge fields$/ do |table|
   table.hashes.each do |hash|
-    first(:xpath, "//td[contains(@class, 'merge-#{hash[:column]}')]/input[@type='radio'][./following-sibling::div/div/table/tbody/tr/td/h5[contains(text(), '#{hash[:field]}')]]").click
+    first(:xpath, "//td[contains(@class, 'merge-#{hash[:column]}')]/input[@type='radio'][./following-sibling::div/div/table/tbody/tr/td/h5[starts-with(normalize-space(text()), '#{hash[:field]}')]]").click
   end
-end
-
-And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
-  values = values_str.split(';')
-  values = [''] if values.empty?
-  values.each_with_index do |value, index|
-    value.strip!
-    type = get_field_type(field_type)
-    if type == 'vocab'
-      WAIT_RANGE.each do
-        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
-      end
-      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]/option[contains(text(),'#{value}')]")[index].select_option
-    else
-      WAIT_RANGE.each do
-        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]").size > 0
-      end
-      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]")[index].set value
-    end
-  end
-end
-
-And /^I click on update for attribute with field "([^"]*)"$/ do |field|
-  first(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[@value='Update']").click
 end
 
 And /^I update fields with values$/ do |table|
@@ -803,22 +817,37 @@ And /^I update fields with values$/ do |table|
   end
 end
 
+And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
+  values = values_str.split(';')
+  values = [''] if values.empty?
+  values.each_with_index do |value, index|
+    value = value.strip
+    type = get_field_type(field_type)
+    node = all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
+    if type == 'vocab'
+      node.find(:xpath, ".//select[contains(@name, '#{type}')]/option[contains(text(), '#{value}')]").select_option
+    else
+      node.find(:xpath, ".//input[contains(@name,'#{type}')]").set value
+    end
+  end
+end
+
+And /^I click on update for attribute with field "([^"]*)"$/ do |field|
+  field = find(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field.find(:xpath, ".//input[@value='Update']").click
+end
+
 And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
   values = values_str.split(';')
   values = [''] if values.empty?
   values.each_with_index do |value, index|
     value.strip!
     type = get_field_type(field_type)
+    node = all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
     if type == 'vocab'
-      WAIT_RANGE.each do
-        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]").size > 0
-      end
-      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/div/div/select[contains(@name, '#{type}')]/option[contains(text(),'#{value}')]")[index].text.should == value
+      node.find(:xpath, ".//select[contains(@name, '#{type}')]/option[contains(text(), '#{value}')]").text.should == value
     else
-      WAIT_RANGE.each do
-        break if all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]").size > 0
-      end
-      all(:xpath, "//div[@class = 'row-fluid']/label/h4[contains(text(),'#{field}')]/../../div/input[contains(@name,'#{type}')]")[index].value.should == value
+      node.find(:xpath, ".//input[contains(@name,'#{type}')]").value.should == value
     end
   end
 end
@@ -830,9 +859,6 @@ And /^I should see fields with values$/ do |table|
 end
 
 And /^I should see field "([^"]*)" with error "([^"]*)"$/ do |field, error|
-  WAIT_RANGE.each do
-    break if all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size > 0
-  end
   all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size.should == 1
 end
 
@@ -899,7 +925,6 @@ And /^I press "([^"]*)" for exporter "([^"]*)"$/ do |label, name|
   find(:xpath, "//*[contains(text(), \"#{name}\")]/..").find('input[type="submit"]').click
 end
 
-
 def get_field_type(type)
   if type == 'Annotation'
     'freetext'
@@ -910,4 +935,28 @@ def get_field_type(type)
   else
     'certainty'
   end
+end
+
+Then /^I should see attributes in order$/ do |table|
+  attributes1 = all('h4.attribute-name').map { |n| n.text }
+  attributes2 = table.hashes.map { |hash| hash[:name] }
+  attributes1.should == attributes2
+end
+
+Then /^I should see compare attributes in order$/ do |table|
+  attributes1 = all('.left .attribute-name').map { |n| n.text }
+  attributes2 = table.hashes.map { |hash| hash[:name] }
+  attributes1.should == attributes2
+end
+
+Then /^I should see history attributes in order$/ do |table|
+  attributes1 = all('.attribute-name').map { |n| n.text }
+  attributes2 = table.hashes.map { |hash| hash[:name] }
+  attributes1.should == attributes2
+end
+
+When /^I reorder attributes for "([^"]*)"$/ do |name, table|
+  project_module = ProjectModule.find_by_name(name)
+  project_module.db.reorder_attributes(table.hashes.map { |hash| hash[:name] })
+
 end

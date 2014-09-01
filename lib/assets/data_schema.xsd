@@ -55,6 +55,7 @@
                 <xs:complexType mixed="true">
                   <xs:sequence>
                     <xs:element type="xs:string" name="description" minOccurs="0"/>
+                    <xs:element type="xs:string" name="formatString" minOccurs="0"/>
                     <xs:element type="xs:string" name="bundle" maxOccurs="unbounded" minOccurs="0"/>
                     <xs:element name="lookup" minOccurs="0">
                       <xs:complexType>

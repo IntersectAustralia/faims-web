@@ -126,8 +126,6 @@ td.first h5, td.second h5 { margin: 0px; }
 td.first td, td.second td { padding: 10px 0 0 10px; border-top: 0px solid #EEE; }
 td.first .attribute-info, td.second .attribute-info { margin: 0 0 10px 0; padding: 0px 0 0px 10px; border-top: 0px solid #EEE; display: block; }
 
-
-.insert-new-vocab { margin: 20px 0 0 0; }
-.add-child {margin-bottom: 10px;}
+.vocab-button {margin-bottom: 10px; float: left}
 
 .exporter_interface_label { font-weight: bold; }

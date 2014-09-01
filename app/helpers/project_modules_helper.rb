@@ -24,7 +24,7 @@ module ProjectModulesHelper
     name[0..index-1] + " (#{count})" + name[index..-1]
   end
 
-  def compare_arch_entities(first_uuid,second_uuid,first_timestamp, second_timestamp, project_module)
+  def compare_arch_entities(first_uuid, second_uuid, first_timestamp, second_timestamp, project_module)
     first_arch_ent = project_module.db.get_arch_entity_attributes(first_uuid)
     second_arch_ent = project_module.db.get_arch_entity_attributes(second_uuid)
     @firstInfo = project_module.db.get_arch_ent_info(first_uuid, first_timestamp)[0][0]
@@ -38,24 +38,24 @@ module ProjectModulesHelper
     @first_attributeInfos = {}
     @second_attributeInfos = {}
     attributeKeys.each do |attributeKey|
-      if(!@firstAttributeGroup[attributeKey].nil?)
+      if @firstAttributeGroup[attributeKey] and @firstAttributeGroup[attributeKey][0][9] and @firstAttributeGroup[attributeKey][0][1]
         first_info = project_module.db.get_arch_ent_attribute_info(first_uuid,@firstAttributeGroup[attributeKey][0][9],@firstAttributeGroup[attributeKey][0][1])
         @first_attributeInfos[attributeKey] = first_info[0][0]
       end
-      if(!@secondAttributeGroup[attributeKey].nil?)
+      if @secondAttributeGroup[attributeKey] and @secondAttributeGroup[attributeKey][0][9] and @secondAttributeGroup[attributeKey][0][1]
         second_info = project_module.db.get_arch_ent_attribute_info(second_uuid,@secondAttributeGroup[attributeKey][0][9],@secondAttributeGroup[attributeKey][0][1])
         @second_attributeInfos[attributeKey] = second_info[0][0]
       end
 
-      if(@firstAttributeGroup[attributeKey].nil? || @secondAttributeGroup[attributeKey].nil?)
+      if @firstAttributeGroup[attributeKey].nil? || @secondAttributeGroup[attributeKey].nil?
         @attributeKeys[attributeKey] = false
       else
-        if(@firstAttributeGroup[attributeKey].length.eql?(@secondAttributeGroup[attributeKey].length))
+        if @firstAttributeGroup[attributeKey].length.eql?(@secondAttributeGroup[attributeKey].length)
           @firstAttributeGroup[attributeKey].length.times do |i|
-            if(@firstAttributeGroup[attributeKey][i-1][4].eql?(@secondAttributeGroup[attributeKey][i-1][4]) &&
+            if @firstAttributeGroup[attributeKey][i-1][4].eql?(@secondAttributeGroup[attributeKey][i-1][4]) &&
                 @firstAttributeGroup[attributeKey][i-1][5].eql?(@secondAttributeGroup[attributeKey][i-1][5]) &&
                 @firstAttributeGroup[attributeKey][i-1][6].eql?(@secondAttributeGroup[attributeKey][i-1][6]) &&
-                @firstAttributeGroup[attributeKey][i-1][7].eql?(@secondAttributeGroup[attributeKey][i-1][7]))
+                @firstAttributeGroup[attributeKey][i-1][7].eql?(@secondAttributeGroup[attributeKey][i-1][7])
               @attributeKeys[attributeKey] = true
             else
               @attributeKeys[attributeKey] = false
@@ -121,7 +121,7 @@ module ProjectModulesHelper
 
   def show_arch_ent_attributes_history(project_module, timestamps)
     @history_rows = {}
-    @history_keys = ['Geospatial']
+    @history_keys = []
 
     timestamps.each do |timestamp|
       attributes = project_module.db.get_arch_ent_attributes_at_timestamp(timestamp[0], timestamp[1])
@@ -143,7 +143,7 @@ module ProjectModulesHelper
           userid: attribute[10],
           isforked: attribute[12]
         }
-        row['Geospatial'] = cell
+        row['Geometry'] = cell
 
         # attribute cell data
         cell = {
@@ -164,11 +164,13 @@ module ProjectModulesHelper
 
       @history_rows[timestamp[1]] = row
     end
+
+    @history_keys << 'Geometry'
   end
 
   def show_rel_attributes_history(project_module,timestamps)
     @history_rows = {}
-    @history_keys = ['Geospatial']
+    @history_keys = []
 
     timestamps.each do |timestamp|
       attributes = project_module.db.get_rel_attributes_at_timestamp(timestamp[0], timestamp[1])
@@ -190,7 +192,7 @@ module ProjectModulesHelper
             userid: attribute[10],
             isforked: attribute[12]
         }
-        row['Geospatial'] = cell
+        row['Geometry'] = cell
 
         # attribute cell data
         cell = {
@@ -211,6 +213,8 @@ module ProjectModulesHelper
 
       @history_rows[timestamp[1]] = row
     end
+
+    @history_keys << 'Geometry'
   end
 
   def vocab_breadcrumb(vocab, id_to_vocab)
@@ -250,12 +254,12 @@ module ProjectModulesHelper
 
     vocabs.each do |v|
       parent_vocab_id = v[:parent_vocab_id]
-      temp_parent_id = v[:temp_parent_id]
+      parent_temp_id = v[:parent_temp_id]
       if parent_vocab_id == nil || !map.has_key?(parent_vocab_id)
-        if temp_parent_id.blank? || !map.has_key?(temp_parent_id)
+        if parent_temp_id.blank? || !map.has_key?(parent_temp_id)
           (@grouped_vocabs[nil] ||= []) << v
         else
-          (@grouped_vocabs[temp_parent_id] ||= []) << v
+          (@grouped_vocabs[parent_temp_id] ||= []) << v
         end
       else
         (@grouped_vocabs[parent_vocab_id] ||= []) << v

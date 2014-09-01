@@ -417,13 +417,14 @@ describe 'Web Database Queries' do
   end
 
   it 'Get arch entity attributes for comparison', :ignore_jenkins => true do
-    expected = [[1000011365058835006, "location", "34768", "dropdown", "2013-05-06 02:10:05", "Loc A (35.0% certain) | Loc B (49.0% certain) | Loc C (56.0% certain)"],
-                [1000011365058835006, "name", "17136", "string", "2013-05-06 07:02:48", "Ballsun-Stanton (100.0% certain) | Brian (100.0% certain)"],
-                [1000011365058835006, "picture", "38416", "dropdown", "2013-04-30 01:57:54", "cugl69808.jpg (; 38.0% certain)"],
-                [1000011365058835006, "supervisor", "53296", "radiogroup", "2013-04-30 01:57:54", "superc (66.0% certain)"],
-                [1000011365058835006, "timestamp", "29344", "timestamp", "2013-04-30 01:57:54", "2013-04-04 17:59:58 (66.0% certain)"],
-                [1000011365058835006, "type", "31072", "checklist", "2013-04-30 01:57:54", "Type C (; 39.0% certain)"],
-                [1000011365058835006, "value", "27616", "integer", "2013-05-06 04:12:15", "743895 (100.0% certain) | 965129 (100.0% certain) | 662605 (100.0% certain) | 133500 (100.0% certain) | 835655 (100.0% certain) | 809098 (100.0% certain) | 918434 (100.0% certain) | 121551 (100.0% certain) | 303306 (100.0% certain) | 862096 (100.0% certain) | 810461 (100.0% certain) | 427823 (100.0% certain) | 610287 (100.0% certain) | 412728 (100.0% certain) | 146620 (100.0% certain) | 747748 (100.0% certain) | 17115 (100.0% certain) | 548408 (100.0% certain) | 235159 (100.0% certain) | 736398 (100.0% certain)"]]
+    expected = [[1000011365058835006, "location", "34768", "dropdown", "2013-05-06 02:10:05", "Loc A (35.0% certain) | Loc B (49.0% certain) | Loc C (56.0% certain)", nil],
+                [1000011365058835006, "name", "17136", "string", "2013-05-06 07:02:48", "Ballsun-Stanton (100.0% certain) | Brian (100.0% certain)", nil],
+                [1000011365058835006, "picture", "38416", "dropdown", "2013-04-30 01:57:54", "cugl69808.jpg (; 38.0% certain)", nil],
+                [1000011365058835006, "supervisor", "53296", "radiogroup", "2013-04-30 01:57:54", "superc (66.0% certain)", nil],
+                [1000011365058835006, "timestamp", "29344", "timestamp", "2013-04-30 01:57:54", "2013-04-04 17:59:58 (66.0% certain)", nil],
+                [1000011365058835006, "type", "31072", "checklist", "2013-04-30 01:57:54", "Type C (; 39.0% certain)", nil],
+                [1000011365058835006, "value", "27616", "integer", "2013-05-06 04:12:15", "17115 (100.0% certain) | 121551 (100.0% certain) | 133500 (100.0% certain) | 146620 (100.0% certain) | 235159 (100.0% certain) | 303306 (100.0% certain) | 412728 (100.0% certain) | 427823 (100.0% certain) | 548408 (100.0% certain) | 610287 (100.0% certain) | 662605 (100.0% certain) | 736398 (100.0% certain) | 743895 (100.0% certain) | 747748 (100.0% certain) | 809098 (100.0% certain) | 810461 (100.0% certain) | 835655 (100.0% certain) | 862096 (100.0% certain) | 918434 (100.0% certain) | 965129 (100.0% certain)", nil]
+    ]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)

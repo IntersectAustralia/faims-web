@@ -1,23 +1,42 @@
-- if !@grouped_vocabs[key].nil?
-  %div{class: 'vocab-row', style: "margin-left: #{indent * 25}px"}
-    - @grouped_vocabs[key].each_with_index do |v, index|
-      - if index == 0 && indent == 0
-        %label.span3
-          ='Name'
-        %label.span3
-          ='Description'
-        %label.span3
-          ='Picture URL'
-      - class_name = indent ? 'vocab-row well':'vocab-row row-fluid well'
-      %div{class: class_name}
-        %input.span3{:type => 'hidden', :name => 'temp_id[]', :value => v[:temp_id]}
-        %input.span3{:type => 'hidden', :name => 'temp_parent_id[]', :value => v[:temp_parent_id]}
-        %input.span3{:type => 'hidden', :name => 'vocab_id[]', :value => v[:vocab_id]}
-        %input.span3{:type => 'hidden', :name => 'parent_vocab_id[]', :value => v[:parent_vocab_id]}
-        %input.span3{:type => 'text', :name => 'vocab_name[]', :value => v[:vocab_name]}
-        %input.span3{:type => 'text', :name => 'vocab_description[]', :value => v[:vocab_description]}
-        %input.span3{:type => 'text', :name => 'picture_url[]', :value => v[:picture_url]}
-        - if @grouped_vocabs[v[:vocab_id].blank? ? v[:temp_id] : v[:vocab_id] ].nil?
-          = link_to "Add Child",'#', :class => "btn add-child"
-        = render :partial => 'create_vocabularies_table', :locals => {key: v[:vocab_id].blank? ? v[:temp_id] : v[:vocab_id], indent: 1}
-    = link_to "Insert",'#', :class => "btn btn-block insert-new-vocab"
+- if @grouped_vocabs[key]
+  %table.vocab-container{style: "margin-left: #{vocab_level > 0 ? 25 : 0}px"}
+    - @grouped_vocabs[key].each_with_index do |vocab, index|
+      - if index == 0
+        %tr
+          %td
+            .span2
+              %label
+              ='Name'
+            .span2
+              %label
+                ='Description'
+            .span2
+              %label
+                ='Picture URL'
+            .span3
+      %tr
+        %td
+          - vocab_key = vocab[:vocab_id].blank? ? vocab[:temp_id] : vocab[:vocab_id]
+          %input{:type => 'hidden', :name => 'temp_id[]', :value => vocab[:temp_id]}
+          %input{:type => 'hidden', :name => 'parent_temp_id[]', :value => vocab[:parent_temp_id]}
+          %input{:type => 'hidden', :name => 'vocab_id[]', :value => vocab[:vocab_id]}
+          %input{:type => 'hidden', :name => 'parent_vocab_id[]', :value => vocab[:parent_vocab_id]}
+          .span2
+            %input.span2{:type => 'text', :name => 'vocab_name[]', :value => vocab[:vocab_name]}
+          .span2
+            %input.span2{:type => 'text', :name => 'vocab_description[]', :value => vocab[:vocab_description]}
+          .span2
+            %input.span2{:type => 'text', :name => 'picture_url[]', :value => vocab[:picture_url]}
+          .span3
+            = link_to '#', :class => 'btn vocab-button move-up' do
+              %i.icon-arrow-up
+            = link_to '#', :class => 'btn vocab-button move-down' do
+              %i.icon-arrow-down
+            - if @grouped_vocabs[vocab_key].nil?
+              = link_to 'Add Child','#', :class => 'btn vocab-button add-child'
+          - if @grouped_vocabs[vocab_key]
+            = render :partial => 'create_vocabularies_table', :locals => {key: vocab_key, vocab_level: 1}
+    %tr.insert-row
+      %td
+        .span2
+          = link_to 'Insert', '#', :class => 'btn vocab-button insert-new-vocab'

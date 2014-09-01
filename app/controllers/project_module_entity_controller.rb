@@ -146,9 +146,8 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.update_arch_entity_attribute(uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
 
-      # TODO add new query to return attributes dirty flag and reason
       @attributes = @project_module.db.get_arch_entity_attributes(uuid)
-      errors = @attributes.select { |a| a[1] == attribute_id }.map { |a| a[11] }.first
+      errors = @attributes.select { |a| a[1].to_s == attribute_id }.map { |a| a[11] }.first
 
       render json: { result: 'success', errors: errors }
     end

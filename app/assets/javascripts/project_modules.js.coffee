@@ -109,7 +109,7 @@ show_export_modal_dialog = ->
       $('#loading').dialog('open')
       form = $(this).attr('id').replace("export_module_","")
       postData = $("#" + form).find('form').serializeArray()
-      if $("#" + form).find("*").filter('[required]:visible').filter(-> return $(this).val().trim() == ""; ).size() != 0
+      if $("#" + form).find("*").filter('[required]:visible').filter(-> return $(this).val().trim() == "").size() != 0
         $('#loading').addClass('hidden')
         $('#loading').dialog('destroy')
         return
@@ -414,6 +414,7 @@ history_management = ->
 
 vocab_management = ->
   temp_id = 0
+
   $('.show input[name="temp_id[]"]').each(
     ->
       if $(this).val() != "" && $(this).val() != undefined
@@ -447,54 +448,100 @@ vocab_management = ->
 
   $(document).on('click', '.insert-new-vocab',
     ->
-      parent_vocab_id = $($(this).parent('.vocab-row').children('div')[0]).find('input[name="parent_vocab_id[]"]').val()
-      parent_id = $($(this).parents('.vocab-row').children('div')[0]).find('input[name="temp_parent_id[]"]').val()
+      row = $(this).parents('.vocab-container:first').find('tr:first').next()
 
-      value = '<div class="vocab-new vocab-row well" ><input class="span3" type="hidden" name="temp_id[]" value="' + temp_id + '"/>'
-      if parent_id == undefined
-        value += '<input class="span3" type="hidden" name="temp_parent_id[]"/>'
+      parent_temp_id = row.find('input[name="parent_temp_id[]"]').val()
+      parent_vocab_id = row.find('input[name="parent_vocab_id[]"]').val()
+
+      value = '<tr><td>'
+      value += '<input name="temp_id[]" type="hidden" value="' + temp_id + '"/>'
+      if parent_temp_id == undefined
+        value += '<input name="parent_temp_id[]" type="hidden"/>'
       else
-        value += '<input class="span3" type="hidden" name="temp_parent_id[]" value="'+ parent_id + '"/>'
-
+        value += '<input name="parent_temp_id[]" type="hidden" value="'+ parent_temp_id + '"/>'
+      value += '<input name="vocab_id[]" type="hidden"/>'
       if parent_vocab_id == undefined
-        value += '<input class="span3" type="hidden" name="parent_vocab_id[]"/>'
+        value += '<input name="parent_vocab_id[]" type="hidden"/>'
       else
-        value += '<input class="span3" type="hidden" name="parent_vocab_id[]"value="'+ parent_vocab_id + '"/>'
+        value += '<input name="parent_vocab_id[]" type="hidden" value="'+ parent_vocab_id + '"/>'
+      value += '<div class="span2"><input class="span2" name="vocab_name[]" type="text"/></div>'
+      value += '<div class="span2"><input class="span2" name="vocab_description[]" type="text"/></div>'
+      value += '<div class="span2"><input class="span2" name="picture_url[]" type="text"/></div>'
+      value += '<div class="span3">'
+      value += '<a href="#" class="btn vocab-button move-up"><i class="icon-arrow-up"/></a>'
+      value += '<a href="#" class="btn vocab-button move-down"><i class="icon-arrow-down"/></a>'
+      value += '<a href="#" class="btn vocab-button add-child">Add Child</a>'
+      value += '</div>'
+      value += '</td></tr>'
 
-      value += '<input class="span3" type="hidden" name="vocab_id[]"/><input class="span3" type="text" name="vocab_name[]"/> '
-      value += '<input class="span3" type="text" name="vocab_description[]"/> <input class="span3" type="text" name="picture_url[]"/> '
-      value += '<a href="#" class="btn add-child">Add Child</a></div>'
       temp_id += 1
-      $(this).before($(value).fadeIn('slow'))
+
+      $(this).parents('.vocab-container:first').find('tr:last').before($(value))
+
       return false
   )
 
   $(document).on('click', '.add-child',
   ->
-    div = $(this).parents('div')[0]
-    parent_vocab_id = $(div).find('input[name="vocab_id[]"]').val()
-    parent_id = $(div).find('input[name="temp_id[]"]').val()
-    value = '<div class="vocab-row" style="margin-left: 25px"><div class="vocab-new vocab-row well"><input class="span3" type="hidden" name="temp_id[]" value="' + temp_id + '"/>'
-    if parent_id == ""
-      value += '<input class="span3" type="hidden" name="temp_parent_id[]"/>'
-    else
-      value += '<input class="span3" type="hidden" name="temp_parent_id[]" value="'+parent_id+'"/>'
+    row = $(this).parents('tr:first')
 
-    if parent_vocab_id == ""
-      value += '<input class="span3" type="hidden" name="parent_vocab_id[]"/>'
-    else
-      value += '<input class="span3" type="hidden" name="parent_vocab_id[]" value="'+ parent_vocab_id + '"/>'
+    parent_temp_id = row.find('input[name="temp_id[]"]').val()
+    parent_vocab_id = row.find('input[name="vocab_id[]"]').val()
 
-    value += '<input class="span3" type="hidden" name="vocab_id[]"/><input class="span3" type="text" name="vocab_name[]"/> '
-    value += '<input class="span3" type="text" name="vocab_description[]"/> <input class="span3" type="text" name="picture_url[]"/> '
-    value += '<a href="#" class="btn add-child">Add Child</a></div><a href="#" class="btn btn-block insert-new-vocab" style="display:block">Insert</a></div>'
-    if $(div).find('.insert-new-vocab').length == 0
-      $(div).append($(value).fadeIn('slow'))
+    value = '<table class="vocab-container" style="margin-left: 25px"><tbody>'
+
+    value += '<tr><td>'
+    value += '<div class="span2"><label class="span2">Name</label></div>'
+    value += '<div class="span2"><label class="span2">Description</label></div>'
+    value += '<div class="span2"><label class="span2">Picture URL</label></div>'
+    value += '<div class="span3"></div>'
+    value += '</td></tr>'
+
+    value += '<tr><td>'
+    value += '<input name="temp_id[]" type="hidden" value="' + temp_id + '"/>'
+    if parent_temp_id == undefined
+      value += '<input name="parent_temp_id[]" type="hidden"/>'
     else
-      $(div).find('.insert-new-vocab').before($(value).fadeIn('slow'))
-    $(this).remove()
+      value += '<input name="parent_temp_id[]" type="hidden" value="'+ parent_temp_id + '"/>'
+    value += '<input name="vocab_id[]" type="hidden"/>'
+    if parent_vocab_id == undefined
+      value += '<input name="parent_vocab_id[]" type="hidden"/>'
+    else
+      value += '<input name="parent_vocab_id[]" type="hidden" value="'+ parent_vocab_id + '"/>'
+    value += '<div class="span2"><input class="span2" name="vocab_name[]" type="text"/></div>'
+    value += '<div class="span2"><input class="span2" name="vocab_description[]" type="text"/></div>'
+    value += '<div class="span2"><input class="span2" name="picture_url[]" type="text"/></div>'
+    value += '<div class="span3">'
+    value += '<a href="#" class="btn vocab-button move-up"><i class="icon-arrow-up"/></a>'
+    value += '<a href="#" class="btn vocab-button move-down"><i class="icon-arrow-down"/></a>'
+    value += '<a href="#" class="btn vocab-button add-child">Add Child</a>'
+    value += '</div>'
+    value += '</td></tr>'
+
+    value += '<tr class="insert-row"><td><div class="span2"><a href="#" class="btn vocab-button insert-new-vocab">Insert</a></div></td></tr>'
+    value += '</tbody></table>'
+
     temp_id += 1
 
+    row.find('td').append($(value))
+    $(this).remove()
+
+    return false
+  )
+
+  $(document).on('click', '.move-up',
+  ->
+    row = $(this).parents('tr:first')
+    unless row.prev().prev().size() == 0
+      row.prev().before(row)
+    return false
+  )
+
+  $(document).on('click', '.move-down',
+  ->
+    row = $(this).parents('tr:first')
+    unless row.next().next().size() == 0
+      row.next().after(row)
     return false
   )
 

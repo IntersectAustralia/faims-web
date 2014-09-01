@@ -296,19 +296,14 @@ EOF
 
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, isDirty, isDirtyReason
-    FROM aentvalue
-    JOIN attributekey USING (attributeid)
-    LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-    JOIN (SELECT uuid, attributeid, valuetimestamp
-            FROM aentvalue
-            JOIN archentity USING (uuid)
-           WHERE uuid = ?
-        GROUP BY uuid, attributeid
-          HAVING MAX(ValueTimestamp)
-             AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-    WHERE deleted is NULl
- ORDER BY uuid, attributename ASC;
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, av.isDirty, av.isDirtyReason
+from latestnondeletedarchent
+join idealaent using (aenttypeid)
+join attributekey using (attributeid)
+left outer join latestnondeletedaentvalue av using (uuid, attributeid)
+left outer join vocabulary using (vocabid, attributeid)
+where uuid = ?
+order by AEntCountOrder, VocabCountOrder, valuetimestamp;
 EOF
     )
   end
@@ -426,7 +421,7 @@ EOF
 
   def self.get_arch_ent_attribute_for_comparison
     cleanup_query(<<EOF
-   select uuid, attributename, attributeid, attributetype, valuetimestamp, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+select uuid, attributename, attributeid, attributetype, valuetimestamp, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
                                                                                               measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                               vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
                                                                                               measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
@@ -437,22 +432,21 @@ EOF
                                                                                               freetext   || ' (' || (certainty * 100.0) || '% certain)',
                                                                                               measure,
                                                                                               vocabname,
-                                                                                              freetext), ' | ') as response
-FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp
-          FROM aentvalue
-          JOIN attributekey USING (attributeid)
-          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-          JOIN (SELECT uuid, attributeid, valuetimestamp
-                  FROM aentvalue
-                  JOIN archentity USING (uuid)
-                 WHERE archentity.deleted is NULL
-                 AND uuid = ?
-              GROUP BY uuid, attributeid
-                HAVING MAX(ValueTimestamp)
-                   AND MAX(AEntTimestamp)) USING (uuid, attributeid, valuetimestamp)
-          WHERE deleted is NULl
-       ORDER BY uuid, attributename ASC)
-group by uuid, attributename;
+                                                                                              freetext), ' | ') as response, group_concat(vocabcountorder)
+
+
+
+FROM (
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, av.isDirty, av.isDirtyReason, aentcountorder, vocabcountorder
+from latestnondeletedarchent
+join idealaent using (aenttypeid)
+join attributekey using (attributeid)
+left outer join latestnondeletedaentvalue av using (uuid, attributeid)
+left outer join vocabulary using (vocabid, attributeid)
+where uuid = ?
+order by AEntCountOrder, vocabcountorder)
+group by uuid, attributename
+order by AEntCountOrder, vocabcountorder;
 EOF
     )
   end
@@ -487,11 +481,12 @@ select uuid, attributename, attributeid, group_concat(DISTINCT afname || ' ' || 
                                                                                              measure,
                                                                                              vocabname,
                                                                                              freetext), ' | ') as response, auserid, vuserid, aentforked, avalforked, valdeleted
-FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp, aentuser.userid as auserid, valueuser.userid as vuserid, archentity.isforked as aentforked, aentvalue.isforked as avalforked
-         FROM aentvalue
+FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp, aentuser.userid as auserid, valueuser.userid as vuserid, archentity.isforked as aentforked, aentvalue.isforked as avalforked, aentcountorder, vocabcountorder
+         FROM archentity
+         join idealaent using (aenttypeid)
          JOIN attributekey USING (attributeid)
+         left outer join aentvalue using (uuid, attributeid)
          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-         join archentity using (uuid)
          JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp
                  FROM aentvalue
                 WHERE uuid = ?
@@ -505,8 +500,9 @@ FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as a
              GROUP BY uuid) USING (uuid, aenttimestamp)
          left outer join user as aentuser on (aentuser.userid = archentity.userid)
          left outer join user as valueuser on (valueuser.userid = aentvalue.userid)
-      ORDER BY uuid, attributename ASC, archentity.deleted desc)
-group by uuid, attributename;
+      ORDER BY uuid,  AEntCountOrder, vocabcountorder, archentity.deleted desc)
+group by uuid, attributename
+order by uuid, aentcountorder, vocabcountorder;
 EOF
     )
   end
@@ -1669,16 +1665,17 @@ EOF
 
   def self.get_vocabs_for_attribute
     cleanup_query(<<EOF
-    select attributeid, vocabid, vocabname, vocabdescription, pictureurl, parentvocabid
+    select attributeid, vocabid, vocabname, vocabdescription, pictureurl, parentvocabid, vocabcountorder
       from vocabulary
-      where attributeid = ?;
+      where attributeid = ?
+      order by vocabcountorder;
 EOF
     )
   end
 
   def self.update_attributes_vocab
     cleanup_query(<<EOF
-    insert or replace into vocabulary (vocabid, attributeid, vocabname, vocabdescription, pictureurl, parentvocabid) VALUES(?, ?, ?, ?, ?, ?);select last_insert_rowid();
+    insert or replace into vocabulary (vocabid, attributeid, vocabname, vocabdescription, pictureurl, parentvocabid, VocabCountOrder) VALUES(?, ?, ?, ?, ?, ?, ?);select last_insert_rowid();
 EOF
     )
   end

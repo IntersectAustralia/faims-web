@@ -760,18 +760,23 @@ class Database
     vocabs
   end
 
-  def update_attributes_vocab(attribute_id, temp_id, temp_parent_id, vocab_id, parent_vocab_id, vocab_name, vocab_description, picture_url, userid)
+  def update_attributes_vocab(attribute_id, temp_id, parent_temp_id, vocab_id, parent_vocab_id, vocab_name, vocab_description, picture_url, userid)
     @db.transaction do |db|
       db.execute(WebQuery.insert_version, current_timestamp, userid)
       temp_id_vocab_mapping = {}
 
+      vocab_index_mapping = {}
+
       vocab_id.length.times do |i|
         vocab_id[i] = vocab_id[i].blank? ? nil : vocab_id[i]
 
-        parent_vocab_ids = parent_vocab_id[i].blank? ? temp_id_vocab_mapping[temp_parent_id[i]] : parent_vocab_id[i]
-        db.execute(WebQuery.update_attributes_vocab, vocab_id[i], attribute_id,vocab_name[i], vocab_description[i], picture_url[i], parent_vocab_ids)
+        parent_vocab_ids = parent_vocab_id[i].blank? ? temp_id_vocab_mapping[parent_temp_id[i]] : parent_vocab_id[i]
 
-        if !temp_id[i].blank?
+        vocab_index_mapping[parent_vocab_ids] = vocab_index_mapping[parent_vocab_ids] ? vocab_index_mapping[parent_vocab_ids] + 1 : 1
+
+        db.execute(WebQuery.update_attributes_vocab, vocab_id[i], attribute_id, vocab_name[i], vocab_description[i], picture_url[i], parent_vocab_ids, vocab_index_mapping[parent_vocab_ids])
+
+        unless temp_id[i].blank?
           new_vocab_id = db.last_insert_row_id
           temp_id_vocab_mapping[temp_id[i]] = new_vocab_id
         end
@@ -921,6 +926,14 @@ class Database
 
   def current_timestamp
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
+  end
+
+  # test method
+  def reorder_attributes(names)
+    # this is used by automated tests and is hardcoded for the sync example
+    names.each_with_index do |name, index|
+      @db.execute("update idealAent set aentCountOrder = #{index + 1} where attributeid = (select attributeid from attributekey where attributename = '#{name}') and aenttypeid = (select aenttypeid from aenttype where aenttypename = 'small')")
+    end
   end
 
   private

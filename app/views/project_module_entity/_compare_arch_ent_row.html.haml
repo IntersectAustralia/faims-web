@@ -1,13 +1,13 @@
-- if !group[key].nil?
+- if group[key]
   - if (checked)
     %input{:type => 'radio', :checked => 'checked'}
-    .attrib.selected
+    .attrib.selected.left
       = render :partial => 'compare_arch_ent_row_content', :locals => { group: group, key: key, value: value }
       %span.attribute-info
         = attributeInfo[key]
   - else
     %input{:type => 'radio'}
-    .attrib
+    .attrib.right
       = render :partial => 'compare_arch_ent_row_content', :locals => { group: group, key: key, value: value }
       %span.attribute-info
         = attributeInfo[key]

@@ -46,7 +46,7 @@
           - for attribute in val
             .row-fluid
               %label.span3
-                %h4=key
+                %h4.attribute-name=key
               - if !@vocab_name[attribute[1]].empty?
                 .span2
                   - vocabs = @vocab_name[attribute[1]]

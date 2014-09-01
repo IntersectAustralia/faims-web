@@ -6,10 +6,11 @@ VACUUM;
 
 -- The user table is incomplete. It however, holds user information.
 CREATE TABLE User (
-  UserID  INTEGER PRIMARY KEY,
-  FName   TEXT NOT NULL,
-  LName   TEXT NOT NULL,
-  Email   TEXT NOT NULL
+  UserID      INTEGER PRIMARY KEY,
+  FName       TEXT NOT NULL,
+  LName       TEXT NOT NULL,
+  Email       TEXT NOT NULL,
+  UserDeleted BOOLEAN
 );
 
 
@@ -46,7 +47,8 @@ CREATE TABLE AttributeKey (
   AttributeID          INTEGER PRIMARY KEY,
   AttributeType        TEXT, -- this is typing for external tools. It has no bearing internally
   AttributeName        TEXT NOT NULL, -- effectively column name
-  AttributeDescription TEXT -- human-entered description for the "column"
+  AttributeDescription TEXT, -- human-entered description for the "column"
+  FormatString         TEXT
 );
 
 -- TODO tweak indexes for performance
@@ -67,6 +69,8 @@ CREATE TABLE Vocabulary (
   SemanticMapURL   TEXT,
   PictureURL       TEXT, -- relative path.
   VocabDescription TEXT,
+  VocabCountOrder  INTEGER,
+  VocabDeleted     TEXT,
   ParentVocabID    INTEGER REFERENCES Vocabulary (VocabID)
 );
 
@@ -83,10 +87,10 @@ CREATE TABLE RelnType (
   RelnTypeDescription TEXT, -- human description explaining purpose of the relationship type
   RelnTypeCategory    TEXT, -- This is, actually, important. It identifies the *category* of relationship-meatphor: hierarchial, container, or bidirectional.
   Parent              TEXT, -- This is the text string that serves to identify, for categories of type hierarchial, the "participatesverb"
-								            -- that identifies a parent. It should be possible, using this, to select all parents in a specific
-								            -- hierarchial relationship by constraining the search to this term.
-  Child               TEXT  -- As above, but for the other side of the hierarchial relationship. Relationships of other category/metaphor do not need
-								            -- participation verbs
+								  -- that identifies a parent. It should be possible, using this, to select all parents in a specific
+								  -- hierarchial relationship by constraining the search to this term.
+  Child               TEXT -- As above, but for the other side of the hierarchial relationship. Relationships of other category/metaphor do not need
+								 -- participation verbs
 );
 
 
@@ -99,6 +103,7 @@ CREATE TABLE IdealAEnt (
 									 -- what subset of rows
   MinCardinality  INTEGER, -- It is theoretically possible to use these to power script-level validation
   MaxCardinality  INTEGER,
+  AEntCountOrder  INTEGER,
   CONSTRAINT IdealAEntPK PRIMARY KEY (AEntTypeID, AttributeID)
 );
 
@@ -153,6 +158,7 @@ CREATE TABLE AentValue (
 
 
 CREATE INDEX aentvalueindex ON AentValue (uuid, attributeid, valuetimestamp DESC);
+CREATE INDEX aentvaluelookupindex ON AentValue (uuid, attributeid, valuetimestamp DESC, freetext, vocabid, measure);
 
 
 CREATE TABLE Relationship (

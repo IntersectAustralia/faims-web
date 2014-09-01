@@ -18,7 +18,7 @@
         - selected = attribute_id.to_s == @attribute_id.to_s ? 'show' : 'hide'
         %div{class: "vocab-list vocab-list-#{attribute_id} #{selected}"}
           - group_vocabularies(vocabs)
-          = render :partial => 'create_vocabularies_table', :locals => {key: nil, indent: 0}
+          = render :partial => 'create_vocabularies_table', :locals => {key: nil, vocab_level: 0}
   - show_buttons = @attribute_id.blank? ? 'hide' : ''
 .form-actions
   = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
