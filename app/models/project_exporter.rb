@@ -115,11 +115,11 @@ class ProjectExporter
     result
   end
 
-  def export(module_tarball, input_json, download_dir, markup_file)
+  def export(module_dir, input_json, download_dir, markup_file)
     # check if export script exists
     raise ProjectExporterException, "Exporter doesn't contain export.sh script" unless File.exists? get_path(:export_script)
 
-    params = [module_tarball, input_json, download_dir, markup_file].join(" ")
+    params = [module_dir, input_json, download_dir, markup_file].join(" ")
 
     # run the export script
     execute_script(File.basename(get_path(:export_script)), params)
