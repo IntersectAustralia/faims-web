@@ -94,14 +94,13 @@ class ProjectModuleFileController < ProjectModuleBaseController
       else
         @project_module.data_mgr.with_shared_lock do
           if params[:path] == '.'
-            safe_delete_directory @project_module.get_path(:data_files_dir)
-            safe_create_directory @project_module.get_path(:data_files_dir)
+            @project_module.remove_data_dir(@project_module.get_path(:data_files_dir))
             flash.now[:notice] = 'Deleted directory.'
           elsif File.directory? file
-            safe_delete_directory file
+            @project_module.remove_data_dir file
             flash.now[:notice] = 'Deleted directory.'
           else
-            safe_delete_file file
+            @project_module.remove_data_file file
             flash.now[:notice] = 'Deleted file.'
           end
 

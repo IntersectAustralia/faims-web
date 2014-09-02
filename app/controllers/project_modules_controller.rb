@@ -150,7 +150,6 @@ class ProjectModulesController < ProjectModuleBaseController
   end
 
   def restore_project_module
-    logger.debug params
     @project_module = ProjectModule.deleted.find(params[:restore_id])
 
     if @project_module.deleted

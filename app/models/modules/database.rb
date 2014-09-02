@@ -784,6 +784,48 @@ class Database
     end
   end
 
+  # FILE HELPERS
+
+  def get_files(type)
+    files = []
+    @db.transaction do |db|
+      db.execute(WebQuery.get_files_for_type, type).each do |result|
+        files << {
+            filename: result[0],
+            md5checksum: result[1],
+            size: result[2],
+            type: result[3],
+            state: result[4],
+            timestamp: result[5],
+            deleted: result[6],
+            thumbnail_filename: result[7],
+            thumbnail_md5checksum: result[8],
+            thumbnail_size: result[9],
+        }
+      end
+    end
+    files
+  end
+
+  def insert_file(info)
+    @db.transaction do |db|
+      db.execute(WebQuery.insert_or_update_file, info[:filename], info[:md5checksum], info[:size], info[:type], info[:state], current_timestamp, info[:deleted],
+                 info[:thumbnail_filename], info[:thumbnail_md5checksum], info[:thumbnail_size])
+    end
+  end
+
+  def remove_files(type)
+    @db.transaction do |db|
+      db.execute(WebQuery.remove_files, type)
+    end
+  end
+
+  def delete_file(file)
+    @db.transaction do |db|
+      db.execute(WebQuery.delete_file, file)
+    end
+  end
+
   # DATABASE HELPERS
 
   def current_version
@@ -928,7 +970,7 @@ class Database
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
   end
 
-  # test method
+  # TEST helpers
   def reorder_attributes(names)
     # this is used by automated tests and is hardcoded for the sync example
     names.each_with_index do |name, index|

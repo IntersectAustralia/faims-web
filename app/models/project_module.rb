@@ -5,6 +5,12 @@ class ProjectModule < ActiveRecord::Base
   include MD5Checksum
   include SecurityHelper
 
+  SETTINGS = 'settings'
+  DB = 'db'
+  DATA = 'data'
+  APP = 'app'
+  SERVER = 'server'
+
   class ProjectModuleException < Exception
   end
 
@@ -218,7 +224,7 @@ class ProjectModule < ActiveRecord::Base
 
   def settings_mgr
     return @settings_mgr if @settings_mgr
-    @settings_mgr = FileManager.new('settings', get_path(:project_module_dir), get_path(:project_module_dir))
+    @settings_mgr = FileManager.new(SETTINGS, get_path(:project_module_dir), get_path(:project_module_dir))
     @settings_mgr.add_file(get_path(:ui_schema))
     @settings_mgr.add_file(get_path(:ui_logic))
     @settings_mgr.add_file(get_path(:settings))
@@ -229,28 +235,28 @@ class ProjectModule < ActiveRecord::Base
 
   def db_mgr
     return @db_mgr if @db_mgr
-    @db_mgr = FileManager.new('db', get_path(:project_module_dir), get_path(:project_module_dir))
+    @db_mgr = FileManager.new(DB, get_path(:project_module_dir), get_path(:project_module_dir))
     @db_mgr.add_file(get_path(:db))
     @db_mgr
   end
 
   def server_mgr
     return @server_mgr if @server_mgr
-    @server_mgr = FileManager.new('server', get_path(:project_module_dir), get_path(:server_files_dir))
+    @server_mgr = FileManager.new(SERVER, get_path(:project_module_dir), get_path(:server_files_dir))
     @server_mgr.add_dir(get_path(:server_files_dir))
     @server_mgr
   end
 
   def app_mgr
     return @app_mgr if @app_mgr
-    @app_mgr = FileManager.new('app', get_path(:project_module_dir), get_path(:app_files_dir))
+    @app_mgr = FileManager.new(APP, get_path(:project_module_dir), get_path(:app_files_dir))
     @app_mgr.add_dir(get_path(:app_files_dir))
     @app_mgr
   end
 
   def data_mgr
     return @data_mgr if @data_mgr
-    @data_mgr = FileManager.new('data', get_path(:project_module_dir), get_path(:data_files_dir))
+    @data_mgr = FileManager.new(DATA, get_path(:project_module_dir), get_path(:data_files_dir))
     @data_mgr.add_dir(get_path(:data_files_dir))
     @data_mgr
   end
@@ -300,7 +306,7 @@ class ProjectModule < ActiveRecord::Base
 
   def settings_info
     {
-        files: file_mgr_info(settings_mgr),
+        files: file_mgr_info(settings_mgr, nil),
         version: db.current_version.to_s
     }
   end
@@ -311,13 +317,13 @@ class ProjectModule < ActiveRecord::Base
 
   def server_files_info
     {
-        files: file_mgr_info(server_mgr)
+        files: file_mgr_info(server_mgr, 'files/server/')
     }
   end
 
   def app_files_info
     {
-        files: file_mgr_info(app_mgr)
+        files: file_mgr_info(app_mgr, 'files/app/')
     }
   end
 
@@ -327,7 +333,7 @@ class ProjectModule < ActiveRecord::Base
 
   def data_files_info
     {
-        files: file_mgr_info(data_mgr)
+        files: file_mgr_info(data_mgr, 'files/data/')
     }
   end
 
@@ -360,26 +366,35 @@ class ProjectModule < ActiveRecord::Base
                 size: File.size(full_path),
                 md5: MD5Checksum.compute_checksum(full_path)
               }],
-      version: db.current_version.to_s 
+      version: db.current_version.to_s
     }
   end
 
   # file info helper function
-  def file_mgr_info(file_mgr)
-    files = []
-    file_mgr.with_shared_lock do
-      file_mgr.file_list.each do |f|
-        full_path = File.join(file_mgr.base_dir, f)
-        files.push(
-            {
-                file: f,
-                size: File.size(full_path),
-                md5: MD5Checksum.compute_checksum(full_path)
-            }
-        )
+  def file_mgr_info(file_mgr, remove_dir)
+    db.get_files(file_mgr.name).map do |info|
+      full_path = File.join(get_path(:project_module_dir), info[:filename])
+
+      # update cache if file changed
+      if info[:timestamp] > File.mtime(full_path)
+        info = cache_file(file_mgr.name, File.join(full_path))
+      end
+
+      # get thumbnail file if thumbnail exists
+      if info[:thumbnail_filename]
+        {
+            file: info[:thumbnail_filename].gsub(remove_dir, ''),
+            size: info[:thumbnail_size],
+            checksum: info[:thumbnail_md5checksum]
+        }
+      else
+        {
+            file: info[:filename].gsub(remove_dir, ''),
+            size: info[:size],
+            checksum: info[:md5checksum]
+        }
       end
     end
-    files
   end
 
   def get_request_file(base_dir, file)
@@ -387,45 +402,74 @@ class ProjectModule < ActiveRecord::Base
     raise ProjectModuleException, 'file not found' unless File.exists? request_file
     request_file
   end
-  
+
   def add_server_file(path, file)
-    add_file(get_path(:server_files_dir), path, file)
+    add_file(SERVER, get_path(:server_files_dir), path, file)
   end
   
   def add_app_file(path, file)
-    add_file(get_path(:app_files_dir), path, file)
+    add_file(APP, get_path(:app_files_dir), path, file)
   end
 
   def add_data_file(path, file)
-    add_file!(get_path(:data_files_dir), path, file)
+    add_file!(DATA, get_path(:data_files_dir), path, file)
   end
 
-  def add_file!(base_dir, path, file)
+  def remove_data_file(file)
+    safe_delete_file file
+    # remove file from cache
+    db.delete_file file.to_s.gsub(get_path(:project_module_dir), '')
+  end
+
+  def add_file!(name, base_dir, path, file)
     raise ProjectModuleException, 'Filename is not valid.' unless is_valid_filename?(path)
     dest_path = File.join(base_dir, path)
     raise ProjectModuleException, 'File already exists.' if File.exists? dest_path
+
     FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
     FileUtils.mv file.path, dest_path
+
+    cache_file(name, dest_path)
   end
 
-  def add_file(base_dir, path, file)
+  def add_file(name, base_dir, path, file)
     raise ProjectModuleException, 'Filename is not valid.' unless is_valid_filename?(path)
     dest_path = File.join(base_dir, path)
     return if File.exists? dest_path
+
     FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
     FileUtils.mv file.path, dest_path
+
+    cache_file(name, dest_path)
   end
 
   def add_data_dir(dir)
     raise ProjectModuleException, 'Directory name is not valid.' unless is_valid_filename?(dir)
     dest_path = File.join(get_path(:data_files_dir), dir)
     raise ProjectModuleException, 'Directory already exists.' if File.exists? dest_path and dir != '.'
+
     FileUtils.mkdir_p dest_path
+  end
+
+  def remove_data_dir(dir)
+    safe_delete_directory dir
+    safe_create_directory dir if get_path(:data_files_dir) == dir
+
+    # remove data files
+    db.remove_files(DATA)
+    # cache data files
+    cache_data_files
   end
 
   def add_data_batch_file(file)
     begin
       success = TarHelper.untar('zxf', file, get_path(:data_files_dir))
+      if success
+        # remove data files
+        db.remove_files(DATA)
+        # cache data files
+        cache_data_files
+      end
       raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.' unless success
     rescue
       raise ProjectModuleException, 'Could not upload file. Please ensure file is a valid archive.'
@@ -477,6 +521,9 @@ class ProjectModule < ActiveRecord::Base
       # create default faims properties
       FileUtils.touch(get_path(:properties))
 
+      # add files to database
+      cache_project_module_files
+
       generate_temp_files
     rescue Exception => e
       logger.error e
@@ -492,6 +539,9 @@ class ProjectModule < ActiveRecord::Base
       # copy files from temp directory to project_modules directory
       FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir), ['hash_sum'])
 
+      # update files in database
+      cache_project_module_files
+
       generate_temp_files
     rescue Exception => e
       logger.error e
@@ -506,6 +556,9 @@ class ProjectModule < ActiveRecord::Base
     begin
       # copy files from temp directory to project_modules directory
       FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir))
+
+      # update files in database
+      cache_project_module_files
 
       generate_database_cache
     rescue Exception => e
@@ -534,6 +587,54 @@ class ProjectModule < ActiveRecord::Base
   end
 
   # Project archive helpers
+
+  def cache_project_module_files
+    cache_settings_files
+    cache_data_files
+    cache_app_files
+    cache_server_files
+  end
+
+  def cache_settings_files
+    # update settings files
+    settings_mgr.file_list.each do |file|
+      cache_file(SETTINGS, File.join(settings_mgr.base_dir, file))
+    end
+  end
+
+  def cache_data_files
+    # update data files
+    data_mgr.file_list.each do |file|
+      cache_file(DATA, File.join(data_mgr.base_dir, file))
+    end
+  end
+
+  def cache_app_files
+    # update app files
+    app_mgr.file_list.each do |file|
+      cache_file(APP, File.join(app_mgr.base_dir, file))
+    end
+  end
+
+  def cache_server_files
+    # update server files
+    server_mgr.file_list.each do |file|
+      cache_file(SERVER, File.join(server_mgr.base_dir, file))
+    end
+  end
+
+  def cache_file(name, file_path)
+    return unless File.exists? file_path
+    info = {
+      filename: file_path.to_s.gsub(get_path(:project_module_dir), ''),
+      md5checksum: MD5Checksum.compute_checksum(file_path),
+      size: File.size(file_path),
+      type: name,
+      thumbnail_filename: nil
+    }
+    db.insert_file(info)
+    info
+  end
 
   def generate_temp_files
     # initialise file managers

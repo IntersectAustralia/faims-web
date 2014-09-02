@@ -2012,6 +2012,34 @@ EOF
     )
   end
 
+  def self.get_files_for_type
+    cleanup_query(<<EOF
+select Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize from File where Type = ?;
+EOF
+    )
+  end
+
+  def self.insert_or_update_file
+    cleanup_query(<<EOF
+insert or replace into File (Filename, MD5Checksum, Size, Type, State, Timestamp, Deleted, ThumbnailFilename, ThumbnailMD5Checksum, ThumbnailSize) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?); select last_insert_rowid();
+EOF
+    )
+  end
+
+  def self.remove_files
+    cleanup_query(<<EOF
+delete from File where type = ?;
+EOF
+    )
+  end
+
+  def self.delete_file
+    cleanup_query(<<EOF
+delete from File where Filename = ?;
+EOF
+    )
+  end
+
   private
 
   def self.cleanup_query(query)

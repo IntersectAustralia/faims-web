@@ -4,6 +4,20 @@ PRAGMA temp_store = 2;
 
 VACUUM;
 
+-- The file table serves to store file information
+CREATE TABLE File (
+  Filename             TEXT PRIMARY KEY,
+  MD5Checksum          TEXT    NOT NULL,
+  Size                 INTEGER NOT NULL,
+  Type                 TEXT, -- either Settings, Database, Data files, App files or Server only files
+  State                TEXT, -- either null (if not on device), downloaded (if downloaded from server), uploaded (if sent to server)
+  Timestamp            DATETIME DEFAULT CURRENT_TIMESTAMP,
+  Deleted              BOOLEAN,
+  ThumbnailFilename    TEXT,
+  ThumbnailSize        INTEGER,
+  ThumbnailMD5Checksum TEXT
+);
+
 -- The user table is incomplete. It however, holds user information.
 CREATE TABLE User (
   UserID      INTEGER PRIMARY KEY,
@@ -14,7 +28,7 @@ CREATE TABLE User (
 );
 
 
--- the version table controle upload synchronization
+-- the version table control upload synchronization
 CREATE TABLE Version (
   VersionNum      INTEGER PRIMARY KEY,
   UploadTimestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -115,7 +129,6 @@ CREATE TABLE IdealReln (
   MinCardinality  INTEGER,
   MaxCardinality  INTEGER,
   CONSTRAINT IdealRelnPK PRIMARY KEY (RelnTypeID, AttributeID)
-
 );
 
 CREATE TABLE ArchEntity (
