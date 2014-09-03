@@ -51,7 +51,9 @@ Feature: Export project module
     And I should see "No interface to display for this exporter"
     And I press "Export" within the exporter interface
     And I process delayed jobs
-    Then I should see "Nothing to display"
+    Then I should see "Module Contents"
+    And I should see "faims.properties"
+    And I should see "db.sqlite"
 
   @javascript
   Scenario: Run failing exporter
