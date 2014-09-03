@@ -306,7 +306,7 @@ class ProjectModule < ActiveRecord::Base
 
   def settings_info
     {
-        files: file_mgr_info(settings_mgr, nil),
+        files: file_mgr_info(settings_mgr, ''),
         version: db.current_version.to_s
     }
   end
@@ -385,13 +385,13 @@ class ProjectModule < ActiveRecord::Base
         {
             file: info[:thumbnail_filename].gsub(remove_dir, ''),
             size: info[:thumbnail_size],
-            checksum: info[:thumbnail_md5checksum]
+            md5: info[:thumbnail_md5checksum]
         }
       else
         {
             file: info[:filename].gsub(remove_dir, ''),
             size: info[:size],
-            checksum: info[:md5checksum]
+            md5: info[:md5checksum]
         }
       end
     end

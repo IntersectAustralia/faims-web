@@ -1785,6 +1785,7 @@ create table export.relnvalue as select * from relnvalue where versionnum >= '#{
 create table export.aentreln as select * from aentreln where versionnum >= '#{version}';
 create table export.vocabulary as select * from vocabulary;
 create table export.user as select * from user;
+create table export.file as select * from file;
 detach database export;
 EOF
     )
