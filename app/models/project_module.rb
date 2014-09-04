@@ -410,13 +410,13 @@ class ProjectModule < ActiveRecord::Base
   def add_app_file(path, file)
     add_file(APP, get_path(:app_files_dir), path, file)
     # need to cause database to sync
-    db.insert_version(db.get_project_module_user_id(User.first.email)) # TODO which user to use?
+    db.insert_version(db.get_project_module_user_id(User.first ? User.first.email : 0)) # TODO which user to use?
   end
 
   def add_data_file(path, file)
     add_file!(DATA, get_path(:data_files_dir), path, file)
     # need to cause database to sync
-    db.insert_version(db.get_project_module_user_id(User.first.email)) # TODO which user to use?
+    db.insert_version(db.get_project_module_user_id(User.first ? User.first.email : 0)) # TODO which user to use?
   end
 
   def remove_data_file(file)
