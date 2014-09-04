@@ -1759,6 +1759,7 @@ EOF
   def self.create_full_database(toDB)
     cleanup_query(<<EOF
 attach database "#{toDB}" as export;
+create table export.file as select * from file;
 create table export.user as select * from user;
 create table export.aenttype as select * from aenttype;
 create table export.attributekey as select * from attributekey;

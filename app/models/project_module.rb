@@ -376,7 +376,7 @@ class ProjectModule < ActiveRecord::Base
       full_path = File.join(get_path(:project_module_dir), info[:filename])
 
       # update cache if file changed
-      if info[:timestamp] > File.mtime(full_path)
+      if File.mtime(full_path) > info[:timestamp]
         info = cache_file(file_mgr.name, File.join(full_path))
       end
 
@@ -409,10 +409,14 @@ class ProjectModule < ActiveRecord::Base
   
   def add_app_file(path, file)
     add_file(APP, get_path(:app_files_dir), path, file)
+    # need to cause database to sync
+    db.insert_version(db.get_project_module_user_id(User.first.email)) # TODO which user to use?
   end
 
   def add_data_file(path, file)
     add_file!(DATA, get_path(:data_files_dir), path, file)
+    # need to cause database to sync
+    db.insert_version(db.get_project_module_user_id(User.first.email)) # TODO which user to use?
   end
 
   def remove_data_file(file)

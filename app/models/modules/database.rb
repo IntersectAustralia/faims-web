@@ -847,6 +847,13 @@ class Database
     end
   end
 
+  def insert_version(userid)
+    @db.transaction do |db|
+      db.execute(WebQuery.insert_version, current_timestamp, userid)
+      latest_version
+    end
+  end
+
   def merge_database(fromDB, version)
     @db.execute_batch(WebQuery.merge_database(fromDB, version))
     validate_records
