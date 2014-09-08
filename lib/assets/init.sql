@@ -156,7 +156,7 @@ CREATE TABLE AentValue (
   UserID          INTEGER NOT NULL REFERENCES User,
   AttributeID     TEXT    NOT NULL REFERENCES AttributeKey,
   VocabID         INTEGER REFERENCES Vocabulary,
-  Measure         REAL,
+  Measure         TEXT,
   FreeText        TEXT,
   Certainty       REAL,
   Deleted         BOOLEAN,
