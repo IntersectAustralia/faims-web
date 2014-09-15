@@ -138,3 +138,39 @@ Feature: Merge entities
     And I confirm
 
   # TODO Scenario: Cannot compare arch entities of different types
+
+  @javascript
+  Scenario: Merge entities also merges relationships
+    Given I have project module "Entity Combiner"
+    And I am on the project modules page
+    And I follow "Entity Combiner"
+    And I follow "List Archaeological Entity Records"
+    And I press "Filter"
+    And I select records
+      | name    |
+      | Small 5 |
+      | Small 6 |
+    And I click on "Compare"
+    And I select the "first" record to merge to
+    And I click on "Merge"
+    Then I should see "Merged Archaeological Entities"
+    And I should see records
+      | name    |
+      | Small 5 |
+    And I should not see records
+      | name    |
+      | Small 6 |
+    Then I follow "Small 5"
+    And I follow "Show Relationship Association"
+    And I should see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |
+    And I follow "Entities"
+    Then I follow "Show Deleted"
+    Then I follow "Small 6"
+    And I follow "Show Relationship Association"
+    Then I should not see records
+      | name         |
+      | AboveBelow 1 |
+      | AboveBelow 2 |

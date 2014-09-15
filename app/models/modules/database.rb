@@ -211,7 +211,20 @@ class Database
       delete_arch_entity_no_transaction(db, delete_uuid, userid)
 
       insert_updated_arch_entity(db, merge_uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
+
+      merge_arch_entity_relationships(db, merge_uuid, delete_uuid)
     end
+  end
+
+  def merge_arch_entity_relationships(db, merge_uuid, delete_uuid)
+    params = {
+        mergeuuid:merge_uuid,
+        deleteuuid:delete_uuid
+    }
+    # copies over relationships
+    db.execute(WebQuery.merge_copy_arch_entity_relationships, params)
+    # marks redundant relationships as deleted
+    db.execute(WebQuery.merge_delete_arch_entity_relationships, {deleteuuid:delete_uuid})
   end
 
   def insert_updated_arch_entity(db, uuid, userid, vocab_id, attribute_id, measure, freetext, certainty)
@@ -664,6 +677,7 @@ class Database
         limit:limit,
         offset:offset
     }
+
     rels = @db.execute(WebQuery.get_relationships_for_arch_ent, params)
     rels
   end
@@ -885,11 +899,11 @@ class Database
             update_reln_value_as_dirty(db, relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, fields['freetext'], fields['certainty'], versionnum, 1, result)
           end
         rescue Exception => e
-          @project_modulelogger.error e
+          @project_module.logger.error e
         end
       end
     rescue Exception => e
-      @project_modulelogger.error e
+      @project_module.logger.error e
     end
   end
 
