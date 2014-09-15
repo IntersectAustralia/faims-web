@@ -153,6 +153,7 @@ Feature: Merge entities
     And I click on "Compare"
     And I select the "first" record to merge to
     And I click on "Merge"
+    And I wait for popup to close
     Then I should see "Merged Archaeological Entities"
     And I should see records
       | name    |
