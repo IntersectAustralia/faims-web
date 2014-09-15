@@ -3,7 +3,7 @@ class ThumbnailCreator
   class << self
     def create_thumbnail_for_file(file)
       thumbnail_file = generate_thumbnail_filename(file)
-      temp_file = Tempfile.new('thumbnail')
+      temp_file = Tempfile.new(['thumbnail', '.jpg'])
 
       if (`file -b -i #{file}` =~ /video/).nil?
        `convert "#{file}" -rotate 90 -thumbnail #{thumbnail_size}% "#{temp_file.path}"`

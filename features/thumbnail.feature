@@ -51,6 +51,18 @@ Feature: Android
     | files/cb57fdf7-ba49-4223-9a6c-8d8d0266f85b_video-1410411633095.mp4 | server |
     | files/ec4898d9-aa8e-4671-a82f-875963783dcf_video-1410411653987.mp4 | server |
 
+  Scenario Outline: See thumbnail info for images and videos
+    Given I have project module "Thumbnail"
+    And I upload <type> file "<file>" to Thumbnail succeeds
+    Then I should have stored <type> file "<file>" for Thumbnail
+    And I should have thumbnail for "<file>" with type "<type>" for Thumbnail
+    And I requested the android <type> files info for Thumbnail
+    Then I should see json for "Thumbnail" <type> files for "<file>"
+  Examples:
+    | file                                                                        | type |
+    | files/536bd80c-e78e-4300-aa71-93d07eb71b6d_image-1410411623538.original.jpg | app  |
+    | files/990810e7-9bfb-4211-b970-50c03d023648_image-1410411612633.original.jpg | app  |
+
   Scenario Outline: I can download thumbnail for images and videos
     Given I have project module "Thumbnail"
     And I upload <type> file "<file>" to Thumbnail succeeds

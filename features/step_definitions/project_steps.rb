@@ -966,3 +966,9 @@ And /^I should (not have|have) thumbnail for "([^"]*)" with type "([^"]*)" for (
   project_module = ProjectModule.find_by_name(name)
   File.exists?(File.join(project_module.get_path("#{type}_files_dir".to_sym), ThumbnailCreator.generate_thumbnail_filename(file))).should == (not_have != 'not have')
 end
+
+Then /^I should see json for "([^"]*)" (.*) files for "([^"]*)"$/ do |name, type, file|
+  project_module = ProjectModule.find_by_name(name)
+  page.should have_content(project_module.send("#{type}_files_info").to_json)
+  page.should have_content("\"file\":\"#{ThumbnailCreator.generate_thumbnail_filename(file)}\"")
+end
