@@ -30,6 +30,8 @@ describe XSDValidator do
     it { validate_data_schema('data_schema_4.xml').should be_empty }
     # adding hierarchical vocabs and descriptions
     it { validate_data_schema('data_schema_5.xml').should be_empty }
+    # adding file and thumbnails
+    it { validate_data_schema('data_schema_6.xml').should be_empty }
     # error
     it { validate_data_schema('data_schema_error1.xml').should_not be_empty }
   end

@@ -84,6 +84,8 @@ module FaimsWeb
 
     config.server_upload_failures_directory = Rails.root.join("upload_failures").to_s
 
+    config.thumbnail_size = 10
+
     config.i18n.enforce_available_locales = true
   end
 end

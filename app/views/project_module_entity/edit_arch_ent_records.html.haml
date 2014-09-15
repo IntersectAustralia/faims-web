@@ -1,6 +1,6 @@
 - title @project_module.name + " - Archaeological Entity"
 = breadcrumbs
-- get_files(@attributes,8,5)
+- get_files(@attributes, 12, 13, 5)
 .form-actions
   - if !session[:prev_id].nil? and !session[:prev_id].empty?
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module,session[:prev_id][-1]), :class => 'btn'

@@ -629,14 +629,28 @@ class ProjectModule < ActiveRecord::Base
 
   def cache_file(name, file_path)
     return unless File.exists? file_path
+
+    # check if file is attached to an attribute which uses thumbnails
+    attached_file = file_path.to_s.gsub(get_path(:project_module_dir), '')
+
+    thumbnail_file_path = nil
+    attached_thumbnail_file = nil
+    if attached_file =~ /\.original/
+      thumbnail_file_path = ThumbnailCreator.create_thumbnail_for_file(file_path)
+      attached_thumbnail_file = thumbnail_file_path.to_s.gsub(get_path(:project_module_dir), '')  if thumbnail_file_path
+    end
+
     info = {
-      filename: file_path.to_s.gsub(get_path(:project_module_dir), ''),
+      filename: attached_file,
       md5checksum: MD5Checksum.compute_checksum(file_path),
       size: File.size(file_path),
       type: name,
-      thumbnail_filename: nil
+      thumbnail_filename: attached_thumbnail_file,
+      thumbnail_md5checksum: thumbnail_file_path ? MD5Checksum.compute_checksum(thumbnail_file_path) : nil,
+      thumbnail_size: thumbnail_file_path ? File.size(thumbnail_file_path) : nil
     }
     db.insert_file(info)
+
     info
   end
 
