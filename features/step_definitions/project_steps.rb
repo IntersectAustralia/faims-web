@@ -969,6 +969,21 @@ end
 
 Then /^I should see json for "([^"]*)" (.*) files for "([^"]*)"$/ do |name, type, file|
   project_module = ProjectModule.find_by_name(name)
-  page.should have_content(project_module.send("#{type}_files_info").to_json)
+  project_module.send("#{type}_files_info")[:files].each do |file|
+    page.should have_content("{\"file\":\"#{file[:file]}\",\"size\":#{file[:size]},\"md5\":\"#{file[:md5]}\"}")
+  end
   page.should have_content("\"file\":\"#{ThumbnailCreator.generate_thumbnail_filename(file)}\"")
+end
+
+Then /^I should see thumbnail files$/ do |table|
+  table.hashes.each do |hash|
+    find(:css, "img[alt='#{hash[:name]}']")
+  end
+end
+
+And /^I remove all thumbnail files for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  FileHelper.get_file_list(project_module.get_path(:app_files_dir)).each do |name|
+    FileUtils.rm File.join(project_module.get_path(:app_files_dir), name) if name =~ /\.thumbnail/
+  end
 end

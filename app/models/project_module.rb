@@ -616,14 +616,16 @@ class ProjectModule < ActiveRecord::Base
   def cache_app_files
     # update app files
     app_mgr.file_list.each do |file|
-      cache_file(APP, File.join(app_mgr.base_dir, file))
+      # ignore thumbnail files
+      cache_file(APP, File.join(app_mgr.base_dir, file)) unless file =~ /\.thumbnail/
     end
   end
 
   def cache_server_files
     # update server files
     server_mgr.file_list.each do |file|
-      cache_file(SERVER, File.join(server_mgr.base_dir, file))
+      # ignore thumbnail files
+      cache_file(SERVER, File.join(server_mgr.base_dir, file)) unless file =~ /\.thumbnail/
     end
   end
 

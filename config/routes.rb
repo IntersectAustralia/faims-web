@@ -140,6 +140,8 @@ FaimsWeb::Application.routes.draw do
   get 'android/module/:key/app_file_download', :to => 'android#app_file_download', :as => 'android_app_file_download'
   post 'android/module/:key/app_file_upload', :to => 'android#app_file_upload', :as => 'android_app_file_upload'
 
+  get 'thumbnail', :to => 'project_module_entity#thumbnail', :as => 'thumbnail'
+
   # home
   root :to => 'pages#home'
 
