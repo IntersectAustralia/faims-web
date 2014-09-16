@@ -871,7 +871,7 @@ And /^I should see fields with errors$/ do |table|
 end
 
 And /^I wait for popup to close$/ do
-  sleep(30)
+  sleep(1)
 end
 
 And /^I refresh page$/ do
