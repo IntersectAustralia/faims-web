@@ -764,6 +764,26 @@ EOF
     )
   end
 
+  def self.merge_copy_arch_entity_relationships
+    cleanup_query(<<EOF
+insert into aentreln (UUID, RelationshipID, UserID,  ParticipatesVerb, Deleted, VersionNum, isDirty, isDirtyReason, isForked, ParentTimestamp) 
+  select :mergeuuid, RelationshipID, UserID, ParticipatesVerb, Deleted, VersionNum, isDirty, isDirtyReason, isForked, ParentTimestamp 
+  from latestnondeletedaentreln
+  where uuid = :deleteuuid;
+EOF
+    )
+  end
+
+  def self.merge_delete_arch_entity_relationships
+    cleanup_query(<<EOF
+insert into aentreln (UUID, RelationshipID, UserID,  ParticipatesVerb, Deleted, VersionNum, isDirty, isDirtyReason, isForked, ParentTimestamp)
+  select UUID, RelationshipID, UserID,  ParticipatesVerb, 'true' as Deleted, VersionNum, isDirty, isDirtyReason, isForked, ParentTimestamp
+  from latestnondeletedaentreln
+  where uuid = :deleteuuid;
+EOF
+    )
+  end
+
   def self.load_relationships
     cleanup_query(<<EOF
 select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
