@@ -120,8 +120,9 @@ Feature: Manage project modules
     And I press "Update"
     And I should have setting "<setting>" for "Module 1" as "<setting_value>"
   Examples:
-    | field       | value              | setting | setting_value |
-    | Module SRID | EPSG:4326 - WGS 84 | srid    | 4326          |
+    | field          | value              | setting | setting_value |
+    | Module SRID    | EPSG:4326 - WGS 84 | srid    | 4326          |
+    | Module Version | 1.0                | version | 1.0           |
 
   Scenario Outline: Edit static data fails due to validation errors
     Given I have project module "Module 1"

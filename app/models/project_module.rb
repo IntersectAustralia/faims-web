@@ -30,6 +30,7 @@ class ProjectModule < ActiveRecord::Base
                 :arch16n,
                 :validation_schema,
                 :css_style,
+                :version,
                 :srid,
                 :season,
                 :description,
@@ -54,6 +55,7 @@ class ProjectModule < ActiveRecord::Base
                   :arch16n,
                   :validation_schema,
                   :css_style,
+                  :version,
                   :srid,
                   :season,
                   :description,
@@ -202,6 +204,10 @@ class ProjectModule < ActiveRecord::Base
 
   def name=(value)
     write_attribute(:name, value.strip.squish) if value
+  end
+
+  def version
+    get_settings['version'].nil? ? "" : get_settings['version']
   end
 
   # project_module database
@@ -496,6 +502,7 @@ class ProjectModule < ActiveRecord::Base
     File.open(get_path(:settings), 'w') do |file|
       file.write({:name => args[:name],
                   :key => key,
+                  :version => args[:version],
                   :season => args[:season],
                   :description => args[:description],
                   :permit_no => args[:permit_no],

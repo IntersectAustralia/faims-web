@@ -12,6 +12,9 @@
             = f.text_field :name, :class => "input-block-level"
             = f.error :name
             %p
+            = f.label :version, 'Module Version:'
+            = f.text_field :version, :value => @version, :class => "input-block-level", :placeholder => "instruction here..."
+            %p
             = f.label :season, 'Module SRID:'
             = f.select :srid, @spatial_list, :selected => (@srid.blank? ? ProjectModule::DEFAULT_SRID : @srid), :class => "input-block-level"
             %p
