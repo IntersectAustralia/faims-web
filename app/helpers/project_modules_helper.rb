@@ -1,9 +1,9 @@
 module ProjectModulesHelper
   
-  def get_files(attributes, type_index, value_index)
+  def get_files(attributes, file_index, thumbnail_index, value_index)
     @files = {}
     for attribute in attributes
-      if attribute[type_index].to_s.downcase.eql?("file")
+      if attribute[file_index].to_s.downcase.eql?("1")
         path = attribute[value_index]
         next unless path
         name = File.basename(path)[File.basename(path).to_s.index('_')+1..-1]

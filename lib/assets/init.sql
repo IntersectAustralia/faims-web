@@ -58,11 +58,13 @@ CREATE TABLE AEntType (
  */
 
 CREATE TABLE AttributeKey (
-  AttributeID          INTEGER PRIMARY KEY,
-  AttributeType        TEXT, -- this is typing for external tools. It has no bearing internally
-  AttributeName        TEXT NOT NULL, -- effectively column name
-  AttributeDescription TEXT, -- human-entered description for the "column"
-  FormatString         TEXT
+  AttributeID           INTEGER PRIMARY KEY,
+  AttributeType         TEXT, -- this is typing for external tools. It has no bearing internally
+  AttributeName         TEXT NOT NULL, -- effectively column name
+  AttributeDescription  TEXT, -- human-entered description for the "column"
+  AttributeIsFile       BOOLEAN, -- this flags the attribute as a file type
+  AttributeUseThumbnail BOOLEAN, -- this flags the attribute to generate thumbnails
+  FormatString          TEXT
 );
 
 -- TODO tweak indexes for performance
@@ -85,8 +87,8 @@ CREATE TABLE Vocabulary (
   VocabDescription TEXT,
   VocabCountOrder  INTEGER,
   VocabDeleted     TEXT,
-  ParentVocabID    INTEGER REFERENCES Vocabulary (VocabID)
-);
+  ParentVocabID    INTEGER REFERENCES Vocabulary( VocabID)
+  );
 
 --create index vocabindex on vocabulary (vocabid);
 CREATE INDEX vocabAttIndex ON vocabulary (attributeid, vocabname);

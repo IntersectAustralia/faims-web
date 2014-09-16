@@ -35,6 +35,17 @@ describe Database do
     tempfile.unlink
   end
 
+  it 'Generates and Parses data_schema.xml with file and thumbnail attributes' do
+    tempfile = Tempfile.new('db.sqlite3')
+    Database.generate_database(tempfile.path, Rails.root.join('spec', 'assets', 'data_schema_files.xml').to_s)
+    db = SpatialiteDB.new(tempfile.path)
+    result = db.execute("select attributename from attributekey where attributeisfile = 1 order by attributename");
+    result.map {|row| row.first}.should == ["entity_audio", "entity_file", "entity_image", "entity_video", "rel_audio", "rel_file", "rel_image", "rel_video"]
+    result = db.execute("select attributename from attributekey where attributeisfile = 1 and attributeusethumbnail = 1 order by attributename");
+    result.map {|row| row.first}.should == ["entity_image", "entity_video", "rel_image", "rel_video"]
+    tempfile.unlink
+  end
+
   describe 'Merging databases', :ignore_jenkins => true do
     it 'Empty database and Empty database' do
       p1 = make_project_module('Module 1')

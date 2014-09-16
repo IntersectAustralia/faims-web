@@ -235,33 +235,33 @@ describe 'Web Database Queries' do
   end
 
   it 'Get multi-valued arch ent attributes' do
-    expected = [[1000011365058823906, "17136", nil, "name", nil, nil, "Indigo", 0.72, "string", "2013-04-30 02:41:32", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 17597, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 26099, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 151826, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 170587, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 200269, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 324373, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 339043, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 345945, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 399373, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 401755, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 459104, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 476048, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 612170, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 690870, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 756435, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 794183, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 814526, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 854547, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 893327, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "27616", nil, "value", nil, 969578, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil],
-                [1000011365058823906, "29344", nil, "timestamp", nil, nil, "2013-04-04 17:59:58", 0.99, "timestamp", "2013-04-30 01:57:42", nil, nil],
-                [1000011365058823906, "31072", 33744, "type", "Type C", nil, "", 0.72, "checklist", "2013-04-30 01:57:42", nil, nil],
-                [1000011365058823906, "34768", 37008, "location", "Loc B", nil, nil, 0.37, "dropdown", "2013-05-06 02:10:05", nil, nil],
-                [1000011365058823906, "34768", 37392, "location", "Loc C", nil, nil, 0.28, "dropdown", "2013-05-06 02:10:05", nil, nil],
-                [1000011365058823906, "38416", 40272, "picture", "cugl69808.jpg", nil, "", 0.83, "dropdown", "2013-04-30 01:57:42", nil, nil],
-                [1000011365058823906, "53296", nil, "supervisor", nil, nil, "superc", 0.55, "radiogroup", "2013-04-30 01:57:42", nil, nil]]
+    expected = [[1000011365058823906, "17136", nil, "name", nil, nil, "Indigo", 0.72, "string", "2013-04-30 02:41:32", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 17597, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 26099, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 151826, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 170587, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 200269, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 324373, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 339043, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 345945, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 399373, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 401755, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 459104, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 476048, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 612170, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 690870, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 756435, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 794183, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 814526, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 854547, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 893327, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "27616", nil, "value", nil, 969578, nil, 1.0, "integer", "2013-05-06 04:12:15", nil, nil, nil, nil],
+                [1000011365058823906, "29344", nil, "timestamp", nil, nil, "2013-04-04 17:59:58", 0.99, "timestamp", "2013-04-30 01:57:42", nil, nil, nil, nil],
+                [1000011365058823906, "31072", 33744, "type", "Type C", nil, "", 0.72, "checklist", "2013-04-30 01:57:42", nil, nil, nil, nil],
+                [1000011365058823906, "34768", 37008, "location", "Loc B", nil, nil, 0.37, "dropdown", "2013-05-06 02:10:05", nil, nil, nil, nil],
+                [1000011365058823906, "34768", 37392, "location", "Loc C", nil, nil, 0.28, "dropdown", "2013-05-06 02:10:05", nil, nil, nil, nil],
+                [1000011365058823906, "38416", 40272, "picture", "cugl69808.jpg", nil, "", 0.83, "dropdown", "2013-04-30 01:57:42", nil, nil, nil, nil],
+                [1000011365058823906, "53296", nil, "supervisor", nil, nil, "superc", 0.55, "radiogroup", "2013-04-30 01:57:42", nil, nil, nil, nil]]
     begin
       temp_file = Tempfile.new('db')
       FileUtils.cp(test_multivalued_db, temp_file.path)
@@ -276,11 +276,11 @@ describe 'Web Database Queries' do
   end
 
   it 'Get multi-valued relationship attributes' do
-    expected = [[1000011365058823908, 37008, "34768", "location", nil, 1.0, "Loc B", 21904, "dropdown", "2013-05-06 07:26:20", nil, nil],
-                [1000011365058823908, 37392, "34768", "location", nil, 1.0, "Loc C", 21904, "dropdown", "2013-05-06 07:26:20", nil, nil],
-                [1000011365058823908, 37776, "34768", "location", nil, 1.0, "Loc D", 21904, "dropdown", "2013-05-06 07:26:20", nil, nil],
-                [1000011365058823908, nil, "17136", "name", "Jellyfish", 1.0, nil, 21904, "string", "2013-04-30 02:40:33", nil, nil],
-                [1000011365058823908, nil, "29344", "timestamp", "2013-04-30 02:31:46", 1.0, nil, 21904, "timestamp", "2013-04-30 02:31:46", nil, nil]]
+    expected = [[1000011365058823908, 37008, "34768", "location", nil, 1.0, "Loc B", 21904, "dropdown", "2013-05-06 07:26:20", nil, nil, nil, nil],
+                [1000011365058823908, 37392, "34768", "location", nil, 1.0, "Loc C", 21904, "dropdown", "2013-05-06 07:26:20", nil, nil, nil, nil],
+                [1000011365058823908, 37776, "34768", "location", nil, 1.0, "Loc D", 21904, "dropdown", "2013-05-06 07:26:20", nil, nil, nil, nil],
+                [1000011365058823908, nil, "17136", "name", "Jellyfish", 1.0, nil, 21904, "string", "2013-04-30 02:40:33", nil, nil, nil, nil],
+                [1000011365058823908, nil, "29344", "timestamp", "2013-04-30 02:31:46", 1.0, nil, 21904, "timestamp", "2013-04-30 02:31:46", nil, nil, nil, nil]]
 
     begin
       temp_file = Tempfile.new('db')

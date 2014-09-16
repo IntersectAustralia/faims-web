@@ -32,6 +32,9 @@ class AndroidController < ApplicationController
   rescue FileManager::TimeoutException => e
     logger.warn e
     render :json => { message: 'request timeout' }.to_json, :status => 408
+  rescue Exception => e
+    logger.error e
+    render :json => { message: 'bad request' }.to_json, :status => 400
   end
 
   def db_info
@@ -126,6 +129,9 @@ class AndroidController < ApplicationController
   rescue FileManager::TimeoutException => e
     logger.warn e
     render :json => { message: 'request timeout' }.to_json, :status => 408
+  rescue Exception => e
+    logger.error e
+    render :json => { message: 'bad request' }.to_json, :status => 400
   end
 
   def app_file_upload
@@ -168,6 +174,9 @@ class AndroidController < ApplicationController
   rescue FileManager::TimeoutException => e
     logger.warn e
     render :json => { message: 'request timeout' }.to_json, :status => 408
+  rescue Exception => e
+    logger.error e
+    render :json => { message: 'bad request' }.to_json, :status => 400
   end
 
 end

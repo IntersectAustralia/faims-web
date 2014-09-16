@@ -802,21 +802,19 @@ class Database
 
   def get_files(type)
     files = []
-    @db.transaction do |db|
-      db.execute(WebQuery.get_files_for_type, type).each do |result|
-        files << {
-            filename: result[0],
-            md5checksum: result[1],
-            size: result[2],
-            type: result[3],
-            state: result[4],
-            timestamp: result[5],
-            deleted: result[6],
-            thumbnail_filename: result[7],
-            thumbnail_md5checksum: result[8],
-            thumbnail_size: result[9],
-        }
-      end
+    @db.execute(WebQuery.get_files_for_type, type).each do |result|
+      files << {
+          filename: result[0],
+          md5checksum: result[1],
+          size: result[2],
+          type: result[3],
+          state: result[4],
+          timestamp: result[5],
+          deleted: result[6],
+          thumbnail_filename: result[7],
+          thumbnail_md5checksum: result[8],
+          thumbnail_size: result[9],
+      }
     end
     files
   end

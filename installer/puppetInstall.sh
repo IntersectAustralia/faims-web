@@ -16,6 +16,10 @@ if [ ! -d "$HOME/.puppet/modules/stdlib" ]; then
     puppet module install puppetlabs-stdlib
 fi
 
+if [ ! -d "$HOME/.puppet/modules/apt" ]; then
+    puppet module install puppetlabs-apt
+fi
+
 # Clone webapp
 if [ ! -d "$APP_ROOT" ]; then
     sudo git clone https://github.com/IntersectAustralia/faims-web.git $APP_ROOT

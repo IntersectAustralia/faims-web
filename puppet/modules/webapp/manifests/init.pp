@@ -9,10 +9,17 @@ class webapp {
   $rbenv_path = "${rbenv_root}/bin:${exec_path}"
   $rbenv_env = "RBENV_ROOT=${rbenv_root}"
 
+  class { 'apt':
+    always_apt_update => true,
+  }
+
+  apt::ppa { 'ppa:jon-severinsson/ffmpeg':}
+
   # Install common packages
-  $common_packages = ["git"]
+  $common_packages = ["git","imagemagick","libmagickwand-dev","ffmpeg"]
   package { $common_packages:
-    ensure  => "present"
+    ensure  => "present",
+    require => Apt::Ppa['ppa:jon-severinsson/ffmpeg']
   }
 
   # Install Spatialite

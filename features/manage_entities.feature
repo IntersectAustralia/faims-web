@@ -132,6 +132,36 @@ Feature: Manage entities
       | Screenshot_2013-04-09-10-32-04.png     |
       | Screenshot_2013-04-09-10-32-04 (1).png |
 
+  Scenario: View entity with thumbnails
+    Given I have project module "Thumbnail"
+    And I am on the project modules page
+    And I click on "Thumbnail"
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    Then I should see thumbnail files
+      | name                             |
+      | image-1410832623415.original.jpg |
+      | video-1410832643560.original.mp4 |
+
+  Scenario: View entity without thumbnails if they have not synced yet
+    Given I have project module "Thumbnail"
+    And I am on the project modules page
+    And I click on "Thumbnail"
+    Then I follow "Search Archaeological Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    Then I should see thumbnail files
+      | name                             |
+      | image-1410832623415.original.jpg |
+      | video-1410832643560.original.mp4 |
+    Then I remove all thumbnail files for "Thumbnail"
+    And I refresh page
+    Then I should see attached files
+      | name                             |
+      | image-1410832623415.original.jpg |
+      | video-1410832643560.original.mp4 |
+
   Scenario: View entity list
     Given I have project module "Sync Example"
     And I am on the project modules page

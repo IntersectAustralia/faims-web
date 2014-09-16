@@ -39,6 +39,8 @@
                   <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
                   <xs:attribute type="xs:string" name="isIdentifier" use="optional"/>
                   <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
+                  <xs:attribute type="xs:string" name="file" use="optional"/>
+                  <xs:attribute type="xs:string" name="thumbnail" use="optional"/>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
@@ -71,6 +73,8 @@
                   <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
                   <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
                   <xs:attribute type="xs:string" name="isIdentifier" use="optional"/>
+                  <xs:attribute type="xs:string" name="file" use="optional"/>
+                  <xs:attribute type="xs:string" name="thumbnail" use="optional"/>
                   <xs:anyAttribute processContents="skip"/>
                 </xs:complexType>
               </xs:element>

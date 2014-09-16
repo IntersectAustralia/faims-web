@@ -296,7 +296,7 @@ EOF
 
   def self.get_arch_entity_attributes
     cleanup_query(<<EOF
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, av.isDirty, av.isDirtyReason
+SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, av.isDirty, av.isDirtyReason, attributeisfile, attributeusethumbnail
 from latestnondeletedarchent
 join idealaent using (aenttypeid)
 join attributekey using (attributeid)
@@ -1038,7 +1038,7 @@ EOF
 
   def self.get_relationship_attributes
     cleanup_query(<<EOF
-SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason
+SELECT relationshipid, vocabid, attributeid, attributename, freetext, certainty, vocabname, relntypeid, attributetype, relnvaluetimestamp, isDirty, isDirtyReason, attributeisfile, attributeusethumbnail
     FROM relnvalue
     JOIN attributekey USING (attributeid)
     LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)

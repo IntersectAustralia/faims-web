@@ -282,4 +282,8 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     redirect_to action: :show_arch_ent_history, id: @project_module.id, uuid: params[:uuid]
   end
 
+  def thumbnail
+    safe_send_file(params[:url])
+  end
+
 end

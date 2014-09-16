@@ -205,13 +205,10 @@ When /^I click on "([^"]*)"$/ do |name|
     find(:xpath, "//input[@value = \"#{name}\"]").click
   else
     WAIT_RANGE.each do
-      if all(:xpath, "//a[contains(text(), \"#{name}\")]").size == 0
-        sleep(1)
-      else
-        find(:xpath, "//a[contains(text(), \"#{name}\")]").click
-        break
-      end
+      break unless all(:xpath, "//a[contains(text(), \"#{name}\")]").size == 0
+      sleep(1)
     end
+    find(:xpath, "//a[contains(text(), \"#{name}\")]").click
   end
 end
 
@@ -278,8 +275,7 @@ Then /^I should have stored (.*) file "([^"]*)" for (.*)$/ do |type, file, name|
   dir = project_module.get_path("#{type}_files_dir".to_sym)
 
   # check if uploaded files exist on server file list
-  list = FileHelper.get_file_list(dir)
-  list.select { |f| f != file }.size.should == 0
+  File.exists?(File.join(dir, file)).should be_true
 
   # check if file is the same
   File.read(Rails.root.join("features/assets/#{file}")).should == File.read(File.join(dir, file))
@@ -660,24 +656,18 @@ end
 
 And /^I delete project module file "([^"]*)" for "([^"]*)"$/ do |file, dir|
   WAIT_RANGE.each do
-    if all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").size == 0
-      sleep(1)
-    else
-      all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").first.click
-      break
-    end
+    break unless all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").size == 0
+    sleep(1)
   end
+  all(:xpath, "//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{dir}']]/ul/li[./a[contains(text(), '#{file}')]]/following-sibling::a").first.click
 end
 
 And /^I delete root directory$/ do
   WAIT_RANGE.each do
-    if all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").size == 0
-      sleep(1)
-    else
-      all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").first.click
-      break
-    end
+    break unless all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").size == 0
+    sleep(1)
   end
+  all(:xpath, "//div[@class='dir clearfix']/div[@class='dir-header']/h3/span/a[text()='data']/../following-sibling::span/a").first.click
   step 'I confirm'
 end
 
@@ -823,6 +813,10 @@ And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |fie
   values.each_with_index do |value, index|
     value = value.strip
     type = get_field_type(field_type)
+    WAIT_RANGE.each do
+      break unless all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+      sleep(1)
+    end
     node = all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
     if type == 'vocab'
       node.find(:xpath, ".//select[contains(@name, '#{type}')]/option[contains(text(), '#{value}')]").select_option
@@ -833,6 +827,10 @@ And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |fie
 end
 
 And /^I click on update for attribute with field "([^"]*)"$/ do |field|
+  WAIT_RANGE.each do
+    break unless all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    sleep(1)
+  end
   field = find(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
   field.find(:xpath, ".//input[@value='Update']").click
 end
@@ -843,6 +841,10 @@ And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do 
   values.each_with_index do |value, index|
     value.strip!
     type = get_field_type(field_type)
+    WAIT_RANGE.each do
+      break unless all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+      sleep(1)
+    end
     node = all(:xpath, "//div[@class = 'row-fluid']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
     if type == 'vocab'
       node.find(:xpath, ".//select[contains(@name, '#{type}')]/option[contains(text(), '#{value}')]").text.should == value
@@ -958,5 +960,30 @@ end
 When /^I reorder attributes for "([^"]*)"$/ do |name, table|
   project_module = ProjectModule.find_by_name(name)
   project_module.db.reorder_attributes(table.hashes.map { |hash| hash[:name] })
+end
 
+And /^I should (not have|have) thumbnail for "([^"]*)" with type "([^"]*)" for (.*)$/ do |not_have, file, type, name|
+  project_module = ProjectModule.find_by_name(name)
+  File.exists?(File.join(project_module.get_path("#{type}_files_dir".to_sym), ThumbnailCreator.generate_thumbnail_filename(file))).should == (not_have != 'not have')
+end
+
+Then /^I should see json for "([^"]*)" (.*) files for "([^"]*)"$/ do |name, type, file|
+  project_module = ProjectModule.find_by_name(name)
+  project_module.send("#{type}_files_info")[:files].each do |file|
+    page.should have_content("{\"file\":\"#{file[:file]}\",\"size\":#{file[:size]},\"md5\":\"#{file[:md5]}\"}")
+  end
+  page.should have_content("\"file\":\"#{ThumbnailCreator.generate_thumbnail_filename(file)}\"")
+end
+
+Then /^I should see thumbnail files$/ do |table|
+  table.hashes.each do |hash|
+    find(:css, "img[alt='#{hash[:name]}']")
+  end
+end
+
+And /^I remove all thumbnail files for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  FileHelper.get_file_list(project_module.get_path(:app_files_dir)).each do |name|
+    FileUtils.rm File.join(project_module.get_path(:app_files_dir), name) if name =~ /\.thumbnail/
+  end
 end
