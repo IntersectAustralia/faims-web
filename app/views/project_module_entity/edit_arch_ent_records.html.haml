@@ -52,9 +52,9 @@
                   - vocabs = @vocab_name[attribute[1]]
                   - vocabs = vocab_name_to_breadcrumb(vocabs)
                   - if attribute[2].blank?
-                    = f.input :vocab_id, collection: vocabs, label: false, input_html: {name: 'attr[vocab_id][]'}
+                    = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, input_html: {name: 'attr[vocab_id][]'}
                   - else
-                    = f.input :vocab_id, collection: vocabs, label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
+                    = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
               - else
                 .span2
               .span2
