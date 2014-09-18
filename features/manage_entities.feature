@@ -14,7 +14,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I update fields with values
@@ -41,7 +41,7 @@ Feature: Manage entities
     And I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I update field "name" of type "Annotation" with values "test"
@@ -54,7 +54,7 @@ Feature: Manage entities
     Given I have project module "Hierarchical Vocabulary"
     And I am on the project modules page
     And I follow "Hierarchical Vocabulary"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 1"
     And I update fields with values
@@ -74,7 +74,7 @@ Feature: Manage entities
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I press "Update"
     Then I should see "Updated module"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I update fields with values
@@ -90,7 +90,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And database is locked for "Sync Example"
@@ -107,7 +107,7 @@ Feature: Manage entities
     Given I have project module "Sync Test"
     And I am on the project modules page
     And I click on "Sync Test"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
@@ -119,7 +119,7 @@ Feature: Manage entities
     Given I have project module "Sync Test"
     And I am on the project modules page
     And I click on "Sync Test"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
@@ -136,7 +136,7 @@ Feature: Manage entities
     Given I have project module "Thumbnail"
     And I am on the project modules page
     And I click on "Thumbnail"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see thumbnail files
@@ -148,7 +148,7 @@ Feature: Manage entities
     Given I have project module "Thumbnail"
     And I am on the project modules page
     And I click on "Thumbnail"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see thumbnail files
@@ -166,7 +166,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I should see records
       | name    |
@@ -179,7 +179,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I click on "Show Deleted"
     Then I should see records
@@ -194,12 +194,12 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
     And I click on "Delete"
     And I confirm
-    Then I should see "Deleted Archaeological Entity"
+    Then I should see "Deleted Entity"
     Then I should not see records
       | name    |
       | Small 1 |
@@ -210,7 +210,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
     And database is locked for "Sync Example"
@@ -231,7 +231,7 @@ Feature: Manage entities
     And I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
     And I click on "Delete"
@@ -247,7 +247,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
     Then I click on "Delete"
@@ -255,7 +255,7 @@ Feature: Manage entities
     Then I click on "Show Deleted"
     Then I follow "Small 3"
     Then I click on "Restore"
-    And I should see "Restored Archaeological Entity"
+    And I should see "Restored Entity"
     Then I follow "Back"
     Then I click on "Hide Deleted"
     And I should not see records
@@ -270,7 +270,7 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I follow "Small 3"
     Then I click on "Delete"
@@ -296,7 +296,7 @@ Feature: Manage entities
     And I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    Then I follow "Search Archaeological Entity Records"
+    Then I follow "Search Entity Records"
     And I enter "" and submit the form
     Then I click on "Show Deleted"
     Then I follow "Small 1"

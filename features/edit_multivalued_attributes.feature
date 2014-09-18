@@ -14,7 +14,7 @@ Feature: Edit Multivalued Attribute
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I should have values for field
@@ -42,7 +42,7 @@ Feature: Edit Multivalued Attribute
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I should have values for field
@@ -72,7 +72,7 @@ Feature: Edit Multivalued Attribute
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I should have values for field
@@ -110,7 +110,7 @@ Feature: Edit Multivalued Attribute
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I press "Update"
     Then I should see "Updated module"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I add values to field
@@ -131,7 +131,7 @@ Feature: Edit Multivalued Attribute
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I should have values for field
@@ -155,7 +155,7 @@ Feature: Edit Multivalued Attribute
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I should have values for field
@@ -193,7 +193,7 @@ Feature: Edit Multivalued Attribute
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
     And I should have values for field

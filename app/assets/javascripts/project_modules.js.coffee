@@ -210,7 +210,7 @@ aent_rel_management = ->
       selected = $('input[type="radio"]:checked')
       verb = $('#select-verb').val()
       if selected.length == 0
-        alert('No Archaeological Entity is selected to be added')
+        alert('No Entity is selected to be added')
         return false
       else
         $('#add-arch-ent-form input[name="verb"]').val(verb)

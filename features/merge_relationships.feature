@@ -9,130 +9,130 @@ Feature: Merge relationships
     And I am logged in as "faimsadmin@intersect.org.au"
     And I have a project modules dir
 
-  @javascript
-  Scenario: Merge relationships (first)
-    Given I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Relationship Records"
-    And I press "Filter"
-    And I select records
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
-    And I click on "Compare"
-    And I select the "first" record to merge to
-    And I select merge fields
-      | field | column |
-      | name  | right  |
-    And I click on "Merge"
-    Then I should see "Merged Relationship"
-    And I should see records
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 3 |
-    And I should not see records
-      | name         |
-      | AboveBelow 2 |
-    And I follow "AboveBelow 1"
-    And I should see fields with values
-      | field        | type       | values       |
-      | relationship | Annotation | AboveBelow 1 |
-      | name         | Annotation | rel2         |
-
-  @javascript
-  Scenario: Merge relationships (second)
-    Given I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Relationship Records"
-    And I press "Filter"
-    And I select records
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
-    And I click on "Compare"
-    And I select the "second" record to merge to
-    And I select merge fields
-      | field | column |
-      | name  | left   |
-    And I click on "Merge"
-    Then I should see "Merged Relationship"
-    And I should see records
-      | name         |
-      | AboveBelow 2 |
-      | AboveBelow 3 |
-    And I should not see records
-      | name         |
-      | AboveBelow 1 |
-    And I follow "AboveBelow 2"
-    And I should see fields with values
-      | field        | type       | values       |
-      | relationship | Annotation | AboveBelow 2 |
-      | name         | Annotation | rel1         |
-
-  @javascript
-  Scenario: Can only compare 2 relationships
-    Given I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Relationship Records"
-    And I press "Filter"
-    And I click on "Compare"
-    Then I should see dialog "Please select two records to compare"
-    And I confirm
-    And I select records
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
-      | AboveBelow 3 |
-    Then I click on "Compare"
-    Then I should see dialog "Can only compare two records at a time"
-    And I confirm
-
-  @javascript
-  Scenario: Cannot merge relationships if database is locked
-    Given I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Relationship Records"
-    And I press "Filter"
-    And I select records
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
-    And I click on "Compare"
-    And database is locked for "Sync Example"
-    And I select the "first" record to merge to
-    And I select merge fields
-      | field | column |
-      | name  | right  |
-    And I click on "Merge"
-    And I wait for popup to close
-    Then I should see dialog "Could not process request as project is currently locked."
-    And I confirm
-
-  @javascript
-  Scenario: Cannot merge relationships if not member of module
-    Given I logout
-    And I have a user "other@intersect.org.au" with role "superuser"
-    And I am logged in as "other@intersect.org.au"
-    And I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Relationship Records"
-    And I press "Filter"
-    And I select records
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
-    And I click on "Compare"
-    And I select the "first" record to merge to
-    And I select merge fields
-      | field | column |
-      | name  | right  |
-    And I click on "Merge"
-    Then I should see dialog "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
-    And I confirm
-
-  # TODO Scenario: Cannot compare relationships of different types
+#  @javascript
+#  Scenario: Merge relationships (first)
+#    Given I have project module "Sync Example"
+#    And I am on the project modules page
+#    And I follow "Sync Example"
+#    And I follow "List Relationship Records"
+#    And I press "Filter"
+#    And I select records
+#      | name         |
+#      | AboveBelow 1 |
+#      | AboveBelow 2 |
+#    And I click on "Compare"
+#    And I select the "first" record to merge to
+#    And I select merge fields
+#      | field | column |
+#      | name  | right  |
+#    And I click on "Merge"
+#    Then I should see "Merged Relationship"
+#    And I should see records
+#      | name         |
+#      | AboveBelow 1 |
+#      | AboveBelow 3 |
+#    And I should not see records
+#      | name         |
+#      | AboveBelow 2 |
+#    And I follow "AboveBelow 1"
+#    And I should see fields with values
+#      | field        | type       | values       |
+#      | relationship | Annotation | AboveBelow 1 |
+#      | name         | Annotation | rel2         |
+#
+#  @javascript
+#  Scenario: Merge relationships (second)
+#    Given I have project module "Sync Example"
+#    And I am on the project modules page
+#    And I follow "Sync Example"
+#    And I follow "List Relationship Records"
+#    And I press "Filter"
+#    And I select records
+#      | name         |
+#      | AboveBelow 1 |
+#      | AboveBelow 2 |
+#    And I click on "Compare"
+#    And I select the "second" record to merge to
+#    And I select merge fields
+#      | field | column |
+#      | name  | left   |
+#    And I click on "Merge"
+#    Then I should see "Merged Relationship"
+#    And I should see records
+#      | name         |
+#      | AboveBelow 2 |
+#      | AboveBelow 3 |
+#    And I should not see records
+#      | name         |
+#      | AboveBelow 1 |
+#    And I follow "AboveBelow 2"
+#    And I should see fields with values
+#      | field        | type       | values       |
+#      | relationship | Annotation | AboveBelow 2 |
+#      | name         | Annotation | rel1         |
+#
+#  @javascript
+#  Scenario: Can only compare 2 relationships
+#    Given I have project module "Sync Example"
+#    And I am on the project modules page
+#    And I follow "Sync Example"
+#    And I follow "List Relationship Records"
+#    And I press "Filter"
+#    And I click on "Compare"
+#    Then I should see dialog "Please select two records to compare"
+#    And I confirm
+#    And I select records
+#      | name         |
+#      | AboveBelow 1 |
+#      | AboveBelow 2 |
+#      | AboveBelow 3 |
+#    Then I click on "Compare"
+#    Then I should see dialog "Can only compare two records at a time"
+#    And I confirm
+#
+#  @javascript
+#  Scenario: Cannot merge relationships if database is locked
+#    Given I have project module "Sync Example"
+#    And I am on the project modules page
+#    And I follow "Sync Example"
+#    And I follow "List Relationship Records"
+#    And I press "Filter"
+#    And I select records
+#      | name         |
+#      | AboveBelow 1 |
+#      | AboveBelow 2 |
+#    And I click on "Compare"
+#    And database is locked for "Sync Example"
+#    And I select the "first" record to merge to
+#    And I select merge fields
+#      | field | column |
+#      | name  | right  |
+#    And I click on "Merge"
+#    And I wait for popup to close
+#    Then I should see dialog "Could not process request as project is currently locked."
+#    And I confirm
+#
+#  @javascript
+#  Scenario: Cannot merge relationships if not member of module
+#    Given I logout
+#    And I have a user "other@intersect.org.au" with role "superuser"
+#    And I am logged in as "other@intersect.org.au"
+#    And I have project module "Sync Example"
+#    And I am on the project modules page
+#    And I follow "Sync Example"
+#    And I follow "List Relationship Records"
+#    And I press "Filter"
+#    And I select records
+#      | name         |
+#      | AboveBelow 1 |
+#      | AboveBelow 2 |
+#    And I click on "Compare"
+#    And I select the "first" record to merge to
+#    And I select merge fields
+#      | field | column |
+#      | name  | right  |
+#    And I click on "Merge"
+#    Then I should see dialog "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
+#    And I confirm
+#
+#  # TODO Scenario: Cannot compare relationships of different types

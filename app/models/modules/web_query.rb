@@ -2016,6 +2016,31 @@ EOF
     )
   end
 
+  def self.get_entity_uuid
+    cleanup_query(<<EOF
+select uuid from (
+select uuid, group_concat(response, ', ') as response
+from (
+  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+                                        vocabname  || ' (' || freetext || ')',
+                                        measure    || ' (' || freetext || ')',
+                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
+                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
+                                        measure,
+                                        vocabname,
+                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
+  from latestAllArchEntIdentifiers
+  group by uuid, attributeid
+  order by epoch)
+group by uuid) where response = ?
+EOF
+    )
+  end
+
   def self.get_rel_identifier
     cleanup_query(<<EOF
 select group_concat(response, ', ') as response

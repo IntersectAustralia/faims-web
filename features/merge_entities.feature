@@ -14,7 +14,7 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I select records
       | name    |
@@ -26,7 +26,7 @@ Feature: Merge entities
       | field | column |
       | name  | right  |
     And I click on "Merge"
-    Then I should see "Merged Archaeological Entities"
+    Then I should see "Merged Entities"
     And I should see records
       | name    |
       | Small 2 |
@@ -45,7 +45,7 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I select records
       | name    |
@@ -58,7 +58,7 @@ Feature: Merge entities
       | name  | left   |
     And I wait
     And I click on "Merge"
-    Then I should see "Merged Archaeological Entities"
+    Then I should see "Merged Entities"
     And I should see records
       | name    |
       | Small 3 |
@@ -78,7 +78,7 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I click on "Compare"
     Then I should see dialog "Please select two records to compare"
@@ -97,7 +97,7 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I select records
       | name    |
@@ -122,7 +122,7 @@ Feature: Merge entities
     And I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I select records
       | name    |
@@ -144,7 +144,7 @@ Feature: Merge entities
     Given I have project module "Entity Combiner"
     And I am on the project modules page
     And I follow "Entity Combiner"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     And I select records
       | name    |
@@ -154,24 +154,18 @@ Feature: Merge entities
     And I select the "first" record to merge to
     And I click on "Merge"
     And I wait for popup to close
-    Then I should see "Merged Archaeological Entities"
+    Then I should see "Merged Entities"
     And I should see records
       | name    |
       | Small 5 |
     And I should not see records
       | name    |
       | Small 6 |
-    Then I follow "Small 5"
-    And I follow "Show Relationship Association"
-    And I should see records
+    Then I should see relationships for "Entity Combiner" and entity "Small 5"
       | name         |
       | AboveBelow 1 |
       | AboveBelow 2 |
-    And I follow "Entities"
-    Then I follow "Show Deleted"
-    Then I follow "Small 6"
-    And I follow "Show Relationship Association"
-    Then I should not see records
+    Then I should not see relationships for "Entity Combiner" and entity "Small 6"
       | name         |
       | AboveBelow 1 |
       | AboveBelow 2 |

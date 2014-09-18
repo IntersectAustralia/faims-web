@@ -861,7 +861,7 @@ And /^I should see fields with values$/ do |table|
 end
 
 And /^I should see field "([^"]*)" with error "([^"]*)"$/ do |field, error|
-  all(:xpath, "//div[contains(@class, 'row-fluid')][./label/h4[contains(text(), '#{field}')]]/following-sibling::div/li[contains(text(), '#{error}')]").size.should == 1
+  first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").first(:xpath, "//*[contains(text(), '#{error}')]").text.should == error
 end
 
 And /^I should see fields with errors$/ do |table|
@@ -1082,4 +1082,13 @@ end
 
 And /^I wait (.*) seconds$/ do |seconds|
   sleep(seconds.to_i)
+end
+
+Then /^I should (not see|see) relationships for "([^"]*)" and entity "([^"]*)"$/ do |not_see, name, entity, table|
+  project_module = ProjectModule.find_by_name(name)
+  uuid = project_module.db.get_entity_uuid(entity)
+  relationships = project_module.db.get_arch_ent_rel_associations(uuid, 20, 0).map {|record| record[1]}
+  table.hashes.each do |hash|
+    relationships.include?(hash[:name]).should == (not_see != 'not see')
+  end
 end

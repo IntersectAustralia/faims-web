@@ -108,7 +108,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     end
 
     if @project_module.db.is_arch_entity_forked(uuid)
-      flash.now[:warning] = "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
+      flash.now[:warning] = "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     end
 
     @deleted = @project_module.db.get_arch_entity_deleted_status(uuid)
@@ -198,7 +198,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_arch_entity(uuid, @project_module.db.get_project_module_user_id(current_user.email))
 
-      flash[:notice] = 'Deleted Archaeological Entity.'
+      flash[:notice] = 'Deleted Entity.'
 
       show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
       if session[:type]
@@ -225,7 +225,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.restore_arch_entity(uuid, @project_module.db.get_project_module_user_id(current_user.email))
 
-      flash[:notice] = 'Restored Archaeological Entity.'
+      flash[:notice] = 'Restored Entity.'
 
       redirect_to action: :edit_arch_ent_records, id: @project_module.id, uuid: uuid
     end
@@ -251,7 +251,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @second_uuid = ids[1]
 
     unless @project_module.db.is_arch_ent_same_type(@first_uuid, @second_uuid)
-      flash[:error] = 'Cannot compare Archaeological Entities of different types.'
+      flash[:error] = 'Cannot compare Entities of different types.'
 
       redirect_to @project_module
     end
@@ -265,7 +265,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.merge_arch_ents(params[:deleted_id], params[:uuid], params[:vocab_id], params[:attribute_id], params[:measure], params[:freetext], params[:certainty], @project_module.db.get_project_module_user_id(current_user.email))
 
-      flash[:notice] = 'Merged Archaeological Entities.'
+      flash[:notice] = 'Merged Entities.'
 
       show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
       if session[:type]
@@ -303,7 +303,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.revert_arch_ent(entity[:uuid], entity[:timestamp], attributes, params[:resolve] == 'true', @project_module.db.get_project_module_user_id(current_user.email))
 
-      flash[:notice] = 'Reverted Archaeological Entity.'
+      flash[:notice] = 'Reverted Entity.'
     end
   rescue MemberException, FileManager::TimeoutException => e
     logger.warn e

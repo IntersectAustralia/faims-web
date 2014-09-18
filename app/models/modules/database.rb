@@ -269,7 +269,7 @@ class Database
       params = {
           uuid:uuid,
           userid:userid,
-          attributeid:attribute_id,
+          attributeid:attribute_id[i],
           vocabid:v,
           measure:m,
           freetext:f,
@@ -1011,6 +1011,10 @@ class Database
     names.each_with_index do |name, index|
       @db.execute("update idealAent set aentCountOrder = #{index + 1} where attributeid = (select attributeid from attributekey where attributename = '#{name}') and aenttypeid = (select aenttypeid from aenttype where aenttypename = 'small')")
     end
+  end
+
+  def get_entity_uuid(identifer)
+    @db.get_first_value(WebQuery.get_entity_uuid, identifer)
   end
 
   private

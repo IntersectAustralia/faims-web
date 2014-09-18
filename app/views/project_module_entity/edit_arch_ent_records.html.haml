@@ -1,4 +1,4 @@
-- title @project_module.name + " - Archaeological Entity"
+- title @project_module.name + " - Entity"
 = breadcrumbs
 - get_files(@attributes, 12, 13, 5)
 .form-actions
@@ -6,7 +6,7 @@
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module,session[:prev_id][-1]), :class => 'btn'
   - else
     - if !session[:show].nil? and !session[:show].empty?
-      = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project_module,session[:relationshipid])+"?offset=0&relntypeid="+session[:relntypeid].to_s, :class => 'btn'
+      =# link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_rel_members_path(@project_module,session[:relationshipid])+"?offset=0&relntypeid="+session[:relntypeid].to_s, :class => 'btn'
     -else
       - show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
       - if session[:action].eql?('list_typed_arch_ent_records')
@@ -17,10 +17,10 @@
     = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn btn-warning', :id => 'restore-record'
   - else
     = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn btn-warning', :id => 'delete-record', confirm: "Are you sure you want to delete this record?"
-  = link_to "Show Relationship Association", show_rel_association_path(@project_module,session[:uuid]) + "?offset=0", :class => 'btn'
+  =# link_to "Show Relationship Association", show_rel_association_path(@project_module,session[:uuid]) + "?offset=0", :class => 'btn'
   = link_to "Show History", show_arch_ent_history_path(@project_module,session[:uuid]), :class => 'btn'
   - if !@related_arch_ents.empty?
-    = link_to "Show Related Archaelogical Entities", '#related-arch-ents', :class => 'btn', :id => 'show-related'
+    = link_to "Show Related Entities", '#related-arch-ents', :class => 'btn', :id => 'show-related'
 .container
   .row-fluid.labels
     .span2
@@ -80,7 +80,7 @@
 
 - if !@related_arch_ents.empty?
   #related-arch-ents
-    %h2 Related Archaeological Entities
+    %h2 Related Entities
     .inner-box
       %ul
         - @related_arch_ents.each do |aent|

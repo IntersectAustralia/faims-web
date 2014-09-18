@@ -75,35 +75,35 @@ FaimsWeb::Application.routes.draw do
   post 'project_modules/:id/merge_arch_ents', :to => 'project_module_entity#merge_arch_ents', :as => 'merge_arch_ents'
 
   # project module relationship
-  get 'project_modules/:id/search_rel_records/', :to => 'project_module_relationship#search_rel_records', :as => 'search_rel_records'
-  get 'project_modules/:id/show_rel_records/', :to => 'project_module_relationship#show_rel_records', :as => 'show_rel_records'
-  get 'project_modules/:id/list_rel_records/', :to => 'project_module_relationship#list_rel_records', :as => 'list_rel_records'
-  get 'project_modules/:id/list_typed_rel_records/', :to => 'project_module_relationship#list_typed_rel_records', :as => 'list_typed_rel_records'
-  get 'project_modules/:id/delete_rel_records/:relationshipid', :to => 'project_module_relationship#delete_rel_records', :as => 'delete_rel_records'
-  get 'project_modules/:id/restore_rel_records/:relationshipid', :to => 'project_module_relationship#restore_rel_records', :as => 'restore_rel_records'
-  get 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_module_relationship#edit_rel_records', :as => 'edit_rel_records'
-  post 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_module_relationship#update_rel_records', :as => 'update_rel_records'
-  get 'project_modules/:id/show_rel_history/:relationshipid', :to => 'project_module_relationship#show_rel_history', :as => 'show_rel_history'
-  post 'project_modules/:id/revert_rel_to_timestamp/:relationshipid', :to => 'project_module_relationship#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
-  post 'project_modules/:id/compare_rel', :to => 'project_module_relationship#compare_rel', :as => 'compare_rel'
-  post 'project_modules/:id/merge_rel', :to => 'project_module_relationship#merge_rel', :as => 'merge_rel'
+  # get 'project_modules/:id/search_rel_records/', :to => 'project_module_relationship#search_rel_records', :as => 'search_rel_records'
+  # get 'project_modules/:id/show_rel_records/', :to => 'project_module_relationship#show_rel_records', :as => 'show_rel_records'
+  # get 'project_modules/:id/list_rel_records/', :to => 'project_module_relationship#list_rel_records', :as => 'list_rel_records'
+  # get 'project_modules/:id/list_typed_rel_records/', :to => 'project_module_relationship#list_typed_rel_records', :as => 'list_typed_rel_records'
+  # get 'project_modules/:id/delete_rel_records/:relationshipid', :to => 'project_module_relationship#delete_rel_records', :as => 'delete_rel_records'
+  # get 'project_modules/:id/restore_rel_records/:relationshipid', :to => 'project_module_relationship#restore_rel_records', :as => 'restore_rel_records'
+  # get 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_module_relationship#edit_rel_records', :as => 'edit_rel_records'
+  # post 'project_modules/:id/edit_rel_records/:relationshipid', :to => 'project_module_relationship#update_rel_records', :as => 'update_rel_records'
+  # get 'project_modules/:id/show_rel_history/:relationshipid', :to => 'project_module_relationship#show_rel_history', :as => 'show_rel_history'
+  # post 'project_modules/:id/revert_rel_to_timestamp/:relationshipid', :to => 'project_module_relationship#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
+  # post 'project_modules/:id/compare_rel', :to => 'project_module_relationship#compare_rel', :as => 'compare_rel'
+  # post 'project_modules/:id/merge_rel', :to => 'project_module_relationship#merge_rel', :as => 'merge_rel'
 
   # merge helpers
   post 'project_modules/:id/add_record_to_compare/', :to => 'project_module_association#add_record_to_compare', :as => 'add_record_to_compare'
   post 'project_modules/:id/remove_record_to_compare/', :to => 'project_module_association#remove_record_to_compare', :as => 'remove_record_to_compare'
 
   # project module association
-  get 'project_modules/:id/show_rel_members/:relationshipid', :to => 'project_module_association#show_rel_members', :as => 'show_rel_members'
-  post 'project_modules/:id/remove_arch_ent_member/', :to => 'project_module_association#remove_arch_ent_member', :as => 'remove_arch_ent_member'
-  get 'project_modules/:id/search_arch_ent_member/:relationshipid', :to => 'project_module_association#search_arch_ent_member', :as => 'search_arch_ent_member'
-  post 'project_modules/:id/add_arch_ent_member/', :to => 'project_module_association#add_arch_ent_member', :as => 'add_arch_ent_member'
+  # get 'project_modules/:id/show_rel_members/:relationshipid', :to => 'project_module_association#show_rel_members', :as => 'show_rel_members'
+  # post 'project_modules/:id/remove_arch_ent_member/', :to => 'project_module_association#remove_arch_ent_member', :as => 'remove_arch_ent_member'
+  # get 'project_modules/:id/search_arch_ent_member/:relationshipid', :to => 'project_module_association#search_arch_ent_member', :as => 'search_arch_ent_member'
+  # post 'project_modules/:id/add_arch_ent_member/', :to => 'project_module_association#add_arch_ent_member', :as => 'add_arch_ent_member'
+  #
+  # get 'project_modules/:id/show_rel_association/:uuid', :to => 'project_module_association#show_rel_association', :as => 'show_rel_association'
+  # post 'project_modules/:id/remove_rel_association/', :to => 'project_module_association#remove_rel_association', :as => 'remove_rel_association'
+  # get 'project_modules/:id/search_rel_association/:uuid', :to => 'project_module_association#search_rel_association', :as => 'search_rel_association'
+  # post 'project_modules/:id/add_rel_association/', :to => 'project_module_association#add_rel_association', :as => 'add_rel_association'
 
-  get 'project_modules/:id/show_rel_association/:uuid', :to => 'project_module_association#show_rel_association', :as => 'show_rel_association'
-  post 'project_modules/:id/remove_rel_association/', :to => 'project_module_association#remove_rel_association', :as => 'remove_rel_association'
-  get 'project_modules/:id/search_rel_association/:uuid', :to => 'project_module_association#search_rel_association', :as => 'search_rel_association'
-  post 'project_modules/:id/add_rel_association/', :to => 'project_module_association#add_rel_association', :as => 'add_rel_association'
-
-  get 'project_modules/:id/get_verbs_for_rel_association', :to => 'project_module_association#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
+  # get 'project_modules/:id/get_verbs_for_rel_association', :to => 'project_module_association#get_verbs_for_rel_association', :as => 'get_verbs_for_rel_association'
 
   # project module vocabulary
   get 'project_modules/:id/list_attributes_with_vocab', :to => 'project_module_vocabulary#list_attributes_with_vocab', :as => 'list_attributes_with_vocab'

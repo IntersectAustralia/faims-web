@@ -46,7 +46,7 @@ class ProjectModuleAssociationController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_member(relationshipid, @project_module.db.get_project_module_user_id(current_user.email), uuid)
 
-      flash[:notice] = 'Removed Archaeological Entity from Relationship.'
+      flash[:notice] = 'Removed Entity from Relationship.'
 
       return redirect_to action: :show_rel_members, id: @project_module.id, relationshipid: relationshipid, relntypeid: relntypeid
     end
@@ -101,7 +101,7 @@ class ProjectModuleAssociationController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.add_member(params[:relationshipid], @project_module.db.get_project_module_user_id(current_user.email), params[:uuid], params[:verb])
 
-      flash[:notice] = 'Added Archaeological Entity as member of Relationship.'
+      flash[:notice] = 'Added Entity as member of Relationship.'
 
       return redirect_to action: :show_rel_members, id: @project_module.id, relationshipid: params[:relationshipid], relntypeid: params[:relntypeid]
     end
@@ -156,7 +156,7 @@ class ProjectModuleAssociationController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.delete_member(relationshipid, @project_module.db.get_project_module_user_id(current_user.email), uuid)
 
-      flash[:notice] = 'Removed Archaeological Entity from Relationship.'
+      flash[:notice] = 'Removed Entity from Relationship.'
 
       redirect_to action: :show_rel_association, id: @project_module.id, uuid: uuid
     end
@@ -209,7 +209,7 @@ class ProjectModuleAssociationController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
       @project_module.db.add_member(params[:relationshipid], @project_module.db.get_project_module_user_id(current_user.email), params[:uuid], params[:verb])
 
-      flash[:notice] = 'Added Archaeological Entity as member of Relationship.'
+      flash[:notice] = 'Added Entity as member of Relationship.'
 
       redirect_to action: :show_rel_association, id: @project_module.id, uuid: params[:uuid]
     end

@@ -1,7 +1,7 @@
-- title @project_module.name + " - Archaeological Entity Records"
+- title @project_module.name + " - Entity Records"
 = breadcrumbs
 .content
-  %h2 Filter based on Archaeological Entity type
+  %h2 Filter based on Entity type
   %form{:action => list_typed_arch_ent_records_path, :method => "get"}
     .input-append
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}

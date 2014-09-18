@@ -1,7 +1,7 @@
 - title @project_module.name + " - Search"
 = breadcrumbs
 .content
-  %h2 Search Archaeological Entity
+  %h2 Search Entity
   %p
   .search-arch-member
     %ul.tabs
@@ -35,9 +35,9 @@
           - if @status.eql?('init')
             %p Please enter keywords to search for a particular entity or leave the search empty to show all entities
           -else
-            %p No Archaeological Entities found
+            %p No Entities found
       %li.verb
-        %h4 Archaeological Entity Verb
+        %h4 Entity Verb
         %label Verb (if required)
         .input-append
           %select{:id => 'select-verb'}

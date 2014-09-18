@@ -15,11 +15,11 @@ Feature: View and Revert entity history
     Given I have project module "Resolve Conflicts"
     And I am on the project modules page
     And I follow "Resolve Conflicts"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     Then I should see "Small 1" with "conflict"
     And I follow "Small 1"
-    Then I should see "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
+    Then I should see "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     And I follow "Show History"
     Then I history should have conflicts
     And I click on "Revert and Resolve Conflicts"
@@ -31,11 +31,11 @@ Feature: View and Revert entity history
     Given I have project module "Resolve Conflicts"
     And I am on the project modules page
     And I follow "Resolve Conflicts"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     Then I should see "Small 1" with "conflict"
     And I follow "Small 1"
-    Then I should see "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
+    Then I should see "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     And I follow "Show History"
     Then I history should have conflicts
     And database is locked for "Resolve Conflicts"
@@ -52,11 +52,11 @@ Feature: View and Revert entity history
     And I have project module "Resolve Conflicts"
     And I am on the project modules page
     And I follow "Resolve Conflicts"
-    And I follow "List Archaeological Entity Records"
+    And I follow "List Entity Records"
     And I press "Filter"
     Then I should see "Small 1" with "conflict"
     And I follow "Small 1"
-    Then I should see "This Archaeological Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
+    Then I should see "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
     And I follow "Show History"
     Then I history should have conflicts
     And I click on "Revert and Resolve Conflicts"
