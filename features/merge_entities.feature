@@ -139,6 +139,7 @@ Feature: Merge entities
 
   # TODO Scenario: Cannot compare arch entities of different types
 
+  @ignore_jenkins
   @javascript
   Scenario: Merge entities also merges relationships
     Given I have project module "Entity Combiner"

@@ -7,6 +7,7 @@ Feature: Android
     And I have a project modules dir
     And I perform HTTP authentication
 
+  @ignore_jenkins
   Scenario Outline: I can generate thumbnails for image and video files
     Given I have project module "Thumbnail"
     And I upload <type> file "<file>" to Thumbnail succeeds
@@ -63,6 +64,7 @@ Feature: Android
     | files/536bd80c-e78e-4300-aa71-93d07eb71b6d_image-1410411623538.original.jpg | app  |
     | files/990810e7-9bfb-4211-b970-50c03d023648_image-1410411612633.original.jpg | app  |
 
+  @ignore_jenkins
   Scenario Outline: I can download thumbnail for images and videos
     Given I have project module "Thumbnail"
     And I upload <type> file "<file>" to Thumbnail succeeds
