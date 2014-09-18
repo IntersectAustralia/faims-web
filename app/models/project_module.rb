@@ -515,7 +515,7 @@ class ProjectModule < ActiveRecord::Base
                   :copyright_holder => args[:copyright_holder],
                   :client_sponsor => args[:client_sponsor],
                   :land_owner => args[:land_owner],
-                  :has_sensitive_data => args[:has_sensitive_data]}.to_json)
+                  :has_sensitive_data => args[:has_sensitive_data].nil? ? "" : args[:has_sensitive_data]}.to_json)
     end
   end
 
