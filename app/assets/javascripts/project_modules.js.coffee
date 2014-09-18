@@ -594,32 +594,139 @@ update_attribute = (form) ->
     dataType: 'json'
     data: form.serialize()
     success: (data, textStatus, jqXHR) ->
-      form.find('#attr_ignore_errors').val('')
-      if data.result == 'success'
-        form.find('.form-attribute-error').remove()
-        if data.errors
-          errors = data.errors.split(';')
-          for error in errors
-            if error != ""
-              form.find('.row-fluid').after("<div class='form-attribute-error'><li>"+error+"</li></div>")
+      restore_attribute(form, data, true)
 
-          # hide update button
-          if form.find('.ignore-errors-btn').hasClass('hidden')
-            form.find('.ignore-errors-btn').removeClass('hidden')
-        else
-          form.find('.row-fluid').after("<div class='alert alert-success alert-dismissable'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>Updated</div>")
-          setTimeout(
-            ->
-              form.find('.alert').fadeOut()
-            , 2000)
-          # show update button
-          if !form.find('.ignore-errors-btn').hasClass('hidden')
-            form.find('.ignore-errors-btn').addClass('hidden')
-      else
-        alert(data.message)
+add_attribute = (button) ->
+  value = $(button).parents('.attribute-value')
+  clone_value = value.clone()
+  setup_attribute_value(clone_value)
+  if (value.next().hasClass('form-attribute-error'))
+      value = value.next()
+  clone_value.insertAfter(value)
 
-      $('#loading').addClass('hidden')
-      $('#loading').dialog('destroy')
+remove_attribute = (button) ->
+  value = $(button).parents('.attribute-value')
+  form = $(button).parents('.update-arch-ent-form')
+  count = form.find('.attribute-value').size()
+  if count > 1
+    value.remove()
+  else if count == 1
+    clear_attribute_value(value)
+
+refresh_attribute = (button) ->
+  form = $(button).parents('.update-arch-ent-form')
+
+  uuid = form.find('[name="attr[uuid]"]').val()
+  attribute_id = form.find('[name="attr[attribute_id]"]').val()
+
+  # open modal dialog
+  $('#loading').dialog({
+    autoOpen: false,
+    closeOnEscape: false,
+    draggable: false,
+    title: "Message",
+    width: 300,
+    minHeight: 50,
+    modal: true,
+    buttons: {},
+    resizable: false
+  });
+  $('#loading').removeClass('hidden')
+  $('#loading').dialog('open')
+
+  $.ajax $(button).attr('data_url'),
+    type: 'GET'
+    dataType: 'json'
+    data: {uuid: uuid, attribute_id: attribute_id}
+    success: (data, textStatus, jqXHR) ->
+      restore_attribute(form, data, false)
+
+clear_attribute_value = (value) ->
+  vocab = value.find('[name="attr[vocab_id][]"]')
+  if vocab
+    vocab.val('')
+  value.find('[name="attr[measure][]"]').val('')
+  value.find('[name="attr[freetext][]"]').val('')
+  value.find('[name="attr[certainty][]"]').val('')
+  value.find('.form-attribute-error').remove()
+
+setup_attribute_value = (value) ->
+  clear_attribute_value(value)
+  value.find('.add-attribute').click(
+    ->
+      add_attribute($(this))
+      return false
+  )
+  value.find('.remove-attribute').click(
+    ->
+      remove_attribute($(this))
+      return false
+  )
+  value.find('.refresh-attribute').click(
+    ->
+      refresh_attribute($(this))
+      return false
+  )
+
+create_attribute_value = (value, data) ->
+  v = value.clone()
+
+  clear_attribute_value(v)
+  setup_attribute_value(v)
+
+  vocab = v.find('[name="attr[vocab_id][]"]')
+  if vocab
+    vocab.val(data.vocab)
+  v.find('[name="attr[measure][]"]').val(data.measure)
+  v.find('[name="attr[freetext][]"]').val(data.freetext)
+  v.find('[name="attr[certainty][]"]').val(data.certainty)
+
+  if data.errors
+    errors = data.errors.split(';')
+    for error in errors
+      if error != ""
+        node = v.find('label h4')
+        while (node.next().hasClass('form-attribute-error'))
+          node = node.next()
+        node.after("<div class='form-attribute-error'><span>"+error+"</span></div>")
+
+  return v
+
+restore_attribute = (form, data, updated) ->
+  form.find('#attr_ignore_errors').val('')
+
+  if data.result != 'failure'
+
+    value = form.find('.attribute-value:first')
+    form.find('.attribute-value').remove()
+
+    has_error = false
+    for value_data in data.result
+      clone_value = create_attribute_value(value, value_data)
+      form.find('.arch_ent_record_content').append(clone_value)
+      if value_data.errors
+        has_error = true
+
+    if has_error
+      # hide update button
+      if form.find('.ignore-errors-btn').hasClass('hidden')
+        form.find('.ignore-errors-btn').removeClass('hidden')
+    else
+      # show update button
+      if !form.find('.ignore-errors-btn').hasClass('hidden')
+        form.find('.ignore-errors-btn').addClass('hidden')
+      # show update flash
+      form.find('.row-fluid:last').after("<div class='alert alert-success alert-dismissable'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>Updated</div>")
+      setTimeout(
+        ->
+          form.find('.alert').fadeOut()
+      , 2000)
+
+  else
+    alert(data.message)
+
+  $('#loading').dialog('destroy')
+  $('#loading').addClass('hidden')
 
 update_arch_ent_or_rel = ->
   $('.update-arch-ent-form form').submit(
@@ -630,6 +737,21 @@ update_arch_ent_or_rel = ->
   $('.update-rel-form form').submit(
     ->
       update_attribute($(this))
+      return false
+  )
+  $('.add-attribute').click(
+    ->
+      add_attribute($(this))
+      return false
+  )
+  $('.remove-attribute').click(
+    ->
+      remove_attribute($(this))
+      return false
+  )
+  $('.refresh-attribute').click(
+    ->
+      refresh_attribute($(this))
       return false
   )
 

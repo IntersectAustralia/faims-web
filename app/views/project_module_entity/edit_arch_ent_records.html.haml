@@ -23,7 +23,7 @@
     = link_to "Show Related Archaelogical Entities", '#related-arch-ents', :class => 'btn', :id => 'show-related'
 .container
   .row-fluid.labels
-    .span3
+    .span2
       %label 
     .span2
       %label Constrained Data:
@@ -33,7 +33,7 @@
       %label Annotation:
     .span1
       %label Certainty:
-    .span3
+    .span4
   - attributeGroup = @attributes.group_by{|a|a[3]}
   - attributeGroup.each do |key,val|
     .update-arch-ent-form
@@ -42,11 +42,15 @@
           = f.hidden_field :uuid, :value => val[0][0]
           = f.hidden_field :attribute_id, :value => val[0][1]
           = f.hidden_field 'ignore_errors'
-          - show_error_button = 'hidden'
           - for attribute in val
-            .row-fluid
-              %label.span3
+            .row-fluid.attribute-value
+              %label.span2
                 %h4.attribute-name=key
+                - if attribute[10] == 1
+                  .form-attribute-error
+                    - attribute[11].each_line(';') do |l|
+                      - next if l.gsub(';', '').blank?
+                      %span=l.gsub(';', '')
               - if !@vocab_name[attribute[1]].empty?
                 .span2
                   - vocabs = @vocab_name[attribute[1]]
@@ -63,17 +67,16 @@
                 = f.text_field :freetext, :value => attribute[6], name: 'attr[freetext][]'
               .span1
                 = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'
-              .span3
-                - if attribute[10] == 1
-                  - show_error_button = nil
+              .span4
+                = link_to '#', :class => 'btn add-attribute' do
+                  %i.icon-plus
+                = link_to '#', :class => 'btn remove-attribute' do
+                  %i.icon-minus
+                = link_to '#', data_url: refresh_arch_ent_records_path, :class => 'btn refresh-attribute' do
+                  %span='Undo'
                 = f.submit "Update", :class => "btn btn-inverse"
-                = f.submit "Update and Ignore errors", :class => "btn btn-primary ignore-errors-btn #{show_error_button}"
-            - if attribute[10] == 1
-              - show_error_button = nil
-              .form-attribute-error
-                - attribute[11].each_line(';') do |l|
-                  - next if l.gsub(';', '').blank?
-                  %li=l.gsub(';', '')
+                = f.submit "Ignore errors", :class => "btn btn-primary ignore-errors-btn #{attribute[10] == 1 ? nil : 'hidden'}"
+
 
 - if !@related_arch_ents.empty?
   #related-arch-ents

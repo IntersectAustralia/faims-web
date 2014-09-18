@@ -181,16 +181,24 @@ class Database
           cache_timestamps[attribute_id] = parenttimestamp
         end
 
+        # check if deleted
+        v = clean(vocab_id ? vocab_id[i] : nil)
+        m = clean(measure[i])
+        f = clean(freetext[i])
+        c = clean(certainty[i])
+        deleted = v.blank? && m.blank? && f.blank? && c.blank?
+
         params = {
             uuid:uuid,
             userid:userid,
             attributeid:attribute_id,
-            vocabid:clean(vocab_id ? vocab_id[i] : nil),
-            measure:clean(measure[i]),
-            freetext:clean(freetext[i]),
-            certainty:clean(certainty[i]),
+            vocabid:v,
+            measure:m,
+            freetext:f,
+            certainty:c,
             valuetimestamp:timestamp,
-            parenttimestamp:parenttimestamp
+            parenttimestamp:parenttimestamp,
+            deleted: deleted ? 1 : nil
         }
 
         db.execute(WebQuery.insert_arch_entity_attribute, params)
@@ -251,16 +259,24 @@ class Database
         cache_timestamps[attribute_id[i]] = parenttimestamp
       end
 
+      # check if deleted
+      v = clean(vocab_id ? vocab_id[i] : nil)
+      m = clean(measure[i])
+      f = clean(freetext[i])
+      c = clean(certainty[i])
+      deleted = v.blank? && m.blank? && f.blank? && c.blank?
+
       params = {
           uuid:uuid,
           userid:userid,
-          attributeid:attribute_id[i],
-          vocabid:clean(vocab_id ? vocab_id[i] : nil),
-          measure:clean(measure[i]),
-          freetext:clean(freetext[i]),
-          certainty:clean(certainty[i]),
+          attributeid:attribute_id,
+          vocabid:v,
+          measure:m,
+          freetext:f,
+          certainty:c,
           valuetimestamp:timestamp,
-          parenttimestamp:parenttimestamp
+          parenttimestamp:parenttimestamp,
+          deleted: deleted ? 1 : nil
       }
 
       db.execute(WebQuery.insert_arch_entity_attribute, params)

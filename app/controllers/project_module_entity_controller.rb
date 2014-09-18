@@ -134,8 +134,9 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module = ProjectModule.find(params[:id])
 
     uuid = params[:uuid]
-    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
     attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
+
+    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
     measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
     freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
     certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
@@ -147,10 +148,40 @@ class ProjectModuleEntityController < ProjectModuleBaseController
       @project_module.db.update_arch_entity_attribute(uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
 
       @attributes = @project_module.db.get_arch_entity_attributes(uuid)
-      errors = @attributes.select { |a| a[1].to_s == attribute_id }.map { |a| a[11] }.first
+      data = @attributes.select { |a| a[1].to_s == attribute_id }.map { |a|
+        {name: a[3],
+         vocab: a[2].blank? ? nil : a[2].to_s,
+         measure: a[5].blank? ? nil : a[5].to_s,
+         freetext: a[6].blank? ? nil : a[6].to_s,
+         certainty: a[7].blank? ? nil : a[7].to_s,
+         errors: a[11].blank? ? nil : a[11].to_s } }
 
-      render json: { result: 'success', errors: errors }
+      render json: { result: data }
     end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    render json: { result: 'failure', message: get_error_message(e) }
+  end
+
+  def refresh_arch_ent_records
+    @project_module = ProjectModule.find(params[:id])
+
+    uuid = params[:uuid]
+    attribute_id = params[:attribute_id]
+
+    authenticate_project_module_user
+
+    @attributes = @project_module.db.get_arch_entity_attributes(uuid)
+    data = @attributes.select { |a| a[1].to_s == attribute_id }.map { |a|
+      {name: a[3],
+       vocab: a[2].blank? ? nil : a[2].to_s,
+       measure: a[5].blank? ? nil : a[5].to_s,
+       freetext: a[6].blank? ? nil : a[6].to_s,
+       certainty: a[7].blank? ? nil : a[7].to_s,
+       errors: a[11].blank? ? nil : a[11].to_s } }
+
+    render json: { result: data }
   rescue MemberException, FileManager::TimeoutException => e
     logger.warn e
 
