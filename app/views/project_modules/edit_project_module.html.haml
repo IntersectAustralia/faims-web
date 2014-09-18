@@ -11,6 +11,9 @@
             = f.text_field :name, :value => @name, :class => "input-block-level"
             = f.error :name
             %p
+            = f.label :version, 'Module Version:'
+            = f.text_field :version, :value => @version, :class => "input-block-level", :placeholder => "instruction here..."
+            %p
             = f.label :srid, 'Module SRID:'
             = f.select :srid, @spatial_list, :selected => @srid, :class => "input-block-level"
             %p

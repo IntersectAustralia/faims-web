@@ -73,6 +73,7 @@ class ProjectModulesController < ProjectModuleBaseController
 
     project_module_setting = JSON.parse(safe_file_read(@project_module.get_path(:settings)))
     @name = @project_module.name
+    @version = project_module_setting['version']
     @season = project_module_setting['season']
     @description = project_module_setting['description']
     @permit_no = project_module_setting['permit_no']
@@ -405,6 +406,7 @@ class ProjectModulesController < ProjectModuleBaseController
   def parse_settings_from_params(params)
     @tmpdir = params[:project_module][:tmpdir]
     @name = params[:project_module][:name]
+    @version = params[:project_module][:version]
     @season = params[:project_module][:season]
     @description = params[:project_module][:description]
     @permit_no = params[:project_module][:permit_no]
