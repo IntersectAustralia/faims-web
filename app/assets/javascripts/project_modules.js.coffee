@@ -667,6 +667,12 @@ setup_attribute_value = (value) ->
       refresh_attribute($(this))
       return false
   )
+  value.find('.ignore-errors-btn').click(
+    ->
+      form = $(this).closest('form')
+      form.find('#attr_ignore_errors').val('1')
+      return true
+  )
 
 create_attribute_value = (value, data) ->
   v = value.clone()
