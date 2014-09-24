@@ -6,6 +6,8 @@
     %input{:type => 'hidden', :value => remove_record_to_compare_path(@project_module), :id => 'remove-entity'}
     %form{:method => 'post', :id => 'compare'}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      - pagination_options = [['50 per page', '50'], ['100 per page', '100'], ['250 per page', '250'], ['Show all', '-1']]
+      = select_tag :per_page, options_for_select(pagination_options, @limit), :onchange => 'updatePagination(this.value)'
       - if session[:values]
         - session[:values].length.times do |i|
           %input{:type => 'hidden', :value => session[:values][i-1], :name => 'ids[]', :id => session[:values][i-1]}
@@ -27,3 +29,8 @@
       %input{:type => 'hidden', :value => session[:type], :name => 'type'}
       - if session[:show_deleted].nil?
         %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
+
+:javascript
+  function updatePagination(per_page) {
+    window.location = "#{@base_url}&offset=0&per_page=" + per_page
+  }

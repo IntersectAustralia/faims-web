@@ -175,6 +175,35 @@ Feature: Manage entities
       | Small 4 |
 
   @javascript
+  Scenario: View entity list with pagination
+    Given I have project module "Large Entity List"
+    And I am on the project modules page
+    And I follow "Large Entity List"
+    And I follow "List Entity Records"
+    And I press "Filter"
+    Then I should see records
+      | name     |
+      | Small 1  |
+      | Small 50 |
+    And I should not see records
+      | name     |
+      | Small 51 |
+    And I select "100" from "per_page"
+    Then I should see records
+      | name      |
+      | Small 1   |
+      | Small 100 |
+    And I should not see records
+      | name      |
+      | Small 101 |
+    And I select "all" from "per_page"
+    Then I should see records
+      | name      |
+      | Small 1   |
+      | Small 100 |
+      | Small 101 |
+
+  @javascript
   Scenario: View entity list including deleted entities
     Given I have project module "Sync Example"
     And I am on the project modules page

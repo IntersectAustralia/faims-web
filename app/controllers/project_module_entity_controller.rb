@@ -20,7 +20,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
 
     @project_module = ProjectModule.find(params[:id])
 
-    @limit = Database::LIMIT
+    @limit = params[:per_page].nil? ? 50 : params[:per_page]
     @offset = params[:offset] ? params[:offset] : '0'
 
     type = params[:type]
@@ -63,7 +63,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
 
     @project_module = ProjectModule.find(params[:id])
 
-    @limit = Database::LIMIT
+    @limit = params[:per_page].nil? ? 50 : params[:per_page]
     @offset = params[:offset] ? params[:offset] : '0'
 
     query = params[:query]

@@ -1,0 +1,556 @@
+// USER
+User user; // dont touch
+String userid;
+
+populateListForUsers() {
+    fetchAll("select userid, fname ||' ' || lname from user", new FetchCallback() {
+        onFetch(result) {
+            populateList("user/tab1/users", result);
+        }
+    });
+    return users;
+}
+populateListForUsers();
+
+login(){
+    fetchOne("select userid,fname,lname,email from user where userid='" + getListItemValue() + "';", new FetchCallback() {
+        onFetch(userResult) {
+            user = new User(userResult.get(0),userResult.get(1),userResult.get(2),userResult.get(3));
+            setUser(user);
+            showTabGroup("menu");
+        }
+    });
+}
+
+onEvent("user/tab1/users", "click", "login()");
+
+// CONTROLS
+
+onEvent("menu/tab1/startsync", "click", "startSync()");
+onEvent("menu/tab1/stopsync", "click", "stopSync()");
+
+setSyncMinInterval(10.0f);
+setSyncMaxInterval(20.0f);
+setSyncDelay(5.0f);
+
+startSync() {
+    setSyncEnabled(true);
+    setFileSyncEnabled(true);
+}
+
+stopSync() {
+    setSyncEnabled(false);
+    setFileSyncEnabled(false);
+}
+
+createOption(name, value) {
+	ArrayList option = new ArrayList();
+	option.add(name);
+	option.add(value);
+	return option;
+}
+
+options = new ArrayList();
+options.add(createOption("entity", "Save and Load Entity"));
+options.add(createOption("entity_childview", "Save and Load Entity - Child Views"));
+options.add(createOption("entity_autosave", "Save and Load Entity - AutoSave"));
+options.add(createOption("associations", "Associations"));
+options.add(createOption("table", "Table View"));
+loadOptions() {
+	populateList("menu/tab1/options", options);
+}
+
+onEvent("menu", "load", "loadOptions()");
+
+onClickOption() {
+	String value = getListItemValue();
+	if ("entity".equals(value)) {
+		showTabGroup("tabgroup1");
+	} else if ("entity_childview".equals(value)) {
+		showTabGroup("tabgroup3");
+	} else if ("entity_autosave".equals(value)) {
+		showTabGroup("tabgroup5");
+	} else if ("associations".equals(value)) {
+		showTabGroup("tabgroup7");
+	}else if ("table".equals(value)) {
+		showTabGroup("tabgroup8");
+	}
+}
+
+onEvent("menu/tab1/options", "click", "onClickOption()");
+
+init() {
+	//startSync();
+	// reset ids
+	entityId = tableEntityId = null;
+	relationshipId = tableRelationshipId = null;
+}
+
+cleanup() {
+	stopSync();
+}
+
+onEvent("menu", "show", "init()"); 
+onEvent("user", "show", "cleanup()");
+
+// ENTITY
+
+String entityId = null;
+String tableEntityId = null;
+
+initEntity(tabgroup) {
+ 	newEntity(tabgroup);
+}
+
+initAutoEntity(tabgroup) {
+	clearEntity(tabgroup);
+}
+
+closeEntity(tabgroup) {
+	cancelTabGroup(tabgroup, true);
+}
+
+String ENTITY_LIST = "SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+        "                      measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+        "                      vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+        "                      measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+        "                        vocabname || ' (' || freetext  || ')', \n" + 
+        "                        measure   || ' (' || freetext  || ')', \n" + 
+        "                      measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+        "                      vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+        "                      freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+        "                      measure, \n" + 
+        "                      vocabname, \n" + 
+        "                      freetext), ' | ') as response \n" + 
+        "       FROM latestNonDeletedArchentIdentifiers\n" + 
+        "     WHERE aenttypename = 'small'\n" + 
+        "       GROUP BY uuid limit ? offset ?;";
+
+loadEntities(tabgroup) {
+  populateCursorList(tabgroup + "/tab2/entities", ENTITY_LIST, 5);
+}
+
+saveEntity(tabgroup) {
+	updateEntity(tabgroup);
+}
+
+loadEntity(tabgroup) {
+	localId = getListItemValue();
+	if (isNull(localId)) return;
+
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
+	entityId = localId;
+}
+
+loadEntityAuto(tabgroup) {
+	localId = getListItemValue();
+	if (isNull(localId)) return;
+
+	newEntity(tabgroup);
+	showTabGroup(tabgroup, localId);
+	entityId = localId;
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, localId, null, getEntityIdentifier(result), null, true);
+		}
+	});
+}
+
+reloadEntity(tabgroup) {
+	if (isNull(entityId)) return;
+	
+	showTabGroup(tabgroup, entityId);
+}
+
+fetchEntityIdentifier(FetchCallback callback) {
+	fetchOne("select count(distinct(uuid)) from archentity;", callback);
+}
+
+getEntityIdentifier(Object result) {
+	attributes = null;
+	if (entityId == null) {
+		attributes = createAttributeList();
+		entityCount = Integer.valueOf(result.get(0)) + 1;
+		attributes.add(createEntityAttribute("entity", "Small " + entityCount, null, null, null));
+	}
+	return attributes;
+}
+
+updateEntity(tabgroup) {
+	if (isNull(entityId)) entityId = null;
+
+	if (entityId == null && tableEntityId != null) entityId = tableEntityId;
+	
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, entityId, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+					reloadEntity(tabgroup);
+				}
+			});
+		}
+	});
+}
+
+
+clearEntity(tabgroup) {
+	newEntity(tabgroup);
+	fetchEntityIdentifier(new FetchCallback() {
+		onFetch(result) {
+			saveTabGroup(tabgroup, null, null, getEntityIdentifier(result), new SaveCallback() {
+				onSave(uuid, newRecord) {
+					entityId = uuid;
+				}
+			}, true);
+		}
+	});
+}
+
+newEntity(tabgroup) {
+	newTabGroup(tabgroup);
+	
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'location' order by vocabcountorder;", new FetchCallback() {
+		onFetch(result) {
+			populateCheckBoxGroup(tabgroup + "/tab1/location", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'choice' order by vocabcountorder;", new FetchCallback() {
+		onFetch(result) {
+			populateRadioGroup(tabgroup + "/tab1/choice", result);
+		}
+	});
+
+	fetchAll("select vocabid, vocabname from vocabulary left join attributekey using (attributeid) where attributename = 'item' order by vocabcountorder;", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown(tabgroup + "/tab1/item", result);
+		}
+	});
+	
+	populateHierarchicalDropDown(tabgroup + "/tab1/type", "type");
+
+	fetchAll("select vocabid, vocabname, pictureurl from vocabulary left join attributekey using (attributeid) where attributename = 'gallery' order by vocabcountorder;", new FetchCallback() {
+		onFetch(result) {
+			populatePictureGallery(tabgroup + "/tab1/gallery", result);
+		}
+	});
+	
+	populateHierarchicalPictureGallery(tabgroup + "/tab1/rocks", "rocks");
+	
+	setFieldValue(tabgroup + "/tab1/timestamp", getCurrentTime());
+
+	entityId = null;
+
+	keepTabGroupChanges(tabgroup);
+}
+
+deleteEntity(tabgroup){
+	if (isNull(entityId)) return;
+	
+	deleteArchEnt(entityId);
+	entityId = null;
+	
+  cancelTabGroup(tabgroup, false);
+}
+
+onClickScanner() {
+	scanCode("onCodeScan()");
+}
+
+onCodeScan() {
+	code = getLastScanContents();
+	showToast(code);
+	setFieldValue("tabgroup1/tab1/scvalue", code);
+}
+
+onEvent("tabgroup1", "show", "initEntity(\"tabgroup1\")");  
+onEvent("tabgroup1", "show", "loadEntities(\"tabgroup1\")");	
+onEvent("tabgroup1/tab1/save", "delayclick", "saveEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/clear", "click", "newEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/delete", "click", "deleteEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/close", "click", "closeEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab2/entities", "click", "loadEntity(\"tabgroup1\")");
+onEvent("tabgroup1/tab1/scancode", "click", "onClickScanner()");
+
+onEvent("tabgroup1/tab1/attachfile", "click", "attachFileTo(\"tabgroup1/tab1/files\")");
+onEvent("tabgroup1/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup1/tab1/pictures\")");
+onEvent("tabgroup1/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup1/tab1/videos\")");
+onEvent("tabgroup1/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup1/tab1/audios\")");
+onEvent("tabgroup1/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+onEvent("tabgroup3", "show", "initEntity(\"tabgroup3\")");	
+onEvent("tabgroup3", "show", "loadEntities(\"tabgroup3\")");  
+onEvent("tabgroup3/tab1/save", "delayclick", "saveEntity(\"tabgroup3\")");
+onEvent("tabgroup3/tab1/clear", "click", "newEntity(\"tabgroup3\")");
+onEvent("tabgroup3/tab1/delete", "click", "deleteEntity(\"tabgroup3\")");
+onEvent("tabgroup3/tab1/close", "click", "closeEntity(\"tabgroup3\")");
+onEvent("tabgroup3/tab2/entities", "click", "loadEntity(\"tabgroup3\")");
+
+onEvent("tabgroup3/tab1/attachfile", "click", "attachFileTo(\"tabgroup3/tab1/files\")");
+onEvent("tabgroup3/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup3/tab1/pictures\")");
+onEvent("tabgroup3/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup3/tab1/videos\")");
+onEvent("tabgroup3/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup3/tab1/audios\")");
+onEvent("tabgroup3/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+onEvent("tabgroup5", "show", "initAutoEntity(\"tabgroup5\")");	
+onEvent("tabgroup5", "show", "loadEntities(\"tabgroup5\")");  
+// onEvent("tabgroup5/tab1/save", "delayclick", "saveEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/clear", "click", "clearEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/delete", "click", "deleteEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab1/close", "click", "closeEntity(\"tabgroup5\")");
+onEvent("tabgroup5/tab2/entities", "click", "loadEntityAuto(\"tabgroup5\")");
+
+onEvent("tabgroup5/tab1/attachfile", "click", "attachFileTo(\"tabgroup5/tab1/files\")");
+onEvent("tabgroup5/tab1/attachpicture", "click", "attachPictureTo(\"tabgroup5/tab1/pictures\")");
+onEvent("tabgroup5/tab1/attachvideo", "click", "attachVideoTo(\"tabgroup5/tab1/videos\")");
+onEvent("tabgroup5/tab1/attachaudio", "click", "attachAudioTo(\"tabgroup5/tab1/audios\")");
+onEvent("tabgroup5/tab1/viewattached", "click", "viewArchEntAttachedFiles(entityId)");
+
+addActionBarItem("sync", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn Sync off";
+    }
+    actionOn() {
+        setSyncEnabled(false);
+        setFileSyncEnabled(false);
+    }
+    isActionOff() {
+        isSyncEnabled();
+    }
+    actionOffLabel() {
+        "Turn Sync on";
+    }
+    actionOff() {
+        setSyncEnabled(true);
+        setFileSyncEnabled(true);
+    }
+});
+
+addActionBarItem("auto save", new ToggleActionButtonCallback() {
+    actionOnLabel() {
+        "Turn auto save off";
+    }
+    actionOn() {
+        showTabGroup("tabgroup1");
+    }
+    isActionOff() {
+        isAutosaveEnabled();
+    }
+    actionOffLabel() {
+        "Turn auto save on";
+    }
+    actionOff() {
+        showTabGroup("tabgroup5");;
+    }
+});
+
+addActionBarItem("save Entity", new ActionButtonCallback() {
+    actionOnLabel() {
+        "Save Entity";
+    }
+     
+    actionOn() {
+    	if(isAutosaveEnabled()){
+        	showToast("Already Auto saved");
+        } else {
+        	saveEntity("tabgroup1");
+        }	
+    }
+});
+
+
+
+// ASSOCIATIONS
+
+loadMembers() {
+	fetchEntityList("small", new FetchCallback() {
+		onFetch(result) {
+			populateDropDown("tabgroup7/tab1/entity1", result);
+			populateDropDown("tabgroup7/tab1/entity2", result);
+		}
+	});
+
+}
+
+onEvent("tabgroup7", "show", "loadMembers()");
+
+onEvent("tabgroup7/tab1/add", "click", "onAddMember()");
+
+onAddMember() {
+	eid1 = getFieldValue("tabgroup7/tab1/entity1");
+	eid2 = getFieldValue("tabgroup7/tab1/entity2");
+	if (isNull(eid1) || isNull(eid2)) return;
+	
+	verb = getFieldValue("tabgroup7/tab1/verb");
+	
+	saveRel(null, "AboveBelow", null, null, new SaveCallback() {
+  	onSave(uuid, newRecord) {
+    	addReln(eid1, uuid, verb, new SaveCallback() {
+			onSaveAssociation(entityId, relId) {
+				showToast("added association entity1 ");
+			}
+		});
+		addReln(eid2, uuid, verb, new SaveCallback() {
+			onSaveAssociation(entityId, relId) {
+				showToast("added association entity2 ");
+			}
+		});
+  	}	
+	
+});
+
+}
+
+//Table View
+
+tableQuery = new ArrayList();
+tableQuery.add("SELECT uuid, group_concat(coalesce(measure   || ' '  || vocabname || '('  ||  freetext           ||'; '|| (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' || freetext  || '; ' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure   || ' '  || vocabname || ' (' || (certainty * 100.0) || '% certain)', \n" + 
+				"	 								  	   vocabname || ' (' || freetext  || ')', \n" + 
+				"	 								  	   measure   || ' (' || freetext  || ')', \n" + 
+				"	 									   measure   || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   vocabname || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   freetext  || ' (' ||(certainty * 100.0) || '% certain)', \n" + 
+				"	 									   measure, \n" + 
+				"	 									   vocabname, \n" + 
+				"	 									   freetext), ' | ') as response, uuid \n" +
+				" 			FROM latestNonDeletedArchentIdentifiers\n" +
+				" 			GROUP BY uuid;");
+tableQuery.add("select uuid, attributename, response\n" + 
+				"from (select attributename, attributeid\n" + 
+				"from attributekey join idealaent using (attributeid) join aenttype using (aenttypeid)\n" + 
+				"where aenttypename = 'small'), (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"left outer join \n" + 
+				"(select uuid, valuetimestamp, attributename, attributeid, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||') '||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext   ||')'||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure    || ' ' || vocabname   ||  coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || ' (' || freetext || ')',\n" + 
+				"                                                                                              measure    || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              vocabname  || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              freetext   || coalesce(case certainty <1 when 1 then '?' end, '') ,\n" + 
+				"                                                                                              measure,\n" + 
+				"                                                                                              vocabname,\n" + 
+				"                                                                                              freetext), ' | ') as response\n" + 
+				"FROM (  SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp          \n" + 
+				"          FROM latestnondeletedaentvalue join latestnondeletedarchent using (uuid)\n" + 
+				"          JOIN attributekey using (attributeid)          \n" + 
+				"          LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)          \n" + 
+				"       ORDER BY uuid, attributename ASC)\n" + 
+				"group by uuid, attributeid) using (uuid, attributeid, attributename)\n" + 
+				"union \n" + 
+				"select uuid, 'geometry', astext(geospatialcolumn)\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, geospatialcolumn\n" + 
+				"from latestnondeletedarchentidentifiers \n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'username', fname || ' ' || lname\n" + 
+				"from (select uuid, aenttypeid, aenttypename, aenttimestamp, group_concat(coalesce(measure, freetext, vocabname, '<null>'), '|') || coalesce(case certainty <1 when 1 then '?' end, '') as isIdent, fname, lname\n" + 
+				"from latestnondeletedarchentidentifiers join user using (userid)\n" + 
+				"where aenttypename = 'small'\n" + 
+				"group by uuid\n" + 
+				"order by attributename\n" + 
+				") as id \n" + 
+				"union \n" + 
+				"select uuid, 'action', uuid \n" + 
+				"from latestnondeletedarchent join aenttype using (aenttypeid) \n" + 
+				"where aenttypename = 'small' \n" + 
+				"group by uuid \n" + 
+				"order by uuid, attributename;");
+tableQuery.add("select attributename, aentcountorder from attributekey join idealaent using (attributeid);");
+
+createTableHeaders(headers) {
+	ArrayList listHeaders = new ArrayList();
+	for (String header : headers) {
+		listHeaders.add(header);
+	}
+	return listHeaders;
+}
+
+tableHeaders = new ArrayList();
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "identifier", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "uuid", "entity", "name", "value", "timestamp", "gallery", "rocks", "type", "location", "file", "picture", "video", "audio", "geometry", "username", "action" }));
+tableHeaders.add(createTableHeaders(new String[]{ "attributename", "aentcountorder" }));
+
+tableList = new ArrayList();
+tableList.add(createOption("entity", "Fetch Entities"));
+tableList.add(createOption("entity-pivot", "Fetch Entity Attributes"));
+tableList.add(createOption("attribute-order", "Attribute Ordering"));
+
+onEvent("tabgroup8", "load", "onLoadTable()");
+
+onLoadTable() {
+	populateDropDown("tabgroup8/tab1/queries", tableList);
+}
+
+onEvent("tabgroup8", "show", "refreshTable(\"tabgroup8/tab1/table\")");
+
+onEvent("tabgroup8/tab1/load", "click", "onLoadQuery()");
+onEvent("tabgroup8/tab1/top", "click", "onScrollTop()");
+onEvent("tabgroup8/tab1/bottom", "click", "onScrollBottom()");
+onEvent("tabgroup8/tab1/row", "click", "onScrollRow()");
+
+onLoadQuery() {
+	selectedItem = getFieldValue("tabgroup8/tab1/queries");
+	
+	index = getTableIndex(selectedItem);
+	if (index < 0) return;
+
+	headers = tableHeaders.get(index);
+	query = tableQuery.get(index);
+	if (index == 0) {
+		populateTableRaw("tabgroup8/tab1/table", query, headers, "Show", 2, "onShowEntityRow()");
+	} else if (index == 1) {
+		populateTablePivot("tabgroup8/tab1/table", query, headers, "Show", 15, "onShowEntityRow()");
+	} else {
+    populateTableRaw("tabgroup8/tab1/table", query, headers, null, -1, null);
+  }
+}
+
+onShowEntityRow() {
+	row = getTableRow();
+	value = getTableValue();
+
+	tableEntityId = value;
+	showTabGroup("tabgroup1", value);
+}
+
+
+getTableIndex(selectedItem) {
+	for (int i = 0; i < tableList.size(); i++) {
+		if (tableList.get(i).get(0).equals(selectedItem)) {
+			return i;
+		}
+	}
+	return -1;
+}
+
+onScrollTop() {
+	scrollTableToTop("tabgroup8/tab1/table");
+}
+
+onScrollBottom() {
+	scrollTableToBottom("tabgroup8/tab1/table");
+}
+
+onScrollRow() {
+	value = getFieldValue("tabgroup8/tab1/scrollRow");
+	row = 0;
+	if (value != null && !"".equals(value)) {
+		row = Integer.parseInt(value);
+	}
+	scrollTableToRow("tabgroup8/tab1/table", row);
+}
