@@ -257,6 +257,78 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     end
   end
 
+  def batch_delete_arch_ents
+    @project_module = ProjectModule.find(params[:id])
+
+    uuids = params[:selected].split(",")
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.batch_delete_arch_entities(uuids, @project_module.db.get_project_module_user_id(current_user.email))
+
+      flash[:notice] = 'Deleted Entities.'
+
+      session[:values] = []
+      session[:identifiers] = []
+      session[:timestamps] = []
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+      else
+        redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+      end
+    end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
+
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    if session[:type]
+      redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+    else
+      redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+    end
+  end
+
+  def batch_restore_arch_ents
+    @project_module = ProjectModule.find(params[:id])
+
+    uuids = params[:selected].split(",")
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.batch_restore_arch_entities(uuids, @project_module.db.get_project_module_user_id(current_user.email))
+
+      flash[:notice] = 'Restored Entities.'
+
+      session[:values] = []
+      session[:identifiers] = []
+      session[:timestamps] = []
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+      else
+        redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+      end
+    end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
+
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    if session[:type]
+      redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+    else
+      redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+    end
+  end
+
   def merge_arch_ents
     @project_module = ProjectModule.find(params[:id])
 

@@ -235,6 +235,81 @@ Feature: Manage entities
       | Small 3 |
 
   @javascript
+  Scenario: Batch delete entity
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Delete Selected"
+    And I confirm
+    Then I should see "Deleted Entities"
+    Then I should not see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+
+
+  @javascript
+  Scenario: Can't batch delete entities if none selected
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    And I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I follow "Delete Selected"
+    Then I should see dialog "Please select a record to delete"
+    And I confirm
+
+  @javascript
+  Scenario: Batch restore entity
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Delete Selected"
+    And I confirm
+    Then I should see "Deleted Entities"
+    And I should not see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Show Deleted"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Restore Selected"
+    And I confirm
+    Then I should see "Restored Entities"
+    And I follow "Hide Deleted"
+    Then I should see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+
+  @javascript
+  Scenario: Can't batch restore entities if none selected
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    And I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I follow "Show Deleted"
+    And I follow "Restore Selected"
+    Then I should see dialog "Please select a record to restore"
+    And I confirm
+
+  @javascript
   Scenario: Cannot delete entity if database locked
     Given I have project module "Sync Example"
     And I am on the project modules page

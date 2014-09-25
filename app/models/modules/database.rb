@@ -379,6 +379,18 @@ class Database
     end
   end
 
+  def batch_delete_arch_entities(uuids, userid)
+    uuids.each do |uuid|
+      delete_arch_entity(uuid, userid)
+    end
+  end
+
+  def batch_restore_arch_entities(uuids, userid)
+    uuids.each do |uuid|
+      restore_arch_entity(uuid, userid)
+    end
+  end
+
   def get_related_arch_entities(uuid)
     params = {
         uuid:uuid

@@ -251,6 +251,48 @@ compare_records = ->
   )
   return
 
+bulk_delete_restore_entities = ->
+  $('#delete-selected-button').click(
+    ->
+      values = $(':checkbox:checked').map(
+        ->
+          return $(this).val();
+      ).get();
+      if values.length == 0
+        alert('Please select a record to delete')
+        false
+      else
+        if confirm("Are you sure you want to delete these records?")
+          href = $(this).attr('href')
+          $form = $('#delete-ent-form')
+          $('#selected-ents-delete').val(values.toString())
+          $form.attr('action', href)
+          $form.submit()
+          false
+      return false
+  )
+
+  $('#restore-selected-button').click(
+    ->
+      values = $(':checkbox:checked').filter('.restore').map(
+        ->
+          return $(this).val();
+      ).get();
+      if values.length == 0
+        alert('Please select a record to restore')
+        false
+      else
+        if confirm("Are you sure you want to restore these records?")
+          href = $(this).attr('href')
+          $form = $('#restore-ent-form')
+          $('#selected-ents-restore').val(values.toString())
+          $form.attr('action', href)
+          $form.submit()
+          false
+      return false
+  )
+  return
+
 download_attached_file = ->
   $('form[id*=download-attached-file]').each(
     ->
@@ -768,6 +810,7 @@ $(document).ready(
     show_archive_modal_dialog()
     show_export_modal_dialog()
     compare_records()
+    bulk_delete_restore_entities()
     compare_input_checked_handler()
     aent_rel_management()
     download_attached_file()

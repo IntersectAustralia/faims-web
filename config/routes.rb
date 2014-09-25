@@ -72,6 +72,8 @@ FaimsWeb::Application.routes.draw do
   get 'project_modules/:id/show_arch_ent_history/:uuid', :to => 'project_module_entity#show_arch_ent_history', :as => 'show_arch_ent_history'
   post 'project_modules/:id/revert_arch_ent_to_timestamp/:uuid', :to => 'project_module_entity#revert_arch_ent_to_timestamp', :as => 'revert_arch_ent_to_timestamp'
   post 'project_modules/:id/compare_arch_ents', :to => 'project_module_entity#compare_arch_ents', :as => 'compare_arch_ents'
+  post 'project_modules/:id/batch_delete_arch_ents', :to => 'project_module_entity#batch_delete_arch_ents', :as => 'batch_delete_arch_ents'
+  post 'project_modules/:id/batch_restore_arch_ents', :to => 'project_module_entity#batch_restore_arch_ents', :as => 'batch_restore_arch_ents'
   post 'project_modules/:id/merge_arch_ents', :to => 'project_module_entity#merge_arch_ents', :as => 'merge_arch_ents'
 
   # project module relationship
