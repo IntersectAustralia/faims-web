@@ -729,6 +729,7 @@ setup_attribute_groups = ->
 
     $(window).unload(
       ->
+        current_form_data = $('form').serialize()
         if should_save and current_form_data != form_data
           autosave(true)
         return false
