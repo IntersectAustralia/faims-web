@@ -1,6 +1,13 @@
 # Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://jashkenas.github.com/coffee-script/
+
+
+# GLOBAL VARIABLES
+should_save = false
+form_data = null
+
+
 show_submit_modal_dialog = ->
   $('#submit-project-module-btn').click(
     =>
@@ -615,36 +622,14 @@ show_hide_deleted = ->
   )
   return
 
-update_attribute = (form) ->
-  # open modal dialog
-  $('#loading').dialog({
-    autoOpen: false,
-    closeOnEscape: false,
-    draggable: false,
-    title: "Message",
-    width: 300,
-    minHeight: 50,
-    modal: true,
-    buttons: {},
-    resizable: false
-  });
-  $('#loading').removeClass('hidden')
-  $('#loading').dialog('open')
-
-  $.ajax $(this).attr('href'),
-    type: 'POST'
-    dataType: 'json'
-    data: form.serialize()
-    success: (data, textStatus, jqXHR) ->
-      restore_attribute(form, data, true)
-
 add_attribute = (button) ->
   value = $(button).parents('.attribute-value')
   clone_value = value.clone()
   setup_attribute_value(clone_value)
   if (value.next().hasClass('form-attribute-error'))
-      value = value.next()
+    value = value.next()
   clone_value.insertAfter(value)
+  autosave_entity_attributes()
 
 remove_attribute = (button) ->
   value = $(button).parents('.attribute-value')
@@ -654,42 +639,16 @@ remove_attribute = (button) ->
     value.remove()
   else if count == 1
     clear_attribute_value(value)
-
-refresh_attribute = (button) ->
-  form = $(button).parents('.update-arch-ent-form')
-
-  uuid = form.find('[name="attr[uuid]"]').val()
-  attribute_id = form.find('[name="attr[attribute_id]"]').val()
-
-  # open modal dialog
-  $('#loading').dialog({
-    autoOpen: false,
-    closeOnEscape: false,
-    draggable: false,
-    title: "Message",
-    width: 300,
-    minHeight: 50,
-    modal: true,
-    buttons: {},
-    resizable: false
-  });
-  $('#loading').removeClass('hidden')
-  $('#loading').dialog('open')
-
-  $.ajax $(button).attr('data_url'),
-    type: 'GET'
-    dataType: 'json'
-    data: {uuid: uuid, attribute_id: attribute_id}
-    success: (data, textStatus, jqXHR) ->
-      restore_attribute(form, data, false)
+  should_save = true
 
 clear_attribute_value = (value) ->
-  vocab = value.find('[name="attr[vocab_id][]"]')
+  attribute_name = value.find('.attribute-name').text()
+  vocab = value.find('[name="attr['+attribute_name+'][vocab_id][]"]')
   if vocab
     vocab.val('')
-  value.find('[name="attr[measure][]"]').val('')
-  value.find('[name="attr[freetext][]"]').val('')
-  value.find('[name="attr[certainty][]"]').val('')
+  value.find('[name="attr['+attribute_name+'][measure][]"]').val('')
+  value.find('[name="attr['+attribute_name+'][freetext][]"]').val('')
+  value.find('[name="attr['+attribute_name+'][certainty][]"]').val('')
   value.find('.form-attribute-error').remove()
 
 setup_attribute_value = (value) ->
@@ -704,17 +663,6 @@ setup_attribute_value = (value) ->
       remove_attribute($(this))
       return false
   )
-  value.find('.refresh-attribute').click(
-    ->
-      refresh_attribute($(this))
-      return false
-  )
-  value.find('.ignore-errors-btn').click(
-    ->
-      form = $(this).closest('form')
-      form.find('#attr_ignore_errors').val('1')
-      return true
-  )
 
 create_attribute_value = (value, data) ->
   v = value.clone()
@@ -722,12 +670,12 @@ create_attribute_value = (value, data) ->
   clear_attribute_value(v)
   setup_attribute_value(v)
 
-  vocab = v.find('[name="attr[vocab_id][]"]')
+  vocab = v.find('[name="attr['+data.name+'][vocab_id][]"]')
   if vocab
     vocab.val(data.vocab)
-  v.find('[name="attr[measure][]"]').val(data.measure)
-  v.find('[name="attr[freetext][]"]').val(data.freetext)
-  v.find('[name="attr[certainty][]"]').val(data.certainty)
+  v.find('[name="attr['+data.name+'][measure][]"]').val(data.measure)
+  v.find('[name="attr['+data.name+'][freetext][]"]').val(data.freetext)
+  v.find('[name="attr['+data.name+'][certainty][]"]').val(data.certainty)
 
   if data.errors
     errors = data.errors.split(';')
@@ -740,53 +688,7 @@ create_attribute_value = (value, data) ->
 
   return v
 
-restore_attribute = (form, data, updated) ->
-  form.find('#attr_ignore_errors').val('')
-
-  if data.result != 'failure'
-
-    value = form.find('.attribute-value:first')
-    form.find('.attribute-value').remove()
-
-    has_error = false
-    for value_data in data.result
-      clone_value = create_attribute_value(value, value_data)
-      form.find('.arch_ent_record_content').append(clone_value)
-      if value_data.errors
-        has_error = true
-
-    if has_error
-      # hide update button
-      if form.find('.ignore-errors-btn').hasClass('hidden')
-        form.find('.ignore-errors-btn').removeClass('hidden')
-    else
-      # show update button
-      if !form.find('.ignore-errors-btn').hasClass('hidden')
-        form.find('.ignore-errors-btn').addClass('hidden')
-      # show update flash
-      form.find('.row-fluid:last').after("<div class='alert alert-success alert-dismissable'><button type='button' class='close' data-dismiss='alert' aria-hidden='true'>&times;</button>Updated</div>")
-      setTimeout(
-        ->
-          form.find('.alert').fadeOut()
-      , 2000)
-
-  else
-    alert(data.message)
-
-  $('#loading').dialog('destroy')
-  $('#loading').addClass('hidden')
-
 update_arch_ent_or_rel = ->
-  $('.update-arch-ent-form form').submit(
-    ->
-      update_attribute($(this))
-      return false
-  )
-  $('.update-rel-form form').submit(
-    ->
-      update_attribute($(this))
-      return false
-  )
   $('.add-attribute').click(
     ->
       add_attribute($(this))
@@ -797,11 +699,129 @@ update_arch_ent_or_rel = ->
       remove_attribute($(this))
       return false
   )
-  $('.refresh-attribute').click(
+
+setup_attribute_groups = ->
+  if $('.update-arch-ent-form').length > 0
+    show_loading_dialog()
+
+    $.ajax $('#setup-attributes').attr('href'),
+      type: 'GET'
+      dataType: 'json'
+      success: (data, textStatus, jqXHR) ->
+        for form, index in $("form")
+          initial_setup_attribute($(form), data.result[index], true)
+        autosave_entity_attributes()
+        form_data = $('form').serialize()
+        $('#setting_up').dialog('destroy')
+        $('#setting_up').addClass('hidden')
+
+    $(document).idle({
+      onIdle:
+        ->
+          current_form_data = $('form').serialize()
+          if should_save and current_form_data != form_data
+            show_loading_dialog()
+            autosave(false)
+            should_save = false
+      , idle: 5000
+      events: 'keypress mousedown'
+    })
+
+    $(window).unload(
+      ->
+        if should_save and current_form_data != form_data
+          autosave(true)
+        return false
+    )
+
+    $('.logo').parent().prepend('<p><b>This page will automatically update any changes to this entity and will update again upon navigating away from this page</b></p>')
+    return false
+
+initial_setup_attribute = (form, data, updated) ->
+  form.find('#attr_ignore_errors').val('')
+
+  if data != 'failure'
+
+    value = form.find('.attribute-value:first')
+    form.find('.attribute-value').remove()
+
+    has_error = false
+    for value_data, index in data['values']
+      clone_value = create_attribute_value(value, value_data)
+      if index != 0
+        clone_value.find('.ignore-errors-chk').remove()
+      form.find('.arch_ent_record_content').append(clone_value)
+      if value_data.errors
+        has_error = true
+
+    if has_error
+      # hide update button
+      if form.find('.ignore-errors-chk').hasClass('hidden')
+        form.find('.ignore-errors-chk').removeClass('hidden')
+      form.find('#attr_ignore_errors').prop('checked', false);
+    else
+      # show update button
+      if !form.find('.ignore-errors-chk').hasClass('hidden')
+        form.find('.ignore-errors-chk').addClass('hidden')
+
+autosave_entity_attributes = ->
+  $('input[name^="attr"]').on('blur',
     ->
-      refresh_attribute($(this))
+      should_save = true
       return false
   )
+
+  $('select[name*="[vocab_id]"]').change(
+    ->
+      should_save = true
+      return false
+  )
+
+  $('input[name*="[ignore_errors]"]').click(
+    ->
+      should_save = true
+      if this.checked
+        $(this).val(1)
+      else
+        $(this).val("")
+  )
+
+autosave = (on_unload) ->
+  $.ajax $('#update-all').attr('href'),
+    type: 'POST'
+    async: false
+    dataType: 'json'
+    data: $('form').serialize()
+    success: (data, textStatus, jqXHR) ->
+      if data.result != 'failure'
+        $.toast('Successfully updated entity', 2500, 'success');
+        if !on_unload
+          for form, index in $("form")
+            initial_setup_attribute($(form), data.result[index], true)
+          autosave_entity_attributes()
+          form_data = $('form').serialize()
+      else
+        alert(data.message)
+      $('#setting_up').dialog('destroy')
+      $('#setting_up').addClass('hidden')
+  return false
+
+
+show_loading_dialog = ->
+  # open modal dialog
+  $('#setting_up').dialog({
+    autoOpen: false,
+    closeOnEscape: false,
+    draggable: false,
+    title: "Message",
+    width: 300,
+    minHeight: 50,
+    modal: true,
+    buttons: {},
+    resizable: false
+  });
+  $('#setting_up').removeClass('hidden')
+  $('#setting_up').dialog('open')
 
 $(document).ready(
   =>
@@ -821,5 +841,7 @@ $(document).ready(
     user_management()
     show_hide_deleted()
     update_arch_ent_or_rel()
+    autosave_entity_attributes()
+    setup_attribute_groups()
     return
 )

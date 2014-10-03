@@ -802,9 +802,9 @@ end
 And /^I update fields with values$/ do |table|
   table.hashes.each do |hash|
     step "I update field \"#{hash[:field]}\" of type \"#{hash[:type]}\" with values \"#{hash[:values]}\""
-    step "I click on update for attribute with field \"#{hash[:field]}\""
-    sleep(1)
   end
+    #wait for autosaving
+    sleep(7)
 end
 
 And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
@@ -833,6 +833,17 @@ And /^I click on update for attribute with field "([^"]*)"$/ do |field|
   end
   field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
   field.find(:xpath, ".//input[@value='Update']").click
+end
+
+Then(/^I ignore errors for "(.*?)"$/) do |field|
+  WAIT_RANGE.each do
+    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    sleep(1)
+  end
+  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field.find(:xpath, "//*[@id='attr_ignore_errors']").click
+  #wait for autosaving
+  sleep(7)
 end
 
 And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |field, field_type, values_str|
@@ -876,6 +887,10 @@ end
 
 And /^I refresh page$/ do
   visit(current_path)
+end
+
+And /^I wait for page to load up data$/ do
+  sleep(2)
 end
 
 And /^I upload exporter "([^"]*)"$/ do |file|
@@ -1035,9 +1050,9 @@ And /^I add values to field$/ do |table|
     value.find(:xpath, ".//input[contains(@name,'measure')]").set hash['Unconstrained Data'] unless hash['Unconstrained Data'].blank?
     value.find(:xpath, ".//input[contains(@name,'freetext')]").set hash['Annotation'] unless hash['Annotation'].blank?
     value.find(:xpath, ".//input[contains(@name,'certainty')]").set hash['Certainty'] unless hash['Certainty'].blank?
-    # press update
-    node.find(:css, '[value="Update"]').click unless hash[:update] == 'false'
   end
+  # wait for autosaving
+  sleep(7)
 end
 
 And /^I remove values from field$/ do |table|
@@ -1055,29 +1070,9 @@ And /^I remove values from field$/ do |table|
         break
       end
     end
-    # press update
-    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").find(:css, '[value="Update"]').click unless hash[:update] == 'false'
   end
-end
-
-And /^I update fields$/ do |table|
-  table.hashes.each do |hash|
-    WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
-      sleep(1)
-    end
-    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").find(:css, '[value="Update"]').click
-  end
-end
-
-And /^I undo fields$/ do |table|
-  table.hashes.each do |hash|
-    WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
-      sleep(1)
-    end
-    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").find(:css, '.refresh-attribute').click
-  end
+  # wait for autosaving
+  sleep(7)
 end
 
 And /^I wait (.*) seconds$/ do |seconds|

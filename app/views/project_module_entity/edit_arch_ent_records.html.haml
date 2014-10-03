@@ -13,6 +13,8 @@
         = link_to "<i class='icon-arrow-left'></i> Back".html_safe, list_typed_arch_ent_records_path(@project_module)+"?type="+session[:type]+"&show_deleted="+ show_deleted, :class => 'btn'
       - elsif session[:action].eql?('show_arch_ent_records')
         = link_to "<i class='icon-arrow-left'></i> Back".html_safe, show_arch_ent_records_path(@project_module)+"?query="+session[:query]+"&show_deleted="+ show_deleted, :class => 'btn'
+  = link_to "", get_arch_ent_record_data_path(@project_module,session[:uuid]), :class => "hidden", :id => 'setup-attributes'
+  = link_to "", batch_update_arch_ent_records_path(@project_module,session[:uuid]), :class => "hidden", :id => 'update-all', :method => "post"
   - if !@deleted[1].nil?
     = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module,session[:uuid]), :class => 'btn btn-warning', :id => 'restore-record'
   - else
@@ -21,6 +23,9 @@
   = link_to "Show History", show_arch_ent_history_path(@project_module,session[:uuid]), :class => 'btn'
   - if !@related_arch_ents.empty?
     = link_to "Show Related Entities", '#related-arch-ents', :class => 'btn', :id => 'show-related'
+/ %div.alert.alert-info
+/   %p
+/     This page will automatically update any changes to this entity and will update again upon navigating away from this page
 .container
   .row-fluid.labels
     .span2
@@ -39,16 +44,15 @@
         (Freetext)
     .span1
       %label Certainty:
-    .span4
+    .span3
   - attributeGroup = @attributes.group_by{|a|a[3]}
   - attributeGroup.each do |key,val|
     .update-arch-ent-form
-      = simple_form_for :attr, :url => update_arch_ent_records_path, :method => "post" do|f|
+      = simple_form_for :attr, :url => batch_update_arch_ent_records_path, :method => "post" do|f|
         .arch_ent_record_content
           = f.hidden_field :uuid, :value => val[0][0]
-          = f.hidden_field :attribute_id, :value => val[0][1]
-          = f.hidden_field 'ignore_errors'
-          - for attribute in val
+          = f.hidden_field :attribute_id, :value => val[0][1], name: 'attr['+key+'][attribute_id]'
+          - val.each_with_index do |attribute, index|
             .row-fluid.attribute-value
               %label.span2
                 %h4.attribute-name=key
@@ -61,27 +65,24 @@
                 .span2
                   - vocabs = @vocab_name[attribute[1]]
                   - vocabs = vocab_name_to_breadcrumb(vocabs)
-                  - if attribute[2].blank?
-                    = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, input_html: {name: 'attr[vocab_id][]'}
-                  - else
-                    = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, selected: attribute[2], input_html: {name: 'attr[vocab_id][]'}
+                  = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, input_html: {name: 'attr['+key+'][vocab_id][]'}
               - else
                 .span2
               .span2
-                = f.text_field :measure, :value => attribute[5], name: 'attr[measure][]'
+                = f.text_field :measure, :value => "", name: 'attr['+key+'][measure][]'
               .span1
-                = f.text_field :freetext, :value => attribute[6], name: 'attr[freetext][]'
+                = f.text_field :freetext, :value => "", name: 'attr['+key+'][freetext][]'
               .span1
-                = f.text_field :certainty, :value => attribute[7], name: 'attr[certainty][]'
-              .span4
+                = f.text_field :certainty, :value => "", name: 'attr['+key+'][certainty][]'
+              .span3
                 = link_to '#', :class => 'btn add-attribute' do
                   %i.icon-plus
                 = link_to '#', :class => 'btn remove-attribute' do
                   %i.icon-minus
-                = link_to '#', data_url: refresh_arch_ent_records_path, :class => 'btn refresh-attribute' do
-                  %span='Undo'
-                = f.submit "Update", :class => "btn btn-inverse"
-                = f.submit "Ignore errors", :class => "btn btn-primary ignore-errors-btn #{attribute[10] == 1 ? nil : 'hidden'}"
+                - if index == 0
+                  .ignore-errors-chk
+                    = f.check_box 'ignore_errors', name: 'attr['+key+'][ignore_errors]'
+                    Ignore Errors
 
 
 - if !@related_arch_ents.empty?
@@ -115,7 +116,7 @@
             - else
               %p
                 = name
-#loading.hidden.indicator
+#setting_up.hidden.indicator
   = image_tag "loading.gif"
   %p
-    %span Updating
+    %span Loading
