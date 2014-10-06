@@ -9,6 +9,16 @@ class SpatialiteDB
     @db.execute("select load_extension('#{SpatialiteDB.spatialite_library}')")
   end
 
+  def load_functions
+    @db.create_function('format', -1) do |func, *args|
+      if args.empty? or args.size < 1
+        func.result = nil
+      else
+        func.result = StringFormatter.new(args[0]).pre_compute.evaluate(args[1..-1])
+      end
+    end
+  end
+
   def transaction
     @db.transaction do |db|
       return yield db
