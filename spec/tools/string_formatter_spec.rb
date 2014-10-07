@@ -4,6 +4,34 @@ describe StringFormatter do
 
   describe 'parse string format' do
 
+    it 'should parse no statements' do
+      StringFormatter.new('Hello world').pre_compute.evaluate(['world']).should == 'Hello world'
+    end
+
+    it 'should parse no statements with variables' do
+      StringFormatter.new('Hello $1').pre_compute.evaluate(['world']).should == 'Hello world'
+    end
+
+    it 'should parse single statements' do
+      StringFormatter.new('Hello {{ if "world" then "world" }}').pre_compute.evaluate(['world']).should == 'Hello world'
+    end
+
+    it 'should parse single statements with variables' do
+      StringFormatter.new('Hello {{ if $1 then $1 }}').pre_compute.evaluate(['world']).should == 'Hello world'
+    end
+
+    it 'should parse multiple statements' do
+      StringFormatter.new('{{ if "Hello" then "Hello" }} {{ if $1 then $1 }}').pre_compute.evaluate(['world']).should == 'Hello world'
+    end
+
+    it 'should parse multiple statements with variables' do
+      StringFormatter.new('{{ if $2 then $2 }} {{ if $1 then $1 }}').pre_compute.evaluate(%w(world Hello)).should == 'Hello world'
+    end
+
+  end
+
+  describe 'parse program' do
+
     it 'should parse if statement' do
       $argument_mapper = ArgumentMap.new([1, 'test'])
       Statement::Parser.new(Statement::Lexer.new('if equal($1,1) then $2')).program.value.should == 'test'

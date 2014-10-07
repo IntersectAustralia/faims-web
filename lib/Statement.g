@@ -51,11 +51,11 @@ multi_expression returns [value]
 
 single_expression returns [value]
     : 'equal(' l=literal ',' r=literal ')' { $value = $l.value == $r.value }
-    | 'greaterThan(' l=literal ',' r=literal ')' { $value = $l.value.to_f > $r.value.to_f }
-    | 'greaterThanEqual('l=literal ',' r=literal ')' { $value = $l.value.to_f >= $r.value.to_f }
-    | 'lessThan(' l=literal ',' r=literal ')' { $value = $l.value.to_f < $r.value.to_f }
-    | 'lessThanEqual(' l=literal ',' r=literal ')' { $value = $l.value.to_f <= $r.value.to_f }
-    | 'between(' l=literal ',' min=literal ',' max=literal ')' { $value = $l.value.to_f >= $min.value.to_f && $l.value.to_f <= $max.value.to_f }
+    | 'greaterThan(' l=literal ',' r=literal ')' { $value = $l.value.nil? == false && $r.value.nil? == false && $l.value.to_f > $r.value.to_f }
+    | 'greaterThanEqual('l=literal ',' r=literal ')' { $value = $l.value.nil? == false && $r.value.nil? == false && $l.value.to_f >= $r.value.to_f }
+    | 'lessThan(' l=literal ',' r=literal ')' { $value = $l.value.nil? == false && $r.value.nil? == false && $l.value.to_f < $r.value.to_f }
+    | 'lessThanEqual(' l=literal ',' r=literal ')' { $value = $l.value.nil? == false && $r.value.nil? == false && $l.value.to_f <= $r.value.to_f }
+    | 'between(' l=literal ',' min=literal ',' max=literal ')' { $value = $l.value.nil? == false && $min.value.nil? == false && $max.value.nil? == false && $l.value.to_f >= $min.value.to_f && $l.value.to_f <= $max.value.to_f }
     | 'not(' e=single_expression ')' 
         { 
             if $e.value

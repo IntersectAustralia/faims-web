@@ -5,7 +5,7 @@
 # Generated using ANTLR version: 3.5
 # Ruby runtime library version: 1.10.0
 # Input grammar file: Statement.g
-# Generated at: 2014-10-07 10:07:52
+# Generated at: 2014-10-07 12:11:49
 #
 
 # ~~~> start load path setup
@@ -773,7 +773,7 @@ module Statement
 
 
         # --> action
-         return_value.value = ( l.nil? ? nil : l.value ).to_f > ( r.nil? ? nil : r.value ).to_f 
+         return_value.value = ( l.nil? ? nil : l.value ).nil? == false && ( r.nil? ? nil : r.value ).nil? == false && ( l.nil? ? nil : l.value ).to_f > ( r.nil? ? nil : r.value ).to_f 
         # <-- action
 
 
@@ -809,7 +809,7 @@ module Statement
 
 
         # --> action
-         return_value.value = ( l.nil? ? nil : l.value ).to_f >= ( r.nil? ? nil : r.value ).to_f 
+         return_value.value = ( l.nil? ? nil : l.value ).nil? == false && ( r.nil? ? nil : r.value ).nil? == false && ( l.nil? ? nil : l.value ).to_f >= ( r.nil? ? nil : r.value ).to_f 
         # <-- action
 
 
@@ -845,7 +845,7 @@ module Statement
 
 
         # --> action
-         return_value.value = ( l.nil? ? nil : l.value ).to_f < ( r.nil? ? nil : r.value ).to_f 
+         return_value.value = ( l.nil? ? nil : l.value ).nil? == false && ( r.nil? ? nil : r.value ).nil? == false && ( l.nil? ? nil : l.value ).to_f < ( r.nil? ? nil : r.value ).to_f 
         # <-- action
 
 
@@ -881,7 +881,7 @@ module Statement
 
 
         # --> action
-         return_value.value = ( l.nil? ? nil : l.value ).to_f <= ( r.nil? ? nil : r.value ).to_f 
+         return_value.value = ( l.nil? ? nil : l.value ).nil? == false && ( r.nil? ? nil : r.value ).nil? == false && ( l.nil? ? nil : l.value ).to_f <= ( r.nil? ? nil : r.value ).to_f 
         # <-- action
 
 
@@ -927,7 +927,7 @@ module Statement
 
 
         # --> action
-         return_value.value = ( l.nil? ? nil : l.value ).to_f >= ( min.nil? ? nil : min.value ).to_f && ( l.nil? ? nil : l.value ).to_f <= ( max.nil? ? nil : max.value ).to_f 
+         return_value.value = ( l.nil? ? nil : l.value ).nil? == false && ( min.nil? ? nil : min.value ).nil? == false && ( max.nil? ? nil : max.value ).nil? == false && ( l.nil? ? nil : l.value ).to_f >= ( min.nil? ? nil : min.value ).to_f && ( l.nil? ? nil : l.value ).to_f <= ( max.nil? ? nil : max.value ).to_f 
         # <-- action
 
 
