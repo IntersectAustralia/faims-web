@@ -90,11 +90,8 @@ Feature: Edit Multivalued Attribute
       | location | Location D       |                    |            | 1.0       | false  |
       | location | Location B       |                    |            | 1.0       | false  |
       | name     |                  |                    | test2      | 1.0       | false  |
-    And I update fields
-      | field    |
-      | location |
-      | name     |
     And I refresh page
+    And I wait for page to load up data
     Then I should have values for field
       | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
       | location | Location A       |                    | test1      | 0.12      |
@@ -145,83 +142,8 @@ Feature: Edit Multivalued Attribute
       | location | Location B       |                    |            | 1.0       |
       | name     |                  |                    | test2      | 1.0       |
     And I refresh page
+    And I wait for page to load up data
     Then I should have values for field
       | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
       | location |                  |                    |            |           |
       | name     |                  |                    |            |           |
-
-  @javascript
-  Scenario: I can undo changes for attributes
-    Given I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
-    And I follow "Small 2"
-    And I should have values for field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location D       |                    |            | 1.0       |
-      | location | Location B       |                    |            | 1.0       |
-      | name     |                  |                    | test2      | 1.0       |
-    And I add values to field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty | index | update |
-      | location | Location A       |                    | test1      | 0.12      | 0     | false  |
-      | location | Location B       |                    | test2      | 0.23      | 1     | false  |
-      | name     |                  | something          | test3      | 0.34      | 0     | false  |
-    And I remove values from field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty | update |
-      | location | Location D       |                    |            | 1.0       | false  |
-      | location | Location B       |                    |            | 1.0       | false  |
-      | name     |                  |                    | test2      | 1.0       | false  |
-    And I undo fields
-      | field    |
-      | location |
-      | name     |
-    Then I should have values for field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location D       |                    |            | 1.0       |
-      | location | Location B       |                    |            | 1.0       |
-      | name     |                  |                    | test2      | 1.0       |
-    And I should not have values for field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location A       |                    | test1      | 0.12      |
-      | location | Location B       |                    | test2      | 0.23      |
-      | name     |                  | something          | test3      | 0.34      |
-
-  @javascript
-  Scenario: I can undo changes for attributes after updating attributes
-    Given I have project module "Sync Example"
-    And I am on the project modules page
-    And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
-    And I follow "Small 2"
-    And I should have values for field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location D       |                    |            | 1.0       |
-      | location | Location B       |                    |            | 1.0       |
-      | name     |                  |                    | test2      | 1.0       |
-    And I add values to field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty | index |
-      | location | Location A       |                    | test1      | 0.12      | 0     |
-      | location | Location B       |                    | test2      | 0.23      | 1     |
-      | name     |                  | something          | test3      | 0.34      | 0     |
-    And I remove values from field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location D       |                    |            | 1.0       |
-      | location | Location B       |                    |            | 1.0       |
-      | name     |                  |                    | test2      | 1.0       |
-    And I undo fields
-      | field    |
-      | location |
-      | name     |
-    Then I should have values for field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location A       |                    | test1      | 0.12      |
-      | location | Location B       |                    | test2      | 0.23      |
-      | name     |                  | something          | test3      | 0.34      |
-    And I should not have values for field
-      | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
-      | location | Location D       |                    |            | 1.0       |
-      | location | Location B       |                    |            | 1.0       |
-      | name     |                  |                    | test2      | 1.0       |

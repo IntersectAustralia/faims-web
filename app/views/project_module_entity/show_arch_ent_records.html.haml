@@ -3,27 +3,42 @@
 .content
   - if (!@uuid.empty?)
     %input{:type => 'hidden', :value => add_record_to_compare_path(@project_module), :id => 'add-entity'}
-    %input{:type => 'hidden', :value => remove_record_to_compare_path(@project_module), :id => 'remove-sentity'}
+    %input{:type => 'hidden', :value => remove_record_to_compare_path(@project_module), :id => 'remove-entity'}
     %form{:method => 'post', :id => 'compare'}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      - pagination_options = [['50 per page', '50'], ['100 per page', '100'], ['250 per page', '250'], ['Show all', '-1']]
+      = select_tag :per_page, options_for_select(pagination_options, @limit), :onchange => 'updatePagination(this.value)'
       - if session[:values]
         - session[:values].length.times do |i|
           %input{:type => 'hidden', :value => session[:values][i-1], :name => 'ids[]', :id => session[:values][i-1]}
           %input{:type => 'hidden', :value => session[:identifiers][i-1], :name => 'identifiers[]', :id => session[:values][i-1]}
           %input{:type => 'hidden', :value => session[:timestamps][i-1], :name => 'timestamp[]', :id => session[:values][i-1]}
       %p
-      = render :partial => 'edit_arch_ent_record', :locals => {values: session[:values]}
+        = render :partial => 'edit_arch_ent_record', :locals => {values: session[:values]}
   -else
     %p No Records Found
   .form-actions
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project_module), :class => 'btn'
-    = link_to "Compare" ,compare_arch_ents_path(@project_module), :id => 'compare-button', :class => 'btn btn-inverse'
+    = link_to "Compare", compare_arch_ents_path(@project_module), :id => 'compare-button', :class => 'btn btn-inverse'
     - if session[:show_deleted].nil?
+      = link_to "Delete Selected", batch_delete_arch_ents_path(@project_module), :id => 'delete-selected-button', :class => 'btn btn-inverse'
       = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
     - else
+      = link_to "Restore Selected", batch_restore_arch_ents_path(@project_module), :id => 'restore-selected-button', :class => 'btn btn-inverse'
       = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
     %form{:action => show_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}
       %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
       %input{:type => 'hidden', :value => session[:query], :name => 'query'}
       - if session[:show_deleted].nil?
         %input{:type => 'hidden', :value => 'true', :name => 'show_deleted'}
+    %form{:method => 'post', :id => 'delete-ent-form'}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :name => 'selected', :id => 'selected-ents-delete'}
+    %form{:method => 'post', :id => 'restore-ent-form'}
+      %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+      %input{:type => 'hidden', :name => 'selected', :id => 'selected-ents-restore'}
+
+:javascript
+  function updatePagination(per_page) {
+    window.location = "#{@base_url}&offset=0&per_page=" + per_page
+  }

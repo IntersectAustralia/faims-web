@@ -20,7 +20,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
 
     @project_module = ProjectModule.find(params[:id])
 
-    @limit = Database::LIMIT
+    @limit = params[:per_page].nil? ? 50 : params[:per_page]
     @offset = params[:offset] ? params[:offset] : '0'
 
     type = params[:type]
@@ -63,7 +63,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
 
     @project_module = ProjectModule.find(params[:id])
 
-    @limit = Database::LIMIT
+    @limit = params[:per_page].nil? ? 50 : params[:per_page]
     @offset = params[:offset] ? params[:offset] : '0'
 
     query = params[:query]
@@ -130,58 +130,67 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     end
   end
 
-  def update_arch_ent_records
-    @project_module = ProjectModule.find(params[:id])
-
+  def get_arch_ent_record_data
+    project_module = ProjectModule.find(params[:id])
     uuid = params[:uuid]
-    attribute_id = !params[:attr][:attribute_id].blank? ? params[:attr][:attribute_id] : nil
 
-    vocab_id = !params[:attr][:vocab_id].blank? ? params[:attr][:vocab_id] : nil
-    measure = !params[:attr][:measure].blank? ? params[:attr][:measure] : nil
-    freetext = !params[:attr][:freetext].blank? ? params[:attr][:freetext] : nil
-    certainty = !params[:attr][:certainty].blank? ? params[:attr][:certainty] : nil
-    ignore_errors = !params[:attr][:ignore_errors].blank? ? params[:attr][:ignore_errors] : nil
+    attributes = project_module.db.get_arch_entity_attributes(uuid)
 
-    authenticate_project_module_user
-
-    @project_module.db_mgr.with_shared_lock do
-      @project_module.db.update_arch_entity_attribute(uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
-
-      @attributes = @project_module.db.get_arch_entity_attributes(uuid)
-      data = @attributes.select { |a| a[1].to_s == attribute_id }.map { |a|
+    data = []
+    attributes.group_by{|a|a[3]}.each do |attribute, values|
+      data << {"values" => values.map { |a| 
         {name: a[3],
          vocab: a[2].blank? ? nil : a[2].to_s,
          measure: a[5].blank? ? nil : a[5].to_s,
          freetext: a[6].blank? ? nil : a[6].to_s,
          certainty: a[7].blank? ? nil : a[7].to_s,
-         errors: a[11].blank? ? nil : a[11].to_s } }
-
-      render json: { result: data }
+         errors: a[11].blank? ? nil : a[11].to_s }
+       }}
     end
+
+    render json: { result: data }
   rescue MemberException, FileManager::TimeoutException => e
     logger.warn e
 
     render json: { result: 'failure', message: get_error_message(e) }
   end
 
-  def refresh_arch_ent_records
+  def batch_update_arch_ent_records
     @project_module = ProjectModule.find(params[:id])
 
     uuid = params[:uuid]
-    attribute_id = params[:attribute_id]
 
     authenticate_project_module_user
 
-    @attributes = @project_module.db.get_arch_entity_attributes(uuid)
-    data = @attributes.select { |a| a[1].to_s == attribute_id }.map { |a|
-      {name: a[3],
-       vocab: a[2].blank? ? nil : a[2].to_s,
-       measure: a[5].blank? ? nil : a[5].to_s,
-       freetext: a[6].blank? ? nil : a[6].to_s,
-       certainty: a[7].blank? ? nil : a[7].to_s,
-       errors: a[11].blank? ? nil : a[11].to_s } }
+    @project_module.db_mgr.with_shared_lock do
 
-    render json: { result: data }
+      @project_module.db.get_arch_entity_attributes(uuid).collect {|a| a[3]}.uniq.each do |att|
+        attribute_id = !params[:attr][att][:attribute_id].blank? ? params[:attr][att][:attribute_id] : nil
+
+        vocab_id = !params[:attr][att][:vocab_id].blank? ? params[:attr][att][:vocab_id] : nil
+        measure = !params[:attr][att][:measure].blank? ? params[:attr][att][:measure] : nil
+        freetext = !params[:attr][att][:freetext].blank? ? params[:attr][att][:freetext] : nil
+        certainty = !params[:attr][att][:certainty].blank? ? params[:attr][att][:certainty] : nil
+        ignore_errors = !params[:attr][att][:ignore_errors].blank? && params[:attr][att][:ignore_errors] == "1" ? params[:attr][att][:ignore_errors] : nil
+
+        @project_module.db.update_arch_entity_attribute(uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
+      end
+
+      data = []
+      attributes = @project_module.db.get_arch_entity_attributes(uuid)
+      attributes.group_by{|a|a[3]}.each do |attribute, values|
+        data << {"values" => values.map { |a| 
+          {name: a[3],
+           vocab: a[2].blank? ? nil : a[2].to_s,
+           measure: a[5].blank? ? nil : a[5].to_s,
+           freetext: a[6].blank? ? nil : a[6].to_s,
+           certainty: a[7].blank? ? nil : a[7].to_s,
+           errors: a[11].blank? ? nil : a[11].to_s }
+         }}
+      end
+
+      render json: { result: data }
+    end
   rescue MemberException, FileManager::TimeoutException => e
     logger.warn e
 
@@ -254,6 +263,78 @@ class ProjectModuleEntityController < ProjectModuleBaseController
       flash[:error] = 'Cannot compare Entities of different types.'
 
       redirect_to @project_module
+    end
+  end
+
+  def batch_delete_arch_ents
+    @project_module = ProjectModule.find(params[:id])
+
+    uuids = params[:selected].split(",")
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.batch_delete_arch_entities(uuids, @project_module.db.get_project_module_user_id(current_user.email))
+
+      flash[:notice] = 'Deleted Entities.'
+
+      session[:values] = []
+      session[:identifiers] = []
+      session[:timestamps] = []
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+      else
+        redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+      end
+    end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
+
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    if session[:type]
+      redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+    else
+      redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+    end
+  end
+
+  def batch_restore_arch_ents
+    @project_module = ProjectModule.find(params[:id])
+
+    uuids = params[:selected].split(",")
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.batch_restore_arch_entities(uuids, @project_module.db.get_project_module_user_id(current_user.email))
+
+      flash[:notice] = 'Restored Entities.'
+
+      session[:values] = []
+      session[:identifiers] = []
+      session[:timestamps] = []
+
+      show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+      if session[:type]
+        redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+      else
+        redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
+      end
+    end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
+
+    show_deleted = session[:show_deleted].nil? ? '' : session[:show_deleted]
+    if session[:type]
+      redirect_to action: :list_typed_arch_ent_records, id: @project_module.id, type: session[:type], show_deleted: show_deleted
+    else
+      redirect_to action: :show_arch_ent_records, id: @project_module.id, query: session[:query], show_deleted: show_deleted
     end
   end
 

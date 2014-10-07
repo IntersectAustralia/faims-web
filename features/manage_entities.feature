@@ -10,7 +10,7 @@ Feature: Manage entities
     And I have a project modules dir
 
   @javascript
-  Scenario: Update entity
+  Scenario: Update entity with autosaving
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
@@ -24,6 +24,7 @@ Feature: Manage entities
       | name     | Certainty          |                        |
       | value    | Unconstrained Data | 10.0                   |
       | value    | Certainty          | 0.5                    |
+    Then I should see "Successfully updated entity"
     And I refresh page
     And I should see fields with values
       | field    | type               | values                 |
@@ -44,8 +45,8 @@ Feature: Manage entities
     And I follow "List Entity Records"
     And I press "Filter"
     And I follow "Small 2"
-    And I update field "name" of type "Annotation" with values "test"
-    And I click on update for attribute with field "name"
+    And I update field "filename" of type "Annotation" with values "test"
+    And I update field "filename" of type "Certainty" with values "1.0"
     Then I should see dialog "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I confirm
 
@@ -61,12 +62,13 @@ Feature: Manage entities
       | field | type             | values                                       |
       | type  | Constrained Data | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
     And I refresh page
-    And I should see fields with values
+    And I wait for page to load up data
+    Then I should see fields with values
       | field | type             | values                                       |
       | type  | Constrained Data | Type A > Color A1 > Shape A1S1 > Size A1S1R3 |
 
   @javascript
-  Scenario: Update entity attribute causes validation error
+  Scenario: Update entity attribute causes validation error and then ignore errors removes errors
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
@@ -78,12 +80,16 @@ Feature: Manage entities
     And I press "Filter"
     And I follow "Small 2"
     And I update fields with values
-      | field | type       | values |
-      | name  | Annotation |        |
-    And I should see fields with errors
+      | field    | type       | values |
+      | filename | Annotation |        |
+      | filename | Certainty  | 1.0    |
+    Then I should see fields with errors
       | field | error                |
       | name  | Field value is blank |
       | name  | Field value not text |
+      | name  | Error in evaluator |
+    And I ignore errors for "name"
+    Then I should not see "Error in evaluator"
 
   @javascript
   Scenario: Cannot update entity attribute if database is locked
@@ -97,6 +103,7 @@ Feature: Manage entities
     And I update fields with values
       | field    | type             | values                 |
       | location | Constrained Data | Location A; Location C |
+      | location | Certainty        | 1.0                    |
     And I wait for popup to close
     Then I should see dialog "Could not process request as project is currently locked."
     And I confirm
@@ -175,6 +182,35 @@ Feature: Manage entities
       | Small 4 |
 
   @javascript
+  Scenario: View entity list with pagination
+    Given I have project module "Large Entity List"
+    And I am on the project modules page
+    And I follow "Large Entity List"
+    And I follow "List Entity Records"
+    And I press "Filter"
+    Then I should see records
+      | name     |
+      | Small 1  |
+      | Small 50 |
+    And I should not see records
+      | name     |
+      | Small 51 |
+    And I select "100" from "per_page"
+    Then I should see records
+      | name      |
+      | Small 1   |
+      | Small 100 |
+    And I should not see records
+      | name      |
+      | Small 101 |
+    And I select "all" from "per_page"
+    Then I should see records
+      | name      |
+      | Small 1   |
+      | Small 100 |
+      | Small 101 |
+
+  @javascript
   Scenario: View entity list including deleted entities
     Given I have project module "Sync Example"
     And I am on the project modules page
@@ -204,6 +240,81 @@ Feature: Manage entities
       | name    |
       | Small 1 |
       | Small 3 |
+
+  @javascript
+  Scenario: Batch delete entity
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Delete Selected"
+    And I confirm
+    Then I should see "Deleted Entities"
+    Then I should not see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+
+
+  @javascript
+  Scenario: Can't batch delete entities if none selected
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    And I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I follow "Delete Selected"
+    Then I should see dialog "Please select a record to delete"
+    And I confirm
+
+  @javascript
+  Scenario: Batch restore entity
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Delete Selected"
+    And I confirm
+    Then I should see "Deleted Entities"
+    And I should not see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Show Deleted"
+    And I select records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+    And I follow "Restore Selected"
+    And I confirm
+    Then I should see "Restored Entities"
+    And I follow "Hide Deleted"
+    Then I should see records
+      | name    |
+      | Small 2 |
+      | Small 3 |
+
+  @javascript
+  Scenario: Can't batch restore entities if none selected
+    Given I have project module "Sync Example"
+    And I am on the project modules page
+    And I follow "Sync Example"
+    And I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I follow "Show Deleted"
+    And I follow "Restore Selected"
+    Then I should see dialog "Please select a record to restore"
+    And I confirm
 
   @javascript
   Scenario: Cannot delete entity if database locked
