@@ -820,7 +820,7 @@ autosave = (on_unload) ->
           $('.file-measure').prop('readonly', true);
           form_data = $('.attr').serialize()
       else
-        $.toast(data.message, 3000, 'error');
+        alert(data.message)
       if !$('#setting_up').hasClass('hidden')
         $('#setting_up').dialog('destroy')
         $('#setting_up').addClass('hidden')
@@ -873,7 +873,7 @@ upload_file = (button) ->
                   free = form.find('.attribute-value').last()
               $.toast('Successfully uploaded file/s', 2500, 'success');
             else
-              $.toast(data.message, 3000, 'error');
+              alert(data.message)
             $('#uploading_files').dialog('destroy')
             $('#uploading_files').addClass('hidden')
 
