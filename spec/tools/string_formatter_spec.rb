@@ -35,6 +35,8 @@ describe StringFormatter do
     it 'should parse if statement' do
       $argument_mapper = ArgumentMap.new([1, 'test'])
       Statement::Parser.new(Statement::Lexer.new('if equal($1,1) then $2')).program.value.should == 'test'
+      Statement::Parser.new(Statement::Lexer.new('if equal($2,"test") then $2')).program.value.should == 'test'
+      Statement::Parser.new(Statement::Lexer.new('if equal($1,2) then $2')).program.value.should == ''
     end
 
     it 'should parse if else statement' do

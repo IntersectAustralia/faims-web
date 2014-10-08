@@ -7,6 +7,7 @@ class SpatialiteDB
     @db = SQLite3::Database.new(file)
     @db.enable_load_extension(true)
     @db.execute("select load_extension('#{SpatialiteDB.spatialite_library}')")
+    load_functions
   end
 
   def load_functions
