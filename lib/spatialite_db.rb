@@ -14,7 +14,11 @@ class SpatialiteDB
       if args.empty? or args.size < 1
         func.result = nil
       else
-        func.result = StringFormatter.new(args[0]).pre_compute.evaluate(args[1..-1])
+        if args[0].nil?
+          func.result = args[1..-1].join(', ')
+        else
+          func.result = StringFormatter.new(args[0]).pre_compute.evaluate(args[1..-1])
+        end
       end
     end
   end
