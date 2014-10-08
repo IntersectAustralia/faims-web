@@ -68,6 +68,7 @@ FaimsWeb::Application.routes.draw do
   get 'project_modules/:id/restore_arch_ent_records/:uuid', :to => 'project_module_entity#restore_arch_ent_records', :as => 'restore_arch_ent_records'
   get 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_module_entity#edit_arch_ent_records', :as => 'edit_arch_ent_records'
   get 'project_modules/:id/get_arch_ent_record_data/:uuid', :to => 'project_module_entity#get_arch_ent_record_data', :as => 'get_arch_ent_record_data'
+  post 'project_modules/:id/upload_arch_ent_attribute_file/:uuid', :to => 'project_module_entity#upload_arch_ent_attribute_file', :as => 'upload_arch_ent_attribute_file'
   post 'project_modules/:id/batch_edit_arch_ent_records/:uuid', :to => 'project_module_entity#batch_update_arch_ent_records', :as => 'batch_update_arch_ent_records'
   get 'project_modules/:id/show_arch_ent_history/:uuid', :to => 'project_module_entity#show_arch_ent_history', :as => 'show_arch_ent_history'
   post 'project_modules/:id/revert_arch_ent_to_timestamp/:uuid', :to => 'project_module_entity#revert_arch_ent_to_timestamp', :as => 'revert_arch_ent_to_timestamp'

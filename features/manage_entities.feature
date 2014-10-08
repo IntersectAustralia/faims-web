@@ -110,6 +110,54 @@ Feature: Manage entities
 
   # TODO Scenario: Update entity attribute with multiple values causes validation error
 
+  @javascript
+  Scenario: Update entity with uploaded attachments
+    Given I have project module "Large Entity List"
+    And I am on the project modules page
+    And I click on "Large Entity List"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    And I click upload for field "file"
+    And I pick file "ui_logic.bsh" for "attr_file_attribute_file"
+    And I press "Upload"
+    And I wait for autosaving
+    And I refresh page
+    Then I should see attached files
+      | name         |
+      | ui_logic.bsh |
+    And I remove attribute values for field "file"
+    And I wait for autosaving
+    Then I should see non attached files
+      | name         |
+      | ui_logic.bsh |
+
+  @javascript
+  Scenario: Update entity with multiple uploaded attachments and pictures
+    Given I have project module "Large Entity List"
+    And I am on the project modules page
+    And I click on "Large Entity List"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    And I click upload for field "file"
+    And I pick file "ui_logic.bsh" for "attr_file_attribute_file"
+    And I press "Upload"
+    And I click upload for field "file"
+    And I pick file "empty.tar.gz" for "attr_file_attribute_file"
+    And I press "Upload"
+    And I click upload for field "picture"
+    And I pick file "tree.jpg" for "attr_file_attribute_file"
+    And I press "Upload"
+    And I wait for autosaving
+    And I refresh page
+    And I wait for autosaving
+    Then I should see attached files
+      | name              |
+      | ui_logic.bsh      |
+      | empty.tar.gz      |
+    And I should see "tree.original.jpg"
+
   Scenario: View entity with attachments
     Given I have project module "Sync Test"
     And I am on the project modules page

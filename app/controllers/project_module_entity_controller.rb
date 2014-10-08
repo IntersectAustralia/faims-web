@@ -1,4 +1,5 @@
 class ProjectModuleEntityController < ProjectModuleBaseController
+  include ProjectModulesHelper
 
   def list_arch_ent_records
     page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_list_arch_ent
@@ -192,6 +193,35 @@ class ProjectModuleEntityController < ProjectModuleBaseController
       render json: { result: data }
     end
   rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    render json: { result: 'failure', message: get_error_message(e) }
+  end
+
+  def upload_arch_ent_attribute_file
+    @project_module = ProjectModule.find(params[:id])
+
+    uuid = params[:uuid]
+    attribute_id = params[:attr_file][:attribute_id]
+    sync = params[:attr_file][:sync] == "0" ? false : true
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      uploaded_files = []
+      params[:attr_file][:attribute_file].each do |file|
+        filename = process_filename(file.original_filename, @project_module.db.has_thumbnail(attribute_id))
+        if sync
+          @project_module.add_app_file(filename, file)
+          uploaded_files << File.join(@project_module.get_path(:app_files_dir), filename).to_s.gsub(@project_module.get_path(:project_module_dir), '')
+        else
+          @project_module.add_server_file(filename, file)
+          uploaded_files << File.join(@project_module.get_path(:server_files_dir), filename).to_s.gsub(@project_module.get_path(:project_module_dir), '')
+        end
+      end
+      render json: { result: "success", uploaded_files: uploaded_files }
+    end
+  rescue MemberException, FileManager::TimeoutException, ProjectModule::ProjectModuleException => e
     logger.warn e
 
     render json: { result: 'failure', message: get_error_message(e) }

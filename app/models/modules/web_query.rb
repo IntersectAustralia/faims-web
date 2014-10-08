@@ -2087,6 +2087,13 @@ EOF
     )
   end
 
+  def self.has_thumbnail
+    cleanup_query(<<EOF
+select count(*) from attributekey where attributeisfile = 1 and attributeusethumbnail = 1 and attributeid = ?;
+EOF
+    )
+  end
+
   private
 
   def self.cleanup_query(query)
