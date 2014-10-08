@@ -835,6 +835,24 @@ And /^I click on update for attribute with field "([^"]*)"$/ do |field|
   field.find(:xpath, ".//input[@value='Update']").click
 end
 
+And /^I remove attribute values for field "([^"]*)"$/ do |field|
+  WAIT_RANGE.each do
+    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    sleep(1)
+  end
+  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field.find(:css, '.remove-attribute').click
+end
+
+And /^I click upload for field "([^"]*)"$/ do |field|
+  WAIT_RANGE.each do
+    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    sleep(1)
+  end
+  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field.find(:css, '.attribute-upload-file').click
+end
+
 Then(/^I ignore errors for "(.*?)"$/) do |field|
   WAIT_RANGE.each do
     break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
@@ -883,6 +901,10 @@ end
 
 And /^I wait for popup to close$/ do
   sleep(3)
+end
+
+And /^I wait for autosaving$/ do
+  sleep(7)
 end
 
 And /^I refresh page$/ do

@@ -785,6 +785,11 @@ class Database
     types
   end
 
+  def has_thumbnail(attribute_id)
+    result = @db.execute(WebQuery.has_thumbnail, attribute_id)
+    result[0][0] > 0
+  end
+
   # VOCABULARY QUERIES
 
   def get_vocab(attributeid)

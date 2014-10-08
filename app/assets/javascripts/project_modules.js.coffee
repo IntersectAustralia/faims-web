@@ -628,6 +628,7 @@ add_attribute = (button) ->
   setup_attribute_value(clone_value)
   if (value.next().hasClass('form-attribute-error'))
     value = value.next()
+  clone_value.find('.attribute-upload-file').hide()
   clone_value.insertAfter(value)
   autosave_entity_attributes()
 
@@ -637,6 +638,8 @@ remove_attribute = (button) ->
   count = form.find('.attribute-value').size()
   if count > 1
     value.remove()
+    if value.find('.attribute-upload-file').length > 0
+      form.find('.attribute-upload-file').first().show()
   else if count == 1
     clear_attribute_value(value)
   should_save = true
@@ -662,6 +665,10 @@ setup_attribute_value = (value) ->
     ->
       remove_attribute($(this))
       return false
+  )
+  value.find('.attribute-upload-file').click(
+    ->
+      upload_file($(this))
   )
 
 create_attribute_value = (value, data) ->
@@ -699,6 +706,10 @@ update_arch_ent_or_rel = ->
       remove_attribute($(this))
       return false
   )
+  $('.attribute-upload-file').click(
+    ->
+      upload_file($(this))
+  )
 
 setup_attribute_groups = ->
   if $('.update-arch-ent-form').length > 0
@@ -707,30 +718,34 @@ setup_attribute_groups = ->
     $.ajax $('#setup-attributes').attr('href'),
       type: 'GET'
       dataType: 'json'
+      cache: false
       success: (data, textStatus, jqXHR) ->
-        for form, index in $("form")
+        for index in [0...data.result.length]
+          form = $('form')[index]
           initial_setup_attribute($(form), data.result[index], true)
         autosave_entity_attributes()
-        form_data = $('form').serialize()
+        $('.file-measure').prop('readonly', true);
+        form_data = $('.attr').serialize()
         $('#setting_up').dialog('destroy')
         $('#setting_up').addClass('hidden')
 
     $(document).idle({
       onIdle:
         ->
-          current_form_data = $('form').serialize()
+          current_form_data = $('.attr').serialize()
           if should_save and current_form_data != form_data
+            should_save = false
             show_loading_dialog()
             autosave(false)
-            should_save = false
       , idle: 5000
       events: 'keypress mousedown'
     })
 
     $(window).unload(
       ->
-        current_form_data = $('form').serialize()
+        current_form_data = $('.attr').serialize()
         if should_save and current_form_data != form_data
+          should_save = false
           autosave(true)
         return false
     )
@@ -751,6 +766,7 @@ initial_setup_attribute = (form, data, updated) ->
       clone_value = create_attribute_value(value, value_data)
       if index != 0
         clone_value.find('.ignore-errors-chk').remove()
+        clone_value.find('.attribute-upload-file').hide()
       form.find('.arch_ent_record_content').append(clone_value)
       if value_data.errors
         has_error = true
@@ -792,21 +808,97 @@ autosave = (on_unload) ->
     type: 'POST'
     async: false
     dataType: 'json'
-    data: $('form').serialize()
+    data: $('.attr').serialize()
     success: (data, textStatus, jqXHR) ->
       if data.result != 'failure'
         $.toast('Successfully updated entity', 2500, 'success');
         if !on_unload
-          for form, index in $("form")
+          for index in [0...data.result.length]
+            form = $('form')[index]
             initial_setup_attribute($(form), data.result[index], true)
           autosave_entity_attributes()
-          form_data = $('form').serialize()
+          $('.file-measure').prop('readonly', true);
+          form_data = $('.attr').serialize()
       else
-        alert(data.message)
-      $('#setting_up').dialog('destroy')
-      $('#setting_up').addClass('hidden')
+        $.toast(data.message, 3000, 'error');
+      if !$('#setting_up').hasClass('hidden')
+        $('#setting_up').dialog('destroy')
+        $('#setting_up').addClass('hidden')
   return false
 
+upload_file = (button) ->
+  form = $(button).parents('.update-arch-ent-form')
+  attr_id = form.find('#attr_attribute_id').val()
+  $('#attribute-file-upload').find('#attr_file_attribute_id').val(attr_id)
+
+  # open modal dialog
+  $('#attribute-file-upload').dialog({
+    autoOpen: false,
+    closeOnEscape: true,
+    draggable: false,
+    title: "Upload file",
+    width: 400,
+    minHeight: 50,
+    modal: true,
+    buttons: {
+      "Upload": ->
+        $('#uploading_files').dialog({
+          autoOpen: false,
+          closeOnEscape: false,
+          draggable: false,
+          title: "Message",
+          width: 300,
+          minHeight: 50,
+          modal: true,
+          buttons: {},
+          resizable: false
+        });
+        $('#uploading_files').removeClass('hidden')
+        $('#uploading_files').dialog('open')
+        upload_form = $('#attribute-file-upload').find('form')
+        $.ajax upload_form.attr('action'),
+          type: 'POST'
+          dataType: 'json'
+          data: upload_form.serializeArray()
+          files: $(":file", this)
+          iframe: true
+          processData: false
+          success: (data, textStatus, jqXHR) ->
+            if data.result != 'failure'
+              free = find_create_free_field(form)
+              for file, index in data.uploaded_files
+                free.find('#attr_measure').val(file)
+                if index != data.uploaded_files.length-1
+                  add_attribute(free.find('.add-attribute'))
+                  free = form.find('.attribute-value').last()
+              $.toast('Successfully uploaded file/s', 2500, 'success');
+            else
+              $.toast(data.message, 3000, 'error');
+            $('#uploading_files').dialog('destroy')
+            $('#uploading_files').addClass('hidden')
+
+        should_save = true
+        form_data = null
+        $('.attr_file').trigger("reset")
+        $('#attribute-file-upload').find('#attr_file_attribute_id').val("")
+        $(this).dialog('close');
+      Cancel: ->
+        $('.attr_file').trigger("reset")
+        $('#attribute-file-upload').find('#attr_file_attribute_id').val("")
+        $(this).dialog('close');
+    },
+    resizable: false
+  });
+  $('#attribute-file-upload').removeClass('hidden')
+  $('#attribute-file-upload').dialog('open')
+  return false
+
+find_create_free_field = (form) ->
+  for row in form.find('.attribute-value')
+    if $(row).find('#attr_measure').val() == "" && $(row).find('#attr_freetext').val() == "" && $(row).find('#attr_certainty').val() == ""
+      return $(row)
+  add_attribute(form.find('.attribute-value').last().find('.add-attribute'))
+  return form.find('.attribute-value').last()
 
 show_loading_dialog = ->
   # open modal dialog

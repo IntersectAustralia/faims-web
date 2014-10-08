@@ -1,4 +1,6 @@
 module ProjectModulesHelper
+
+  ORIGINAL_EXT = ".original"
   
   def get_files(attributes, file_index, thumbnail_index, value_index)
     @files = {}
@@ -267,4 +269,17 @@ module ProjectModulesHelper
     end
   end
 
+  def process_filename(filename, has_thumbnail)
+    if has_thumbnail
+      index = filename.rindex('.')
+      if index > 0
+        filename = filename[0..index-1] + ORIGINAL_EXT + filename[index..-1]
+      elsif index == 0
+        filename = ORIGINAL_EXT + filename
+      else
+        filename = filename + ORIGINAL_EXT
+      end
+    end
+    return SecureRandom.uuid + "_" + filename  
+  end
 end

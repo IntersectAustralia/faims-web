@@ -69,7 +69,7 @@
               - else
                 .span2
               .span2
-                = f.text_field :measure, :value => "", name: 'attr['+key+'][measure][]'
+                = f.text_field :measure, :value => "", name: 'attr['+key+'][measure][]', :class => attribute[12] == 1 ? "file-measure" : nil
               .span1
                 = f.text_field :freetext, :value => "", name: 'attr['+key+'][freetext][]'
               .span1
@@ -79,6 +79,9 @@
                   %i.icon-plus
                 = link_to '#', :class => 'btn remove-attribute' do
                   %i.icon-minus
+                - if attribute[12] == 1
+                  = link_to '#', :class => 'btn attribute-upload-file' do
+                    %span='Upload'
                 - if index == 0
                   .ignore-errors-chk
                     = f.check_box 'ignore_errors', name: 'attr['+key+'][ignore_errors]'
@@ -116,7 +119,20 @@
             - else
               %p
                 = name
+%br
 #setting_up.hidden.indicator
   = image_tag "loading.gif"
   %p
     %span Loading
+#uploading_files.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Uploading file/s
+
+#attribute-file-upload.hidden
+  = simple_form_for :attr_file, :url => upload_arch_ent_attribute_file_path, :method => "post", :remote => true do |f|
+    = f.file_field 'attribute_file', multiple: true
+    %br
+    = f.label 'sync', 'Sync', class: "checkbox inline"
+    = f.check_box 'sync'
+    = f.hidden_field 'attribute_id'
