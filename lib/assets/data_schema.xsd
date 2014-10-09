@@ -2,90 +2,98 @@
   <xs:element name="term">
     <xs:complexType mixed="true">
       <xs:sequence>
-        <xs:element type="xs:string" name="description" minOccurs="0"/>
-        <xs:element ref="term" minOccurs="0" maxOccurs="unbounded"/>
+        <xs:element minOccurs="0" name="description" type="xs:string"/>
+        <xs:element maxOccurs="unbounded" minOccurs="0" ref="term"/>
       </xs:sequence>
-      <xs:attribute type="xs:string" name="semanticMapURL" use="optional"/>
-      <xs:attribute type="xs:string" name="pictureURL" use="optional"/>
+      <xs:attribute name="semanticMapURL" type="xs:string" use="optional"/>
+      <xs:attribute name="pictureURL" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabDateFrom" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabDateTo" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabDateAnnotation" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabProvenance" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabDateCertainty" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabType" type="xs:string" use="optional"/>
+      <xs:attribute name="VocabMaker" type="xs:string" use="optional"/>
       <xs:anyAttribute processContents="skip"/>
     </xs:complexType>
-    </xs:element>
-
-
+  </xs:element>
   <xs:element name="dataSchema">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="RelationshipElement" maxOccurs="unbounded" minOccurs="0">
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="RelationshipElement">
           <xs:complexType>
             <xs:sequence>
-              <xs:element type="xs:string" name="description" minOccurs="0"/>
-              <xs:element type="xs:string" name="parent" minOccurs="0"/>
-              <xs:element type="xs:string" name="child" minOccurs="0"/>
-              <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+              <xs:element minOccurs="0" name="description" type="xs:string"/>
+              <xs:element minOccurs="0" name="parent" type="xs:string"/>
+              <xs:element minOccurs="0" name="child" type="xs:string"/>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="property">
                 <xs:complexType>
                   <xs:sequence>
-                    <xs:element type="xs:string" name="description" minOccurs="0"/>
-                    <xs:element type="xs:string" name="bundle" minOccurs="0"/>
-                    <xs:element name="lookup" minOccurs="0">
+                    <xs:element minOccurs="0" name="description" type="xs:string"/>
+                    <xs:element minOccurs="0" name="bundle" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="appendCharacterString"/>
+                    <xs:element minOccurs="0" name="lookup">
                       <xs:complexType>
-                        <xs:sequence >
-                          <xs:element ref="term" maxOccurs="unbounded" minOccurs="0" />
+                        <xs:sequence>
+                          <xs:element maxOccurs="unbounded" minOccurs="0" ref="term"/>                          
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
-                  <xs:attribute type="xs:string" name="type" use="optional"/>
-                  <xs:attribute type="xs:string" name="name" use="optional"/>
-                  <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
-                  <xs:attribute type="xs:string" name="isIdentifier" use="optional"/>
-                  <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
-                  <xs:attribute type="xs:string" name="file" use="optional"/>
-                  <xs:attribute type="xs:string" name="thumbnail" use="optional"/>
+                  <xs:attribute name="type" type="xs:string" use="optional"/>
+                  <xs:attribute name="name" type="xs:string" use="optional"/>
+                  <xs:attribute name="minCardinality" type="xs:byte" use="optional"/>
+                  <xs:attribute name="isIdentifier" type="xs:string" use="optional"/>
+                  <xs:attribute name="maxCardinality" type="xs:string" use="optional"/>
+                  <xs:attribute name="file" type="xs:string" use="optional"/>
+                  <xs:attribute name="thumbnail" type="xs:string" use="optional"/>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute type="xs:string" name="name" use="optional"/>
-            <xs:attribute type="xs:string" name="type" use="optional"/>
+            <xs:attribute name="semanticMapURL" type="xs:string" use="optional"/>
+            <xs:attribute name="name" type="xs:string" use="optional"/>
+            <xs:attribute name="type" type="xs:string" use="optional"/>
             <xs:anyAttribute processContents="skip"/>
           </xs:complexType>
         </xs:element>
-        <xs:element name="ArchaeologicalElement" maxOccurs="unbounded" minOccurs="0">
+        <xs:element maxOccurs="unbounded" minOccurs="0" name="ArchaeologicalElement">
           <xs:complexType>
             <xs:sequence>
-              <xs:element type="xs:string" name="description" minOccurs="0"/>
-              <xs:element name="property" maxOccurs="unbounded" minOccurs="0">
+              <xs:element minOccurs="0" name="description" type="xs:string"/>
+              <xs:element maxOccurs="unbounded" minOccurs="0" name="property">
                 <xs:complexType mixed="true">
                   <xs:sequence>
-                    <xs:element type="xs:string" name="description" minOccurs="0"/>
-                    <xs:element type="xs:string" name="formatString" minOccurs="0"/>
-                    <xs:element type="xs:string" name="bundle" maxOccurs="unbounded" minOccurs="0"/>
-                    <xs:element name="lookup" minOccurs="0">
+                    <xs:element minOccurs="0" name="description" type="xs:string"/>
+                    <xs:element minOccurs="0" name="formatString" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="bundle" type="xs:string"/>
+                    <xs:element maxOccurs="unbounded" minOccurs="0" name="appendCharacterString"/>
+                    <xs:element minOccurs="0" name="lookup">
                       <xs:complexType>
-                        <xs:sequence maxOccurs="unbounded" minOccurs="0" >
-                          <xs:element ref="term" maxOccurs="unbounded" minOccurs="0"/>
-                            
+                        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+                          <xs:element maxOccurs="unbounded" minOccurs="0" ref="term"/>
                         </xs:sequence>
                       </xs:complexType>
                     </xs:element>
                   </xs:sequence>
-                  <xs:attribute type="xs:string" name="type" use="optional"/>
-                  <xs:attribute type="xs:string" name="name" use="optional"/>
-                  <xs:attribute type="xs:byte" name="minCardinality" use="optional"/>
-                  <xs:attribute type="xs:string" name="maxCardinality" use="optional"/>
-                  <xs:attribute type="xs:string" name="isIdentifier" use="optional"/>
-                  <xs:attribute type="xs:string" name="file" use="optional"/>
-                  <xs:attribute type="xs:string" name="thumbnail" use="optional"/>
+                  <xs:attribute name="type" type="xs:string" use="optional"/>
+                  <xs:attribute name="name" type="xs:string" use="optional"/>
+                  <xs:attribute name="minCardinality" type="xs:byte" use="optional"/>
+                  <xs:attribute name="maxCardinality" type="xs:string" use="optional"/>
+                  <xs:attribute name="isIdentifier" type="xs:string" use="optional"/>
+                  <xs:attribute name="file" type="xs:string" use="optional"/>
+                  <xs:attribute name="thumbnail" type="xs:string" use="optional"/>
                   <xs:anyAttribute processContents="skip"/>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>
-            <xs:attribute type="xs:string" name="name" use="optional"/>
-            <xs:attribute type="xs:string" name="type" use="optional"/>
+            <xs:attribute name="semanticMapURL" type="xs:string" use="optional"/>
+            <xs:attribute name="name" type="xs:string" use="optional"/>
+            <xs:attribute name="type" type="xs:string" use="optional"/>
           </xs:complexType>
         </xs:element>
       </xs:sequence>
-      <xs:attribute type="xs:string" name="name"/>
-      <xs:attribute type="xs:string" name="preparer"/>
+      <xs:attribute name="name" type="xs:string"/>
+      <xs:attribute name="preparer" type="xs:string"/>
     </xs:complexType>
   </xs:element>
 </xs:schema>
