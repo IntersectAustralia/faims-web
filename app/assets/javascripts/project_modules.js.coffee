@@ -836,7 +836,7 @@ upload_file = (button) ->
     autoOpen: false,
     closeOnEscape: true,
     draggable: false,
-    title: "Upload file",
+    title: "Upload file/s",
     width: 400,
     minHeight: 50,
     modal: true,

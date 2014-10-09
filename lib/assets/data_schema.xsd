@@ -47,6 +47,7 @@
                   <xs:attribute name="maxCardinality" type="xs:string" use="optional"/>
                   <xs:attribute name="file" type="xs:string" use="optional"/>
                   <xs:attribute name="thumbnail" type="xs:string" use="optional"/>
+                  <xs:attribute name="sync" type="xs:string" use="optional"/>
                 </xs:complexType>
               </xs:element>
             </xs:sequence>

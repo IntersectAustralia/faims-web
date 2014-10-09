@@ -2087,9 +2087,16 @@ EOF
     )
   end
 
-  def self.has_thumbnail
+  def self.attribute_has_thumbnail
     cleanup_query(<<EOF
 select count(*) from attributekey where attributeisfile = 1 and attributeusethumbnail = 1 and attributeid = ?;
+EOF
+    )
+  end
+
+  def self.attribute_is_sync
+    cleanup_query(<<EOF
+select count(*) from attributekey where attributeissync = 1 and attributeid = ?;
 EOF
     )
   end

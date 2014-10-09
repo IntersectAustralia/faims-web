@@ -66,6 +66,7 @@ CREATE TABLE AttributeKey (
   AttributeIsFile       BOOLEAN, -- this flags the attribute as a file type
   AttributeUseThumbnail BOOLEAN, -- this flags the attribute to generate thumbnails
   FormatString          TEXT,
+  AttributeIsSync       BOOLEAN, -- this flags the attribute to sync to devices
   AppendCharacterString TEXT,
   SemanticMapURL        TEXT
 );

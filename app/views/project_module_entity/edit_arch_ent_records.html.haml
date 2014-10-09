@@ -131,8 +131,6 @@
 
 #attribute-file-upload.hidden
   = simple_form_for :attr_file, :url => upload_arch_ent_attribute_file_path, :method => "post", :remote => true do |f|
+    = f.label 'attribute_file', "File/s:"
     = f.file_field 'attribute_file', multiple: true
-    %br
-    = f.label 'sync', 'Sync', class: "checkbox inline"
-    = f.check_box 'sync'
     = f.hidden_field 'attribute_id'
