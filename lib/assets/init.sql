@@ -392,3 +392,16 @@ CREATE VIEW latestNonDeletedAentReln AS
           FROM aentreln
           GROUP BY uuid, relationshipid) USING (uuid, relationshipid, aentrelntimestamp)
   WHERE deleted IS NULL;
+
+CREATE VIEW createdAtBy AS
+  SELECT
+    uuid,
+    aenttimestamp         AS createdAt,
+    fname || ' ' || lname AS createdBy
+  FROM archentity
+    JOIN user USING (userid)
+  WHERE uuid IN (SELECT
+                   uuid
+                 FROM latestnondeletedarchent)
+  GROUP BY uuid
+  HAVING min(aenttimestamp);
