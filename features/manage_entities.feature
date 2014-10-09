@@ -80,16 +80,18 @@ Feature: Manage entities
     And I press "Filter"
     And I follow "Small 2"
     And I update fields with values
-      | field    | type       | values |
-      | filename | Annotation |        |
-      | filename | Certainty  | 1.0    |
+      | field | type       | values |
+      | name  | Annotation |        |
+      | name  | Certainty  | 1.0    |
     Then I should see fields with errors
       | field | error                |
       | name  | Field value is blank |
       | name  | Field value not text |
-      | name  | Error in evaluator |
     And I ignore errors for "name"
-    Then I should not see "Error in evaluator"
+    Then I should not see fields with errors
+      | field | error                |
+      | name  | Field value is blank |
+      | name  | Field value not text |
 
   @javascript
   Scenario: Cannot update entity attribute if database is locked
@@ -153,9 +155,9 @@ Feature: Manage entities
     And I refresh page
     And I wait for autosaving
     Then I should see attached files
-      | name              |
-      | ui_logic.bsh      |
-      | empty.tar.gz      |
+      | name         |
+      | ui_logic.bsh |
+      | empty.tar.gz |
     And I should see "tree.original.jpg"
 
   Scenario: View entity with attachments

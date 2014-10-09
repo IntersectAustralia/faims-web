@@ -859,7 +859,7 @@ Then(/^I ignore errors for "(.*?)"$/) do |field|
     sleep(1)
   end
   field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
-  field.find(:xpath, "//*[@id='attr_ignore_errors']").click
+  field.find(:xpath, ".//*[@id='attr_ignore_errors']").click
   #wait for autosaving
   sleep(7)
 end
@@ -889,13 +889,17 @@ And /^I should see fields with values$/ do |table|
   end
 end
 
-And /^I should see field "([^"]*)" with error "([^"]*)"$/ do |field, error|
-  first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").first(:xpath, "//*[contains(text(), '#{error}')]").text.should == error
+And /^I should (not see|see) field "([^"]*)" with error "([^"]*)"$/ do |not_see, field, error|
+  if not_see == 'not see'
+    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").all(:xpath, ".//*[contains(text(), '#{error}')]").size.should == 0
+  else
+    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").first(:xpath, ".//*[contains(text(), '#{error}')]").text.should == error
+  end
 end
 
-And /^I should see fields with errors$/ do |table|
+And /^I should (not see|see) fields with errors$/ do |not_see, table|
   table.hashes.each do |hash|
-    step "I should see field \"#{hash[:field]}\" with error \"#{hash[:error]}\""
+    step "I should #{not_see} field \"#{hash[:field]}\" with error \"#{hash[:error]}\""
   end
 end
 
@@ -1053,7 +1057,7 @@ def match_field(node, vocab, measure, freetext, certainty, error)
     node.first(:xpath, ".//input[contains(@name, 'measure')]").value == measure and
     node.first(:xpath, ".//input[contains(@name, 'freetext')]").value == freetext and
     node.first(:xpath, ".//input[contains(@name, 'certainty')]").value == certainty and
-      (error.blank? or node.first(:xpath, "//*[contains(text(), '#{error}')]").text == error)
+      (error.blank? or node.first(:xpath, ".//*[contains(text(), '#{error}')]").text == error)
 end
 
 And /^I add values to field$/ do |table|

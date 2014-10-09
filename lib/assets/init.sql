@@ -3,8 +3,8 @@ PRAGMA cache_size = 400000;
 PRAGMA temp_store = 2;
 
 VACUUM;
-SELECT
-  InitSpatialMetaData();
+-- SELECT
+--   InitSpatialMetaData();
 -- The file table serves to store file information
 CREATE TABLE File (
   Filename             TEXT PRIMARY KEY,
@@ -98,8 +98,8 @@ CREATE TABLE Vocabulary (
   VocabProvenance     TEXT,
   VocabDateCertainty  TEXT, -- this is effectively whether or not your dates are circa or not. It can be covered in note from in the Annotation, but might be nice to separate out.
   VocabType           TEXT, -- This would be for associations other than ‘ParentVocab’. I can’t think of too many examples where this is relevant, but it’s basically an option giving you access to a meaningful analytic group or type, that you may not want to have to step through in a picture gallery. Eg for transfer prints, I might like to see a summary of % of Chinoiserie vs European landscape patterns as I work, but I don’t want to have to have to choose ‘Chinoiserie>Landscape>Landscape with Border>Willow’ each time I record something. In some respects this is stretching bow for ‘data entry’ fused with analysis, but if we’re tinkering with the schema it may not hurt. It might?
-  VocabMaker          TEXT -- This is standard in typologies for historical archaeology but not as important to other archaeologies. As above, it may be nice to see these sorts of analyses as you work, but likely better suited to post-ex analysis than data recording.
-  ParentVocabID       INTEGER REFERENCES Vocabulary(VocabID),
+  VocabMaker          TEXT, -- This is standard in typologies for historical archaeology but not as important to other archaeologies. As above, it may be nice to see these sorts of analyses as you work, but likely better suited to post-ex analysis than data recording.
+  ParentVocabID       INTEGER REFERENCES Vocabulary(VocabID)
 );
 
 --create index vocabindex on vocabulary (vocabid);
