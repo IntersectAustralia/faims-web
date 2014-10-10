@@ -37,22 +37,6 @@ CREATE TABLE Version (
   IsMerged        INTEGER
 );
 
-
-/* the start of the core archentity definition.
- * ArchEnts are intended to be containers of "fact", the AentType
- * defines a platonic ideal instance of a specific /type/ of archentity,
- * in combination of idealAent. (which serves to identify the "ideal" columns of
- * the nominal entity. AentType and IdealAent serve the equivalent role of a create
- * table statement in DML land.
- */
-CREATE TABLE AEntType (
-  AEntTypeID          INTEGER PRIMARY KEY,
-  AEntTypeName        TEXT NOT NULL, -- table name
-  AEntTypeCategory    TEXT, -- I'm honestly not sure what we use this for.
-  AEntTypeDescription TEXT -- human description
-);
-
-CREATE INDEX aenttypename ON aenttype (aenttypeid, aenttypename);
 /* the attributekey table serves to identify the possible columns across the
  * database. It is a central repository of columns by virtue of DKNF. Column
  * level metadata also goes here.
@@ -105,6 +89,22 @@ CREATE TABLE Vocabulary (
 
 --create index vocabindex on vocabulary (vocabid);
 CREATE INDEX vocabAttIndex ON vocabulary (attributeid, vocabid, vocabname);
+
+/* the start of the core archentity definition.
+ * ArchEnts are intended to be containers of "fact", the AentType
+ * defines a platonic ideal instance of a specific /type/ of archentity,
+ * in combination of idealAent. (which serves to identify the "ideal" columns of
+ * the nominal entity. AentType and IdealAent serve the equivalent role of a create
+ * table statement in DML land.
+ */
+CREATE TABLE AEntType (
+  AEntTypeID          INTEGER PRIMARY KEY,
+  AEntTypeName        TEXT NOT NULL, -- table name
+  AEntTypeCategory    TEXT, -- I'm honestly not sure what we use this for.
+  AEntTypeDescription TEXT -- human description
+);
+
+CREATE INDEX aenttypename ON aenttype (aenttypeid, aenttypename);
 
 /* As Archents exist, so do relationships. Relationships serve to link ArchEnts together and to collect the subjective expertise of
  * the archaeologist in such a way that it does not contaminate the "facts".
