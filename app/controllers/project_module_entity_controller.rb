@@ -203,15 +203,14 @@ class ProjectModuleEntityController < ProjectModuleBaseController
 
     uuid = params[:uuid]
     attribute_id = params[:attr_file][:attribute_id]
-    sync = params[:attr_file][:sync] == "0" ? false : true
 
     authenticate_project_module_user
 
     @project_module.db_mgr.with_shared_lock do
       uploaded_files = []
       params[:attr_file][:attribute_file].each do |file|
-        filename = process_filename(file.original_filename, @project_module.db.has_thumbnail(attribute_id))
-        if sync
+        filename = process_filename(file.original_filename, @project_module.db.attribute_has_thumbnail(attribute_id))
+        if @project_module.db.attribute_is_sync(attribute_id)
           @project_module.add_app_file(filename, file)
           uploaded_files << File.join(@project_module.get_path(:app_files_dir), filename).to_s.gsub(@project_module.get_path(:project_module_dir), '')
         else

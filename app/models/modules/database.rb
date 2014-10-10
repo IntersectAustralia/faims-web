@@ -785,8 +785,13 @@ class Database
     types
   end
 
-  def has_thumbnail(attribute_id)
-    result = @db.execute(WebQuery.has_thumbnail, attribute_id)
+  def attribute_has_thumbnail(attribute_id)
+    result = @db.execute(WebQuery.attribute_has_thumbnail, attribute_id)
+    result[0][0] > 0
+  end
+
+  def attribute_is_sync(attribute_id)
+    result = @db.execute(WebQuery.attribute_is_sync, attribute_id)
     result[0][0] > 0
   end
 
