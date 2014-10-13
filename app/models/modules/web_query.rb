@@ -2,286 +2,115 @@ module WebQuery
 
   # WEB
 
-  def self.load_arch_entities
-    cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestNonDeletedArchEntIdentifiers
-  where aenttypeid = :type
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
-
-  def self.total_arch_entities
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (
-    select uuid, attributeid
-    from latestNonDeletedArchEntIdentifiers
-    where aenttypeid = :type
-    group by uuid, attributeid
-    order by epoch)
-  group by uuid
-);
-EOF
-    )
-  end
-
-  def self.load_arch_entities_include_deleted
-    cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestAllArchEntIdentifiers
-  where aenttypeid = :type
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
-
-  def self.total_arch_entities_include_deleted
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (
-    select uuid, attributeid
-    from latestAllArchEntIdentifiers
-    where aenttypeid = :type
-    group by uuid, attributeid
-    order by epoch)
-  group by uuid
-);
-EOF
-    )
-  end
-
-  def self.load_all_arch_entities
-    cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestNonDeletedArchEntIdentifiers
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
-
-  def self.total_all_arch_entities
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (
-    select uuid, attributeid
-    from latestNonDeletedArchEntIdentifiers
-    group by uuid, attributeid
-    order by epoch)
-  group by uuid
-);
-EOF
-    )
-  end
-
-  def self.load_all_arch_entities_include_deleted
-    cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestAllArchEntIdentifiers
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
-
-  def self.total_all_arch_entities_include_deleted
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (
-    select uuid, attributeid
-    from latestAllArchEntIdentifiers
-    group by uuid, attributeid
-    order by epoch)
-  group by uuid
-);
-EOF
-    )
-  end
-
   def self.search_arch_entity
     cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
-from ( select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-      from latestNonDeletedArchEntIdentifiers
-     where uuid IN (select uuid
-                      FROM latestNonDeletedAentValue
-                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                     WHERE (freetext LIKE '%'||:query||'%'
-                        OR measure LIKE '%'||:query||'%'
-                        OR vocabname LIKE '%'||:query||'%')
-                     order by uuid)
-       group by uuid, attributeid
-       order by epoch)
+select uuid, group_concat(response, ' '), latestnondeletedarchent.deleted, aenttimestamp, createdAt, modifiedAt, createdBy, modifiedBy
+from  latestnondeletedarchent join createdModifiedAtBy using (uuid) join latestNonDeletedArchEntFormattedIdentifiers using (uuid)
+where uuid in (select uuid
+      from latestnondeletedarchent join createdModifiedAtBy using (uuid) join latestnondeletedaentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
+      where (aenttypeid = :type
+             or 'all' = :type)
+      	 and ( 'all' = :user
+      	     or createdUserid = :user
+      	     or modifiedUserid = :user
+      	      )
+         and (freetext LIKE '%'||:query||'%'
+         OR measure LIKE '%'||:query||'%'
+         OR vocabname LIKE '%'||:query||'%'
+         OR createdAt LIKE '%'||:query||'%'
+         or createdBy LIKE '%'||:query||'%'
+         or modifiedAt LIKE '%'||:query||'%'
+         or modifiedBy LIKE '%'||:query||'%')
+   group by uuid
+   order by createdAt
+      limit :limit
+     offset :offset
+      )
 group by uuid
-limit :limit
-offset :offset;
+order by createdAt
+;
 EOF
     )
   end
 
   def self.total_search_arch_entity
     cleanup_query(<<EOF
-select count(*)
+select count(uuid)
 from (
-  select uuid
-  from (select uuid, attributeid
-        from latestNonDeletedArchEntIdentifiers
-        where uuid IN (select uuid
-                        FROM latestNonDeletedAentValue
-                        LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                       WHERE (freetext LIKE '%'||:query||'%'
-                          OR measure LIKE '%'||:query||'%'
-                          OR vocabname LIKE '%'||:query||'%')
-                       order by uuid)
-        group by uuid, attributeid
-        order by epoch)
-  group by uuid
-);
+select distinct uuid
+      from latestnondeletedarchent join allcreatedModifiedAtBy using (uuid) join latestnondeletedaentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
+      where  (aenttypeid = :type
+             or 'all' = :type)
+      	 and ( 'all' = :user
+      	     or createdUserid = :user
+      	     or modifiedUserid = :user
+      	      )
+         and (freetext LIKE '%'||:query||'%'
+         OR measure LIKE '%'||:query||'%'
+         OR vocabname LIKE '%'||:query||'%'
+         OR createdAt LIKE '%'||:query||'%'
+         or createdBy LIKE '%'||:query||'%'
+         or modifiedAt LIKE '%'||:query||'%'
+         or modifiedBy LIKE '%'||:query||'%')
+   order by createdAt);
 EOF
     )
   end
 
   def self.search_arch_entity_include_deleted
     cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response, deleted, aenttimestamp
-from ( select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-      from latestAllArchEntIdentifiers
-     where uuid IN (select uuid
-                      FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
-                                            from aentvalue
-                                        group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
-                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                     WHERE (freetext LIKE '%'||:query||'%'
-                        OR measure LIKE '%'||:query||'%'
-                        OR vocabname LIKE '%'||:query||'%')
-                     order by uuid)
-       group by uuid, attributeid
-       order by epoch)
+select uuid, group_concat(response, ' '), archentity.deleted, aenttimestamp, createdAt, modifiedAt, createdBy, modifiedBy
+from  (select distinct uuid, max(aenttimestamp) as aenttimestamp
+      from archentity join allCreatedModifiedAtBy using (uuid) join aentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
+      where  (aenttypeid = :type
+             or 'all' = :type)
+      	 and ( 'all' = :user
+      	     or createdUserid = :user
+      	     or modifiedUserid = :user
+      	      )
+         and (freetext LIKE '%'||:query||'%'
+         OR measure LIKE '%'||:query||'%'
+         OR vocabname LIKE '%'||:query||'%'
+         OR createdAt LIKE '%'||:query||'%'
+         or createdBy LIKE '%'||:query||'%'
+         or modifiedAt LIKE '%'||:query||'%'
+         or modifiedBy LIKE '%'||:query||'%')
+   group by uuid, attributeid
+   having valuetimestamp = max(valuetimestamp)
+   order by createdAt
+      limit :limit
+     offset :offset
+      ) join archentity using (aenttimestamp, uuid) join allcreatedModifiedAtBy using (uuid) join latestallArchEntFormattedIdentifiers using (uuid)
 group by uuid
-limit :limit
-offset :offset;
+order by createdAt
+;
 EOF
     )
   end
 
   def self.total_search_arch_entity_include_deleted
     cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (select uuid, attributeid
-        from latestAllArchEntIdentifiers
-        where uuid IN (select uuid
-                        FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
-                                              from aentvalue
-                                          group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
-                        LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                       WHERE (freetext LIKE '%'||:query||'%'
-                          OR measure LIKE '%'||:query||'%'
-                          OR vocabname LIKE '%'||:query||'%')
-                       order by uuid)
-        group by uuid, attributeid
-        order by epoch)
-  group by uuid
-);
+select count(uuid)
+from  (select distinct uuid
+      from archentity join allCreatedModifiedAtBy using (uuid) join aentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
+      where  (aenttypeid = :type
+             or 'all' = :type)
+      	 and ( 'all' = :user
+      	     or createdUserid = :user
+      	     or modifiedUserid = :user
+      	      )
+         and (freetext LIKE '%'||:query||'%'
+         OR measure LIKE '%'||:query||'%'
+         OR vocabname LIKE '%'||:query||'%'
+         OR createdAt LIKE '%'||:query||'%'
+         or createdBy LIKE '%'||:query||'%'
+         or modifiedAt LIKE '%'||:query||'%'
+         or modifiedBy LIKE '%'||:query||'%')
+         group by uuid, attributeid
+   		having valuetimestamp = max(valuetimestamp)
+   order by createdAt
+      )
+;
 EOF
     )
   end
@@ -398,18 +227,16 @@ EOF
 
   def self.get_arch_ent_info
     cleanup_query(<<EOF
-select 'Last Edit by: ' || fname || ' ' || lname || ' at '|| aenttimestamp
-from archentity
-join user using (userid)
-where uuid = ?
-  and aenttimestamp = ?;
+select format('Last Edit by $1 $2 at $3', fname, lname, max(aenttimestamp))
+  from archentity join user using (userid)
+ where uuid = ?;
 EOF
     )
   end
 
   def self.get_arch_ent_attribute_info
     cleanup_query(<<EOF
-select 'Last Edit by: ' || fname || ' ' || lname || ' at '|| valuetimestamp
+select format('Last Edit by $1 $2 at $3', fname, lname, max(valuetimestamp))
 from aentvalue
 join user using (userid)
 where uuid = ?
@@ -421,32 +248,18 @@ EOF
 
   def self.get_arch_ent_attribute_for_comparison
     cleanup_query(<<EOF
-select uuid, attributename, attributeid, attributetype, valuetimestamp, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              measure,
-                                                                                              vocabname,
-                                                                                              freetext), ' | ') as response, group_concat(vocabcountorder)
-
-
-
-FROM (
-SELECT uuid, attributeid, vocabid, attributename, vocabname, measure, freetext, certainty, attributetype, valuetimestamp, av.isDirty, av.isDirtyReason, aentcountorder, vocabcountorder
-from latestnondeletedarchent
-join idealaent using (aenttypeid)
+select uuid, attributename, attributeid, attributetype, valuetimestamp, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, format("$1 $2", fname, lname) as modifiedBy
+from latestNonDeletedArchent
+join createdModifiedAtBy using (uuid)
+JOIN aenttype using (aenttypeid)
+JOIN idealaent using (aenttypeid)
 join attributekey using (attributeid)
-left outer join latestnondeletedaentvalue av using (uuid, attributeid)
-left outer join vocabulary using (vocabid, attributeid)
+left outer join latestNonDeletedAentValue using (uuid, attributeid)
+left outer join user on (latestNonDeletedAentValue.userid = user.userid)
+left outer join vocabulary using (attributeid, vocabid)
 where uuid = ?
-order by AEntCountOrder, vocabcountorder)
 group by uuid, attributename
-order by AEntCountOrder, vocabcountorder;
+order by uuid, AEntCountOrder, vocabcountorder;
 EOF
     )
   end
@@ -468,41 +281,35 @@ EOF
 
   def self.get_arch_ent_attributes_at_timestamp
     cleanup_query(<<EOF
-select uuid, attributename, attributeid, group_concat(DISTINCT afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)), group_concat(DISTINCT vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted, group_concat(coalesce(
-                                                                                             measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                                                                             measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                             vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                             measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                                                                             vocabname  || ' (' || freetext || ')',
-                                                                                             measure    || ' (' || freetext || ')',
-                                                                                             measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                             measure,
-                                                                                             vocabname,
-                                                                                             freetext), ' | ') as response, auserid, vuserid, aentforked, avalforked, valdeleted
-FROM (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname, valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty, attributetype, valuetimestamp, aenttimestamp, aentuser.userid as auserid, valueuser.userid as vuserid, archentity.isforked as aentforked, aentvalue.isforked as avalforked, aentcountorder, vocabcountorder
-         FROM archentity
-         join idealaent using (aenttypeid)
-         JOIN attributekey USING (attributeid)
-         left outer join aentvalue using (uuid, attributeid)
-         LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
-         JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp
-                 FROM aentvalue
-                WHERE uuid = ?
-                  and valuetimestamp <= ?
-             GROUP BY uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
-        JOIN (
-               SELECT uuid, max(aenttimestamp) as aenttimestamp
-                 FROM archentity
-                WHERE uuid = ?
-                  and aenttimestamp <= ?
-             GROUP BY uuid) USING (uuid, aenttimestamp)
-         left outer join user as aentuser on (aentuser.userid = archentity.userid)
-         left outer join user as valueuser on (valueuser.userid = aentvalue.userid)
-      ORDER BY uuid,  AEntCountOrder, vocabcountorder, archentity.deleted desc)
-group by uuid, attributename
-order by uuid, aentcountorder, vocabcountorder;
+select uuid, attributename, attributeid, group_concat(DISTINCT afname || ' ' || alname) as auser, astext(transform(GeoSpatialColumn,?)),
+       group_concat(DISTINCT vfname || ' ' || vlname) as vuser, aenttimestamp, valuetimestamp, max(deleted) as entityDeleted,
+       group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response,
+       auserid, vuserid, aentforked, avalforked, valdeleted
+from  (  SELECT uuid, attributeid, GeoSpatialColumn, vocabid, aentuser.fname as afname, aentuser.lname as alname, valueuser.fname as vfname,
+                valueuser.lname as vlname, attributename, vocabname, archentity.deleted, aentvalue.deleted as valdeleted, measure, freetext, certainty,
+                attributetype, valuetimestamp, aenttimestamp, aentuser.userid as auserid, valueuser.userid as vuserid, archentity.isforked as aentforked,
+                aentvalue.isforked as avalforked, aentcountorder, vocabcountorder, appendcharacterstring, formatstring
+           FROM archentity
+           join idealaent using (aenttypeid)
+           JOIN attributekey USING (attributeid)
+           left outer join aentvalue using (uuid, attributeid)
+           LEFT OUTER JOIN vocabulary USING (vocabid, attributeid)
+           JOIN (SELECT uuid, attributeid, max(valuetimestamp) as valuetimestamp
+                   FROM aentvalue
+                  WHERE uuid = ?
+                    and valuetimestamp <= ?
+               GROUP BY uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+           JOIN (
+                 SELECT uuid, max(aenttimestamp) as aenttimestamp
+                   FROM archentity
+                  WHERE uuid = ?
+                    and aenttimestamp <= ?
+               GROUP BY uuid) USING (uuid, aenttimestamp)
+           left outer join user as aentuser on (aentuser.userid = archentity.userid)
+           left outer join user as valueuser on (valueuser.userid = aentvalue.userid)
+        ORDER BY uuid,  AEntCountOrder, vocabcountorder, archentity.deleted desc)
+  group by uuid, attributename
+  order by uuid, aentcountorder, vocabcountorder;
 EOF
     )
   end
@@ -510,85 +317,63 @@ EOF
   def self.get_arch_ent_attributes_changes_at_timestamp
     cleanup_query(<<EOF
 select uuid, 'EntityDeleted' as attribute, ifnull(deleted, 'Record Present') as 'What changed'
-  from archentity
-where uuid = ?
-  AND aenttimestamp = ?
-EXCEPT
-SELECT  uuid, 'EntityDeleted', ifnull(deleted, 'Record Present')
- from ( SELECT uuid, aenttimestamp, deleted
-          FROM archentity
-         where uuid = ?
-           AND aenttimestamp < ?
-      group by uuid
-      having max(aenttimestamp)
-  )
-union
-select uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
-  from archentity
-where uuid = ?
-  AND aenttimestamp = ?
-EXCEPT
-SELECT  uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
- from ( SELECT uuid, aenttimestamp, GeoSpatialColumn
-          FROM archentity
-         where uuid = ?
-           AND aenttimestamp < ?
-           group by uuid
-      having max(aenttimestamp)
-  )
-union
-select uuid, attributename, ifnull(deleted, 'Attribute Present') as 'What changed'
-  from aentvalue join attributekey using (attributeid)
-where uuid = ?
-  AND valuetimestamp = ?
-EXCEPT
-SELECT  uuid, attributename, ifnull(deleted, 'Attribute Present')
- from ( SELECT uuid, valuetimestamp, deleted, attributename
-                from aentvalue join attributekey using (attributeid)
-      where uuid = ?
-        AND valuetimestamp < ?
-   group by uuid, attributeid
-     having max(valuetimestamp)
-  )
-union
-select uuid, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              measure,
-                                                                                              vocabname,
-                                                                                              freetext), ' | ') as response
-  from aentvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
-where uuid = ?
-  AND valuetimestamp = ?
-group by uuid, attributename
-EXCEPT
-SELECT  uuid, attributename,  group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                                                                              measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                                                                              measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                                                                              vocabname  || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || freetext || ')',
-                                                                                              measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                                                                              measure,
-                                                                                              vocabname,
-                                                                                              freetext), ' | ') as response
- from ( select uuid, measure , vocabname, freetext, attributename, valuetimestamp, certainty
-          from aentvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
-         where uuid = ?
-           AND valuetimestamp < ?
-      group by uuid, attributeid
+   from archentity
+ where uuid = ?
+   AND aenttimestamp = ?
+ EXCEPT
+ SELECT  uuid, 'EntityDeleted', ifnull(deleted, 'Record Present')
+  from ( SELECT uuid, aenttimestamp, deleted
+           FROM archentity
+          where uuid = ?
+            AND aenttimestamp < ?
+       group by uuid
+       having max(aenttimestamp)
+   )
+ union
+ select uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
+   from archentity
+ where uuid = ?
+   AND aenttimestamp = ?
+ EXCEPT
+ SELECT  uuid, 'geospatialcolumn', astext(transform(GeoSpatialColumn,?))
+  from ( SELECT uuid, aenttimestamp, GeoSpatialColumn
+           FROM archentity
+          where uuid = ?
+            AND aenttimestamp < ?
+            group by uuid
+       having max(aenttimestamp)
+   )
+ union
+ select uuid, attributename, ifnull(deleted, 'Attribute Present') as 'What changed'
+   from aentvalue join attributekey using (attributeid)
+ where uuid = ?
+   AND valuetimestamp = ?
+ EXCEPT
+ SELECT  uuid, attributename, ifnull(deleted, 'Attribute Present')
+  from ( SELECT uuid, valuetimestamp, deleted, attributename
+                 from aentvalue join attributekey using (attributeid)
+       where uuid = ?
+         AND valuetimestamp < ?
+    group by uuid, attributeid
       having max(valuetimestamp)
-  )
+   )
+ union
+ select uuid, attributename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response
+   from aentvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
+ where uuid = ?
+   AND valuetimestamp = ?
  group by uuid, attributename
-  ;
+
+EXCEPT
+ SELECT  uuid, attributename,  group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response
+  from ( select uuid, measure , vocabname, freetext, attributename, valuetimestamp, certainty, appendcharacterstring, formatstring
+           from aentvalue join attributekey using (attributeid) left outer join vocabulary using (vocabid, attributeid)
+          where uuid = ?
+            AND valuetimestamp < ?
+       group by uuid, attributeid
+       having max(valuetimestamp)
+   )
+  group by uuid, attributename;
 EOF
     )
   end
@@ -642,124 +427,18 @@ EOF
 
   def self.get_related_arch_entities
     cleanup_query(<<EOF
-SELECT uuid,
-       aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||group_concat(response,', ')
-FROM
-  (SELECT uuid,
-          group_concat(coalesce(measure || ' ' || vocabname || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)', measure || ' (' || freetext ||'; '|| (certainty * 100.0) || '% certain)', vocabname || ' (' || freetext ||'; '|| (certainty * 100.0) || '% certain)', measure || ' ' || vocabname ||' ('|| (certainty * 100.0) || '% certain)', vocabname || ' (' || freetext || ')', measure || ' (' || freetext || ')', measure || ' (' || (certainty * 100.0) || '% certain)', vocabname || ' (' || (certainty * 100.0) || '% certain)', freetext || ' (' || (certainty * 100.0) || '% certain)', measure, vocabname, freetext), ' | ') AS response,
-          aenttypename,
-          participatesverb,
-          relntypename
-   FROM
-     (SELECT uuid,
-             attributeid,
-             vocabid,
-             attributename,
-             vocabname,
-             measure,
-             freetext,
-             certainty,
-             attributetype,
-             valuetimestamp,
-             aenttypename,
-             relntypename,
-             participatesverb
-      FROM aentvalue
-      JOIN
-        (SELECT uuid,
-                attributeid,
-                max(valuetimestamp) AS valuetimestamp
-         FROM aentvalue
-         GROUP BY uuid,
-                  attributeid) USING (uuid,
-                                      attributeid,
-                                      valuetimestamp)
-      JOIN attributekey USING (attributeid)
-      JOIN archentity USING (uuid)
-      JOIN
-        (SELECT uuid,
-                max(aenttimestamp) AS aenttimestamp
-         FROM archentity
-         GROUP BY uuid) USING (uuid,
-                               aenttimestamp)
-      JOIN
-        (SELECT attributeid,
-                aenttypeid
-         FROM idealaent
-         JOIN aenttype USING (aenttypeid)
-         WHERE isIdentifier IS 'true') USING (attributeid,
-                                              aenttypeid)
-      LEFT OUTER JOIN vocabulary USING (vocabid,
-                                        attributeid)
-      JOIN
-        (SELECT uuid,
-                attributeid,
-                valuetimestamp
-         FROM aentvalue
-         JOIN archentity USING (uuid)
-         WHERE archentity.deleted IS NULL
-         GROUP BY uuid,
-                  attributeid HAVING MAX(ValueTimestamp)
-         AND MAX(AEntTimestamp)) USING (uuid,
-                                        attributeid,
-                                        valuetimestamp)
-      JOIN
-        (SELECT DISTINCT uuid,
-                         relationshipid,
-                         participatesverb
-         FROM aentreln
-         JOIN
-           (SELECT uuid,
-                   relationshipid,
-                   max(aentrelntimestamp) AS aentrelntimestamp
-            FROM aentreln
-            GROUP BY uuid,
-                     relationshipid) USING (uuid,
-                                            relationshipid,
-                                            aentrelntimestamp)
-         JOIN archentity USING (uuid)
-         JOIN
-           (SELECT uuid,
-                   max(aenttimestamp) AS aenttimestamp
-            FROM archentity
-            GROUP BY uuid) USING (uuid,
-                                  aenttimestamp)
-         JOIN relationship USING (relationshipid)
-         JOIN
-           (SELECT relationshipid,
-                   max(relntimestamp) AS relntimestamp
-            FROM relationship
-            GROUP BY relationshipid) USING (relationshipid,
-                                            relntimestamp)
-         WHERE relationshipid IN
-             ( SELECT DISTINCT relationshipid
-              FROM aentreln
-              JOIN
-                (SELECT uuid,
-                        relationshipid,
-                        max(aentrelntimestamp) AS aentrelntimestamp
-                 FROM aentreln
-                 GROUP BY uuid,
-                          relationshipid having MAX(aentrelntimestamp)) USING (uuid,
-                                                 relationshipid,
-                                                 aentrelntimestamp)
-              WHERE uuid = :uuid AND aentreln.deleted IS NULL)
-           AND uuid != :uuid
-           AND relationship.deleted IS NULL
-           AND aentreln.deleted IS NULL
-           AND archentity.deleted IS NULL) USING (uuid)
-      JOIN relationship USING (relationshipid)
-      JOIN
-        (SELECT relationshipid,
-                max(relntimestamp) AS relntimestamp
-         FROM relationship
-         GROUP BY relationshipid) USING (relationshipid,
-                                         relntimestamp)
-      JOIN relntype USING (relntypeid)
-      JOIN aenttype USING (aenttypeid) )
-   GROUP BY uuid,
-            attributeid)
-GROUP BY uuid;
+SELECT uuid, aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||group_concat(response,' ')
+FROM latestNonDeletedArchEntFormattedIdentifiers
+JOIN latestnondeletedaentreln using (uuid)
+join relationship using (relationshipid)
+join relntype using (relntypeid)
+where relationshipid in (select relationshipid
+                         from latestnondeletedaentreln
+                        where uuid = :uuid
+                       )
+and uuid != :uuid
+group by uuid
+order by aentrelntimestamp;
 EOF
     )
   end
@@ -1993,50 +1672,19 @@ EOF
 
   def self.get_entity_identifier
     cleanup_query(<<EOF
-select group_concat(response, ', ') as response
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestAllArchEntIdentifiers
-  where uuid = ?
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
+select group_concat(response, ' ') as response
+from latestAllArchEntFormattedIdentifiers
+where uuid = ?
+group by uuid;
 EOF
     )
   end
 
   def self.get_entity_uuid
     cleanup_query(<<EOF
-select uuid from (
-select uuid, group_concat(response, ', ') as response
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid, deleted, aenttimestamp
-  from latestAllArchEntIdentifiers
-  group by uuid, attributeid
-  order by epoch)
-group by uuid) where response = ?
+select uuid
+from latestAllArchEntFormattedIdentifiers
+where response = (select response from latestAllArchEntFormattedIdentifiers where uuid = ?);
 EOF
     )
   end

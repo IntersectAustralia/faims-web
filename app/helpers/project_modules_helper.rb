@@ -26,13 +26,16 @@ module ProjectModulesHelper
     name[0..index-1] + " (#{count})" + name[index..-1]
   end
 
-  def compare_arch_entities(first_uuid, second_uuid, first_timestamp, second_timestamp, project_module)
+  def compare_arch_entities(first_uuid, second_uuid, project_module)
     first_arch_ent = project_module.db.get_arch_entity_attributes(first_uuid)
     second_arch_ent = project_module.db.get_arch_entity_attributes(second_uuid)
-    @firstInfo = project_module.db.get_arch_ent_info(first_uuid, first_timestamp)[0][0]
-    @secondInfo = project_module.db.get_arch_ent_info(second_uuid, second_timestamp)[0][0]
+
+    @firstInfo = project_module.db.get_arch_ent_info(first_uuid)[0][0]
+    @secondInfo = project_module.db.get_arch_ent_info(second_uuid)[0][0]
+
     @firstAttributeValueGroup = project_module.db.get_arch_ent_attribute_for_comparison(first_uuid).group_by{|a|a[1]}
     @secondAttributeValueGroup = project_module.db.get_arch_ent_attribute_for_comparison(second_uuid).group_by{|a|a[1]}
+
     @firstAttributeGroup = first_arch_ent.group_by{|a|a[3]}
     @secondAttributeGroup = second_arch_ent.group_by{|a|a[3]}
     attributeKeys = @firstAttributeGroup.keys | @secondAttributeGroup.keys
@@ -281,5 +284,16 @@ module ProjectModulesHelper
       end
     end
     return SecureRandom.uuid + "_" + filename  
+  end
+
+  def search_params
+    sp = {}
+    sp[:type] = params[:type] unless params[:type].blank?
+    sp[:user] = params[:user] unless params[:user].blank?
+    sp[:query] = params[:query] if params[:query]
+    sp[:show_deleted] = params[:show_deleted] unless params[:show_deleted].blank?
+    sp[:per_page] = params[:per_page] unless params[:per_page].blank?
+    sp[:offset] = params[:offset] unless params[:offset].blank?
+    sp
   end
 end

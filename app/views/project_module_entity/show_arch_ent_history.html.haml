@@ -1,10 +1,10 @@
 - title @project_module.name + " - Entity History"
 = breadcrumbs
-- show_arch_ent_attributes_history(@project_module,@timestamps)
+- show_arch_ent_attributes_history(@project_module, @timestamps)
 - has_conflict = nil
 .content
-  %form{:method => 'post', :action =>  revert_arch_ent_to_timestamp_path(@project_module,@timestamps[0][0]), :class => 'history-form'}
-    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+  %form{:method => 'post', :action =>  revert_arch_ent_to_timestamp_path(@project_module, @timestamps[0][0]), :class => 'history-form'}
+    %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
     %input{:type => 'hidden', :value => 'false', :name => 'resolve'}
     .records
       %table.table.inner

@@ -2,7 +2,7 @@
 = breadcrumbs
 .content
   %form{:id => 'attribute_form', :action => update_attributes_vocab_path(@project_module), :method => 'post'}
-    %input{:type => 'hidden', :value => session[:authenticity_token], :name => 'authenticity_token'}
+    %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
     %label Select attribute:
     %select{:id => 'attribute', :name => 'attribute_id'}
       %option

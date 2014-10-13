@@ -51,7 +51,6 @@ class ProjectExporterController < ApplicationController
 
     begin
       result = @project_exporter.uninstall
-      logger.debug result
       if result
         flash[:notice] = 'Exporter uninstalled.'
       else

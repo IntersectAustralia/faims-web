@@ -61,9 +61,6 @@ FaimsWeb::Application.routes.draw do
 
   # project module entity
   get 'project_modules/:id/search_arch_ent_records/', :to => 'project_module_entity#search_arch_ent_records', :as => 'search_arch_ent_records'
-  get 'project_modules/:id/show_arch_ent_records/', :to => 'project_module_entity#show_arch_ent_records', :as => 'show_arch_ent_records'
-  get 'project_modules/:id/list_arch_ent_records/', :to => 'project_module_entity#list_arch_ent_records', :as => 'list_arch_ent_records'
-  get 'project_modules/:id/list_typed_arch_ent_records/', :to => 'project_module_entity#list_typed_arch_ent_records', :as => 'list_typed_arch_ent_records'
   get 'project_modules/:id/delete_arch_ent_records/:uuid', :to => 'project_module_entity#delete_arch_ent_records', :as => 'delete_arch_ent_records'
   get 'project_modules/:id/restore_arch_ent_records/:uuid', :to => 'project_module_entity#restore_arch_ent_records', :as => 'restore_arch_ent_records'
   get 'project_modules/:id/edit_arch_ent_records/:uuid', :to => 'project_module_entity#edit_arch_ent_records', :as => 'edit_arch_ent_records'
@@ -72,7 +69,7 @@ FaimsWeb::Application.routes.draw do
   post 'project_modules/:id/batch_edit_arch_ent_records/:uuid', :to => 'project_module_entity#batch_update_arch_ent_records', :as => 'batch_update_arch_ent_records'
   get 'project_modules/:id/show_arch_ent_history/:uuid', :to => 'project_module_entity#show_arch_ent_history', :as => 'show_arch_ent_history'
   post 'project_modules/:id/revert_arch_ent_to_timestamp/:uuid', :to => 'project_module_entity#revert_arch_ent_to_timestamp', :as => 'revert_arch_ent_to_timestamp'
-  post 'project_modules/:id/compare_arch_ents', :to => 'project_module_entity#compare_arch_ents', :as => 'compare_arch_ents'
+  get 'project_modules/:id/compare_arch_ents', :to => 'project_module_entity#compare_arch_ents', :as => 'compare_arch_ents'
   post 'project_modules/:id/batch_delete_arch_ents', :to => 'project_module_entity#batch_delete_arch_ents', :as => 'batch_delete_arch_ents'
   post 'project_modules/:id/batch_restore_arch_ents', :to => 'project_module_entity#batch_restore_arch_ents', :as => 'batch_restore_arch_ents'
   post 'project_modules/:id/merge_arch_ents', :to => 'project_module_entity#merge_arch_ents', :as => 'merge_arch_ents'
@@ -90,10 +87,6 @@ FaimsWeb::Application.routes.draw do
   # post 'project_modules/:id/revert_rel_to_timestamp/:relationshipid', :to => 'project_module_relationship#revert_rel_to_timestamp', :as => 'revert_rel_to_timestamp'
   # post 'project_modules/:id/compare_rel', :to => 'project_module_relationship#compare_rel', :as => 'compare_rel'
   # post 'project_modules/:id/merge_rel', :to => 'project_module_relationship#merge_rel', :as => 'merge_rel'
-
-  # merge helpers
-  post 'project_modules/:id/add_record_to_compare/', :to => 'project_module_association#add_record_to_compare', :as => 'add_record_to_compare'
-  post 'project_modules/:id/remove_record_to_compare/', :to => 'project_module_association#remove_record_to_compare', :as => 'remove_record_to_compare'
 
   # project module association
   # get 'project_modules/:id/show_rel_members/:relationshipid', :to => 'project_module_association#show_rel_members', :as => 'show_rel_members'

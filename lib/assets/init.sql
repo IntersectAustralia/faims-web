@@ -394,15 +394,58 @@ CREATE VIEW latestNonDeletedAentReln AS
           GROUP BY uuid, relationshipid) USING (uuid, relationshipid, aentrelntimestamp)
   WHERE deleted IS NULL;
 
-CREATE VIEW createdAtBy AS
-  SELECT
-    uuid,
-    aenttimestamp         AS createdAt,
-    fname || ' ' || lname AS createdBy
-  FROM archentity
-    JOIN user USING (userid)
-  WHERE uuid IN (SELECT
-                   uuid
-                 FROM latestnondeletedarchent)
-  GROUP BY uuid
-  HAVING min(aenttimestamp);
+drop view if exists createdModifiedAtBy;
+create view createdModifiedAtBy as select uuid, createdAt, createdBy, modifiedAt, modifiedBy, modifiedUserid, createdUserid
+                                   from (select uuid, aenttimestamp as createdAt, fname || ' ' || lname as createdBy, userid as createdUserid
+                                         from archentity join user using (userid)
+                                         where uuid in (select uuid from latestnondeletedarchent)
+                                         group by uuid
+                                         having min(aenttimestamp)) as created
+                                     join (select uuid, valuetimestamp as modifiedAt, fname || ' ' || lname as modifiedBy, userid as modifiedUserid
+                                           from latestnondeletedaentvalue join user using (userid)
+                                           group by uuid) using (uuid)		  ;
+
+drop view if exists allCreatedModifiedAtBy;
+create view allCreatedModifiedAtBy as select uuid, createdAt, createdBy, modifiedAt, modifiedBy, modifiedUserid, createdUserid
+                                      from (select uuid, aenttimestamp as createdAt, fname || ' ' || lname as createdBy, userid as createdUserid
+                                            from archentity join user using (userid)
+                                            group by uuid
+                                            having min(aenttimestamp)) as created
+                                        join (select uuid, valuetimestamp as modifiedAt, fname || ' ' || lname as modifiedBy, userid as modifiedUserid
+                                              from aentvalue join user using (userid)
+                                              group by uuid
+                                              having valuetimestamp = max(valuetimestamp)) using (uuid)     ;
+
+drop view if exists latestNonDeletedArchEntFormattedIdentifiers;
+create view if not exists latestNonDeletedArchEntFormattedIdentifiers as
+  select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted
+  from latestNonDeletedArchent
+    JOIN aenttype using (aenttypeid)
+    JOIN idealaent using (aenttypeid)
+    join attributekey using (attributeid)
+    join latestNonDeletedAentValue using (uuid, attributeid)
+    left outer join vocabulary using (attributeid, vocabid)
+  WHERE isIdentifier = 'true'
+  group by uuid, attributeid
+  having response is not null
+  order by uuid, aentcountorder, vocabcountorder;
+
+drop view if exists latestAllArchEntFormattedIdentifiers;
+create view if not exists latestAllArchEntFormattedIdentifiers as
+  select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, archentity.deleted
+  from archentity
+    JOIN (select uuid, max(aenttimestamp) as aenttimestamp
+          from archentity
+          group by uuid) USING (uuid, aenttimestamp)
+    join aentvalue using (uuid)
+    JOIN (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+          from aentvalue
+          group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+    JOIN aenttype using (aenttypeid)
+    JOIN idealaent using (aenttypeid, attributeid)
+    join attributekey using (attributeid)
+    left outer join vocabulary using (attributeid, vocabid)
+  WHERE isIdentifier = 'true'
+  group by uuid, attributeid
+  having response is not null
+  order by uuid, aentcountorder, vocabcountorder;
