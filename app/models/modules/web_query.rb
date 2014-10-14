@@ -1735,6 +1735,13 @@ EOF
     )
   end
 
+  def self.delete_old_arch16n_cache_files
+    cleanup_query(<<EOF
+delete from File where Filename LIKE '%.properties' and Type = 'settings';
+EOF
+    )
+  end
+
   def self.attribute_has_thumbnail
     cleanup_query(<<EOF
 select count(*) from attributekey where attributeisfile = 1 and attributeusethumbnail = 1 and attributeid = ?;
