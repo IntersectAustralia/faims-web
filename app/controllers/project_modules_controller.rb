@@ -396,9 +396,30 @@ class ProjectModulesController < ProjectModuleBaseController
   end
 
   def create_temp_file(filename, upload, tmpdir)
+    if filename == @project_module.get_name(:properties)
+      create_arch16n_files(upload, tmpdir)
+      return 
+    end
+
     File.open(upload.tempfile, 'r') do |upload_file|
       File.open(tmpdir + '/' + filename, 'w') do |temp_file|
         temp_file.write(upload_file.read)
+      end
+    end
+  end
+
+  def create_arch16n_files(upload, tmpdir)
+    FileUtils.rm(Dir.glob(@project_module.get_path(:project_module_dir) + "*.properties"))
+    if upload.content_type =~ /gzip/
+      # tarball of arch16n files
+      success = TarHelper.untar('zxf', upload.tempfile.to_path.to_s, @project_module.get_path(:project_module_dir))
+      logger.error "Couldn't extract files from arch16n tarball" unless success
+    else
+      # single arch16n file
+      File.open(upload.tempfile, 'r') do |upload_file|
+        File.open(tmpdir + '/' + File.basename(upload.original_filename).to_s, 'w') do |temp_file|
+          temp_file.write(upload_file.read)
+        end
       end
     end
   end

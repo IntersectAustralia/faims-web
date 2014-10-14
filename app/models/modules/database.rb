@@ -876,6 +876,12 @@ class Database
     end
   end
 
+  def remove_old_arch16n_cache_files
+    @db.transaction do |db|
+      db.execute(WebQuery.delete_old_arch16n_cache_files)
+    end
+  end
+
   # DATABASE HELPERS
 
   def current_version

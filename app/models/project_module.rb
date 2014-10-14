@@ -114,20 +114,36 @@ class ProjectModule < ActiveRecord::Base
   def validate_arch16n(arch16n)
     return if arch16n.blank?
 
-    file = arch16n.tempfile
+    if arch16n.content_type =~ /gzip/
+      tmp_dir = Dir.mktmpdir + '/'
+
+      success = TarHelper.untar('zxf', arch16n.tempfile.to_path.to_s, tmp_dir)
+      errors.add(:arch16n, 'invalid tarball file') and return unless success
+
+      Dir.foreach(tmp_dir) do |file|
+        next if file == '.' or file == '..'
+        errors.add(:arch16n, 'must be .properties file: ' + file) and next if File.extname(file) != ".properties"
+        validate_arch16n_file(File.join(tmp_dir, file))
+      end
+    else
+      validate_arch16n_file(arch16n.tempfile)
+    end
+  end
+
+  def validate_arch16n_file(file)
     begin
       line_num = 0
       File.open(file,'r').read.each_line do |line|
         line_num += 1
         next if line.blank?
         i = line.index('=')
-        errors.add(:arch16n, "invalid properties file at line #{line_num}") if !i
-        errors.add(:arch16n, "invalid properties file at line #{line_num}") if line[0..i] =~ /\s/
+        errors.add(:arch16n, "invalid properties file at line #{line_num} in #{File.basename(file)}") if !i
+        errors.add(:arch16n, "invalid properties file at line #{line_num} in #{File.basename(file)}") if line[0..i] =~ /\s/
       end
     rescue Exception => e
       logger.error e
 
-      errors.add(:arch16n, 'invalid properties file')
+      errors.add(:arch16n, 'invalid properties file: ' + File.basename(file))
     end
   end
 
@@ -234,7 +250,7 @@ class ProjectModule < ActiveRecord::Base
     @settings_mgr.add_file(get_path(:ui_schema))
     @settings_mgr.add_file(get_path(:ui_logic))
     @settings_mgr.add_file(get_path(:settings))
-    @settings_mgr.add_file(get_path(:properties))
+    Dir.glob(get_path(:project_module_dir) + "*.properties").each {|f| @settings_mgr.add_file(f)}
     @settings_mgr.add_file(get_path(:css_style)) if File.exists? get_path(:css_style)
     @settings_mgr
   end
@@ -608,9 +624,16 @@ class ProjectModule < ActiveRecord::Base
 
   def cache_settings_files
     # update settings files
+    db.remove_old_arch16n_cache_files
+    update_arch16n_cache_files
     settings_mgr.file_list.each do |file|
       cache_file(SETTINGS, File.join(settings_mgr.base_dir, file))
     end
+  end
+
+  def update_arch16n_cache_files
+    settings_mgr.file_list.delete_if { |f| f.end_with? ".properties" }
+    Dir.glob(get_path(:project_module_dir) + "*.properties").each {|f| @settings_mgr.add_file(f)}
   end
 
   def cache_data_files
