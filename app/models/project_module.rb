@@ -329,7 +329,7 @@ class ProjectModule < ActiveRecord::Base
   def settings_info
     {
         files: file_mgr_info(settings_mgr, ''),
-        version: db.current_version.to_s
+        dbVersion: db.current_version.to_s
     }
   end
 
@@ -388,7 +388,7 @@ class ProjectModule < ActiveRecord::Base
                 size: File.size(full_path),
                 md5: MD5Checksum.compute_checksum(full_path)
               }],
-      version: db.current_version.to_s
+      dbVersion: db.current_version.to_s
     }
   end
 

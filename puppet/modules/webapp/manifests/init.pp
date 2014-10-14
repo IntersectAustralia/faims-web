@@ -16,10 +16,26 @@ class webapp {
   apt::ppa { 'ppa:jon-severinsson/ffmpeg':}
 
   # Install common packages
-  $common_packages = ["git","imagemagick","libmagickwand-dev","ffmpeg"]
+  $common_packages = ["git","imagemagick","libmagickwand-dev","ffmpeg", "tmpreaper"]
   package { $common_packages:
     ensure  => "present",
     require => Apt::Ppa['ppa:jon-severinsson/ffmpeg']
+  }
+
+  # Configure tmpreaper
+  file_line { "configure tmpreaper":
+    path      => "/etc/tmpreaper.conf",
+    line      => "#SHOWWARNING=true",
+    match     => "SHOWWARNING=true",
+    ensure    => "present",
+    require   => Package[$common_packages],
+    notify    => Service["cron"]
+  }
+
+  service { "cron":
+    ensure  => "running",
+    enable  => "true",
+    require => [File_line["configure tmpreaper"]]
   }
 
   # Install Spatialite
@@ -120,7 +136,7 @@ class webapp {
   }
 
   # Install apache & passenger
-  $apache_packages = ["apache2","apache2-threaded-dev","libcurl4-openssl-dev","libapr1-dev","libaprutil1-dev"]
+  $apache_packages = ["apache2","libcurl4-openssl-dev","libapr1-dev","libaprutil1-dev"]
   package { $apache_packages:
     ensure  => "present"
   }
