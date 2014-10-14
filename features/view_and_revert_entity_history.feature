@@ -15,8 +15,8 @@ Feature: View and Revert entity history
     Given I have project module "Resolve Conflicts"
     And I am on the project modules page
     And I follow "Resolve Conflicts"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     Then I should see "Small 1" with "conflict"
     And I follow "Small 1"
     Then I should see "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
@@ -31,8 +31,8 @@ Feature: View and Revert entity history
     Given I have project module "Resolve Conflicts"
     And I am on the project modules page
     And I follow "Resolve Conflicts"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     Then I should see "Small 1" with "conflict"
     And I follow "Small 1"
     Then I should see "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."
@@ -52,8 +52,8 @@ Feature: View and Revert entity history
     And I have project module "Resolve Conflicts"
     And I am on the project modules page
     And I follow "Resolve Conflicts"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     Then I should see "Small 1" with "conflict"
     And I follow "Small 1"
     Then I should see "This Entity record contains conflicting data. Please click 'Show History' to resolve the conflicts."

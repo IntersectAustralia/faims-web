@@ -10,18 +10,21 @@ Feature: Manage entity relationships
     And I have a project modules dir
 
   Scenario: See entities relations for entity
-    Given I have project module "Sync Example"
+    Given I have project module "Relations"
     And I am on the project modules page
-    And I follow "Sync Example"
+    And I follow "Relations"
     Then I follow "Search Entity Records"
     And I enter "" and submit the form
-    Then I follow "Small 2"
-    Then I follow "small Below AboveBelow: Small 3"
+    Then I follow "Small 1"
+    Then I follow "small add AboveBelow: Small 2"
+    And I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 1 |
     Then I follow "Back"
     And I should see related arch entities
-      | name                            |
-      | small Below AboveBelow: Small 3 |
-      | small Below AboveBelow: Small 4 |
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
 
 #  Scenario: Show relationship associations for entity
 #    Given I have project module "Sync Example"

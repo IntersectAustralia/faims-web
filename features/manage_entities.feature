@@ -10,12 +10,12 @@ Feature: Manage entities
     And I have a project modules dir
 
   @javascript
-  Scenario: Update entity with autosaving
+  Scenario: Update entity with auto saving
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 2"
     And I update fields with values
       | field    | type               | values                 |
@@ -42,8 +42,8 @@ Feature: Manage entities
     And I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 2"
     And I update field "filename" of type "Annotation" with values "test"
     And I update field "filename" of type "Certainty" with values "1.0"
@@ -55,8 +55,8 @@ Feature: Manage entities
     Given I have project module "Hierarchical Vocabulary"
     And I am on the project modules page
     And I follow "Hierarchical Vocabulary"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 1"
     And I update fields with values
       | field | type             | values                                       |
@@ -76,8 +76,8 @@ Feature: Manage entities
     And I pick file "validation_schema.xml" for "Validation Schema"
     And I press "Update"
     Then I should see "Updated module"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 2"
     And I update fields with values
       | field | type       | values |
@@ -98,8 +98,8 @@ Feature: Manage entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 2"
     And database is locked for "Sync Example"
     And I update fields with values
@@ -161,33 +161,33 @@ Feature: Manage entities
     And I should see "tree.original.jpg"
 
   Scenario: View entity with attachments
-    Given I have project module "Sync Test"
+    Given I have project module "Attachments"
     And I am on the project modules page
-    And I click on "Sync Test"
+    And I click on "Attachments"
     Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
-      | name                                   |
-      | Screenshot_2013-04-09-10-32-04.png     |
-      | Screenshot_2013-04-09-10-32-04 (1).png |
+      | name                               |
+      | Screenshot_2013-09-09-14-45-18.png |
+      | Screenshot_2013-09-05-17-05-17.png |
 
   Scenario: View entity with attachments which aren't synced
-    Given I have project module "Sync Test"
+    Given I have project module "Attachments"
     And I am on the project modules page
-    And I click on "Sync Test"
+    And I click on "Attachments"
     Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
     Then I should see attached files
-      | name                                   |
-      | Screenshot_2013-04-09-10-32-04.png     |
-      | Screenshot_2013-04-09-10-32-04 (1).png |
-    Then I remove all files for "Sync Test"
+      | name                               |
+      | Screenshot_2013-09-09-14-45-18.png |
+      | Screenshot_2013-09-05-17-05-17.png |
+    Then I remove all files for "Attachments"
     Then I should see non attached files
-      | name                                   |
-      | Screenshot_2013-04-09-10-32-04.png     |
-      | Screenshot_2013-04-09-10-32-04 (1).png |
+      | name                               |
+      | Screenshot_2013-09-09-14-45-18.png |
+      | Screenshot_2013-09-05-17-05-17.png |
 
   Scenario: View entity with thumbnails
     Given I have project module "Thumbnail"
@@ -236,8 +236,8 @@ Feature: Manage entities
     Given I have project module "Large Entity List"
     And I am on the project modules page
     And I follow "Large Entity List"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     Then I should see records
       | name     |
       | Small 1  |

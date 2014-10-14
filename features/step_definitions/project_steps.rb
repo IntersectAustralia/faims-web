@@ -111,7 +111,7 @@ end
 
 Then /^I should see json for "([^"]*)" settings with version (.*)$/ do |name, version|
   page.should have_content(ProjectModule.find_by_name(name).settings_info.to_json)
-  page.should have_content("\"version\":\"#{version}\"")
+  page.should have_content("\"dbVersion\":\"#{version}\"")
 end
 
 Then /^I should download (.*) "([^"]*)" for "([^"]*)"$/ do |type, file, name|
@@ -140,19 +140,19 @@ end
 Then /^I should see json for "([^"]*)" db$/ do |name|
   project = ProjectModule.find_by_name(name)
   page.should have_content(project.db_version_info.to_json)
-  page.should have_content("\"version\":\"0\"")
+  page.should have_content("\"dbVersion\":\"0\"")
 end
 
 Then /^I should see json for "([^"]*)" db with version (.*)$/ do |name, version|
   project = ProjectModule.find_by_name(name)
   page.should have_content(project.db_version_info.to_json)
-  page.should have_content("\"version\":\"#{version}\"")
+  page.should have_content("\"dbVersion\":\"#{version}\"")
 end
 
 Then /^I should see json for "([^"]*)" db from version (.*) to version (.*)$/ do |name, requested_version, version|
   project = ProjectModule.find_by_name(name)
   page.should have_content(project.db_version_info(requested_version).to_json)
-  page.should have_content("\"version\":\"#{version}\"")
+  page.should have_content("\"dbVersion\":\"#{version}\"")
 end
 
 And /^I have generate database cache version (.*) for "([^"]*)"$/ do |version, name|
@@ -581,7 +581,7 @@ And /^I have database "([^"]*)" for "([^"]*)"$/ do |db, project_module|
 end
 
 Then /^I should see "([^"]*)" with "([^"]*)"$/ do |link, error|
-  page.should have_xpath("//a[contains(text(),\"#{link}\")]/div[contains(text(), \"#{error}\")]")
+  page.should have_xpath("//a[contains(text(),\"#{link}\")]/following-sibling::div[contains(text(), \"#{error}\")]")
 end
 
 Then /^I history should have conflicts$/ do

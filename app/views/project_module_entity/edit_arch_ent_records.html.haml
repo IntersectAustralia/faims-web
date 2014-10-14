@@ -2,7 +2,10 @@
 = breadcrumbs
 - get_files(@attributes, 12, 13, 5)
 .form-actions
-  = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project_module, search_params), :class => 'btn'
+  - if params[:prev_uuid]
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module, params[:prev_uuid], search_params), :class => 'btn'
+  - else
+    = link_to "<i class='icon-arrow-left'></i> Back".html_safe, search_arch_ent_records_path(@project_module, search_params), :class => 'btn'
   = link_to "", get_arch_ent_record_data_path(@project_module, params[:uuid]), :class => "hidden", :id => 'setup-attributes'
   = link_to "", batch_update_arch_ent_records_path(@project_module, params[:uuid]), :class => "hidden", :id => 'update-all', :method => "post"
   - if @deleted[1]
@@ -84,7 +87,7 @@
       %ul
         - @related_arch_ents.each do |aent|
           %li
-            = link_to aent[1], edit_arch_ent_records_path(@project_module, aent[0])
+            = link_to aent[1], edit_arch_ent_records_path(@project_module, aent[0], search_params.merge(prev_uuid: params[:uuid]))
   
 - if !@files.empty?
   .attached-files
