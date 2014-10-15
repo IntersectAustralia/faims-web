@@ -131,3 +131,21 @@ td.first .attribute-info, td.second .attribute-info { margin: 0 0 10px 0; paddin
 .exporter_interface_label { font-weight: bold; }
 
 .ignore-errors-chk { display: inline;}
+
+.carousel {
+  width: 50%;
+}
+
+.carousel-image {
+  max-height:400px;
+}
+
+.carousel-inner .item {
+  background-color:grey;
+}
+
+.center-block {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

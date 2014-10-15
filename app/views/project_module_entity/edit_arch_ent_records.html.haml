@@ -1,6 +1,6 @@
 - title @project_module.name + " - Entity"
 = breadcrumbs
-- get_files(@attributes, 12, 13, 5)
+- get_files(@attributes, 12, 13, 5, 3)
 .form-actions
   - if params[:prev_uuid]
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module, params[:prev_uuid], search_params), :class => 'btn'
@@ -93,21 +93,41 @@
   .attached-files
     %h2 Attached Files
     %ul
-      - @files.each do |path, name|
+      - @files.each do |path, info|
+        - name = info[:name]
         %li
           - file = File.join(@project_module.get_path(:project_module_dir), path)
           - if File.exists? file
-            = link_to thumbnail_path(url: file), :title=> name, class: "fancybox" do
-              - thumbnail = ThumbnailCreator.generate_thumbnail_filename(file)
-              - if File.exists? thumbnail
-                %img{src: thumbnail_path(url: thumbnail), alt: name}
-                %p
-                  = name
-              - else
-                = name
+            = link_to name, thumbnail_path(url: file)
           - else
             %p
               = name
+
+- if !@files.empty?
+  %div.carousel.slide{:id => "slideshow"}
+    %ol.carousel-indicators
+      - @files.select { |f, i| i[:type] == "Photo" }.count.times do |i|
+        - if i == 0
+          %li.active{:'data-target' => "#slideshow", :'data-slide-to' => i}
+        - else 
+          %li{:'data-target' => "#slideshow", :'data-slide-to' => i}
+    %div.carousel-inner
+      - @files.select { |f, i| i[:type] == "Photo" }.each_with_index do |file, index|
+        - if index == 0
+          %div.item.center-block.active
+            %center
+              %img.carousel-image{:src => thumbnail_path(url: File.join(@project_module.get_path(:project_module_dir), file[0]))}
+              .carousel-caption
+                %h4=file[1][:name]
+        - else
+          %div.center-block.item
+            %center
+              %img.carousel-image{:src => thumbnail_path(url: File.join(@project_module.get_path(:project_module_dir), file[0]))}
+              .carousel-caption
+                %h4=file[1][:name]
+    %a.carousel-control.left{:href => "#slideshow", :'data-slide' => "prev"} &lsaquo;
+    %a.carousel-control.right{:href => "#slideshow", :'data-slide' => "next"} &rsaquo;
+
 %br
 #setting_up.hidden.indicator
   = image_tag "loading.gif"
