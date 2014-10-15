@@ -16,9 +16,9 @@ class SpatialiteDB
         func.result = nil
       else
         if args[0].nil?
-          func.result = args[1..-1].select { |arg| !arg.nil? }.join(', ')
+          func.result = args[1..-1].select { |arg| !arg.nil? }.map { |arg| arg.to_s }.join(', ')
         else
-          func.result = StringFormatter.new(args[0]).pre_compute.evaluate(args[1..-1])
+          func.result = StringFormatter.new(args[0]).pre_compute.evaluate(args[1..-1].map { |arg| arg.to_s })
         end
       end
     end

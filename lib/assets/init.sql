@@ -51,7 +51,7 @@ CREATE TABLE AttributeKey (
   AttributeUseThumbnail BOOLEAN, -- this flags the attribute to generate thumbnails
   FormatString          TEXT,
   AttributeIsSync       BOOLEAN, -- this flags the attribute to sync to devices
-  AppendCharacterString TEXT,
+  AppendCharacterString TEXT DEFAULT ' | ',
   SemanticMapURL        TEXT
 );
 
@@ -403,7 +403,7 @@ create view createdModifiedAtBy as select uuid, createdAt, createdBy, modifiedAt
                                          having min(aenttimestamp)) as created
                                      join (select uuid, valuetimestamp as modifiedAt, fname || ' ' || lname as modifiedBy, userid as modifiedUserid
                                            from latestnondeletedaentvalue join user using (userid)
-                                           group by uuid) using (uuid)		  ;
+                                           group by uuid) using (uuid)     ;
 
 drop view if exists allCreatedModifiedAtBy;
 create view allCreatedModifiedAtBy as select uuid, createdAt, createdBy, modifiedAt, modifiedBy, modifiedUserid, createdUserid
@@ -418,34 +418,40 @@ create view allCreatedModifiedAtBy as select uuid, createdAt, createdBy, modifie
 
 drop view if exists latestNonDeletedArchEntFormattedIdentifiers;
 create view if not exists latestNonDeletedArchEntFormattedIdentifiers as
-  select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted
-  from latestNonDeletedArchent
-    JOIN aenttype using (aenttypeid)
-    JOIN idealaent using (aenttypeid)
-    join attributekey using (attributeid)
-    join latestNonDeletedAentValue using (uuid, attributeid)
-    left outer join vocabulary using (attributeid, vocabid)
-  WHERE isIdentifier = 'true'
-  group by uuid, attributeid
-  having response is not null
-  order by uuid, aentcountorder, vocabcountorder;
+  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, null as deleted, aentcountorder
+  from (
+    select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder
+    from latestNonDeletedArchent
+      JOIN aenttype using (aenttypeid)
+      JOIN idealaent using (aenttypeid)
+      join attributekey using (attributeid)
+      join latestNonDeletedAentValue using (uuid, attributeid)
+      left outer join vocabulary using (attributeid, vocabid)
+    WHERE isIdentifier = 'true'
+    group by uuid, attributeid
+    having response is not null
+    order by uuid, aentcountorder, vocabcountorder)
+  group by uuid;
 
 drop view if exists latestAllArchEntFormattedIdentifiers;
 create view if not exists latestAllArchEntFormattedIdentifiers as
-  select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, archentity.deleted
-  from archentity
-    JOIN (select uuid, max(aenttimestamp) as aenttimestamp
-          from archentity
-          group by uuid) USING (uuid, aenttimestamp)
-    join aentvalue using (uuid)
-    JOIN (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
-          from aentvalue
-          group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
-    JOIN aenttype using (aenttypeid)
-    JOIN idealaent using (aenttypeid, attributeid)
-    join attributekey using (attributeid)
-    left outer join vocabulary using (attributeid, vocabid)
-  WHERE isIdentifier = 'true'
-  group by uuid, attributeid
-  having response is not null
-  order by uuid, aentcountorder, vocabcountorder;
+  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, deleted, aentcountorder
+  from (
+    select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, archentity.deleted,aentcountorder
+    from archentity
+      JOIN (select uuid, max(aenttimestamp) as aenttimestamp
+            from archentity
+            group by uuid) USING (uuid, aenttimestamp)
+      join aentvalue using (uuid)
+      JOIN (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+            from aentvalue
+            group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+      JOIN aenttype using (aenttypeid)
+      JOIN idealaent using (aenttypeid, attributeid)
+      join attributekey using (attributeid)
+      left outer join vocabulary using (attributeid, vocabid)
+    WHERE isIdentifier = 'true'
+    group by uuid, attributeid
+    having response is not null
+    order by uuid, aentcountorder, vocabcountorder)
+  group by uuid;
