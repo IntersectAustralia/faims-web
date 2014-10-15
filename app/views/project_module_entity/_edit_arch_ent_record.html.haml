@@ -1,35 +1,19 @@
 - for uuids in @uuid
   %ul.inner
-    %input{:type => 'hidden', :id=> 'timestamp', :value => uuids[3] }
-    - if values and values.include?(uuids[0].to_s)
-      - if !uuids[2].nil?
-        %input{:type => 'checkbox', :value=> uuids[0],:checked => 'checked', :class => 'restore'}
-      - else
-        %input{:type => 'checkbox', :value=> uuids[0],:checked => 'checked'}
-      %li
-        %a{:href => edit_arch_ent_records_path(@project_module,uuids[0])}
-          =uuids[1].to_s
-        - if @entity_dirty_map[uuids[0]]
-          .label.label-important='review'
-        - if @entity_forked_map[uuids[0]]
-          .label.label-warning='conflict'
-      - if !uuids[2].nil?
-        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'restore-record'
-      %input{:type => 'hidden', :id => 'identifier', :value=> uuids[1].to_s}
+    %input{:type => 'hidden', :name => 'timestamp', :value => uuids[3].to_s }
+    %input{:type => 'hidden', :name => 'identifier', :value => uuids[1].to_s}
+    - if uuids[2]
+      %input{:type => 'checkbox', :name => 'id', :value => uuids[0], :class => 'restore'}
     - else
-      - if !uuids[2].nil?
-        %input{:type => 'checkbox', :value=> uuids[0], :class => 'restore'}
-      - else
-        %input{:type => 'checkbox', :value=> uuids[0]}
-      %li
-        %a{:href => edit_arch_ent_records_path(@project_module,uuids[0])}
-          =uuids[1].to_s
-          - if @entity_dirty_map[uuids[0]]
-            .label.label-important='review'
-          - if @entity_forked_map[uuids[0]]
-            .label.label-warning='conflict'
-      - if !uuids[2].nil?
-        = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module,uuids[0]), :class => 'btn btn-warning btn-mini', :id => 'restore-record'
-      %input{:type => 'hidden',:id => 'identifier', :value=> uuids[1].to_s}
+      %input{:type => 'checkbox', :name => 'id', :value => uuids[0]}
+    %li
+      %a{:href => edit_arch_ent_records_path(@project_module, uuids[0], search_params)}
+        = uuids[1].to_s
+      - if @entity_dirty_map[uuids[0]]
+        .label.label-important='review'
+      - if @entity_forked_map[uuids[0]]
+        .label.label-warning='conflict'
+    - if uuids[2]
+      = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module, uuids[0], search_params), :class => 'btn btn-warning btn-mini', :id => 'restore-record'
 .paging
   = render :partial => 'shared/pagination'

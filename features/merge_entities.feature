@@ -14,8 +14,8 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I select records
       | name    |
       | Small 2 |
@@ -45,8 +45,8 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I select records
       | name    |
       | Small 2 |
@@ -78,8 +78,8 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I click on "Compare"
     Then I should see dialog "Please select two records to compare"
     And I confirm
@@ -97,8 +97,8 @@ Feature: Merge entities
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I select records
       | name    |
       | Small 2 |
@@ -122,8 +122,8 @@ Feature: Merge entities
     And I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I select records
       | name    |
       | Small 2 |
@@ -142,15 +142,26 @@ Feature: Merge entities
   @ignore_jenkins
   @javascript
   Scenario: Merge entities also merges relationships
-    Given I have project module "Entity Combiner"
+    Given I have project module "Relations"
     And I am on the project modules page
-    And I follow "Entity Combiner"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Relations"
+    And I follow "Search Entity Records"
+    And I press "Search"
+    And I follow "Small 1"
+    And I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
+    And I follow "Back"
+    And I follow "Small 4"
+    And I should see related arch entities
+      | name                          |
+      | small hub AboveBelow: Small 5 |
+    And I follow "Back"
     And I select records
       | name    |
-      | Small 5 |
-      | Small 6 |
+      | Small 1 |
+      | Small 4 |
     And I click on "Compare"
     And I select the "first" record to merge to
     And I click on "Merge"
@@ -158,15 +169,13 @@ Feature: Merge entities
     Then I should see "Merged Entities"
     And I should see records
       | name    |
-      | Small 5 |
+      | Small 1 |
     And I should not see records
       | name    |
-      | Small 6 |
-    Then I should see relationships for "Entity Combiner" and entity "Small 5"
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
-    Then I should not see relationships for "Entity Combiner" and entity "Small 6"
-      | name         |
-      | AboveBelow 1 |
-      | AboveBelow 2 |
+      | Small 4 |
+    And I follow "Small 1"
+    And I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
+      | small hub AboveBelow: Small 5 |

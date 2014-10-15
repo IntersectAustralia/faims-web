@@ -2,10 +2,6 @@ def test_db
   Rails.root.join('spec/assets/test_db.sqlite3').to_s
 end
 
-def test_multivalued_db
-  Rails.root.join('spec/assets/multivalue.sqlite3').to_s
-end
-
 def run_query(query, *args)
   begin
     temp_file = Tempfile.new('db')

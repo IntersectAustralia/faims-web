@@ -92,26 +92,10 @@ class Database
     @db.get_first_value(WebQuery.get_rel_identifier, relationshipid)
   end
 
-  def load_arch_entity(type, limit, offset, show_deleted)
-    if type.eql?('all')
-      params = {
-          limit:limit,
-          offset:offset
-      }
-      uuids = show_deleted ? @db.execute(WebQuery.load_all_arch_entities_include_deleted, params) : @db.execute(WebQuery.load_all_arch_entities, params)
-    else
-      params = {
-          type:type,
-          limit:limit,
-          offset:offset
-      }
-      uuids = show_deleted ? @db.execute(WebQuery.load_arch_entities_include_deleted, params) : @db.execute(WebQuery.load_arch_entities, params)
-    end
-    uuids
-  end
-
-  def search_arch_entity(limit, offset, query, show_deleted)
+  def search_arch_entity(limit, offset, type, user, query, show_deleted)
     params = {
+        type:type,
+        user:user,
         query:query,
         limit:limit,
         offset:offset
@@ -120,20 +104,10 @@ class Database
     uuids
   end
 
-  def total_arch_entity(type, show_deleted)
-    if type.eql?('all')
-      total = show_deleted ? @db.get_first_value(WebQuery.total_all_arch_entities_include_deleted) : @db.get_first_value(WebQuery.total_all_arch_entities)
-    else
-      params = {
-          type:type
-      }
-      total = show_deleted ? @db.get_first_value(WebQuery.total_arch_entities_include_deleted, params) : @db.get_first_value(WebQuery.total_arch_entities, params)
-    end
-    total
-  end
-
-  def total_search_arch_entity(query, show_deleted)
+  def total_search_arch_entity(query, type, user, show_deleted)
     params = {
+        type:type,
+        user:user,
         query:query
     }
     total = show_deleted ? @db.get_first_value(WebQuery.total_search_arch_entity_include_deleted, params) :  @db.get_first_value(WebQuery.total_search_arch_entity, params)
@@ -149,13 +123,13 @@ class Database
     attributes
   end
 
-  def get_arch_ent_info(uuid,aenttimestamp)
-    info = @db.execute(WebQuery.get_arch_ent_info, uuid, aenttimestamp)
+  def get_arch_ent_info(uuid)
+    info = @db.execute(WebQuery.get_arch_ent_info, uuid)
     info
   end
 
-  def get_arch_ent_attribute_info(uuid,valuetimestamp,attribute_id)
-    info = @db.execute(WebQuery.get_arch_ent_attribute_info, uuid, valuetimestamp,attribute_id)
+  def get_arch_ent_attribute_info(uuid, valuetimestamp, attribute_id)
+    info = @db.execute(WebQuery.get_arch_ent_attribute_info, uuid, valuetimestamp, attribute_id)
     info
   end
 
@@ -164,48 +138,46 @@ class Database
     attributes
   end
 
-  def update_arch_entity_attribute(uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
-    @db.transaction do |db|
-      timestamp = current_timestamp
-      db.execute(WebQuery.insert_version, timestamp, userid)
+  def update_arch_entity_attribute(db, uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
+    timestamp = current_timestamp
+    db.execute(WebQuery.insert_version, timestamp, userid)
 
-      cache_timestamps = {}
+    cache_timestamps = {}
 
-      (0..(freetext.length-1)).each do |i|
+    (0..(freetext.length-1)).each do |i|
 
-        if cache_timestamps[attribute_id]
-          parenttimestamp = cache_timestamps[attribute_id]
-        else
-          parenttimestamp = db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id)
+      if cache_timestamps[attribute_id]
+        parenttimestamp = cache_timestamps[attribute_id]
+      else
+        parenttimestamp = db.get_first_value(WebQuery.get_aentvalue_parenttimestamp, uuid, attribute_id)
 
-          cache_timestamps[attribute_id] = parenttimestamp
-        end
-
-        # check if deleted
-        v = clean(vocab_id ? vocab_id[i] : nil)
-        m = clean(measure[i])
-        f = clean(freetext[i])
-        c = clean(certainty[i])
-        deleted = v.blank? && m.blank? && f.blank? && c.blank?
-
-        params = {
-            uuid:uuid,
-            userid:userid,
-            attributeid:attribute_id,
-            vocabid:v,
-            measure:m,
-            freetext:f,
-            certainty:c,
-            valuetimestamp:timestamp,
-            parenttimestamp:parenttimestamp,
-            deleted: deleted ? 1 : nil
-        }
-
-        db.execute(WebQuery.insert_arch_entity_attribute, params)
+        cache_timestamps[attribute_id] = parenttimestamp
       end
 
-      validate_aent_value(db, uuid, timestamp, attribute_id) unless ignore_errors
+      # check if deleted
+      v = clean(vocab_id ? vocab_id[i] : nil)
+      m = clean(measure[i])
+      f = clean(freetext[i])
+      c = clean(certainty[i])
+      deleted = v.blank? && m.blank? && f.blank? && c.blank?
+
+      params = {
+          uuid:uuid,
+          userid:userid,
+          attributeid:attribute_id,
+          vocabid:v,
+          measure:m,
+          freetext:f,
+          certainty:c,
+          valuetimestamp:timestamp,
+          parenttimestamp:parenttimestamp,
+          deleted: deleted ? 1 : nil
+      }
+
+      db.execute(WebQuery.insert_arch_entity_attribute, params)
     end
+
+    validate_aent_value(db, uuid, timestamp, attribute_id) unless ignore_errors
   end
 
   def update_aent_value_as_dirty(db, uuid, valuetimestamp, userid, attribute_id, vocab_id, measure, freetext, certainty, versionnum, isdirty, isdirtyreason)
@@ -351,12 +323,12 @@ class Database
 
   def delete_arch_entity(uuid, userid)
     @db.transaction do |db|
-      db.execute(WebQuery.insert_version, current_timestamp, userid)
       delete_arch_entity_no_transaction(db, uuid, userid)
     end
   end
 
   def delete_arch_entity_no_transaction(db, uuid, userid)
+    db.execute(WebQuery.insert_version, current_timestamp, userid)
     params = {
         userid:userid,
         deleted:'true',
@@ -368,26 +340,34 @@ class Database
 
   def restore_arch_entity(uuid, userid)
     @db.transaction do |db|
-      db.execute(WebQuery.insert_version, current_timestamp, userid)
-      params = {
-          userid:userid,
-          deleted:nil,
-          uuid:uuid,
-          parenttimestamp: db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
-      }
-      db.execute(WebQuery.delete_or_restore_arch_entity, params)
+      restore_arch_entity_no_transaction(db, uuid, userid)
     end
   end
 
+  def restore_arch_entity_no_transaction(db, uuid, userid)
+    db.execute(WebQuery.insert_version, current_timestamp, userid)
+    params = {
+        userid:userid,
+        deleted:nil,
+        uuid:uuid,
+        parenttimestamp: db.get_first_value(WebQuery.get_arch_ent_parenttimestamp, uuid)
+    }
+    db.execute(WebQuery.delete_or_restore_arch_entity, params)
+  end
+
   def batch_delete_arch_entities(uuids, userid)
-    uuids.each do |uuid|
-      delete_arch_entity(uuid, userid)
+    @db.transaction do |db|
+      uuids.each do |uuid|
+        delete_arch_entity_no_transaction(db, uuid, userid)
+      end
     end
   end
 
   def batch_restore_arch_entities(uuids, userid)
-    uuids.each do |uuid|
-      restore_arch_entity(uuid, userid)
+    @db.transaction do |db|
+      uuids.each do |uuid|
+        restore_arch_entity_no_transaction(db, uuid, userid)
+      end
     end
   end
 
@@ -1043,6 +1023,12 @@ class Database
 
   def get_entity_uuid(identifer)
     @db.get_first_value(WebQuery.get_entity_uuid, identifer)
+  end
+
+  def with_transaction
+    @db.transaction do |db|
+      yield db
+    end
   end
 
   private

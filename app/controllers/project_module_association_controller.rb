@@ -1,4 +1,5 @@
 class ProjectModuleAssociationController < ProjectModuleBaseController
+  # This controller has been deprecated
 
   def show_rel_members
     page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_search_or_list_rel, :project_modules_show_rel, :project_modules_edit_rel, :project_modules_show_rel_associations
@@ -228,43 +229,6 @@ class ProjectModuleAssociationController < ProjectModuleBaseController
     respond_to do |format|
       format.json { render :json => verbs.to_json }
     end
-  end
-
-  # TODO compare should use query params
-  def add_record_to_compare
-    if !session[:values]
-      session[:values] = []
-    end
-    if !session[:values].include?(params[:value])
-      session[:values].push(params[:value])
-    end
-    if !session[:identifiers]
-      session[:identifiers] = []
-    end
-    if !session[:identifiers].include?(params[:identifier])
-      session[:identifiers].push(params[:identifier])
-    end
-    if !session[:timestamps]
-      session[:timestamps] = []
-    end
-    if !session[:timestamps].include?(params[:timestamp])
-      session[:timestamps].push(params[:timestamp])
-    end
-
-    render :nothing => true
-  end
-
-  def remove_record_to_compare
-    if(session[:values])
-      session[:values].delete(params[:value])
-    end
-    if !session[:identifiers]
-      session[:identifiers].delete(params[:identifier])
-    end
-    if !session[:timestamps]
-      session[:timestamps].delete(params[:timestamp])
-    end
-    render :nothing => true
   end
 
 end

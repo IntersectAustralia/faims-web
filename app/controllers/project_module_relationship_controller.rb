@@ -1,4 +1,5 @@
 class ProjectModuleRelationshipController < ProjectModuleBaseController
+  # This controller has been deprecated
 
   def list_rel_records
     page_crumbs :pages_home, :project_modules_index, :project_modules_show, :project_modules_list_rel

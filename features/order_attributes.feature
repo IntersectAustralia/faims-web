@@ -12,8 +12,8 @@ Feature: Order Attributes
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 2"
     When I reorder attributes for "Sync Example"
       | name      |
@@ -69,8 +69,8 @@ Feature: Order Attributes
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     When I reorder attributes for "Sync Example"
       | name      |
       | name      |
@@ -131,8 +131,8 @@ Feature: Order Attributes
     Given I have project module "Sync Example"
     And I am on the project modules page
     And I follow "Sync Example"
-    And I follow "List Entity Records"
-    And I press "Filter"
+    And I follow "Search Entity Records"
+    And I press "Search"
     And I follow "Small 2"
     And I follow "Show History"
     When I reorder attributes for "Sync Example"

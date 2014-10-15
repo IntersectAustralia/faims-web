@@ -149,33 +149,6 @@ check_export = (jobid) ->
       return
   return
 
-compare_input_checked_handler = ->
-  $('#compare input:checkbox').change(
-    ->
-      self = this
-      value = $(self).val()
-      identifier_input = $(this).siblings('#identifier')
-      identifier_value = $(identifier_input).val()
-      timestamp_input = $(this).siblings('#timestamp')
-      timestamp_value = $(timestamp_input).val()
-      if this.checked
-        $('#compare').append('<input type="hidden" value="'+value+'" name="ids[]" id="'+value+ '"/>')
-        $('#compare').append('<input type="hidden" value="'+identifier_value+'" name="identifiers[]" id="'+value+ '"/>')
-        $('#compare').append('<input type="hidden" value="'+timestamp_value+'" name="timestamps[]" id="'+value+ '"/>')
-        $.post $('#add-entity').val(),
-          value: value,
-          identifier: identifier_value,
-          timestamp: timestamp_value
-      else
-        $('input[id='+value+']').remove();
-        $.post $('#remove-entity').val(),
-          value: value,
-          identifier: identifier_value,
-          timestamp: timestamp_value
-      return
-  )
-  return
-
 aent_rel_management = ->
   $('.remove-member').each(
     -> $(this).click(
@@ -243,8 +216,7 @@ compare_records = ->
   $('#compare-button').click(
     ->
       href = $(this).attr('href')
-      $form = $('#compare')
-      values = $("input[name='ids[]']")
+      values = $('input[name="id"]:checked')
       if values.length > 2
         alert('Can only compare two records at a time')
         false
@@ -252,8 +224,7 @@ compare_records = ->
         alert('Please select two records to compare')
         false
       else
-        $form.attr('action', href)
-        $form.submit()
+        window.location = href + "&ids[]=" + $(values[0]).val() + "&ids[]=" + $(values[1]).val()
         false
   )
   return
@@ -928,7 +899,6 @@ $(document).ready(
     show_export_modal_dialog()
     compare_records()
     bulk_delete_restore_entities()
-    compare_input_checked_handler()
     aent_rel_management()
     download_attached_file()
     ignore_error_records()
