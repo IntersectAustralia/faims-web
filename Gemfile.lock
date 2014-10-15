@@ -89,6 +89,8 @@ GEM
     factory_girl_rails (4.4.1)
       factory_girl (~> 4.4.0)
       railties (>= 3.0.0)
+    fancybox2-rails (0.2.8)
+      railties (>= 3.1.0, < 5.0)
     ffi (1.9.3)
     foreman (0.66.0)
       dotenv (~> 0.7.0)
@@ -243,6 +245,7 @@ DEPENDENCIES
   devise (~> 2.2.8)
   email_spec
   factory_girl_rails
+  fancybox2-rails
   foreman
   god
   haml
