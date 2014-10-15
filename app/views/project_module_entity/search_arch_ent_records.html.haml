@@ -12,20 +12,20 @@
           %option{ :value => "all" }="Show All Records"
         - for type in @types
           - if params[:type] == type[1].to_s
-            %option{:value=>type[1], :selected => "selected"}=type[0]
+            %option{:value=>type[1], :selected => "selected"}="Filter type by '#{type[0]}'"
           - else
-            %option{:value=>type[1]}=type[0]
+            %option{:value=>type[1]}="Filter type by '#{type[0]}'"
       %select{:name => 'user'}
         - if params[:user] == 'all'
-          %option{ :value => "all", :selected => "selected"}="Any User"
+          %option{ :value => "all", :selected => "selected"}="Created/Last modified by Any User"
         - else
-          %option{ :value => "all" }="Show All Records"
+          %option{ :value => "all" }="Created/Last Modified by Any User"
         - for user in @users
           - if params[:user] == user[0].to_s
-            %option{:value=>user[0], :selected => "selected"}="#{user[1]} #{user[2]}"
+            %option{:value=>user[0], :selected => "selected"}="Created/Last Modified by '#{user[1]} #{user[2]}'"
           - else
-            %option{:value=>user[0]}="#{user[1]} #{user[2]}"
-      %input{:type => 'text', :name => 'query'}
+            %option{:value=>user[0]}="Created/Last Modified by '#{user[1]} #{user[2]}'"
+      %input{:type => 'text', :name => 'query', :placeholder => "Enter a constrained vocabulary term, annotation, measurement, date, or name here..."}
       %input{:type => 'hidden', :name => 'show_deleted', :value => params[:show_deleted]}
       %input{:type => 'hidden', :name => 'offset', :value => params[:offset]}
       %input{:type => 'hidden', :name => 'per_page', :value => @limit}

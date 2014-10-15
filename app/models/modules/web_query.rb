@@ -4,7 +4,7 @@ module WebQuery
 
   def self.search_arch_entity
     cleanup_query(<<EOF
-select uuid, group_concat(response, ' '), latestnondeletedarchent.deleted, aenttimestamp, createdAt, modifiedAt, createdBy, modifiedBy
+select uuid, response, latestnondeletedarchent.deleted, aenttimestamp, createdAt, modifiedAt, createdBy, modifiedBy
 from  latestnondeletedarchent join createdModifiedAtBy using (uuid) join latestNonDeletedArchEntFormattedIdentifiers using (uuid)
 where uuid in (select uuid
       from latestnondeletedarchent join createdModifiedAtBy using (uuid) join latestnondeletedaentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
@@ -26,7 +26,6 @@ where uuid in (select uuid
       limit :limit
      offset :offset
       )
-group by uuid
 order by createdAt
 ;
 EOF
@@ -59,7 +58,7 @@ EOF
 
   def self.search_arch_entity_include_deleted
     cleanup_query(<<EOF
-select uuid, group_concat(response, ' '), archentity.deleted, aenttimestamp, createdAt, modifiedAt, createdBy, modifiedBy
+select uuid, response, archentity.deleted, aenttimestamp, createdAt, modifiedAt, createdBy, modifiedBy
 from  (select distinct uuid, max(aenttimestamp) as aenttimestamp
       from archentity join allCreatedModifiedAtBy using (uuid) join aentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
       where  (aenttypeid = :type
@@ -81,7 +80,6 @@ from  (select distinct uuid, max(aenttimestamp) as aenttimestamp
       limit :limit
      offset :offset
       ) join archentity using (aenttimestamp, uuid) join allcreatedModifiedAtBy using (uuid) join latestallArchEntFormattedIdentifiers using (uuid)
-group by uuid
 order by createdAt
 ;
 EOF
@@ -427,7 +425,7 @@ EOF
 
   def self.get_related_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||group_concat(response,' ')
+SELECT uuid, aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||response
 FROM latestNonDeletedArchEntFormattedIdentifiers
 JOIN latestnondeletedaentreln using (uuid)
 join relationship using (relationshipid)
@@ -437,7 +435,6 @@ where relationshipid in (select relationshipid
                         where uuid = :uuid
                        )
 and uuid != :uuid
-group by uuid
 order by aentrelntimestamp;
 EOF
     )
@@ -1672,10 +1669,9 @@ EOF
 
   def self.get_entity_identifier
     cleanup_query(<<EOF
-select group_concat(response, ' ') as response
+select response as response
 from latestAllArchEntFormattedIdentifiers
 where uuid = ?
-group by uuid;
 EOF
     )
   end
@@ -1752,6 +1748,20 @@ EOF
   def self.attribute_is_sync
     cleanup_query(<<EOF
 select count(*) from attributekey where attributeissync = 1 and attributeid = ?;
+EOF
+    )
+  end
+
+  def self.update_format_string
+    cleanup_query(<<EOF
+update attributekey set formatstring = ? where attributename = ?;
+EOF
+    )
+  end
+
+  def self.update_append_character_string
+    cleanup_query(<<EOF
+update attributekey set appendcharacterstring = ? where attributename = ?;
 EOF
     )
   end

@@ -1013,6 +1013,12 @@ class Database
     Time.now.getgm.strftime('%Y-%m-%d %H:%M:%S')
   end
 
+  def with_transaction
+    @db.transaction do |db|
+      yield db
+    end
+  end
+
   # TEST helpers
   def reorder_attributes(names)
     # this is used by automated tests and is hardcoded for the sync example
@@ -1025,10 +1031,12 @@ class Database
     @db.get_first_value(WebQuery.get_entity_uuid, identifer)
   end
 
-  def with_transaction
-    @db.transaction do |db|
-      yield db
-    end
+  def update_format_string(name, string)
+    @db.execute(WebQuery.update_format_string, string, name)
+  end
+
+  def update_append_character_string(name, string)
+    @db.execute(WebQuery.update_append_character_string, string, name)
   end
 
   private

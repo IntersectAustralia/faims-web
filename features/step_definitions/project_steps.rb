@@ -1113,3 +1113,34 @@ Then /^I should (not see|see) relationships for "([^"]*)" and entity "([^"]*)"$/
     relationships.include?(hash[:name]).should == (not_see != 'not see')
   end
 end
+
+And /^I update format string for module "([^"]*)" attribute "([^"]*)" with "([^"]*)"$/ do |name, attribute, string|
+  project_module = ProjectModule.find_by_name(name)
+  project_module.db.update_format_string(attribute, string.blank? ? nil : string)
+end
+
+And /^I update append character string for module "([^"]*)" attribute "([^"]*)" with "([^"]*)"$/ do |name, attribute, string|
+  project_module = ProjectModule.find_by_name(name)
+  project_module.db.update_append_character_string(attribute, string.blank? ? nil : string)
+end
+
+Then /^I should see compare identifiers with format$/ do |table|
+  table.hashes.each do |hash|
+    all('.merge-row').first.all(:xpath, ".//td").select { |node| node.text == hash[:name] }.should_not be_empty
+  end
+end
+
+And /^I should see compare attributes with format$/ do |table|
+  table.hashes.each do |hash|
+    find(:xpath, "//td/h5[contains(text(),'#{hash[:attribute]}')]/../following-sibling::td/span[contains(text(), '#{hash[:name]}')]")
+  end
+end
+
+Then /^I should see history attributes with format$/ do |table|
+  headers = all('th').map { |node| node.text.strip }[1..-1]
+  table.hashes.each do |hash|
+    column = headers.index(hash[:attribute])
+    values = all('td span').map { |node| node.text.strip }
+    values[column].should == hash[:name]
+  end
+end
