@@ -887,6 +887,10 @@ show_loading_dialog = ->
   $('#setting_up').removeClass('hidden')
   $('#setting_up').dialog('open')
 
+lightbox_setup = ->
+  $("a.fancybox").fancybox()
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -906,5 +910,6 @@ $(document).ready(
     update_arch_ent_or_rel()
     autosave_entity_attributes()
     setup_attribute_groups()
+    lightbox_setup()
     return
 )

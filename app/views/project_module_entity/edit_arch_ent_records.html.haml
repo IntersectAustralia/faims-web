@@ -95,22 +95,19 @@
     %ul
       - @files.each do |path, name|
         %li
-          %form{:method => 'GET', :action => download_attached_file_path(@project_module), :id => 'download-attached-file'}
-            %input{:type => 'hidden', :name => 'path', :value => path}
-            %input{:type => 'hidden', :name => 'name', :value => name}
-            - file = File.join(@project_module.get_path(:project_module_dir), path)
-            - if File.exists? file
-              %a{:href => '#'}
-                - thumbnail = ThumbnailCreator.generate_thumbnail_filename(file)
-                - if File.exists? thumbnail
-                  %img{src: thumbnail_path(url: thumbnail), alt: name}
-                  %p
-                    = name
-                - else
+          - file = File.join(@project_module.get_path(:project_module_dir), path)
+          - if File.exists? file
+            = link_to thumbnail_path(url: file), :title=> name, class: "fancybox" do
+              - thumbnail = ThumbnailCreator.generate_thumbnail_filename(file)
+              - if File.exists? thumbnail
+                %img{src: thumbnail_path(url: thumbnail), alt: name}
+                %p
                   = name
-            - else
-              %p
+              - else
                 = name
+          - else
+            %p
+              = name
 %br
 #setting_up.hidden.indicator
   = image_tag "loading.gif"
