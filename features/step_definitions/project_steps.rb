@@ -319,8 +319,8 @@ And(/^I enter "([^"]*)" and submit the form$/) do |keywords|
 end
 
 And(/^I select the first record$/) do
-  if all('.inner > li > a').size > 0
-    first('.inner > li > a').click
+  if all('.inner > td > a').size > 0
+    first('.inner > td > a').click
   else
     first('.inner > input').click
   end
@@ -785,7 +785,7 @@ end
 
 And /^I select records$/ do |table|
   table.hashes.each do |hash|
-    find(:xpath, "//input[@type='checkbox'][./following-sibling::li/a[contains(text(),\"#{hash[:name]}\")]]").set(true)
+    find(:xpath, "//input[@type='checkbox'][./../following-sibling::td/a[contains(text(),\"#{hash[:name]}\")]]").set(true)
   end
 end
 
