@@ -39,7 +39,7 @@ Feature: Search entities
     And I am on the project modules page
     And I follow "Search"
     And I follow "Search Entity Records"
-    And I select search user "Created at/Last modified by John Wick"
+    And I select search user "Created/Last modified by John Wick"
     And I press "Search"
     Then I should search table
       | Identifier     | Created at          | Created by  | Last modified at    | Last modified by | Actions |
@@ -62,7 +62,7 @@ Feature: Search entities
     And I follow "Search"
     And I follow "Search Entity Records"
     And I select search type "Filter type by small"
-    And I select search user "Created at/Last modified by Faims Admin"
+    And I select search user "Created/Last modified by Faims Admin"
     And I enter search query "apple"
     And I press "Search"
     Then I should search table
