@@ -1144,3 +1144,20 @@ Then /^I should see history attributes with format$/ do |table|
     values[column].should == hash[:name]
   end
 end
+
+Then /^I should search table$/ do |table|
+  actual = find(".search-table").all('tr').map { |row| row.all('th, td').map { |cell| cell.text.strip } }
+  table.diff!(actual)
+end
+
+And /^I select search type "([^"]*)"$/ do |type|
+  find("select[name='type']").find(:xpath, "./option[contains(text(), '#{type}')]").select_option
+end
+
+And /^I select search user "([^"]*)"$/ do |user|
+  find("select[name='user']").find(:xpath, "./option[contains(text(), '#{user}')]").select_option
+end
+
+And /^I enter search query "([^"]*)"$/ do |query|
+  find("input[name='query']").set query
+end

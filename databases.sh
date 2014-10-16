@@ -9,6 +9,7 @@
 #sqlite3 features/assets/large_entity_list/db.sqlite3 < update.sql
 #sqlite3 features/assets/thumbnail/db.sqlite3 < update.sql
 #sqlite3 features/assets/formatter/db.sqlite3 < update.sql
+#sqlite3 features/assets/search/db.sqlite3 < update.sql
 
 #ruby ../FAIMS-tools/formatter/string_formatter_tester.rb features/assets/module_1/db.sqlite3 update.sql
 #ruby ../FAIMS-tools/formatter/string_formatter_tester.rb features/assets/module_2/db.sqlite3 update.sql
@@ -20,5 +21,6 @@
 #ruby ../FAIMS-tools/formatter/string_formatter_tester.rb features/assets/large_entity_list/db.sqlite3 update.sql
 #ruby ../FAIMS-tools/formatter/string_formatter_tester.rb features/assets/thumbnail/db.sqlite3 update.sql
 #ruby ../FAIMS-tools/formatter/string_formatter_tester.rb features/assets/formatter/db.sqlite3 update.sql
+#ruby ../FAIMS-tools/formatter/string_formatter_tester.rb features/assets/search/db.sqlite3 update.sql
 
 #ruby ../FAIMS-tools/formatter/string_formatter_tester.rb um/Simple_Project/db.sqlite3 update.sql
