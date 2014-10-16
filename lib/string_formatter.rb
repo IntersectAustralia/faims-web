@@ -1,5 +1,5 @@
-require_relative 'StatementLexer'
-require_relative 'StatementParser'
+require Rails.root.join('lib/StatementLexer')
+require Rails.root.join('lib/StatementParser')
 
 $lexer_cache = {}
 $expression_cache = {}

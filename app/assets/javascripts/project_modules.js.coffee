@@ -891,6 +891,15 @@ lightbox_setup = ->
   $("a.fancybox").fancybox()
   return
 
+datatables_setup = ->
+  $('.search-table').dataTable(
+    "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+    "sPaginationType": "bootstrap",
+    "bPaginate": false,
+    "bFilter": false,
+  );
+  return
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -911,5 +920,6 @@ $(document).ready(
     autosave_entity_attributes()
     setup_attribute_groups()
     lightbox_setup()
+    datatables_setup()
     return
 )

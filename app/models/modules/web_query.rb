@@ -38,7 +38,7 @@ select count(uuid)
 from (
 select distinct uuid
       from latestnondeletedarchent join allcreatedModifiedAtBy using (uuid) join latestnondeletedaentvalue using (uuid) left outer join vocabulary using (attributeid, vocabid)
-      where  (aenttypeid = :type
+      where (aenttypeid = :type
              or 'all' = :type)
       	 and ( 'all' = :user
       	     or createdUserid = :user

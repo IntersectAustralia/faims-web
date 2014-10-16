@@ -2,8 +2,8 @@
 = breadcrumbs
 .content
   %h2 Search Entity
-  %form{:action => search_arch_ent_records_path, :method => "get"}
-    %p An empty search will list all entities
+  %p An empty search will list all entities
+  %form.pull-right{:action => search_arch_ent_records_path, :method => "get"}
     .input-append
       %select{:name => 'type'}
         - if params[:type] == 'all'
@@ -25,21 +25,29 @@
             %option{:value=>user[0], :selected => "selected"}="Created/Last Modified by '#{user[1]} #{user[2]}'"
           - else
             %option{:value=>user[0]}="Created/Last Modified by '#{user[1]} #{user[2]}'"
-      %input{:type => 'text', :name => 'query', :placeholder => "Enter a constrained vocabulary term, annotation, measurement, date, or name here..."}
+      %input.span4{:type => 'text', :name => 'query', :placeholder => "Enter a constrained vocabulary term, annotation, measurement, date, or name here...", :value => params[:query]}
       %input{:type => 'hidden', :name => 'show_deleted', :value => params[:show_deleted]}
       %input{:type => 'hidden', :name => 'offset', :value => params[:offset]}
       %input{:type => 'hidden', :name => 'per_page', :value => @limit}
       %input{:type => 'submit', :value => "Search", :class => 'btn'}
 
-  - if @uuid and not @uuid.empty?
-    %form{:method => 'post', :id => 'compare'}
-      %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
-      - pagination_options = [['50 per page', '50'], ['100 per page', '100'], ['250 per page', '250'], ['Show all', '-1']]
-      = select_tag :per_page, options_for_select(pagination_options, @limit.to_s), :onchange => 'updatePagination(this.value)'
-      %p
-        = render :partial => 'edit_arch_ent_record'
-  - else
-    %p No Records Found
+  %form.pull-left{:method => 'post', :id => 'compare'}
+    %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
+    - pagination_options = [['50 per page', '50'], ['100 per page', '100'], ['250 per page', '250'], ['Show all', '-1']]
+    = select_tag :per_page, options_for_select(pagination_options, @limit.to_s), :onchange => 'updatePagination(this.value)'
+
+  %table.table.table-striped.search-table
+    %thead
+      %tr
+        %th
+        %th Identifier
+        %th Created at
+        %th Created by
+        %th Last modified at
+        %th Last modified by
+        %th Actions
+    = render :partial => 'edit_arch_ent_record'
+  = render :partial => 'shared/pagination'
 
   .form-actions
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
@@ -67,5 +75,9 @@
 
 :javascript
   function updatePagination(per_page) {
-    window.location = "#{@base_url}&offset=0&per_page=" + per_page
+    if ("#{@base_url}".indexOf("?") < 0) {
+      window.location = "#{@base_url}?offset=0&per_page=" + per_page
+    } else {
+       window.location = "#{@base_url}&offset=0&per_page=" + per_page
+    }
   }

@@ -16,3 +16,5 @@
 //= require bootstrap
 //= require_tree .
 //= require fancybox
+//= require dataTables/jquery.dataTables
+//= require dataTables/bootstrap/2/jquery.dataTables.bootstrap

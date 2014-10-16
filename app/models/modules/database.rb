@@ -100,17 +100,17 @@ class Database
         limit:limit,
         offset:offset
     }
-    uuids = show_deleted ? @db.execute(WebQuery.search_arch_entity_include_deleted, params) :  @db.execute(WebQuery.search_arch_entity, params)
+    uuids = show_deleted ? @db.execute(WebQuery.search_arch_entity_include_deleted, params) : @db.execute(WebQuery.search_arch_entity, params)
     uuids
   end
 
-  def total_search_arch_entity(query, type, user, show_deleted)
+  def total_search_arch_entity(type, user, query, show_deleted)
     params = {
         type:type,
         user:user,
         query:query
     }
-    total = show_deleted ? @db.get_first_value(WebQuery.total_search_arch_entity_include_deleted, params) :  @db.get_first_value(WebQuery.total_search_arch_entity, params)
+    total = show_deleted ? @db.get_first_value(WebQuery.total_search_arch_entity_include_deleted, params) : @db.get_first_value(WebQuery.total_search_arch_entity, params)
     total
   end
 

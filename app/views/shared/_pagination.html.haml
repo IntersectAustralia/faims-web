@@ -7,18 +7,20 @@
   - cur_page = (offset.to_f / limit).floor + 1
   - min_page = [cur_page - (max_page_links/2).ceil, 1].max
   - max_page = [cur_page + (max_page_links/2).ceil - 1, pages].min
-  .pagination.pagination-centered
-    %ul
-      - if min_page != 1
-        %li
-          = link_to '«', @base_url + "&offset=#{0}&per_page=#{limit}"
-      - (min_page..max_page).each do |i|
-        - if cur_page == i
-          %li.disabled
-            = link_to i.to_s, '#'
-        - else
-          %li
-            = link_to i.to_s, @base_url + "&offset=#{(i - 1) * limit}&per_page=#{limit}"
-      - if max_page != pages
-        %li
-          = link_to '»', @base_url + "&offset=#{(pages - 1) * limit}&per_page=#{limit}"
+  - if min_page <= max_page
+    .paging
+      .pagination.pagination-centered
+        %ul
+          - if min_page != 1
+            %li
+              = link_to '«', @base_url + "&offset=#{0}&per_page=#{limit}"
+          - (min_page..max_page).each do |i|
+            - if cur_page == i
+              %li.disabled
+                = link_to i.to_s, '#'
+            - else
+              %li
+                = link_to i.to_s, @base_url + "&offset=#{(i - 1) * limit}&per_page=#{limit}"
+          - if max_page != pages
+            %li
+              = link_to '»', @base_url + "&offset=#{(pages - 1) * limit}&per_page=#{limit}"
