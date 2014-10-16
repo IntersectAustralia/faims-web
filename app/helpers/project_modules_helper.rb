@@ -2,14 +2,14 @@ module ProjectModulesHelper
 
   ORIGINAL_EXT = ".original"
   
-  def get_files(attributes, file_index, thumbnail_index, value_index, type_index)
+  def get_files(attributes, file_index, thumbnail_index, value_index)
     @files = {}
     for attribute in attributes
       if attribute[file_index].to_s.downcase.eql?("1")
         path = attribute[value_index]
         next unless path
         name = File.basename(path)[File.basename(path).to_s.index('_')+1..-1]
-        @files[path] = {:name => name, :type => attribute[type_index]}
+        @files[path] = name
       end
     end
 
