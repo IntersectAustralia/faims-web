@@ -1,6 +1,6 @@
 - title @project_module.name + " - Entity"
 = breadcrumbs
-- get_files(@attributes, 12, 13, 5, 3)
+- get_files(@attributes, 12, 13, 5)
 .form-actions
   - if params[:prev_uuid]
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, edit_arch_ent_records_path(@project_module, params[:prev_uuid], search_params), :class => 'btn'
@@ -93,8 +93,7 @@
   .attached-files
     %h2 Attached Files
     %ul
-      - @files.each do |path, info|
-        - name = info[:name]
+      - @files.each do |path, name|
         %li
           - file = File.join(@project_module.get_path(:project_module_dir), path)
           - if File.exists? file
@@ -103,28 +102,31 @@
             %p
               = name
 
-- if !@files.empty?
+- preview_images = @files.select { |f, n| File.exists? ThumbnailCreator.generate_thumbnail_filename(File.join(@project_module.get_path(:project_module_dir), f)) }
+- if !preview_images.empty?
   %div.carousel.slide{:id => "slideshow"}
     %ol.carousel-indicators
-      - @files.select { |f, i| i[:type] == "Photo" }.count.times do |i|
+      - preview_images.count.times do |i|
         - if i == 0
           %li.active{:'data-target' => "#slideshow", :'data-slide-to' => i}
         - else 
           %li{:'data-target' => "#slideshow", :'data-slide-to' => i}
     %div.carousel-inner
-      - @files.select { |f, i| i[:type] == "Photo" }.each_with_index do |file, index|
+      - preview_images.each_with_index do |file, index|
+        - original = File.join(@project_module.get_path(:project_module_dir), file[0])
+        - thumbnail = ThumbnailCreator.generate_thumbnail_filename(original)
         - if index == 0
           %div.item.center-block.active
             %center
-              %img.carousel-image{:src => thumbnail_path(url: File.join(@project_module.get_path(:project_module_dir), file[0]))}
+              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
               .carousel-caption
-                %h4=file[1][:name]
+                %h4=file[1]
         - else
           %div.center-block.item
             %center
-              %img.carousel-image{:src => thumbnail_path(url: File.join(@project_module.get_path(:project_module_dir), file[0]))}
+              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
               .carousel-caption
-                %h4=file[1][:name]
+                %h4=file[1]
     %a.carousel-control.left{:href => "#slideshow", :'data-slide' => "prev"} &lsaquo;
     %a.carousel-control.right{:href => "#slideshow", :'data-slide' => "next"} &rsaquo;
 
