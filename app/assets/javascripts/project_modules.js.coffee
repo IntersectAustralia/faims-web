@@ -887,10 +887,6 @@ show_loading_dialog = ->
   $('#setting_up').removeClass('hidden')
   $('#setting_up').dialog('open')
 
-lightbox_setup = ->
-  $("a.fancybox").fancybox()
-  return
-
 datatables_setup = ->
   $('.search-table').dataTable(
     "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -919,7 +915,6 @@ $(document).ready(
     update_arch_ent_or_rel()
     autosave_entity_attributes()
     setup_attribute_groups()
-    lightbox_setup()
     datatables_setup()
     return
 )

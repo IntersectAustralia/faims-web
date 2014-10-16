@@ -97,17 +97,39 @@
         %li
           - file = File.join(@project_module.get_path(:project_module_dir), path)
           - if File.exists? file
-            = link_to thumbnail_path(url: file), :title=> name, class: "fancybox" do
-              - thumbnail = ThumbnailCreator.generate_thumbnail_filename(file)
-              - if File.exists? thumbnail
-                %img{src: thumbnail_path(url: thumbnail), alt: name}
-                %p
-                  = name
-              - else
-                = name
+            = link_to name, thumbnail_path(url: file)
           - else
             %p
               = name
+
+- preview_images = @files.select { |f, n| File.exists? ThumbnailCreator.generate_thumbnail_filename(File.join(@project_module.get_path(:project_module_dir), f)) }
+- if !preview_images.empty?
+  %div.carousel.slide{:id => "slideshow"}
+    %ol.carousel-indicators
+      - preview_images.count.times do |i|
+        - if i == 0
+          %li.active{:'data-target' => "#slideshow", :'data-slide-to' => i}
+        - else 
+          %li{:'data-target' => "#slideshow", :'data-slide-to' => i}
+    %div.carousel-inner
+      - preview_images.each_with_index do |file, index|
+        - original = File.join(@project_module.get_path(:project_module_dir), file[0])
+        - thumbnail = ThumbnailCreator.generate_thumbnail_filename(original)
+        - if index == 0
+          %div.item.center-block.active
+            %center
+              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
+              .carousel-caption
+                %h4=file[1]
+        - else
+          %div.center-block.item
+            %center
+              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
+              .carousel-caption
+                %h4=file[1]
+    %a.carousel-control.left{:href => "#slideshow", :'data-slide' => "prev"} &lsaquo;
+    %a.carousel-control.right{:href => "#slideshow", :'data-slide' => "next"} &rsaquo;
+
 %br
 #setting_up.hidden.indicator
   = image_tag "loading.gif"

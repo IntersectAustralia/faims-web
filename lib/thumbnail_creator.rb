@@ -5,7 +5,7 @@ class ThumbnailCreator
       thumbnail_file = generate_thumbnail_filename(file)
       temp_file = Tempfile.new(['thumbnail', '.jpg'])
 
-      if (`file -b -i #{file}` =~ /video/).nil?
+      if is_image? file
        `convert "#{file}" -rotate 90 -thumbnail #{thumbnail_size}% "#{temp_file.path}"`
         if $?.success?
           FileUtils.mv temp_file, thumbnail_file
@@ -30,6 +30,10 @@ class ThumbnailCreator
       name = File.basename(file.gsub('.original', ''), '.*')
       dir = File.dirname(file)
       File.join(dir, "#{name}.thumbnail.jpg")
+    end
+
+    def is_image?(file)
+      return (`file -b -i #{file}` =~ /video/).nil?
     end
   end
 

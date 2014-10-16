@@ -189,6 +189,7 @@ Feature: Manage entities
       | Screenshot_2013-09-09-14-45-18.png |
       | Screenshot_2013-09-05-17-05-17.png |
 
+  @javascript
   Scenario: View entity with thumbnails
     Given I have project module "Thumbnail"
     And I am on the project modules page
@@ -196,11 +197,12 @@ Feature: Manage entities
     Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
-    Then I should see thumbnail files
+    Then I should see carousel files
       | name                             |
       | image-1410832623415.original.jpg |
       | video-1410832643560.original.mp4 |
 
+  @javascript
   Scenario: View entity without thumbnails if they have not synced yet
     Given I have project module "Thumbnail"
     And I am on the project modules page
@@ -208,7 +210,7 @@ Feature: Manage entities
     Then I follow "Search Entity Records"
     And I enter "" and submit the form
     And I select the first record
-    Then I should see thumbnail files
+    Then I should see carousel files
       | name                             |
       | image-1410832623415.original.jpg |
       | video-1410832643560.original.mp4 |

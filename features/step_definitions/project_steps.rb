@@ -1016,9 +1016,9 @@ Then /^I should see json for "([^"]*)" (.*) files for "([^"]*)"$/ do |name, type
   page.should have_content("\"file\":\"#{ThumbnailCreator.generate_thumbnail_filename(file)}\"")
 end
 
-Then /^I should see thumbnail files$/ do |table|
+Then /^I should see carousel files$/ do |table|
   table.hashes.each do |hash|
-    find(:css, "img[alt='#{hash[:name]}']")
+    find(:css, "img[alt='#{hash[:name]}']", :visible=>false)
   end
 end
 
