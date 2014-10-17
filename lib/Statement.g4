@@ -41,7 +41,7 @@ multi_expression returns [Boolean value]
 single_expression returns [Boolean value]
     : 'equal(' l=literal ',' r=literal ')'
         {
-            $value = ($l.value == null && $r.value == null) || $l.value.equals($r.value);
+            $value = ($l.value == null && $r.value == null) || ($l.value != null && $l.value.equals($r.value));
         }
     | 'greaterThan(' l=literal ',' r=literal ')'
         {
