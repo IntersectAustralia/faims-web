@@ -1016,6 +1016,14 @@ class Database
     db.execute("INSERT into user (fname,lname,email) VALUES ('#{admin_user.first_name}','#{admin_user.last_name}','#{admin_user.email}');" ) if admin_user
   end
 
+  def self.migrate_database(from, to)
+    db = SpatialiteDB.new(to)
+    content = File.read(Rails.root.join('lib', 'assets', 'migrate.sql'))
+    content.gsub!('FAIMS_1_3.sqlite3', from)
+    content.gsub!('FAIMS_2_0.sqlite3', to)
+    db.execute_batch(content)
+  end
+
   def self.get_spatial_ref_list
     begin
       generate_spatial_ref_list unless File.exists? Rails.root.join('lib/assets/spatial_ref_list.json')

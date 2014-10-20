@@ -23,19 +23,41 @@ class webapp {
   }
 
   # Configure tmpreaper
-  file_line { "configure tmpreaper":
+  file_line { "enable tmpreaper":
     path      => "/etc/tmpreaper.conf",
     line      => "#SHOWWARNING=true",
     match     => "SHOWWARNING=true",
     ensure    => "present",
-    require   => Package[$common_packages],
+    require   => Package[$common_packages]
+  }
+
+  file_line { "configure tmpreaper delay":
+    path      => "/etc/tmpreaper.conf",
+    line      => "TMPREAPER_DELAY='0'",
+    match     => "TMPREAPER_DELA*",
+    ensure    => "present",
+    require   => Package[$common_packages]
+  }
+
+  file_line { "configure tmpreaper project dirs":
+    path      => "/etc/tmpreaper.conf",
+    line      => "TMPREAPER_PROTECT_EXTRA='passenger*/ passenger*/* passenger*/*/* passenger*/*/*/* god* ssh*/ ssh*/* unity* .*'",
+    ensure    => "present",
+    require   => Package[$common_packages]
+  }
+
+  file_line { "configure crontab":
+    path      => "/etc/crontab",
+    line      => "25 7  * * * root  /etc/cron.daily/tmpreaper",
+    ensure    => "present",
+    require   => [File_line["enable tmpreaper"],File_line["configure tmpreaper delay"],File_line["configure tmpreaper project dirs"]],
     notify    => Service["cron"]
   }
 
   service { "cron":
     ensure  => "running",
     enable  => "true",
-    require => [File_line["configure tmpreaper"]]
+    require => [File_line["configure crontab"]]
   }
 
   # Install Spatialite
@@ -136,7 +158,7 @@ class webapp {
   }
 
   # Install apache & passenger
-  $apache_packages = ["apache2","libcurl4-openssl-dev","libapr1-dev","libaprutil1-dev"]
+  $apache_packages = ["apache2","apache2-threaded-dev","libcurl4-openssl-dev","libapr1-dev","libaprutil1-dev"]
   package { $apache_packages:
     ensure  => "present"
   }

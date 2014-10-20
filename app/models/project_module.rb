@@ -44,7 +44,8 @@ class ProjectModule < ActiveRecord::Base
                 :client_sponsor,
                 :land_owner,
                 :has_sensitive_data,
-                :tmpdir
+                :tmpdir,
+                :upgraded
 
   attr_accessible :name,
                   :key,
@@ -224,6 +225,14 @@ class ProjectModule < ActiveRecord::Base
 
   def version
     get_settings['version'].nil? ? "" : get_settings['version']
+  end
+
+  def upgraded
+    @upgraded
+  end
+
+  def upgraded=(value)
+    @upgraded = value
   end
 
   # project_module database
@@ -561,10 +570,22 @@ class ProjectModule < ActiveRecord::Base
     end
   end
 
-  def create_project_module_from_archive_file(tmp_dir)
+  def create_project_module_from_archive_file(tmp_dir, user, upgrade = nil)
     begin
       # copy files from temp directory to project_modules directory
       FileHelper.copy_dir(tmp_dir, get_path(:project_module_dir), ['hash_sum'])
+
+      if upgrade
+        # 1. move database to temp location
+        temp_file = Tempfile.new('db')
+        FileUtils.mv get_path(:db), temp_file.path
+        # 2. create new database
+        Database.generate_database(get_path(:db), get_path(:data_schema), user)
+        # 3. migrate old database to new database
+        Database.migrate_database(temp_file.path, get_path(:db))
+        # 4. remove old database
+        FileUtils.rm temp_file.path
+      end
 
       # update files in database
       cache_project_module_files
@@ -736,7 +757,7 @@ class ProjectModule < ActiveRecord::Base
     result
   end
 
-  def self.upload_project_module(file)
+  def self.upload_project_module(file, user = nil)
     tmp_dir = Dir.mktmpdir + '/'
 
     logger.info "Untarring project module"
@@ -759,7 +780,12 @@ class ProjectModule < ActiveRecord::Base
 
       begin
         project_module.save
-        project_module.create_project_module_from_archive_file(module_dir)
+        if File.exists? File.join(module_dir, 'version') and File.read(File.join(module_dir, 'version')).strip == Rails.application.config.faims_version
+          project_module.create_project_module_from_archive_file(module_dir, user)
+        else
+          project_module.create_project_module_from_archive_file(module_dir, user, true)
+          project_module.upgraded = true
+        end
         project_module.created = true
         project_module.save
       rescue Exception => e
@@ -771,6 +797,7 @@ class ProjectModule < ActiveRecord::Base
         raise ProjectModuleException, 'Failed to upload module.'
       end
 
+      puts "Upgraded module from Faims 1.3 to FAIMS 2.0" if project_module.upgraded
       return project_module
     end
   ensure

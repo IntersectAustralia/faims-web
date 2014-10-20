@@ -20,6 +20,17 @@ describe ProjectModule do
     mod.name.should == "Simple Project"
   end
 
+  it 'creates a project module from a Faims 1.3 tarball' do
+    ENV['module'] = File.absolute_path("./features/assets/GraveStone1.tar.bz2")
+    output = capture(:stdout) do
+      create_module
+    end
+    expect(output).to include "Upgraded module from Faims 1.3 to FAIMS 2.0"
+    ProjectModule.all.count.should == 1
+    mod = ProjectModule.first
+    mod.name.should == "GraveStone1"
+  end
+
   it "doesn't create a module if incorrect argument" do
     output = capture(:stdout) do
       ENV['module'] = "./invalid_path"
