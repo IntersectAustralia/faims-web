@@ -86,6 +86,8 @@ module FaimsWeb
 
     config.thumbnail_size = 10
 
+    config.faims_version = '2.0'
+
     config.i18n.enforce_available_locales = true
   end
 end

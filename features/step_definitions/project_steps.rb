@@ -245,6 +245,16 @@ Then /^I should download project module package file for "([^"]*)"$/ do |name|
   page.source == file.read
 end
 
+Then /^downloaded project module should have latest version for "([^"]*)"$/ do |name|
+  project_module = ProjectModule.find_by_name(name)
+  page.response_headers["Content-Disposition"].should == "attachment; filename=\"" + project_module.get_name(:package_archive) + "\""
+  file = File.open(project_module.get_path(:package_archive), 'r')
+  tmp_dir = Dir.mktmpdir
+  TarHelper.untar('jxf', file.path, tmp_dir)
+  version_file = Dir.glob(File.join(tmp_dir, '*/*')).select { |file| file =~ /version/ }.first
+  File.read(version_file).should == Rails.application.config.faims_version
+end
+
 Then /^I automatically archive project module package "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
   project_module.archive_project_module

@@ -34,6 +34,11 @@ class ArchiveManager < FileManager
         FileUtils.cp_r(f, File.join(base_dir, rel_file))
       end
 
+      # add version file
+      File.open(File.join(base_dir, 'version'), 'w+') do |f|
+        f.write(Rails.application.config.faims_version)
+      end
+
       if compute_checksum
         hash_sum = {}
 

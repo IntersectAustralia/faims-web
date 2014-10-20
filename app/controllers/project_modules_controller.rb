@@ -224,8 +224,8 @@ class ProjectModulesController < ProjectModuleBaseController
     end
 
     if params[:project_module]
-      ProjectModule.upload_project_module(params[:project_module][:project_module_file].tempfile.to_path.to_s)
-      flash[:notice] = 'Module has been successfully uploaded.'
+      project_module = ProjectModule.upload_project_module(params[:project_module][:project_module_file].tempfile.to_path.to_s, current_user)
+      flash[:notice] = project_module.upgraded ? 'Module has been successfully upgraded from Faims 1.3 to Faims 2.0.' : 'Module has been successfully uploaded.'
       redirect_to :project_modules
     else
       flash.now[:error] = 'Please upload an archive of the module.'
