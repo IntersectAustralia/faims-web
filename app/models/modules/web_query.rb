@@ -1592,14 +1592,21 @@ EOF
 
   def self.get_list_of_users
     cleanup_query(<<EOF
-    select userid, fname, lname, email from user;
+    select userid, fname, lname, email from user where userdeleted is NULL;
 EOF
     )
   end
 
   def self.update_list_of_users
     cleanup_query(<<EOF
-    insert into user (fname, lname, email) values (?,?,?);
+    replace into user (userid, fname, lname, email, userdeleted) select (select userid from user where email = :email), :firstname, :lastname, :email, null;
+EOF
+    )
+  end
+
+  def self.remove_user
+    cleanup_query(<<EOF
+update user set userdeleted = 'true' where userid = ?;
 EOF
     )
   end

@@ -503,6 +503,15 @@ When(/^I select "([^"]*)" from the user list$/) do |name|
   select name, :from => 'user_id'
 end
 
+And /^I click delete for user "([^"]*)"$/ do |user|
+  user_row = find(:xpath, "//tr/td/input[@value='#{user}']/../..")
+  user_row.find(:css, '.btn-danger').click
+end
+
+Then(/^I should not see "(.*?)" in the list of users$/) do |user|
+  page.should_not have_xpath("//tr/td/input[@value='#{user}']")
+end
+
 When(/^I should have user for project module$/) do |table|
   table.hashes.each do |hash|
     hash.values.each do |value|

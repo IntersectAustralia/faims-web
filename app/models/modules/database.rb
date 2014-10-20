@@ -36,7 +36,21 @@ class Database
   def update_list_of_users(user, userid)
     @db.transaction do |db|
       db.execute(WebQuery.insert_version, current_timestamp, userid)
-      db.execute(WebQuery.update_list_of_users, user.first_name, user.last_name, user.email)
+      params = {
+          firstname:user.first_name,
+          lastname:user.last_name,
+          email:user.email
+      }
+      db.execute(WebQuery.update_list_of_users, params)
+    end
+  end
+
+  def remove_user(delete_id, userid)
+    @db.transaction do |db|
+      unless get_list_of_users.count == 1
+        db.execute(WebQuery.insert_version, current_timestamp, userid)
+        db.execute(WebQuery.remove_user, delete_id)
+      end
     end
   end
 
