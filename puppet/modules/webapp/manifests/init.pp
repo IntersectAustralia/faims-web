@@ -1,192 +1,80 @@
 class webapp {
+  require common
+  require apache
+  require ruby
+  require spatialite
+  require imagemagick
 
   $webapp_user = hiera("webapp_user")
   $webapp_version = hiera("webapp_version")
   $ruby_version = hiera("ruby_version")
+  $app_root = hiera("app_root")
   $exec_path = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
-  $app_root = "/var/www/faims"
   $rbenv_root = "/home/${webapp_user}/.rbenv"
   $rbenv_path = "${rbenv_root}/bin:${exec_path}"
   $rbenv_env = "RBENV_ROOT=${rbenv_root}"
 
-  class { 'apt':
-    always_apt_update => true,
-  }
-
-  apt::ppa { 'ppa:jon-severinsson/ffmpeg':}
-
-  # Install common packages
-  $common_packages = ["git","imagemagick","libmagickwand-dev","ffmpeg", "tmpreaper"]
-  package { $common_packages:
-    ensure  => "present",
-    require => Apt::Ppa['ppa:jon-severinsson/ffmpeg']
-  }
-
-  # Configure tmpreaper
-  file_line { "enable tmpreaper":
-    path      => "/etc/tmpreaper.conf",
-    line      => "#SHOWWARNING=true",
-    match     => "SHOWWARNING=true",
-    ensure    => "present",
-    require   => Package[$common_packages]
-  }
-
-  file_line { "configure tmpreaper delay":
-    path      => "/etc/tmpreaper.conf",
-    line      => "TMPREAPER_DELAY='0'",
-    match     => "TMPREAPER_DELA*",
-    ensure    => "present",
-    require   => Package[$common_packages]
-  }
-
-  file_line { "configure tmpreaper project dirs":
-    path      => "/etc/tmpreaper.conf",
-    line      => "TMPREAPER_PROTECT_EXTRA='passenger*/ passenger*/* passenger*/*/* passenger*/*/*/* god* ssh*/ ssh*/* unity* .*'",
-    ensure    => "present",
-    require   => Package[$common_packages]
-  }
-
-  file_line { "configure crontab":
-    path      => "/etc/crontab",
-    line      => "25 7  * * * root  /etc/cron.daily/tmpreaper",
-    ensure    => "present",
-    require   => [File_line["enable tmpreaper"],File_line["configure tmpreaper delay"],File_line["configure tmpreaper project dirs"]],
-    notify    => Service["cron"]
-  }
-
-  service { "cron":
-    ensure  => "running",
-    enable  => "true",
-    require => [File_line["configure crontab"]]
-  }
-
-  # Install Spatialite
-  $spatialite_packages = ["build-essential","sqlite3","libproj-dev","libgeos++-dev","libfreexl-dev","libspatialite-dev"]
-  package { $spatialite_packages:
-    ensure  => "present"
-  }
-
-  # Install rbenv
-  exec { "clone rbenv":
-    path      => $exec_path,
-    command   => "git clone https://github.com/sstephenson/rbenv.git ${rbenv_root}",
-    unless    => "test -d ${rbenv_root}",
-    logoutput => "on_failure",
-    require   => Package[$common_packages],
-    user      => $webapp_user
-  }
-
-  exec { "clone ruby-build":
-    path      => $exec_path,
-    command   => "git clone https://github.com/sstephenson/ruby-build.git ${rbenv_root}/plugins/ruby-build",
-    unless    => "test -d ${rbenv_root}/plugins/ruby-build",
-    logoutput => "on_failure",
-    require   => [Exec["clone rbenv"], Package[$common_packages]],
-    user      => $webapp_user
-  }
-
-  file_line { "configure rbenv root":
-    path    => "/home/${webapp_user}/.profile",
-    line    => "export RBENV_ROOT=${rbenv_root}"
-  }
-
-  file_line { "configure rbenv path":
-    path    => "/home/${webapp_user}/.profile",
-    line    => "export PATH=\$RBENV_ROOT/bin:\$PATH",
-    require => File_line["configure rbenv root"]
-  }
-
-  file_line { "configure rbenv shell":
-    path    => "/home/${webapp_user}/.profile",
-    line    => "eval \"$(rbenv init -)\"",
-    require => File_line["configure rbenv path"]
-  }
-
-  # Build ruby version
-  $ruby_packages =["libssl-dev","zlib1g-dev"]
-  package { $ruby_packages:
-    ensure  => "present"
-  }
-
-  exec { "build ruby version":
-    path        => $rbenv_path,
-    command     => "rbenv install ${ruby_version}",
-    environment => $rbenv_env,
-    unless      => "test -d ${rbenv_root}/versions/${ruby_version}",
-    logoutput   => "on_failure",
-    require     => [Exec["clone ruby-build"], Package[$ruby_packages]],
-    user        => $webapp_user,
-    timeout     => 1800
-  }
-
-  exec { "configure ruby version":
-    path        => $rbenv_path,
-    command     => "rbenv global ${ruby_version}",
-    environment => $rbenv_env,
-    logoutput   => "on_failure",
-    require     => Exec["build ruby version"],
-    user        => $webapp_user
-  }
-
-  # Setup App
   exec { "install bundler gem":
     path        => $rbenv_path,
+    environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"gem install bundler\"",
     unless      => "su - ${webapp_user} -c \"gem list bundler -i\"",
-    environment => $rbenv_env,
     logoutput   => "on_failure",
     require     => [Exec["configure ruby version"], File_line["configure rbenv shell"]]
   }
 
   exec { "install webapp gems":
     path        => $rbenv_path,
+    environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle install\"",
     unless      => "su - ${webapp_user} -c \"cd ${app_root} && bundle check\"",
-    environment => $rbenv_env,
     logoutput   => "on_failure",
-    require     => Exec["install bundler gem"],
-    timeout     => 1800
+    timeout     => 1800,
+    require     => Exec["install bundler gem"]
   }
 
   exec { "setup app":
-    path      => $rbenv_path,
-    command   => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:migrate db:seed modules:clear modules:setup assets:precompile\"",
+    path        => $rbenv_path,
     environment => $rbenv_env,
-    logoutput => "on_failure",
-    require   => Exec["install webapp gems"],
-    timeout   => 300
+    command     => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:migrate db:seed assets:precompile\"",
+    logoutput   => "on_failure",
+    timeout     => 300,
+    require     => Exec["install webapp gems"]
   }
 
-  # Install apache & passenger
-  $apache_packages = ["apache2","apache2-threaded-dev","libcurl4-openssl-dev","libapr1-dev","libaprutil1-dev"]
-  package { $apache_packages:
-    ensure  => "present"
+  exec { "initialise app":
+    path        => $rbenv_path,
+    environment => $rbenv_env,
+    command     => "su - ${webapp_user} -c \"cd ${app_root} && rake modules:setup modules:clear\"",
+    unless      => "su - ${webapp_user} -c \"cd ${app_root} && test -d modules\"",
+    logoutput   => "on_failure",
+    timeout     => 300,
+    require     => Exec["setup app"]
   }
 
   exec { "install passenger gem":
     path        => $rbenv_path,
+    environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"gem install passenger\"",
     unless      => "su - ${webapp_user} -c \"gem list passenger -i\"",
-    environment => $rbenv_env,
     logoutput   => "on_failure",
-    require     => [Exec["configure ruby version"], Package[$apache_packages], File_line["configure rbenv shell"]],
     timeout     => 300
   }
 
   exec { "link passenger gem":
     path        => $rbenv_path,
+    environment => $rbenv_env,
     command     => "ln -s `su - ${webapp_user} -c \"passenger-config --root\"` /etc/apache2/passenger",
     unless      => "test -d /etc/apache2/passenger",
-    environment => $rbenv_env,
     logoutput   => "on_failure",
     require     => Exec["install passenger gem"]
   }
 
   exec { "install passenger module":
     path        => $rbenv_path,
+    environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"passenger-install-apache2-module --auto\"",
     unless      => "test -f /etc/apache2/passenger/buildout/apache2/mod_passenger.so",
-    environment => $rbenv_env,
     logoutput   => "on_failure",
     require     => Exec["link passenger gem"],
     timeout     => 1800
@@ -197,7 +85,7 @@ class webapp {
     owner   => $webapp_user,
     group   => $webapp_user,
     content => template("webapp/faims.conf"),
-    require => [Package[$apache_packages], Exec["install passenger module"]],
+    require => Exec["install passenger module"],
     notify  => Service["apache2"]
   }
 
@@ -212,21 +100,15 @@ class webapp {
     mode    => "0644",
     owner   => "root",
     group   => "root",
-    content => template("webapp/faims.logrotate")
+    content => template("webapp/faims.logrotate"),
+    notify  => Service["apache2"]
   }
 
-  service { "apache2":
-    ensure  => "running",
-    enable  => "true",
-    require => [File["/etc/apache2/conf-enabled/faims.conf"], Exec["setup app"]]
-  }
-
-  # Install god
   exec { "create god executable":
     path        => $rbenv_path,
+    environment => $rbenv_env,
     command     => "ln -s `rbenv which god` /usr/local/bin/god",
     unless      => "test -f /usr/local/bin/god",
-    environment => $rbenv_env,
     logoutput   => "on_failure",
     require     => Exec["install webapp gems"]
   }
@@ -235,7 +117,8 @@ class webapp {
     mode    => "0755",
     owner   => "root",
     group   => "root",
-    content => template('webapp/god')
+    content => template('webapp/god'),
+    notify  => Service["god"]
   }
 
   file { "/etc/god.conf":
@@ -249,7 +132,12 @@ class webapp {
   service { "god":
     ensure  => "running",
     enable  => "true",
-    require => [File["/etc/init.d/god"], File["/etc/god.conf"], Exec["setup app"]]
+    require => [Exec["create god executable"],File["/etc/init.d/god"],File["/etc/god.conf"],Exec["setup app"]]
+  }
+
+  service { "apache2":
+    ensure  => "running",
+    enable  => "true"
   }
 
 }
