@@ -22,12 +22,13 @@
 
 # Ignore all uploads
 /uploads
+/upload_failures
 
 # Ignore all swp files
 *.swp
 
 # Ignore server properties file
-server.properties
+/server.properties
 
 # Ignore coverage dir
 /coverage
@@ -43,10 +44,12 @@ server.properties
 /lib/assets/template_db.sqlite3-journal
 /lib/assets/spatial_ref_list.json
 
-.vagrant
+# Ignore exporters
+/exporters
 
-exporters
+# Ignore log archive
+/log_archive
 
-log_archive
-
-antlr/
+# Ignore misc
+/.vagrant
+/antlr
