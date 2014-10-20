@@ -93,3 +93,21 @@ Feature: Manage project module users
     And I should not have user for project module
       | first_name | last_name |
       | User1      | Last1     |
+
+  Scenario: Remove user from project module
+    Given I have users
+      | first_name | last_name | email                  |
+      | User1      | Last1     | user1@intersect.org.au |
+      | User2      | Last2     | user2@intersect.org.au |
+    And I have project module "Module 1"
+    And I add "faimsadmin@intersect.org.au" to "Module 1"
+    And I add "user1@intersect.org.au" to "Module 1"
+    And I add "user2@intersect.org.au" to "Module 1"
+    And I am on the home page
+    And I follow "Module 1"
+    And I follow "Edit User"
+    And I click delete for user "User1"
+    Then I should not see "User1" in the list of users
+    And I click delete for user "User2"
+    Then I should not see "User2" in the list of users
+    And I should not see "Delete"

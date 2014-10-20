@@ -15,11 +15,15 @@
         = "First Name"
       %th
         = "Last Name"
+      %th
+        = "Actions"
       - @users.each do |user|
         %tr
           %td
             %input{:name => 'fname[]', :value=> user[1], :readonly => 'readonly'}
           %td
             %input{:name => 'lname[]', :value=> user[2], :readonly => 'readonly'}
+          %td
+            = link_to "Delete", remove_project_module_user_path(@project_module, user[0]), method: :post, :class => "btn btn-danger" unless @users.size == 1
 .form-actions
   = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
