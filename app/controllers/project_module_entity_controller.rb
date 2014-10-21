@@ -26,7 +26,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     end
 
     @types = @project_module.db.get_arch_ent_types
-    @users = @project_module.db.get_list_of_users
+    @users = @project_module.db.get_list_of_users_with_deleted
     @base_url = search_arch_ent_records_path(@project_module, search_params)
   end
 

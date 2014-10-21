@@ -1597,6 +1597,13 @@ EOF
     )
   end
 
+  def self.get_list_of_users_with_deleted
+    cleanup_query(<<EOF
+    select userid, fname, lname, email from user;
+EOF
+    )
+  end
+
   def self.update_list_of_users
     cleanup_query(<<EOF
     replace into user (userid, fname, lname, email, userdeleted) select (select userid from user where email = :email), :firstname, :lastname, :email, null;

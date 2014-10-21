@@ -29,6 +29,11 @@ class Database
     users
   end
 
+  def get_list_of_users_with_deleted
+    users = @db.execute(WebQuery.get_list_of_users_with_deleted)
+    users
+  end
+
   def get_project_module_user_id(email)
     return @db.get_first_value(WebQuery.get_project_module_user_id, email)
   end
