@@ -10,7 +10,7 @@
 # Ignore the default SQLite database.
 /db/*.sqlite3
 
-# Ignore all logfiles and tempfiles.
+# Ignore all log files and tempfiles.
 /log/*.log
 /tmp
 
@@ -22,18 +22,16 @@
 
 # Ignore all uploads
 /uploads
+/upload_failures
 
 # Ignore all swp files
 *.swp
 
 # Ignore server properties file
-server.properties
+/server.properties
 
 # Ignore coverage dir
 /coverage
-
-/lib/assets/template_db.sqlite3
-/lib/assets/template_db.sqlite3-journal
 
 # Ignore assets
 /public/assets
@@ -41,10 +39,17 @@ server.properties
 # Ignore sqlite3 journal files
 *.sqlite3-journal
 
-.vagrant
+# Ignore template db and spatial ref list
+/lib/assets/template_db.sqlite3
+/lib/assets/template_db.sqlite3-journal
+/lib/assets/spatial_ref_list.json
 
-exporters
+# Ignore exporters
+/exporters
 
-log_archive
+# Ignore log archive
+/log_archive
 
-antlr/
+# Ignore misc
+/.vagrant
+/antlr

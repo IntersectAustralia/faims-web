@@ -25,7 +25,6 @@ if [ ! -d "$APP_ROOT" ]; then
     sudo git clone https://github.com/IntersectAustralia/faims-web.git $APP_ROOT
     sudo chown -R $USER:$USER $APP_ROOT
 fi
-cd $APP_ROOT && git pull
 
 # Configure puppet
 sed -i "s/webapp_user:.*/webapp_user: $USER/g" $APP_ROOT/puppet/data/common.yaml

@@ -2,3 +2,4 @@
 webapp_user: faims
 webapp_version: production # development, qa, staging or production
 ruby_version: 2.1.1
+app_root: /var/www/faims
