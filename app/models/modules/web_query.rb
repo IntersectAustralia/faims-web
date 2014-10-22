@@ -425,7 +425,7 @@ EOF
 
   def self.get_related_arch_entities
     cleanup_query(<<EOF
-SELECT uuid, aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||response
+SELECT uuid, relationshipid, aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||response
 FROM latestNonDeletedArchEntFormattedIdentifiers
 JOIN latestnondeletedaentreln using (uuid)
 join relationship using (relationshipid)
@@ -436,6 +436,37 @@ where relationshipid in (select relationshipid
                        )
 and uuid != :uuid
 order by aentrelntimestamp;
+EOF
+    )
+  end
+
+  def self.get_related_arch_entities_include_deleted
+    cleanup_query(<<EOF
+SELECT uuid, relationshipid, aenttypename || ' ' || coalesce(participatesverb, 'in') || ' '|| relntypename||': '||response, deletedaentreln
+FROM latestNonDeletedArchEntFormattedIdentifiers 
+JOIN (select uuid, relationshipid, participatesverb, deleted as deletedaentreln, aentrelntimestamp from aentreln group by uuid, relationshipid having max(aentrelntimestamp)) using (uuid) 
+join relationship using (relationshipid) 
+join relntype using (relntypeid)
+where relationshipid in (select relationshipid 
+                         from aentreln
+                        where uuid = :uuid
+                       )
+and uuid != :uuid
+order by aentrelntimestamp;
+EOF
+    )
+  end
+
+  def self.delete_related_arch_entity
+    cleanup_query(<<EOF
+update aentreln set deleted = 'true' where relationshipid = ?
+EOF
+    )
+  end
+
+  def self.restore_related_arch_entity
+    cleanup_query(<<EOF
+update aentreln set deleted = null where relationshipid = ?
 EOF
     )
   end

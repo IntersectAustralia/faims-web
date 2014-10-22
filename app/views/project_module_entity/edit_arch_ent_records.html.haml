@@ -79,16 +79,6 @@
                     = f.check_box 'ignore_errors', name: 'attr['+key+'][ignore_errors]'
                     Ignore Errors
 
-
-- if !@related_arch_ents.empty?
-  #related-arch-ents
-    %h2 Related Entities
-    .inner-box
-      %ul
-        - @related_arch_ents.each do |aent|
-          %li
-            = link_to aent[1], edit_arch_ent_records_path(@project_module, aent[0], search_params.merge(prev_uuid: params[:uuid]))
-  
 - if !@files.empty?
   .attached-files
     %h2 Attached Files
@@ -125,12 +115,45 @@
           %div.center-block.item
             %center
               %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
-              .carousel-caption
+              .carousel-caption.padding-extra
                 %h4=file[1]
     %a.carousel-control.left{:href => "#slideshow", :'data-slide' => "prev"} &lsaquo;
     %a.carousel-control.right{:href => "#slideshow", :'data-slide' => "next"} &rsaquo;
 
-%br
+#related-arch-ents
+  %h2 Related Entities
+  - if !@related_arch_ents.empty?
+    - @related_arch_ents.each do |aent|
+      %div.padding-extra
+        %input{:type => 'checkbox', :name => 'id', :value => aent[1], :class => aent[3] == "true" ? "restore" : "delete" }
+        = link_to aent[2], edit_arch_ent_records_path(@project_module, aent[0], search_params.merge(prev_uuid: params[:uuid]))
+        .label.label-danger= "Deleted" if aent[3] == "true"
+  - else
+    No related entities to display
+  .form-actions
+    - if params[:show_deleted_related].blank?
+      = link_to "Delete Selected", batch_delete_related_ents_path(@project_module, search_params), :id => 'delete-selected-related-ents-button', :class => 'btn btn-inverse' unless @related_arch_ents.empty?
+      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
+    - else
+      = link_to "Restore Selected", batch_restore_related_ents_path(@project_module, search_params), :id => 'restore-selected-related-ents-button', :class => 'btn btn-inverse' unless @related_arch_ents.empty?
+      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
+
+%form{:action => edit_arch_ent_records_path(@project_module, params[:uuid]), :method => "get", :id => 'show-hide-deleted-form'}
+  %input{:type => 'hidden', :value => params[:type], :name => 'type'}
+  %input{:type => 'hidden', :value => params[:user], :name => 'user'}
+  %input{:type => 'hidden', :value => params[:query], :name => 'query'}
+  %input{:type => 'hidden', :value => params[:offset], :name => 'offset', :value => params[:offset]}
+  %input{:type => 'hidden', :value => params[:per_page], :name => 'per_page', :value => @limit}
+  - if params[:show_deleted_related].blank?
+    %input{:type => 'hidden', :value => 'true', :name => 'show_deleted_related'}
+%form{:method => 'post', :id => 'delete-rel-form'}
+  %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
+  %input{:type => 'hidden', :name => 'selected', :id => 'selected-rels-delete'}
+%form{:method => 'post', :id => 'restore-rel-form'}
+  %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
+  %input{:type => 'hidden', :name => 'selected', :id => 'selected-rels-restore'} 
+  
+%div.footer_space
 #setting_up.hidden.indicator
   = image_tag "loading.gif"
   %p

@@ -26,6 +26,72 @@ Feature: Manage entity relationships
       | small add AboveBelow: Small 2 |
       | small gum AboveBelow: Small 3 |
 
+  @javascript
+  Scenario: Delete entity relations
+    Given I have project module "Relations"
+    And I am on the project modules page
+    And I follow "Relations"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    Then I follow "Small 1"
+    And I wait for page to load up data
+    And I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
+    And I select related entities
+      | name    |
+      | Small 2 |
+    And I follow "Delete Selected"
+    And I confirm
+    And I wait for page to load up data
+    And I should see related arch entities
+      | name                          |
+      | small gum AboveBelow: Small 3 |
+    And I should not see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+    And I follow "Show Deleted"
+    And I wait for page to load up data
+    And I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
+
+  @javascript
+  Scenario: Restore entity relations
+    Given I have project module "Relations"
+    And I am on the project modules page
+    And I follow "Relations"
+    Then I follow "Search Entity Records"
+    And I enter "" and submit the form
+    Then I follow "Small 1"
+    And I wait for page to load up data
+    And I select related entities
+      | name    |
+      | Small 2 |
+    And I follow "Delete Selected"
+    And I confirm
+    And I wait for page to load up data
+    And I follow "Show Deleted"
+    And I wait for page to load up data
+    Then I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
+    And I select related entities
+      | name    |
+      | Small 2 |
+    And I follow "Restore Selected"
+    And I confirm
+    And I wait for page to load up data
+    And I follow "Hide Deleted"
+    And I wait for page to load up data
+    Then I should see related arch entities
+      | name                          |
+      | small add AboveBelow: Small 2 |
+      | small gum AboveBelow: Small 3 |
+
 #  Scenario: Show relationship associations for entity
 #    Given I have project module "Sync Example"
 #    And I am on the project modules page
