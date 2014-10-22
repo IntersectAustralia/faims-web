@@ -21,7 +21,7 @@ Feature: Order Attributes
       | Green |
       | Pink  |
     Then I move vocab "Blue" down
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see vocabularies in order
@@ -43,7 +43,7 @@ Feature: Order Attributes
       | Green |
       | Pink  |
     Then I move vocab "Green" up
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see vocabularies in order
@@ -64,7 +64,7 @@ Feature: Order Attributes
       | One   | One         |             |
       | Two   | Two         |             |
       | Three | Three       |             |
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see child vocabularies for "Green" in order
@@ -73,7 +73,7 @@ Feature: Order Attributes
       | Two   |
       | Three |
     And I move vocab "One" down
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see child vocabularies for "Green" in order
@@ -94,7 +94,7 @@ Feature: Order Attributes
       | One   | One         |             |
       | Two   | Two         |             |
       | Three | Three       |             |
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see child vocabularies for "Green" in order
@@ -103,7 +103,7 @@ Feature: Order Attributes
       | Two   |
       | Three |
     And I move vocab "Two" up
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see child vocabularies for "Green" in order
@@ -162,7 +162,7 @@ Feature: Order Attributes
       | One   | One         |             |
       | Two   | Two         |             |
       | Three | Three       |             |
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see child vocabularies for "Green" in order
@@ -189,7 +189,7 @@ Feature: Order Attributes
       | One   | One         |             |
       | Two   | Two         |             |
       | Three | Three       |             |
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     Then I should see child vocabularies for "Green" in order

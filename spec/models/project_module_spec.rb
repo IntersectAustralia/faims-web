@@ -292,7 +292,6 @@ describe ProjectModule do
       computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:ui_schema), project_module)
       computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:ui_logic), project_module)
       computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:settings), project_module)
-      computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:properties), project_module)
 
       settings_files = project_module.db.get_files(ProjectModule::SETTINGS)
       compare_file_info(settings_files, computed_files)
@@ -317,7 +316,6 @@ describe ProjectModule do
       computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:ui_schema), project_module)
       computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:ui_logic), project_module)
       computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:settings), project_module)
-      computed_files << file_info(ProjectModule::SETTINGS, project_module.get_path(:properties), project_module)
 
       settings_files = project_module.db.get_files(ProjectModule::SETTINGS)
       compare_file_info(settings_files, computed_files)

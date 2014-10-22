@@ -30,7 +30,7 @@ Feature: Manage vocabulary
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see vocabularies
@@ -50,7 +50,7 @@ Feature: Manage vocabulary
     And I add "Red" to the vocabulary list
     Then I add "New color" as description to the vocabulary list
     And  I add "New picture url" as picture url to the vocabulary list
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see vocabularies
@@ -75,7 +75,7 @@ Feature: Manage vocabulary
     And I add "Square" as child for "Green"
     Then I add "A Square" as child description for "Green"
     And  I add "Square URL" as child picture url for "Green"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see child vocabularies for "Green"
@@ -94,7 +94,7 @@ Feature: Manage vocabulary
     And I add "Circle" as child for "Green"
     Then I add "A Circle" as child description for "Green"
     And  I add "Circle URL" as child picture url for "Green"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see child vocabularies for "Green"
@@ -104,7 +104,7 @@ Feature: Manage vocabulary
     And I add "Square" as child for "Circle"
     Then I add "A Square" as child description for "Circle"
     And  I add "Square URL" as child picture url for "Circle"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Successfully updated vocabulary"
     And I select "Soil Texture" for the attribute
     And I should see child vocabularies for "Circle"
@@ -121,7 +121,7 @@ Feature: Manage vocabulary
     Then I click on "Insert" for the attribute
     Then I add "New color" as description to the vocabulary list
     And  I add "New picture url" as picture url to the vocabulary list
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Please correct the errors in this form. Vocabulary name cannot be empty"
     And I select "Soil Texture" for the attribute
     And I should see vocabularies
@@ -145,7 +145,7 @@ Feature: Manage vocabulary
     And I add "" as child for "Green"
     Then I add "A Square" as child description for "Green"
     And  I add "Square URL" as child picture url for "Green"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Please correct the errors in this form. Vocabulary name cannot be empty"
     And I select "Soil Texture" for the attribute
     And I should see child vocabularies for "Green"
@@ -162,7 +162,7 @@ Feature: Manage vocabulary
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     And I should see "Could not process request as project is currently locked."
     And I select "Soil Texture" for the attribute
     And I should see vocabularies
@@ -182,7 +182,7 @@ Feature: Manage vocabulary
     Then I follow "Edit Vocabulary"
     And I select "Soil Texture" for the attribute
     And I modify vocabulary "Green" with "Red"
-    Then I click on "Update"
+    Then I click on "Update Vocabulary"
     Then I should see "You are not a member of the module you are editing. Please ask a member to add you to the module before continuing."
     And I select "Soil Texture" for the attribute
     And I should see vocabularies
