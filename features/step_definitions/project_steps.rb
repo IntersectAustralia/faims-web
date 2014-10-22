@@ -808,6 +808,12 @@ And /^I select records$/ do |table|
   end
 end
 
+And /^I select related entities$/ do |table|
+  table.hashes.each do |hash|
+    find(:xpath, "//input[@type='checkbox'][./../a[contains(text(),\"#{hash[:name]}\")]]").set(true)
+  end
+end
+
 And /^I select the "([^"]*)" record to merge to$/ do |first|
   first(:css, "#select-#{first}").click
 end

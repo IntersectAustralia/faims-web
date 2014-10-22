@@ -51,6 +51,7 @@ module ProjectModuleBreadCrumbs
     sp[:user] = params[:user] unless params[:user].blank?
     sp[:query] = params[:query] if params[:query]
     sp[:show_deleted] = params[:show_deleted] unless params[:show_deleted].blank?
+    sp[:show_deleted_related] = params[:show_deleted_related] unless params[:show_deleted_related].blank?
     sp[:per_page] = params[:per_page] unless params[:per_page].blank?
     sp[:offset] = params[:offset] unless params[:offset].blank?
     sp

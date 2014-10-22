@@ -271,6 +271,48 @@ bulk_delete_restore_entities = ->
   )
   return
 
+bulk_delete_restore_related_entities = ->
+  $('#delete-selected-related-ents-button').click(
+    ->
+      values = $(':checkbox:checked').filter('.delete').map(
+        ->
+          return $(this).val();
+      ).get();
+      if values.length == 0
+        alert('Please select a record to delete')
+        false
+      else
+        if confirm("Are you sure you want to delete these records?")
+          href = $(this).attr('href')
+          $form = $('#delete-rel-form')
+          $('#selected-rels-delete').val(values.toString())
+          $form.attr('action', href)
+          $form.submit()
+          false
+      return false
+  )
+
+  $('#restore-selected-related-ents-button').click(
+    ->
+      values = $(':checkbox:checked').filter('.restore').map(
+        ->
+          return $(this).val();
+      ).get();
+      if values.length == 0
+        alert('Please select a deleted record to restore')
+        false
+      else
+        if confirm("Are you sure you want to restore these records?")
+          href = $(this).attr('href')
+          $form = $('#restore-rel-form')
+          $('#selected-rels-restore').val(values.toString())
+          $form.attr('action', href)
+          $form.submit()
+          false
+      return false
+  )
+  return
+
 download_attached_file = ->
   $('form[id*=download-attached-file]').each(
     ->
@@ -904,6 +946,7 @@ $(document).ready(
     show_export_modal_dialog()
     compare_records()
     bulk_delete_restore_entities()
+    bulk_delete_restore_related_entities()
     aent_rel_management()
     download_attached_file()
     ignore_error_records()

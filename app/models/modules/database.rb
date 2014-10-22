@@ -390,11 +390,37 @@ class Database
     end
   end
 
-  def get_related_arch_entities(uuid)
+  def delete_related_arch_entity_no_transaction(db, relnid, userid)
+    db.execute(WebQuery.insert_version, current_timestamp, userid)
+    db.execute(WebQuery.delete_related_arch_entity, relnid)
+  end
+
+  def restore_related_arch_entity_no_transaction(db, relnid, userid)
+    db.execute(WebQuery.insert_version, current_timestamp, userid)
+    db.execute(WebQuery.restore_related_arch_entity, relnid)
+  end
+
+  def batch_delete_related_arch_entities(reln_ids, userid)
+    @db.transaction do |db|
+      reln_ids.each do |relnid|
+        delete_related_arch_entity_no_transaction(db, relnid, userid)
+      end
+    end
+  end
+
+  def batch_restore_related_arch_entities(reln_ids, userid)
+    @db.transaction do |db|
+      reln_ids.each do |uuid|
+        restore_related_arch_entity_no_transaction(db, uuid, userid)
+      end
+    end
+  end
+
+  def get_related_arch_entities(uuid, show_deleted)
     params = {
         uuid:uuid
     }
-    related_arch_ents = @db.execute(WebQuery.get_related_arch_entities, params)
+    related_arch_ents = show_deleted ? @db.execute(WebQuery.get_related_arch_entities_include_deleted, params) : @db.execute(WebQuery.get_related_arch_entities, params)
     related_arch_ents
   end
 

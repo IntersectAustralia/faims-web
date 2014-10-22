@@ -50,7 +50,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     end
 
     @deleted = @project_module.db.get_arch_entity_deleted_status(uuid)
-    @related_arch_ents = @project_module.db.get_related_arch_entities(uuid)
+    @related_arch_ents = @project_module.db.get_related_arch_entities(uuid, params[:show_deleted_related])
   end
 
   def get_arch_ent_record_data
@@ -271,6 +271,54 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     flash[:error] = get_error_message(e)
 
     redirect_to search_arch_ent_records_path(@project_module, search_params)
+  end
+
+  def batch_delete_related_ents
+    @project_module = ProjectModule.find(params[:id])
+
+    uuid = params[:uuid]
+
+    relationship_ids = params[:selected].split(",")
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.batch_delete_related_arch_entities(relationship_ids, @project_module.db.get_project_module_user_id(current_user.email))
+
+      flash[:notice] = 'Deleted related entities.'
+
+      redirect_to edit_arch_ent_records_path(@project_module, uuid, search_params)
+    end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
+
+    redirect_to edit_arch_ent_records_path(@project_module, uuid, search_params)
+  end
+
+  def batch_restore_related_ents
+    @project_module = ProjectModule.find(params[:id])
+
+    uuid = params[:uuid]
+
+    relationship_ids = params[:selected].split(",")
+
+    authenticate_project_module_user
+
+    @project_module.db_mgr.with_shared_lock do
+      @project_module.db.batch_restore_related_arch_entities(relationship_ids, @project_module.db.get_project_module_user_id(current_user.email))
+
+      flash[:notice] = 'Restored related entities.'
+
+      redirect_to edit_arch_ent_records_path(@project_module, uuid, search_params)
+    end
+  rescue MemberException, FileManager::TimeoutException => e
+    logger.warn e
+
+    flash[:error] = get_error_message(e)
+
+    redirect_to edit_arch_ent_records_path(@project_module, uuid, search_params)
   end
 
   def show_arch_ent_history
