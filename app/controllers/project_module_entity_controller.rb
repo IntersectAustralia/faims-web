@@ -23,6 +23,8 @@ class ProjectModuleEntityController < ProjectModuleBaseController
         @entity_dirty_map[row[0]] = @project_module.db.is_arch_entity_dirty(row[0]) unless @entity_dirty_map[row[0]]
         @entity_forked_map[row[0]] = @project_module.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
       end
+    else
+      redirect_to search_arch_ent_records_path(@project_module, type: 'all', user: 'all', query: '')
     end
 
     @types = @project_module.db.get_arch_ent_types

@@ -40,9 +40,9 @@ Feature: Format entities
 
   Scenario: View entity in list page with custom format string and default append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I am on the project modules page
     And I follow "Formatter"
     And I follow "Search Entity Records"
@@ -54,9 +54,9 @@ Feature: Format entities
 
   Scenario: View entity in list page with custom format string and custom append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I update append character string for module "Formatter" attribute "location" with " & "
     And I am on the project modules page
     And I follow "Formatter"
@@ -127,9 +127,9 @@ Feature: Format entities
   @javascript
   Scenario: View entity in compare page with custom format string and default append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I am on the project modules page
     And I follow "Formatter"
     And I follow "Search Entity Records"
@@ -155,9 +155,9 @@ Feature: Format entities
   @javascript
   Scenario: View entity in compare page with custom format string and custom append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I update append character string for module "Formatter" attribute "location" with " & "
     And I am on the project modules page
     And I follow "Formatter"
@@ -220,9 +220,9 @@ Feature: Format entities
 
   Scenario: I should see related entities with no format string and default append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I am on the project modules page
     And I follow "Formatter"
     And I follow "Search Entity Records"
@@ -238,9 +238,9 @@ Feature: Format entities
 
   Scenario: I should see related entities with no format string and default append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I update append character string for module "Formatter" attribute "location" with " & "
     And I am on the project modules page
     And I follow "Formatter"
@@ -295,9 +295,9 @@ Feature: Format entities
   @ignore_jenkins
   Scenario: View entity in history page with custom format string and default append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I am on the project modules page
     And I follow "Formatter"
     And I follow "Search Entity Records"
@@ -313,9 +313,9 @@ Feature: Format entities
   @ignore_jenkins
   Scenario: View entity in history page with custom format string and custom append character string
     Given I have project module "Formatter"
-    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,'1.0') then $4 else '$4?'}}"
-    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,'1.0') then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "name" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "description" with "$2 {{if equal($4,1) then $4 else '$4?'}}"
+    And I update format string for module "Formatter" attribute "location" with "$1 {{if equal($4,1) then $4 else '$4?'}}"
     And I update append character string for module "Formatter" attribute "location" with " & "
     And I am on the project modules page
     And I follow "Formatter"
