@@ -53,3 +53,4 @@
 # Ignore misc
 /.vagrant
 /antlr
+/.faims_has_updates

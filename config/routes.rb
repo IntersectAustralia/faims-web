@@ -140,6 +140,10 @@ FaimsWeb::Application.routes.draw do
 
   get 'thumbnail', :to => 'project_module_entity#thumbnail', :as => 'thumbnail'
 
+  # server
+  get 'server/update', :to => 'server#check_for_updates', :as => 'update_server'
+  post 'server/update', :to => 'server#update', :as => 'update_server'
+
   # home
   root :to => 'pages#home'
 
