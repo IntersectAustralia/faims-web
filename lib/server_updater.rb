@@ -1,5 +1,3 @@
-require 'curb'
-
 class ServerUpdater
 
   class ServerUpdaterException < Exception
@@ -12,7 +10,7 @@ class ServerUpdater
     end
 
     def check_server_available
-      Curl::Easy.perform(Rails.application.config.server_has_update_url)
+      Net::HTTP.get(URI(Rails.application.config.server_has_update_url))
       true
     rescue Exception
       false
@@ -21,8 +19,7 @@ class ServerUpdater
     def check_server_updates
       raise ServerUpdaterException, 'Could not find internet connection to check for updates' unless check_server_available
 
-      res = Curl::Easy.perform(Rails.application.config.server_has_update_url)
-      request_json = JSON.parse(res.body_str)
+      request_json = JSON.parse(Net::HTTP.get(URI(Rails.application.config.server_has_update_url)))
       server_json = JSON.parse(File.read(Rails.application.config.server_deployment_version_file))
 
       has_updates = server_json['version'].to_i < request_json['version'].to_i
@@ -46,8 +43,7 @@ class ServerUpdater
 
       puts 'Please wait this could take a while ...'
 
-      res = Curl::Easy.perform(Rails.application.config.server_has_update_url)
-      request_json = JSON.parse(res.body_str)
+      request_json = JSON.parse(Net::HTTP.get(URI(Rails.application.config.server_has_update_url)))
 
       system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes")
 
