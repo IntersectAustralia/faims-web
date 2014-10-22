@@ -554,9 +554,6 @@ class ProjectModule < ActiveRecord::Base
       # generate database
       Database.generate_database(get_path(:db), get_path(:data_schema), user)
 
-      # create default faims properties
-      FileUtils.touch(get_path(:properties))
-
       # add files to database
       cache_project_module_files
 

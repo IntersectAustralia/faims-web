@@ -71,7 +71,7 @@ class ArgumentMap
     return value unless value
     return value unless @arguments
     @arguments.each_with_index do |argument, index|
-      value = value.to_s.gsub(/\$#{index + 1}/, argument.to_s)
+      value = value.to_s.gsub(/\$#{index + 1}/, argument.nil? ? 'null' : argument.to_s)
     end
     value
   end

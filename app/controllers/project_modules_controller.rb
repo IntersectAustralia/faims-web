@@ -412,7 +412,7 @@ class ProjectModulesController < ProjectModuleBaseController
     FileUtils.rm(Dir.glob(@project_module.get_path(:project_module_dir) + "*.properties"))
     if upload.content_type =~ /gzip/
       # tarball of arch16n files
-      success = TarHelper.untar('zxf', upload.tempfile.to_path.to_s, @project_module.get_path(:project_module_dir))
+      success = TarHelper.untar('zxf', upload.tempfile.to_path.to_s, tmpdir)
       logger.error "Couldn't extract files from arch16n tarball" unless success
     else
       # single arch16n file
