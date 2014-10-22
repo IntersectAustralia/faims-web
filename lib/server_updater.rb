@@ -25,7 +25,7 @@ class ServerUpdater
       request_json = JSON.parse(res.body_str)
       server_json = JSON.parse(File.read(Rails.application.config.server_deployment_version_file))
 
-      has_updates = server_json != request_json
+      has_updates = server_json['version'].to_i < request_json['version'].to_i
       if has_updates
         puts 'Found new updates'
         FileUtils.touch Rails.application.config.server_has_update_file
@@ -49,7 +49,7 @@ class ServerUpdater
       res = Curl::Easy.perform(Rails.application.config.server_has_update_url)
       request_json = JSON.parse(res.body_str)
 
-      system("sudo FACTER_app_tag=#{request_json['version']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes")
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes")
 
       result = nil
       if $?.exitstatus == 0

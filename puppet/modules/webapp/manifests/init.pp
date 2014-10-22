@@ -56,7 +56,7 @@ class webapp {
   exec { "initialise app":
     path        => $rbenv_path,
     environment => $rbenv_env,
-    command     => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:seed modules:setup modules:clear\"",
+    command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:create db:migrate db:seed modules:setup modules:clear\"",
     unless      => "su - ${webapp_user} -c \"cd ${app_root} && test -d modules\"",
     logoutput   => "on_failure",
     timeout     => 300,
@@ -66,7 +66,7 @@ class webapp {
   exec { "update app":
     path        => $rbenv_path,
     environment => $rbenv_env,
-    command     => "su - ${webapp_user} -c \"cd ${app_root} && rake db:migrate assets:precompile\"",
+    command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:migrate assets:precompile\"",
     logoutput   => "on_failure",
     timeout     => 300,
     require     => Exec["initialise app"]
