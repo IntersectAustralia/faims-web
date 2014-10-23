@@ -6,7 +6,7 @@ class ServerUpdater
   class << self
 
     def has_server_updates
-      File.exists? Rails.application.config.server_has_update_file
+      File.exists? faims_update_file
     end
 
     def check_server_available
@@ -17,17 +17,19 @@ class ServerUpdater
     end
 
     def check_server_updates
-      raise ServerUpdaterException, 'Could not find internet connection to check for updates' unless check_server_available
+      return true if has_server_updates
+
+      raise ServerUpdaterException, 'Could not find internet connection to check for updates.' unless check_server_available
 
       request_json = get_deployment_version
       server_json = get_local_version
 
       has_updates = server_json['version'].to_f < request_json['version'].to_f
       if has_updates
-        puts 'Found new updates'
-        FileUtils.touch Rails.application.config.server_has_update_file
+        puts 'Found new updates.'
+        FileUtils.touch faims_update_file
       else
-        puts 'Everything is update to date'
+        puts 'Everything is update to date.'
       end
 
       has_updates
@@ -41,29 +43,45 @@ class ServerUpdater
     def update_server
       return unless check_server_updates
 
-      puts 'Updating server... Please wait this could take a while'
+      puts 'Updating server... Please wait this could take a while.'
 
       status = run_update_script
 
       if status == 0
-        puts 'No changes were made'
+        puts 'No changes were made.'
       elsif status == 2
-        puts 'Finished updating server'
+        puts 'Finished updating server.'
       else
-        puts 'Encountered an error trying to update server'
+        puts 'Encountered an error trying to update server.'
       end
 
-      FileUtils.rm Rails.application.config.server_has_update_file if File.exists? Rails.application.config.server_has_update_file
+      FileUtils.rm faims_update_file if File.exists? faims_update_file
 
       status
     end
 
     def get_deployment_version
-      JSON.parse(Net::HTTP.get(URI(Rails.application.config.server_has_update_url)))
+      Rails.env == 'test' ? File.read(faims_remote_deployment_file) : JSON.parse(Net::HTTP.get(URI(faims_update_url)))
     end
 
     def get_local_version
-      JSON.parse(File.read(Rails.application.config.server_deployment_version_file))
+      JSON.parse(File.read(faims_deployment_file))
+    end
+
+    def faims_update_url
+      Rails.application.config.server_has_update_url
+    end
+
+    def faims_update_file
+      Rails.env == 'test' ? Rails.root.join('tmp/.faims_has_updates') : Rails.application.config.server_has_update_file
+    end
+
+    def faims_remote_deployment_file
+      Rails.env == 'test' ? Rails.root.join('tmp/.remote_deployment_version') : Rails.application.config.server_deployment_version_file
+    end
+
+    def faims_deployment_file
+      Rails.env == 'test' ? Rails.root.join('tmp/.deployment_version') : Rails.application.config.server_deployment_version_file
     end
 
     def run_update_script

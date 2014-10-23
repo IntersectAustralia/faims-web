@@ -1,7 +1,7 @@
 require 'spec_helper'
 require Rails.root.join('lib/tasks/server')
 
-describe 'Server setup' do
+describe 'Server rake tasks' do
 
   before :each do
     load File.expand_path('../../../lib/tasks/server.rake', __FILE__)
@@ -9,7 +9,8 @@ describe 'Server setup' do
   end
 
   it 'checks for server updates returns server update to date' do
-    Net::HTTP.stub(:get) { File.read('.deployment_version') }
+    ServerUpdater.stub(:get_deployment_version) { {'version' => '2.0', 'tag' => 'blah'} }
+    ServerUpdater.stub(:get_local_version) { {'version' => '2.0', 'tag' => 'blah'} }
     output = capture(:stdout) do
       check_for_server_updates
     end
@@ -17,7 +18,8 @@ describe 'Server setup' do
   end
 
   it 'checks for server updates returns server has updates' do
-    Net::HTTP.stub(:get) { '{"version":"1000","tag":"blah"}' }
+    ServerUpdater.stub(:get_deployment_version) { {'version' => '2.1', 'tag' => 'blah'} }
+    ServerUpdater.stub(:get_local_version) { {'version' => '2.0', 'tag' => 'blah'} }
     output = capture(:stdout) do
       check_for_server_updates
     end

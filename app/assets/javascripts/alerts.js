@@ -1,20 +1,25 @@
 $(window).load(function () {
 
     $(function () {
-        var alert = $('.alert');
-        if (alert.length > 0) {
+        var alerts = $(".alert");
+        alerts.each(function() {
+            var alert = $(this);
             alert.slideDown();
 
-            if (!alert.hasClass("alert-error")) {
-                var alerttimer = window.setTimeout(function () {
+            var alerttimer;
+            if (alert.hasClass("alert-success")) {
+                alerttimer = window.setTimeout(function () {
                     alert.slideUp();
                 }, 9000);
             }
-            $(".alert").click(function () {
-                window.clearTimeout(alerttimer);
-                alert.slideUp();
+
+            alert.click(function () {
+                if (!alert.hasClass("alert-info")) {
+                    window.clearTimeout(alerttimer);
+                    alert.slideUp();
+                }
             });
-        }
+        })
     });
 
 });

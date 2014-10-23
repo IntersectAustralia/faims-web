@@ -1,0 +1,32 @@
+- title 'Server Update'
+= breadcrumbs
+.alert.alert-info
+  Before updating the server it is recommended that you download the modules to backup the your data or perform a full backup of you server.
+- if @project_modules
+  %table.table#project-modules
+    %tr
+      %th No.
+      %th Name
+      %th
+    - index = 0
+    - for project_module in @project_modules
+      - index = index + 1
+      %tr
+        %td
+          = index.to_s + "."
+        %td.project-name
+          %a.project_module{href:project_module_path(project_module)}
+            = project_module.name
+        %td
+
+          = link_to 'Archive', archive_project_module_path(project_module), :class => "btn btn-small archive-module-btn #{project_module.package_mgr.has_changes? ? nil : 'hidden'}",
+            data: { disable_with: 'Archiving...', check: check_archive_status_path(project_module) }
+          = link_to 'Download', download_project_module_path(project_module), :class => "btn btn-small btn-primary download-module-btn #{project_module.package_mgr.has_changes? ? 'hidden': nil}"
+- if ServerUpdater.has_server_updates
+  .well
+    = button_to "Update Server".html_safe, update_server_path, :class => 'btn btn-danger update-server-btn', method: :post
+
+#loading.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Updating Server
