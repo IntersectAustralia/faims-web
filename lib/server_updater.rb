@@ -10,7 +10,7 @@ class ServerUpdater
     end
 
     def check_server_available
-      Net::HTTP.get(URI(Rails.application.config.server_has_update_url))
+      get_deployment_version
       true
     rescue Exception
       false
@@ -19,10 +19,10 @@ class ServerUpdater
     def check_server_updates
       raise ServerUpdaterException, 'Could not find internet connection to check for updates' unless check_server_available
 
-      request_json = JSON.parse(Net::HTTP.get(URI(Rails.application.config.server_has_update_url)))
-      server_json = JSON.parse(File.read(Rails.application.config.server_deployment_version_file))
+      request_json = get_deployment_version
+      server_json = get_local_version
 
-      has_updates = server_json['version'].to_i < request_json['version'].to_i
+      has_updates = server_json['version'].to_f < request_json['version'].to_f
       if has_updates
         puts 'Found new updates'
         FileUtils.touch Rails.application.config.server_has_update_file
@@ -41,26 +41,37 @@ class ServerUpdater
     def update_server
       return unless check_server_updates
 
-      puts 'Please wait this could take a while ...'
+      puts 'Updating server... Please wait this could take a while'
 
-      request_json = JSON.parse(Net::HTTP.get(URI(Rails.application.config.server_has_update_url)))
+      status = run_update_script
 
-      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes")
-
-      result = nil
-      if $?.exitstatus == 0
+      if status == 0
         puts 'No changes were made'
-        result = true
-      elsif $?.exitstatus == 2
+      elsif status == 2
         puts 'Finished updating server'
-        result = true
       else
         puts 'Encountered an error trying to update server'
       end
 
       FileUtils.rm Rails.application.config.server_has_update_file if File.exists? Rails.application.config.server_has_update_file
 
-      result
+      status
+    end
+
+    def get_deployment_version
+      JSON.parse(Net::HTTP.get(URI(Rails.application.config.server_has_update_url)))
+    end
+
+    def get_local_version
+      JSON.parse(File.read(Rails.application.config.server_deployment_version_file))
+    end
+
+    def run_update_script
+      request_json = get_deployment_version
+
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes")
+
+      $?.exitstatus
     end
   end
 
