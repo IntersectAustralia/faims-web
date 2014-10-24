@@ -10,37 +10,17 @@ class webapp {
   $webapp_version = hiera("webapp_version")
   $ruby_version = hiera("ruby_version")
   $app_root = hiera("app_root")
-  $app_source = hiera("app_source")
   $exec_path = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
   $rbenv_root = "/home/${webapp_user}/.rbenv"
   $rbenv_path = "${rbenv_root}/bin:${exec_path}"
   $rbenv_env = "RBENV_ROOT=${rbenv_root}"
-
-  if $app_tag {
-    vcsrepo { $app_root:
-      ensure   => latest,
-      provider => git,
-      source   => $app_source,
-      revision => $app_tag,
-      user     => $webapp_user,
-    }
-  } else {
-    vcsrepo { $app_root:
-      ensure   => latest,
-      provider => git,
-      source   => $app_source,
-      revision => hiera("app_tag"),
-      user     => $webapp_user,
-    }
-  }
 
   exec { "install bundler gem":
     path        => $rbenv_path,
     environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"gem install bundler\"",
     unless      => "su - ${webapp_user} -c \"gem list bundler -i\"",
-    logoutput   => "on_failure",
-    require     => VcsRepo[$app_root]
+    logoutput   => "on_failure"
   }
 
   exec { "install webapp gems":
