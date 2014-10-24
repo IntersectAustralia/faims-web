@@ -50,7 +50,7 @@ class webapp {
     logoutput   => "on_failure",
     timeout     => 300,
     require     => Exec["initialise app"],
-    notify      => [Service["apache2"],Service["god"],Exec["remove update file"]]
+    notify      => [Service["apache2"],Service["god"],File["${app_root}/.faims_has_updates"]]
   }
 
   exec { "install passenger gem":
@@ -150,12 +150,8 @@ class webapp {
     content => template('webapp/checkupdates')
   }
 
-  exec { "remove update file":
-    path        => $exec_path,
-    command     => "rm ${app_root}/.faims_has_updates",
-    unless      => "test ! -f ${app_root}/.faims_has_updates",
-    logoutput   => "on_failure",
-    require     => Exec["update app"]
+  file { "${app_root}/.faims_has_updates":
+    ensure  => absent
   }
 
 }
