@@ -1,7 +1,7 @@
 class common {
 
   class { 'apt':
-#    always_apt_update => true,
+    always_apt_update => true,
   }
 
   $common_packages = ["git","build-essential"]

@@ -13,10 +13,10 @@ class ServerController < ApplicationController
   end
 
   def update
-    result = ServerUpdater.update_server
+    result = ServerUpdater.update_server_in_background
 
     if result == 0 or result == 2
-      render json: { result: 'success', url: project_modules_path(notice: 'Finished updating server.') }
+      render json: { result: 'success', url: has_updated_server_path }
     else
       render json: { result: 'failure', message: 'Encountered an error trying to update server.' }
     end
@@ -24,6 +24,10 @@ class ServerController < ApplicationController
     logger.error e
 
     render json: { result: 'failure', message: e.message }
+  end
+
+  def has_updated
+    render json: { result: 'success', url: project_modules_path(notice: 'Finished updating server.') } unless ServerUpdater.has_server_updates
   end
 
 end

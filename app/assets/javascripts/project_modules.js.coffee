@@ -986,7 +986,7 @@ setup_server_updates = ->
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
           if data.result == "success"
-            window.location = data.url
+            check_server_updated(data.url)
           else
             alert(data.message)
             $('#loading').addClass('hidden')
@@ -1011,6 +1011,16 @@ check_archive_for_server_update_page = (button, jobid) ->
         alert(data.message)
         button.removeClass('btn-primary disabled')
         button.parent().children('.download-module-btn').addClass('hidden')
+
+check_server_updated = (url) ->
+  $.ajax url,
+    type: 'GET'
+    dataType: 'json'
+    success: (data, textStatus, jqXHR) ->
+      if data.result == "success"
+        window.location = data.url
+      else
+        setTimeout (-> check_server_updated(url)), 5000
 
 $(document).ready(
   =>

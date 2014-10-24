@@ -38,10 +38,14 @@ class ServerUpdater
       raise Exception, 'Encountered an unexpected error trying to check for updates.'
     end
 
-    def update_server
+    def update_server_in_background
       return unless check_server_updates
 
-      puts 'Updating server... Please wait this could take a while.'
+      run_update_script(true)
+    end
+
+    def update_server
+      return unless check_server_updates
 
       status = run_update_script
 
@@ -52,8 +56,6 @@ class ServerUpdater
       else
         puts 'Encountered an error trying to update server.'
       end
-
-      FileUtils.rm faims_update_file if File.exists? faims_update_file
 
       status
     end
@@ -86,7 +88,9 @@ class ServerUpdater
       Rails.root.join('tmp/.run_update_script')
     end
 
-    def run_update_script
+    def run_update_script(fork = nil)
+      puts 'Updating server... Please wait this could take a while.'
+
       return File.read(faims_run_update_script_file).to_i if Rails.env == 'test' and File.exists? faims_run_update_script_file
 
       request_json = get_deployment_version
@@ -98,7 +102,7 @@ class ServerUpdater
       return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
 
       # then run puppet script to update the server
-      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} #{fork ? '&' : ''}")
 
       # return exit status
       $?.exitstatus
