@@ -150,8 +150,9 @@ class webapp {
     content => template('webapp/checkupdates')
   }
 
-  file { "${app_root}/.faims_has_updates" :
-    ensure => absent,
+  file { "${app_root}/.faims_has_updates":
+    ensure  => absent,
+    require => Exec["update app"]
   }
 
 }
