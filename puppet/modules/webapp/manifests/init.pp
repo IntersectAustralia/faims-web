@@ -18,7 +18,7 @@ class webapp {
 
   if $app_tag {
     vcsrepo { $app_root:
-      ensure   => present,
+      ensure   => latest,
       provider => git,
       source   => $app_source,
       revision => $app_tag,
@@ -26,7 +26,7 @@ class webapp {
     }
   } else {
     vcsrepo { $app_root:
-      ensure   => present,
+      ensure   => latest,
       provider => git,
       source   => $app_source,
       revision => hiera("app_tag"),
@@ -69,7 +69,8 @@ class webapp {
     command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:migrate assets:precompile\"",
     logoutput   => "on_failure",
     timeout     => 300,
-    require     => Exec["initialise app"]
+    require     => Exec["initialise app"],
+    notify      => [Service["apache2"],Service["god"]]
   }
 
   exec { "install passenger gem":
