@@ -50,7 +50,7 @@ class webapp {
     logoutput   => "on_failure",
     timeout     => 300,
     require     => Exec["initialise app"],
-    notify      => [Service["apache2"],Service["god"]]
+    notify      => [Service["apache2"],Service["god"],File["${app_root}/.faims_has_updates"]]
   }
 
   exec { "install passenger gem":
@@ -148,6 +148,10 @@ class webapp {
     owner   => "root",
     group   => "root",
     content => template('webapp/checkupdates')
+  }
+
+  file { "${app_root}/.faims_has_updates" :
+    ensure => absent,
   }
 
 }
