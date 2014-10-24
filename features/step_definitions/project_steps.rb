@@ -1186,3 +1186,36 @@ end
 And /^I enter search query "([^"]*)"$/ do |query|
   find("input[name='query']").set query
 end
+
+And /^I reset faims updater$/ do
+  FileUtils.rm ServerUpdater.faims_deployment_file if File.exists? ServerUpdater.faims_deployment_file
+  FileUtils.rm ServerUpdater.faims_remote_deployment_file if File.exists? ServerUpdater.faims_remote_deployment_file
+  FileUtils.rm ServerUpdater.faims_update_file if File.exists? ServerUpdater.faims_update_file
+  FileUtils.rm ServerUpdater.faims_run_update_script_file if File.exists? ServerUpdater.faims_run_update_script_file
+end
+
+And /^I add remote deployment file with version "([^"]*)" and tag "([^"]*)"$/ do |version, tag|
+  File.open(ServerUpdater.faims_remote_deployment_file, 'w+') do |f|
+    f.write({version:version,tag:tag}.to_json)
+  end
+end
+
+And /^I add local deployment file with version "([^"]*)" and tag "([^"]*)"$/ do |version, tag|
+  File.open(ServerUpdater.faims_deployment_file, 'w+') do |f|
+    f.write({version:version,tag:tag}.to_json)
+  end
+end
+
+And /^I should see button "([^"]*)" for "([^"]*)" module$/ do |button, name|
+  find(:xpath, "//*[contains(text(), '#{name}')]/../..").find(:xpath, ".//a[contains(text(), '#{button}')]")
+end
+
+And /^I add has server updates file$/ do
+  FileUtils.touch ServerUpdater.faims_update_file
+end
+
+And /^I add script file with "([^"]*)"$/ do |data|
+   File.open(ServerUpdater.faims_run_update_script_file, 'w+') do |f|
+     f.write(data)
+   end
+end

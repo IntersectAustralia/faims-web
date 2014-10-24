@@ -162,4 +162,11 @@ class webapp {
     hasrestart => "true",
   }
 
+  file { "/etc/cron.daily/checkupdates":
+    mode    => "0755",
+    owner   => "root",
+    group   => "root",
+    content => template('webapp/checkupdates')
+  }
+
 }

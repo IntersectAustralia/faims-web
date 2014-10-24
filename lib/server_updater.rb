@@ -17,8 +17,6 @@ class ServerUpdater
     end
 
     def check_server_updates
-      return true if has_server_updates
-
       raise ServerUpdaterException, 'Could not find internet connection to check for updates.' unless check_server_available
 
       request_json = get_deployment_version
@@ -61,7 +59,7 @@ class ServerUpdater
     end
 
     def get_deployment_version
-      Rails.env == 'test' ? File.read(faims_remote_deployment_file) : JSON.parse(Net::HTTP.get(URI(faims_update_url)))
+      Rails.env == 'test' ? JSON.parse(File.read(faims_remote_deployment_file)) : JSON.parse(Net::HTTP.get(URI(faims_update_url)))
     end
 
     def get_local_version
@@ -84,7 +82,13 @@ class ServerUpdater
       Rails.env == 'test' ? Rails.root.join('tmp/.deployment_version') : Rails.application.config.server_deployment_version_file
     end
 
+    def faims_run_update_script_file
+      Rails.root.join('tmp/.run_update_script')
+    end
+
     def run_update_script
+      return File.read(faims_run_update_script_file).to_i if Rails.env == 'test' and File.exists? faims_run_update_script_file
+
       request_json = get_deployment_version
 
       system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes")

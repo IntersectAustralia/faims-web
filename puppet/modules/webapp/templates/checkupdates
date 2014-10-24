@@ -1,0 +1,7 @@
+#!/bin/sh
+
+export RBENV_ROOT=/home/faims/.rbenv
+export PATH=$RBENV_ROOT/bin:$PATH
+eval "$(rbenv init -)"
+
+su - faims -c "cd /var/www/faims && bundle exec rake server:check_for_updates"
