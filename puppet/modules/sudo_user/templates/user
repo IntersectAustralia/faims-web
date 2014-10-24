@@ -1,1 +1,1 @@
-<%= @webapp_user %>    ALL=NOPASSWD: ALL
+www-data    ALL=NOPASSWD: ALL
