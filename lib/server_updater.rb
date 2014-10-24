@@ -95,7 +95,7 @@ class ServerUpdater
       system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
 
       # check if updating repo failed
-      return $?.exitstatus if $?.existstatus == 4 or $?.existstatus == 6
+      return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
 
       # then run puppet script to update the server
       system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
