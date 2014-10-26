@@ -27,7 +27,11 @@ class ServerController < ApplicationController
   end
 
   def has_updated
-    render json: { result: 'success', url: project_modules_path(notice: 'Finished updating server.') } unless ServerUpdater.has_server_updates
+    unless ServerUpdater.has_server_updates
+      render json: { result: 'success', url: project_modules_path(notice: 'Finished updating server.') }
+    else
+      render json: { result: 'waiting' }
+    end
   end
 
 end
