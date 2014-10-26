@@ -2,6 +2,7 @@ class ProjectModulesController < ProjectModuleBaseController
 
   def index
     page_crumbs :pages_home, :project_modules_index
+    flash.now[:notice] = params[:notice] if params[:notice]
     @project_modules = ProjectModule.created
   end
 

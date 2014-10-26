@@ -1,5 +1,6 @@
 class webapp {
   require common
+  require sudo_user
   require apache
   require ruby
   require spatialite
@@ -19,8 +20,7 @@ class webapp {
     environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"gem install bundler\"",
     unless      => "su - ${webapp_user} -c \"gem list bundler -i\"",
-    logoutput   => "on_failure",
-    require     => [Exec["configure ruby version"], File_line["configure rbenv shell"]]
+    logoutput   => "on_failure"
   }
 
   exec { "install webapp gems":
@@ -33,23 +33,24 @@ class webapp {
     require     => Exec["install bundler gem"]
   }
 
-  exec { "setup app":
+  exec { "initialise app":
     path        => $rbenv_path,
     environment => $rbenv_env,
-    command     => "su - ${webapp_user} -c \"cd ${app_root} && rake db:create db:migrate db:seed assets:precompile\"",
+    command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:create db:migrate db:seed modules:setup modules:clear\"",
+    unless      => "su - ${webapp_user} -c \"cd ${app_root} && test -d modules\"",
     logoutput   => "on_failure",
     timeout     => 300,
     require     => Exec["install webapp gems"]
   }
 
-  exec { "initialise app":
+  exec { "update app":
     path        => $rbenv_path,
     environment => $rbenv_env,
-    command     => "su - ${webapp_user} -c \"cd ${app_root} && rake modules:setup modules:clear\"",
-    unless      => "su - ${webapp_user} -c \"cd ${app_root} && test -d modules\"",
+    command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:migrate assets:precompile\"",
     logoutput   => "on_failure",
     timeout     => 300,
-    require     => Exec["setup app"]
+    require     => Exec["initialise app"],
+    notify      => [Service["apache2"],Service["god"]]
   }
 
   exec { "install passenger gem":
@@ -130,14 +131,23 @@ class webapp {
   }
 
   service { "god":
-    ensure  => "running",
-    enable  => "true",
-    require => [Exec["create god executable"],File["/etc/init.d/god"],File["/etc/god.conf"],Exec["setup app"]]
+    ensure     => "running",
+    enable     => "true",
+    hasrestart => "true",
+    require => [Exec["create god executable"],File["/etc/init.d/god"],File["/etc/god.conf"],Exec["update app"]]
   }
 
   service { "apache2":
-    ensure  => "running",
-    enable  => "true"
+    ensure     => "running",
+    enable     => "true",
+    hasrestart => "true",
+  }
+
+  file { "/etc/cron.daily/checkupdates":
+    mode    => "0755",
+    owner   => "root",
+    group   => "root",
+    content => template('webapp/checkupdates')
   }
 
 }

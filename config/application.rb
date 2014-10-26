@@ -88,6 +88,12 @@ module FaimsWeb
 
     config.faims_version = '2.0'
 
+    config.server_has_update_url = 'https://raw.githubusercontent.com/IntersectAustralia/faims-web/deployment/.deployment_version'
+
+    config.server_has_update_file = Rails.root.join(".faims_has_updates").to_s
+
+    config.server_deployment_version_file = Rails.root.join(".deployment_version").to_s
+
     config.i18n.enforce_available_locales = true
   end
 end

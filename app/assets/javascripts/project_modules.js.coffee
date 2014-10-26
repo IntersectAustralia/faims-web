@@ -938,6 +938,90 @@ datatables_setup = ->
   );
   return
 
+setup_server_updates = ->
+  $('.archive-module-btn').click(
+    ->
+      button = $(this)
+      if (button.hasClass('disabled'))
+        return
+
+      button.addClass('btn-primary disabled')
+
+      $.ajax button.attr('href'),
+        type: 'GET'
+        dataType: 'json'
+        success: (data, textStatus, jqXHR) ->
+          if data.result == "success"
+            $(this).addClass('hidden')
+            $(this).removeClass('btn-primary disabled')
+            $(this).parent().children('.download-module-btn').removeClass('hidden')
+          else if data.result == "waiting"
+            check_archive_for_server_update_page(button, data.jobid)
+          else
+            alert(data.message)
+            $(this).removeClass('btn-primary disabled')
+            $(this).parent().children('.download-module-btn').addClass('hidden')
+
+      return false
+  )
+
+  $('.update-server-btn').click(
+    ->
+      $('#loading').dialog({
+        autoOpen: false,
+        closeOnEscape: false,
+        draggable: false,
+        title: "Message",
+        width: 300,
+        minHeight: 50,
+        modal: true,
+        buttons: {},
+        resizable: false
+      });
+      $('#loading').removeClass('hidden')
+      $('#loading').dialog('open')
+
+      $.ajax $(this).attr('href'),
+        type: 'POST'
+        dataType: 'json'
+        success: (data, textStatus, jqXHR) ->
+          if data.result == "success"
+            check_server_updated(data.url)
+          else
+            alert(data.message)
+            $('#loading').addClass('hidden')
+            $('#loading').dialog('destroy')
+
+      return false
+  )
+
+check_archive_for_server_update_page = (button, jobid) ->
+  $.ajax button.attr('data-check'),
+    type: 'GET'
+    dataType: 'json'
+    data: {jobid: jobid}
+    success: (data, textStatus, jqXHR) ->
+      if data.result == "success"
+        button.addClass('hidden')
+        button.removeClass('btn-primary disabled')
+        button.parent().children('.download-module-btn').removeClass('hidden')
+      else if data.result == "waiting"
+        setTimeout (-> check_archive_for_server_update_page(button, jobid)), 5000
+      else
+        alert(data.message)
+        button.removeClass('btn-primary disabled')
+        button.parent().children('.download-module-btn').addClass('hidden')
+
+check_server_updated = (url) ->
+  $.ajax url,
+    type: 'GET'
+    dataType: 'json'
+    success: (data, textStatus, jqXHR) ->
+      if data.result == "success"
+        window.location = data.url
+      else
+        setTimeout (-> check_server_updated(url)), 5000
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -959,5 +1043,6 @@ $(document).ready(
     autosave_entity_attributes()
     setup_attribute_groups()
     datatables_setup()
+    setup_server_updates()
     return
 )
