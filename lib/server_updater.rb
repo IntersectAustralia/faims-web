@@ -38,26 +38,49 @@ class ServerUpdater
       raise Exception, 'Encountered an unexpected error trying to check for updates.'
     end
 
-    def update_server_in_background
-      return unless check_server_updates
-
-      run_update_script(true)
-    end
-
     def update_server
       return unless check_server_updates
 
       status = run_update_script
 
-      if status == 0
-        puts 'No changes were made.'
-      elsif status == 2
+      if status == 0 or status == 2
         puts 'Finished updating server.'
+
+        # cleanup
+        FileUtils.rm faims_update_file if File.exists? faims_update_file
       else
         puts 'Encountered an error trying to update server.'
       end
 
       status
+    end
+
+    def restart_server
+      run_restart_script
+    end
+
+    def run_update_script
+      puts 'Updating server... Please wait this could take a while.'
+
+      return File.read(faims_run_update_script_file).to_i if Rails.env == 'test' and File.exists? faims_run_update_script_file
+
+      request_json = get_deployment_version
+
+      # update repo
+      #system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
+      #return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
+
+      # update server
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/update.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
+      $?.exitstatus
+    end
+
+    def run_restart_script
+      puts 'Restarting server... Please wait this could take a while.'
+
+      return File.read(faims_run_update_script_file).to_i if Rails.env == 'test' and File.exists? faims_run_update_script_file
+
+      system("sudo puppet apply --pluginsync #{Rails.root.join('puppet/update.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} &")
     end
 
     def get_deployment_version
@@ -76,36 +99,16 @@ class ServerUpdater
       Rails.env == 'test' ? Rails.root.join('tmp/.faims_has_updates') : Rails.application.config.server_has_update_file
     end
 
-    def faims_remote_deployment_file
-      Rails.env == 'test' ? Rails.root.join('tmp/.remote_deployment_version') : Rails.application.config.server_deployment_version_file
-    end
-
     def faims_deployment_file
       Rails.env == 'test' ? Rails.root.join('tmp/.deployment_version') : Rails.application.config.server_deployment_version_file
     end
 
-    def faims_run_update_script_file
-      Rails.root.join('tmp/.run_update_script')
+    def faims_remote_deployment_file
+      Rails.env == 'test' ? Rails.root.join('tmp/.remote_deployment_version') : Rails.application.config.server_deployment_version_file
     end
 
-    def run_update_script(fork = nil)
-      puts 'Updating server... Please wait this could take a while.'
-
-      return File.read(faims_run_update_script_file).to_i if Rails.env == 'test' and File.exists? faims_run_update_script_file
-
-      request_json = get_deployment_version
-
-      # first run puppet script to update the repo
-      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
-
-      # check if updating repo failed
-      return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
-
-      # then run puppet script to update the server
-      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/site.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} #{fork ? '&' : ''}")
-
-      # return exit status
-      $?.exitstatus
+    def faims_run_update_script_file
+      Rails.root.join('tmp/.run_update_script')
     end
   end
 

@@ -19,6 +19,7 @@ end
 
 def update_server
   ServerUpdater.update_server
+  ServerUpdater.restart_server
 end
 
 def create_server_properties(filename)

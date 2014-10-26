@@ -985,6 +985,7 @@ setup_server_updates = ->
         type: 'POST'
         dataType: 'json'
         success: (data, textStatus, jqXHR) ->
+          console.log(data)
           if data.result == "success"
             check_server_updated(data.url)
           else
@@ -1017,10 +1018,16 @@ check_server_updated = (url) ->
     type: 'GET'
     dataType: 'json'
     success: (data, textStatus, jqXHR) ->
+      console.log(data)
       if data.result == "success"
+        alert(data.message)
         window.location = data.url
-      else
+      else if data.result == "waiting"
         setTimeout (-> check_server_updated(url)), 5000
+      else
+        alert(data.message)
+        $('#loading').addClass('hidden')
+        $('#loading').dialog('destroy')
 
 $(document).ready(
   =>
