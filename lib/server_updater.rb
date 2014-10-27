@@ -46,6 +46,7 @@ class ServerUpdater
       # create lock file
       FileUtils.touch faims_update_lock
 
+      puts 'Updating server... Please wait this could take a while.'
       status = run_update_script
 
       if status == 0 or status == 2
@@ -66,12 +67,11 @@ class ServerUpdater
     def restart_server
       return if File.exists? faims_update_lock
 
+      puts 'Restarting server... Please wait this could take a while.'
       run_restart_script
     end
 
     def run_update_script
-      puts 'Updating server... Please wait this could take a while.'
-
       request_json = get_deployment_version
 
       # update repo
@@ -84,8 +84,6 @@ class ServerUpdater
     end
 
     def run_restart_script
-      puts 'Restarting server... Please wait this could take a while.'
-
       system("sudo puppet apply --pluginsync #{Rails.root.join('puppet/restart.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} &")
     end
 
@@ -110,7 +108,7 @@ class ServerUpdater
     end
 
     def faims_update_lock
-      Rails.root.join('.update_lock')
+      Rails.env == 'test' ? Rails.root.join('tmp/.update_lock') : Rails.root.join('.update_lock')
     end
 
   end

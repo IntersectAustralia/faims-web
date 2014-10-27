@@ -18,8 +18,9 @@ def check_for_server_updates
 end
 
 def update_server
-  ServerUpdater.update_server
-  ServerUpdater.restart_server
+  status = ServerUpdater.update_server
+  ServerUpdater.restart_server if status == 0 or status == 2
+  status
 end
 
 def create_server_properties(filename)
