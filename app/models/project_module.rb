@@ -459,6 +459,7 @@ class ProjectModule < ActiveRecord::Base
   def add_file!(name, base_dir, path, file)
     raise ProjectModuleException, 'Filename is not valid.' unless is_valid_filename?(path)
     dest_path = File.join(base_dir, path)
+    dest_path.gsub!("/./", "/")
     raise ProjectModuleException, 'File already exists.' if File.exists? dest_path
 
     FileUtils.mkdir_p File.dirname(dest_path) unless Dir.exists? File.dirname(dest_path)
