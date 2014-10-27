@@ -17,20 +17,28 @@ class ServerController < ApplicationController
     render json: { result: 'success', url: check_server_updated_path(jobid: jobid) }
   end
 
-  def check_server_updated
+  def check_updated
     job = Delayed::Job.find_by_id(params[:jobid])
     if job
-      logger.error job.last_error if job.last_error
-      render json: { result: job.last_error? ? 'failure' : 'waiting', message: 'Encountered an unexpected error trying to check for updates.' }
+      if job.last_error?
+        logger.error job.last_error if job.last_error?
+        render json: { result: 'failure', message: 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.' }
+      else
+        render json: { result: 'waiting' }
+      end
     else
-      render json: { result: 'success', message: 'Your server has been successfully updated. The server will need to be restarted please click ok to restart the server and continue.', url: restart_server_path }
+      if ServerUpdater.has_server_updates
+        render json: { result: 'failure', message: 'The server failed to update properly. Please contact a system administrator to resolve this problem.' }
+      else
+        render json: { result: 'success', message: 'Your server has been successfully updated. The server will now reboot in 60 seconds please press ok to continue.', url: project_modules_path, restart_url: restart_server_path }
+      end
     end
   end
 
   def restart
     ServerUpdater.restart_server
-    sign_out user
-    redirect_to root_path
+    sign_out :user
+    render json: { result: 'success' }
   end
 
 end

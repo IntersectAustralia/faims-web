@@ -54,3 +54,4 @@
 /.vagrant
 /antlr
 /.faims_has_updates
+/.update_lock

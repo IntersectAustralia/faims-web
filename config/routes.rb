@@ -145,7 +145,7 @@ FaimsWeb::Application.routes.draw do
   # server
   get 'server/update', :to => 'server#check_for_updates', :as => 'update_server'
   post 'server/update', :to => 'server#update', :as => 'update_server'
-  post 'server/check_updated', :to => 'server#check_updated', :as => 'check_server_updated'
+  get 'server/check_updated', :to => 'server#check_updated', :as => 'check_server_updated'
   post 'server/restart', :to => 'server#restart', :as => 'restart_server'
 
   # home
