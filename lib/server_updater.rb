@@ -80,7 +80,7 @@ class ServerUpdater
 
       return File.read(faims_run_update_script_file).to_i if Rails.env == 'test' and File.exists? faims_run_update_script_file
 
-      system("sudo puppet apply --pluginsync #{Rails.root.join('puppet/update.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} &")
+      system("sudo puppet apply --pluginsync #{Rails.root.join('puppet/restart.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} &")
     end
 
     def get_deployment_version
