@@ -108,13 +108,13 @@
         - if index == 0
           %div.item.center-block.active
             %center
-              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
-              .carousel-caption
+              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original and !ThumbnailCreator.show_thumbnail? original) ? original : thumbnail), :alt => file[1]}
+              .carousel-caption.padding-extra
                 %h4=file[1]
         - else
           %div.center-block.item
             %center
-              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original) ? original : thumbnail), :alt => file[1]}
+              %img.carousel-image{:src => thumbnail_path(url: (ThumbnailCreator.is_image? original and !ThumbnailCreator.show_thumbnail? original) ? original : thumbnail), :alt => file[1]}
               .carousel-caption.padding-extra
                 %h4=file[1]
     %a.carousel-control.left{:href => "#slideshow", :'data-slide' => "prev"} &lsaquo;

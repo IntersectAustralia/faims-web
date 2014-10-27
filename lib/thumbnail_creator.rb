@@ -35,6 +35,11 @@ class ThumbnailCreator
     def is_image?(file)
       return (`file -b -i #{file}` =~ /video/).nil?
     end
+
+    def show_thumbnail?(file)
+      ext = File.extname(file)
+      return true unless [".jpg", ".jpeg", ".png", ".bmp", ".gif"].include? ext
+    end
   end
 
 end

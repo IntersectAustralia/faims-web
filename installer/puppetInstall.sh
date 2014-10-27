@@ -20,6 +20,10 @@ if [ ! -d "$HOME/.puppet/modules/apt" ]; then
     puppet module install puppetlabs-apt
 fi
 
+if [ ! -d "$HOME/.puppet/modules/vcsrepo" ]; then
+    puppet module install puppetlabs-vcsrepo
+fi
+
 # Clone webapp
 if [ ! -d "$APP_ROOT" ]; then
     sudo git clone https://github.com/IntersectAustralia/faims-web.git $APP_ROOT
@@ -33,5 +37,11 @@ if [ ! -h "/etc/puppet/hiera.yaml" ]; then
     sudo ln -s $APP_ROOT/puppet/hiera.yaml /etc/puppet/hiera.yaml
 fi
 
-# Run puppet site.pp
-sudo puppet apply --pluginsync $APP_ROOT/puppet/site.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
+# Update repo
+sudo puppet apply --pluginsync $APP_ROOT/puppet/repo.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
+
+# Update server
+sudo puppet apply --pluginsync $APP_ROOT/puppet/update.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
+
+# Restart services
+sudo puppet apply --pluginsync $APP_ROOT/puppet/restart.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
