@@ -30,15 +30,15 @@ if [ ! -d "$APP_ROOT" ]; then
     sudo chown -R $USER:$USER $APP_ROOT
 fi
 
-# Configure puppet
-sed -i "s/webapp_user:.*/webapp_user: $USER/g" $APP_ROOT/puppet/data/common.yaml
-
 if [ ! -h "/etc/puppet/hiera.yaml" ]; then
     sudo ln -s $APP_ROOT/puppet/hiera.yaml /etc/puppet/hiera.yaml
 fi
 
 # Update repo
 sudo puppet apply --pluginsync $APP_ROOT/puppet/repo.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
+
+# Configure puppet
+sed -i "s/webapp_user:.*/webapp_user: $USER/g" $APP_ROOT/puppet/data/common.yaml
 
 # Update server
 sudo puppet apply --pluginsync $APP_ROOT/puppet/update.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
