@@ -5,7 +5,7 @@ describe 'Server rake tasks' do
 
   before :each do
     load File.expand_path('../../../lib/tasks/server.rake', __FILE__)
-    ProjectModule.destroy_all
+    FileUtils.rm ServerUpdater.faims_update_lock if File.exists? ServerUpdater.faims_update_lock
   end
 
   it 'checks for server updates returns server update to date' do
@@ -33,7 +33,7 @@ describe 'Server rake tasks' do
     output = capture(:stdout) do
       update_server.should == nil
     end
-    expect(output).to include "Everything is update to date"
+    expect(output).to include 'Everything is update to date'
   end
 
   it 'update server upgrades server' do
@@ -43,7 +43,7 @@ describe 'Server rake tasks' do
     output = capture(:stdout) do
       update_server.should == 2
     end
-    expect(output).to include "Found new updates\nUpdating server... Please wait this could take a while\nFinished updating server"
+    expect(output).to include "Found new updates.\nUpdating server... Please wait this could take a while.\nFinished updating server.\nRestarting server... Please wait this could take a while.\n"
   end
 
   it 'update server causes error' do
@@ -53,7 +53,7 @@ describe 'Server rake tasks' do
     output = capture(:stdout) do
       update_server.should == 4
     end
-    expect(output).to include "Found new updates\nUpdating server... Please wait this could take a while\nEncountered an error trying to update server"
+    expect(output).to include "Found new updates.\nUpdating server... Please wait this could take a while.\nThe server failed to update properly. Please contact a system administrator to resolve this problem.\n"
   end
 
   it 'generates properties file with uuid' do

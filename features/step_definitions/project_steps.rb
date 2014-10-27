@@ -231,6 +231,13 @@ And /^I process delayed jobs$/ do
   Delayed::Job.all.size.should == 0
 end
 
+And /^I process delayed jobs with (.?) errors?$/ do |errors|
+  sleep(4)
+  Delayed::Job.all.each { |job| Delayed::Worker.new.run(job) }
+  sleep(2)
+  Delayed::Job.all.size.should == errors.to_i
+end
+
 And /^I make changes to "([^"]*)"$/ do |name|
   project_module = ProjectModule.find_by_name(name)
   sleep(1)
@@ -1188,21 +1195,44 @@ And /^I enter search query "([^"]*)"$/ do |query|
 end
 
 And /^I reset faims updater$/ do
-  FileUtils.rm ServerUpdater.faims_deployment_file if File.exists? ServerUpdater.faims_deployment_file
-  FileUtils.rm ServerUpdater.faims_remote_deployment_file if File.exists? ServerUpdater.faims_remote_deployment_file
   FileUtils.rm ServerUpdater.faims_update_file if File.exists? ServerUpdater.faims_update_file
-  FileUtils.rm ServerUpdater.faims_run_update_script_file if File.exists? ServerUpdater.faims_run_update_script_file
 end
 
 And /^I add remote deployment file with version "([^"]*)" and tag "([^"]*)"$/ do |version, tag|
-  File.open(ServerUpdater.faims_remote_deployment_file, 'w+') do |f|
-    f.write({version:version,tag:tag}.to_json)
+  # File.open(ServerUpdater.faims_remote_deployment_file, 'w+') do |f|
+  #   f.write({version:version,tag:tag}.to_json)
+  # end
+  $remote_version = version
+  $remote_tag = tag
+  class ServerUpdater
+
+    class << self
+
+      def get_deployment_version
+        {'version' => $remote_version, 'tag' => $remote_tag}
+      end
+
+    end
+
   end
 end
 
 And /^I add local deployment file with version "([^"]*)" and tag "([^"]*)"$/ do |version, tag|
-  File.open(ServerUpdater.faims_deployment_file, 'w+') do |f|
-    f.write({version:version,tag:tag}.to_json)
+  # File.open(ServerUpdater.faims_deployment_file, 'w+') do |f|
+  #   f.write({version:version,tag:tag}.to_json)
+  # end
+  $local_version = version
+  $local_tag = tag
+  class ServerUpdater
+
+    class << self
+
+      def get_local_version
+        {'version' => $local_version, 'tag' => $local_tag}
+      end
+
+    end
+
   end
 end
 
@@ -1215,7 +1245,81 @@ And /^I add has server updates file$/ do
 end
 
 And /^I add script file with "([^"]*)"$/ do |data|
-   File.open(ServerUpdater.faims_run_update_script_file, 'w+') do |f|
-     f.write(data)
-   end
+  $script_data = data
+  class ServerUpdater
+
+    class << self
+
+      def run_update_script
+        $script_data
+      end
+
+    end
+
+  end
 end
+
+Given /^I fake no internet connection$/ do
+  class ServerUpdater
+
+    class << self
+
+      def get_deployment_version
+        raise Exception
+      end
+
+    end
+
+  end
+end
+
+And /^I fake server update success$/ do
+  class ServerUpdater
+
+    class << self
+
+      def update_server
+        FileUtils.rm ServerUpdater.faims_update_file if File.exists? ServerUpdater.faims_update_file
+      end
+
+      def restart_server
+      end
+
+    end
+
+  end
+end
+
+And /^I fake server update failure/ do
+  class ServerUpdater
+
+    class << self
+
+      def update_server
+      end
+
+      def restart_server
+      end
+
+    end
+
+  end
+end
+
+And /^I fake server update exception/ do
+  class ServerUpdater
+
+    class << self
+
+      def update_server
+        raise Exception
+      end
+
+      def restart_server
+      end
+
+    end
+
+  end
+end
+

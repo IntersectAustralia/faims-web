@@ -33,7 +33,8 @@ Feature: Server updates
     Then I should see button "Update Server"
 
   Scenario: I cannot check for server updates if there is no internet connection
-    Given I am on the project modules page
+    Given I fake no internet connection
+    And I am on the project modules page
     And I follow "Check for Updates"
     Then I should see "Could not find internet connection to check for updates"
     And I should not see button "Update Server"
@@ -68,22 +69,40 @@ Feature: Server updates
   Scenario: I can update server returns server updated
     Given I add remote deployment file with version "2.1" and tag "blah"
     And I add local deployment file with version "2.0" and tag "blah"
-    And I add script file with "2"
+    And I fake server update success
     And I am on the project modules page
     And I follow "Check for Updates"
     Then I should see button "Update Server"
     And I press "Update Server"
-    Then I should see "Finished updating server"
-    And I should be on the project modules page
+    And I process delayed jobs
+    And I wait 5 seconds
+    Then I should see dialog "The server has been successfully updated. The server will now reboot in 60 seconds please press ok to continue."
+    And I cancel
 
   @javascript
-  Scenario: I can update server return failure to update server
+  Scenario: I can update server returns server update failure
     Given I add remote deployment file with version "2.1" and tag "blah"
     And I add local deployment file with version "2.0" and tag "blah"
-    And I add script file with "4"
+    And I fake server update failure
     And I am on the project modules page
     And I follow "Check for Updates"
     Then I should see button "Update Server"
     And I press "Update Server"
-    Then I should see dialog "Encountered an error trying to update server."
+    And I process delayed jobs
+    And I wait 5 seconds
+    Then I should see dialog "The server failed to update properly. Please contact a system administrator to resolve this problem."
+    And I cancel
+
+  @javascript
+  Scenario: I can update server returns server update exception
+    Given I add remote deployment file with version "2.1" and tag "blah"
+    And I add local deployment file with version "2.0" and tag "blah"
+    And I fake server update exception
+    And I am on the project modules page
+    And I follow "Check for Updates"
+    Then I should see button "Update Server"
+    And I press "Update Server"
+    And I process delayed jobs with 1 error
+    And I wait 5 seconds
+    Then I should see dialog "Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem."
     And I cancel

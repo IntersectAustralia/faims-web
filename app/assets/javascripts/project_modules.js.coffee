@@ -1020,9 +1020,20 @@ check_server_updated = (url) ->
     dataType: 'json'
     success: (data, textStatus, jqXHR) ->
       if data.result == "success"
-        window.location = data.url
-      else
+        alert(data.message)
+        setTimeout (-> window.location = data.url), 60000
+
+        # send restart request
+        $.ajax data.restart_url,
+          type: 'POST'
+          dataType: 'json'
+
+      else if data.result == "waiting"
         setTimeout (-> check_server_updated(url)), 5000
+      else
+        alert(data.message)
+        $('#loading').addClass('hidden')
+        $('#loading').dialog('destroy')
 
 $(document).ready(
   =>

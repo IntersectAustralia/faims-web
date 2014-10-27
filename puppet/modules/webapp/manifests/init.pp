@@ -49,8 +49,7 @@ class webapp {
     command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:migrate assets:precompile\"",
     logoutput   => "on_failure",
     timeout     => 300,
-    require     => Exec["initialise app"],
-    notify      => [Service["apache2"],Service["god"]]
+    require     => Exec["initialise app"]
   }
 
   exec { "install passenger gem":
@@ -86,8 +85,7 @@ class webapp {
     owner   => $webapp_user,
     group   => $webapp_user,
     content => template("webapp/faims.conf"),
-    require => Exec["install passenger module"],
-    notify  => Service["apache2"]
+    require => Exec["install passenger module"]
   }
 
   file { "${app_root}/log_archive":
@@ -101,8 +99,7 @@ class webapp {
     mode    => "0644",
     owner   => "root",
     group   => "root",
-    content => template("webapp/faims.logrotate"),
-    notify  => Service["apache2"]
+    content => template("webapp/faims.logrotate")
   }
 
   exec { "create god executable":
@@ -118,29 +115,14 @@ class webapp {
     mode    => "0755",
     owner   => "root",
     group   => "root",
-    content => template('webapp/god'),
-    notify  => Service["god"]
+    content => template('webapp/god')
   }
 
   file { "/etc/god.conf":
     mode    => "0644",
     owner   => "root",
     group   => "root",
-    content => template('webapp/god.conf'),
-    notify  => Service["god"]
-  }
-
-  service { "god":
-    ensure     => "running",
-    enable     => "true",
-    hasrestart => "true",
-    require => [Exec["create god executable"],File["/etc/init.d/god"],File["/etc/god.conf"],Exec["update app"]]
-  }
-
-  service { "apache2":
-    ensure     => "running",
-    enable     => "true",
-    hasrestart => "true",
+    content => template('webapp/god.conf')
   }
 
   file { "/etc/cron.daily/checkupdates":
