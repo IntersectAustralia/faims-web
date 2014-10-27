@@ -869,6 +869,7 @@ upload_file = (button) ->
         $('#uploading_files').removeClass('hidden')
         $('#uploading_files').dialog('open')
         upload_form = $('#attribute-file-upload').find('form')
+        should_save = false
         $.ajax upload_form.attr('action'),
           type: 'POST'
           dataType: 'json'
@@ -889,9 +890,10 @@ upload_file = (button) ->
               alert(data.message)
             $('#uploading_files').dialog('destroy')
             $('#uploading_files').addClass('hidden')
+            should_save = true
+            form_data = null
 
-        should_save = true
-        form_data = null
+        
         $('.attr_file').trigger("reset")
         $('#attribute-file-upload').find('#attr_file_attribute_id').val("")
         $(this).dialog('close');
