@@ -75,8 +75,8 @@ class ServerUpdater
       request_json = get_deployment_version
 
       # update repo
-      #system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
-      #return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
+      return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
 
       # update server
       system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/update.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
@@ -100,15 +100,15 @@ class ServerUpdater
     end
 
     def faims_update_file
-      Rails.application.config.server_has_update_file
-    end
-
-    def faims_deployment_file
-      Rails.application.config.server_deployment_version_file
+      Rails.env == 'test' ? Rails.root.join('tmp/.has_server_updates') : Rails.application.config.server_has_update_file
     end
 
     def faims_update_lock
       Rails.env == 'test' ? Rails.root.join('tmp/.update_lock') : Rails.root.join('.update_lock')
+    end
+
+    def faims_deployment_file
+      Rails.application.config.server_deployment_version_file
     end
 
   end

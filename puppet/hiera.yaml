@@ -1,5 +1,5 @@
 :backends: yaml
 :yaml:
-  :datadir: /var/www/faims/puppet/data
+  :datadir: /var/www/faims-test/puppet/data
 :hierarchy: common
 :logger: console
