@@ -418,37 +418,43 @@ create view allCreatedModifiedAtBy as select uuid, createdAt, createdBy, modifie
 
 drop view if exists latestNonDeletedArchEntFormattedIdentifiers;
 create view if not exists latestNonDeletedArchEntFormattedIdentifiers as
-  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, null as deleted, aentcountorder
+  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, null as deleted
   from (
     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder
-    from latestNonDeletedArchent
-      JOIN aenttype using (aenttypeid)
-      JOIN idealaent using (aenttypeid)
-      join attributekey using (attributeid)
-      join latestNonDeletedAentValue using (uuid, attributeid)
-      left outer join vocabulary using (attributeid, vocabid)
-    WHERE isIdentifier = 'true'
+    from (
+      select uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, null as deleted, aentcountorder, vocabcountorder, attributeid
+      from latestNonDeletedArchent
+        JOIN aenttype using (aenttypeid)
+        JOIN (select * from idealaent where isIdentifier='true') using (aenttypeid)
+        join attributekey  using (attributeid)
+        join latestNonDeletedAentValue using (uuid, attributeid)
+        left outer join vocabulary using (attributeid, vocabid)
+      order by uuid, aentcountorder, vocabcountorder
+    )
     group by uuid, attributeid
     having response is not null
-    order by uuid, aentcountorder, vocabcountorder)
-  group by uuid;
+    order by uuid, aentcountorder)
+  group by uuid
+  order by uuid;
 
 drop view if exists latestAllArchEntFormattedIdentifiers;
 create view if not exists latestAllArchEntFormattedIdentifiers as
-  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, deleted, aentcountorder
+  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, deleted
   from (
-    select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, archentity.deleted,aentcountorder
-    from archentity
-      JOIN (select uuid, max(aenttimestamp) as aenttimestamp
-            from archentity
-            group by uuid) USING (uuid, aenttimestamp)
-      JOIN aenttype using (aenttypeid)
-      JOIN idealaent using (aenttypeid)
-      join attributekey using (attributeid)
-      join latestnondeletedaentvalue using (uuid, attributeid)
-      left outer join vocabulary using (attributeid, vocabid)
-    WHERE isIdentifier = 'true'
+    select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, deleted,aentcountorder
+    from ( select  uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, archentity.deleted as deleted, aentcountorder, vocabcountorder, attributeid
+           from archentity
+             JOIN (select uuid, max(aenttimestamp) as aenttimestamp
+                   from archentity
+                   group by uuid) USING (uuid, aenttimestamp)
+             JOIN aenttype using (aenttypeid)
+             JOIN (select * from idealaent where isIdentifier='true') using (aenttypeid)
+             JOIN attributekey using (attributeid)
+             join latestNonDeletedAentValue using (uuid, attributeid)
+             left outer join vocabulary using (attributeid, vocabid)
+           order by uuid, aentcountorder, vocabcountorder)
     group by uuid, attributeid
     having response is not null
     order by uuid, aentcountorder, vocabcountorder)
-  group by uuid;
+  group by uuid
+  order by uuid;
