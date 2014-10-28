@@ -4,6 +4,7 @@ class repo {
   $webapp_user = hiera("webapp_user")
   $app_root = hiera("app_root")
   $app_source = hiera("app_source")
+  $exec_path = "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
 
   if $app_tag {
     vcsrepo { $app_root:
@@ -21,5 +22,10 @@ class repo {
       revision => hiera("app_tag"),
       user     => $webapp_user,
     }
+  }
+
+  exec { "sed -i \"s/webapp_user:.*/webapp_user: ${webapp_user}/g\" ${$app_root}/puppet/data/common.yaml":
+    path    => $exec_path,
+    require => Vcsrepo[$app_root]
   }
 }
