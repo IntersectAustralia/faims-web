@@ -44,7 +44,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     if params[:file_manager].blank? or params[:file_manager][:file].blank?
       flash.now[:error] = 'Please select a file to upload.'
     else
-      @project_module.data_mgr.with_shared_lock do
+      @project_module.data_mgr.with_exclusive_lock do
         file = params[:file_manager][:file]
         @project_module.add_data_file(File.join(params[:path], file.original_filename), file.tempfile)
         flash.now[:notice] = 'File uploaded.'
@@ -66,7 +66,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     if params[:file_manager].blank? or not @project_module.is_valid_filename?(params[:file_manager][:dir].strip)
       flash.now[:error] = 'Please enter a valid directory name.'
     else
-      @project_module.data_mgr.with_shared_lock do
+      @project_module.data_mgr.with_exclusive_lock do
         dir = params[:file_manager][:dir].strip
         @project_module.add_data_dir(File.join(File.join(params[:path], dir)))
         flash.now[:notice] = 'Created directory.'
@@ -92,7 +92,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
       if not File.exists? file and not File.directory? file
         flash.now[:error] = 'File does not exist.'
       else
-        @project_module.data_mgr.with_shared_lock do
+        @project_module.data_mgr.with_exclusive_lock do
           if params[:path] == '.'
             @project_module.remove_data_dir(@project_module.get_path(:data_files_dir))
             flash.now[:notice] = 'Deleted directory.'
@@ -121,7 +121,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     if params[:project_module].blank? or params[:project_module][:file].blank?
       flash.now[:error] = 'Please select a file to upload.'
     else
-      @project_module.data_mgr.with_shared_lock do
+      @project_module.data_mgr.with_exclusive_lock do
         file = params[:project_module][:file]
         @project_module.add_data_batch_file(file.path)
         flash.now[:notice] = 'File uploaded.'
