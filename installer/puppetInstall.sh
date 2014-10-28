@@ -34,6 +34,9 @@ if [ ! -h "/etc/puppet/hiera.yaml" ]; then
     sudo ln -s $APP_ROOT/puppet/hiera.yaml /etc/puppet/hiera.yaml
 fi
 
+# Configure puppet
+sed -i "s/webapp_user:.*/webapp_user: $USER/g" $APP_ROOT/puppet/data/common.yaml
+
 # Update repo
 sudo puppet apply --pluginsync $APP_ROOT/puppet/repo.pp --modulepath=$APP_ROOT/puppet/modules:$HOME/.puppet/modules
 
