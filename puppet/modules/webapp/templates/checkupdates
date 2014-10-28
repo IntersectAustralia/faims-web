@@ -4,4 +4,4 @@ export RBENV_ROOT=/home/<%= @webapp_user %>/.rbenv
 export PATH=$RBENV_ROOT/bin:$PATH
 eval "$(rbenv init -)"
 
-su - faims -c "cd <%= @app_root %> && bundle exec rake server:check_for_updates"
+su - <%= @webapp_user %> -c "cd <%= @app_root %> && bundle exec rake server:check_for_updates"
