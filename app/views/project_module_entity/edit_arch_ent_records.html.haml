@@ -1,5 +1,8 @@
 - title @project_module.name + " - Entity"
-= breadcrumbs
+%div
+  - if params[:uuid]
+    .muted.entity-breadcrumb= "[uuid:#{params[:uuid]}]"
+  = breadcrumbs
 - get_files(@attributes, 12, 13, 5)
 .form-actions
   - if params[:prev_uuid]
