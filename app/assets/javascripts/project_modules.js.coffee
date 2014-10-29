@@ -246,6 +246,7 @@ bulk_delete_restore_entities = ->
           $('#selected-ents-delete').val(values.toString())
           $form.attr('action', href)
           $form.submit()
+          show_loading_dialog()
           false
       return false
   )
@@ -266,6 +267,7 @@ bulk_delete_restore_entities = ->
           $('#selected-ents-restore').val(values.toString())
           $form.attr('action', href)
           $form.submit()
+          show_loading_dialog()
           false
       return false
   )
@@ -931,6 +933,23 @@ show_loading_dialog = ->
   $('#setting_up').removeClass('hidden')
   $('#setting_up').dialog('open')
 
+setup_search_spinner = ->
+  $('.search-pagination').change(
+    ->
+      show_loading_dialog()
+  )
+
+  $('.search_form').submit(
+    ->
+      show_loading_dialog()
+  )
+
+  $('.btn-search-refresh').click(
+    ->
+      show_loading_dialog()
+  )
+  return
+
 datatables_setup = ->
   $('.search-table').dataTable(
     "sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
@@ -1055,6 +1074,7 @@ $(document).ready(
     update_arch_ent_or_rel()
     autosave_entity_attributes()
     setup_attribute_groups()
+    setup_search_spinner()
     datatables_setup()
     setup_server_updates()
     return
