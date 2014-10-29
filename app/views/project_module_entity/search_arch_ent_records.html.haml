@@ -2,10 +2,10 @@
 = breadcrumbs
 .content
   %h2 Search Entity
-  %p An empty search will list all entities
+  %p An empty search will list all entities. The search will find an annotation, measurement, constrained vocabulary term, date or username. NB vocabulary terms will not be translated.
   %form.pull-right.search_form{:action => search_arch_ent_records_path, :method => "get"}
     .input-append
-      %select{:name => 'type'}
+      %select.span3{:name => 'type'}
         - if params[:type] == 'all'
           %option{ :value => "all", :selected => "selected"}="Show all records"
         - else
@@ -15,7 +15,7 @@
             %option{:value=>type[1], :selected => "selected"}="Filter type by #{type[0]}"
           - else
             %option{:value=>type[1]}="Filter type by #{type[0]}"
-      %select{:name => 'user'}
+      %select.span3{:name => 'user'}
         - if params[:user] == 'all'
           %option{ :value => "all", :selected => "selected"}="Created/Last modified by any user"
         - else
@@ -25,7 +25,7 @@
             %option{:value=>user[0], :selected => "selected"}="Created/Last modified by #{user[1]} #{user[2]}"
           - else
             %option{:value=>user[0]}="Created/Last modified by #{user[1]} #{user[2]}"
-      %input.span4{:type => 'text', :name => 'query', :placeholder => "Enter a constrained vocabulary term, annotation, measurement, date, or name here...", :value => params[:query]}
+      %input.span3{:type => 'text', :name => 'query', :placeholder => "Enter search string here...", :value => params[:query]}
       %input{:type => 'hidden', :name => 'show_deleted', :value => params[:show_deleted]}
       %input{:type => 'hidden', :name => 'offset', :value => params[:offset]}
       %input{:type => 'hidden', :name => 'per_page', :value => @limit}
@@ -34,7 +34,7 @@
   %form.pull-left{:method => 'post', :id => 'compare'}
     %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
     - pagination_options = [['50 per page', '50'], ['100 per page', '100'], ['250 per page', '250'], ['Show all', '-1']]
-    = select_tag :per_page, options_for_select(pagination_options, @limit.to_s), :onchange => 'updatePagination(this.value)', :class => "search-pagination"
+    = select_tag :per_page, options_for_select(pagination_options, @limit.to_s), :onchange => 'updatePagination(this.value)', :class => "search-pagination span2"
 
   %table.table.table-striped.search-table
     %thead
