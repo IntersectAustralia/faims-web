@@ -12,8 +12,13 @@ class ArchiveManager < FileManager
     not File.exists? @archive or not file_list.select { |f| File.mtime("#{@base_dir}/#{f}") > File.mtime(@timestamp_file.path) }.empty?
   end
 
-  def disk_space
-    stat = Sys::Filesystem.stat("/")
+  def self.tmp_space
+    stat = Sys::Filesystem.stat(Sys::Filesystem.mount_point("/tmp"))
+    stat.block_size * stat.blocks_available
+  end
+
+  def self.module_space
+    stat = Sys::Filesystem.stat(Sys::Filesystem.mount_point("/var/www/faims/"))
     stat.block_size * stat.blocks_available
   end
 
@@ -29,7 +34,12 @@ class ArchiveManager < FileManager
   end
 
   def has_disk_space?
-    disk_space > archive_space * 2
+    space = archive_space
+    if Sys::Filesystem.mount_point("/tmp") == Sys::Filesystem.mount_point("/var/www/faims/")
+      tmp_space > space * 2
+    else
+      tmp_space > space && module_space > space
+    end
   end
 
   # Note: archives will not include dot files
