@@ -3,7 +3,7 @@
 .content
   %h2 Search Entity
   %p An empty search will list all entities
-  %form.pull-right{:action => search_arch_ent_records_path, :method => "get"}
+  %form.pull-right.search_form{:action => search_arch_ent_records_path, :method => "get"}
     .input-append
       %select{:name => 'type'}
         - if params[:type] == 'all'
@@ -34,7 +34,7 @@
   %form.pull-left{:method => 'post', :id => 'compare'}
     %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
     - pagination_options = [['50 per page', '50'], ['100 per page', '100'], ['250 per page', '250'], ['Show all', '-1']]
-    = select_tag :per_page, options_for_select(pagination_options, @limit.to_s), :onchange => 'updatePagination(this.value)'
+    = select_tag :per_page, options_for_select(pagination_options, @limit.to_s), :onchange => 'updatePagination(this.value)', :class => "search-pagination"
 
   %table.table.table-striped.search-table
     %thead
@@ -45,7 +45,12 @@
         %th Created by
         %th Last modified at
         %th Last modified by
-        %th Actions
+        - if @show_review_column
+          %th Review
+        - if @show_conflict_column
+          %th Conflict
+        - if @show_actions_column
+          %th Actions
     = render :partial => 'edit_arch_ent_record'
   = render :partial => 'shared/pagination'
 
@@ -53,11 +58,11 @@
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
     = link_to "Compare", compare_arch_ents_path(@project_module, search_params), :id => 'compare-button', :class => 'btn btn-inverse'
     - if params[:show_deleted].blank?
-      = link_to "Delete Selected", batch_delete_arch_ents_path(@project_module, search_params), :id => 'delete-selected-button', :class => 'btn btn-inverse'
-      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
+      = link_to "Delete Selected", batch_delete_arch_ents_path(@project_module, search_params), :id => 'delete-selected-button', :class => 'btn btn-danger'
+      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-search-refresh'
     - else
-      = link_to "Restore Selected", batch_restore_arch_ents_path(@project_module, search_params), :id => 'restore-selected-button', :class => 'btn btn-inverse'
-      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+      = link_to "Restore Selected", batch_restore_arch_ents_path(@project_module, search_params), :id => 'restore-selected-button', :class => 'btn btn-warning'
+      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-search-refresh'
     %form{:action => search_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}
       %input{:type => 'hidden', :value => params[:type], :name => 'type'}
       %input{:type => 'hidden', :value => params[:user], :name => 'user'}
@@ -72,6 +77,12 @@
     %form{:method => 'post', :id => 'restore-ent-form'}
       %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
       %input{:type => 'hidden', :name => 'selected', :id => 'selected-ents-restore'}
+
+#setting_up.hidden.indicator
+  = image_tag "loading.gif"
+  %p
+    %span Loading
+
 
 :javascript
   function updatePagination(per_page) {

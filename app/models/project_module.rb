@@ -734,6 +734,8 @@ class ProjectModule < ActiveRecord::Base
 
   def archive_project_module
     with_exclusive_lock do
+      raise ProjectModuleException, 'Not enough space to archive module.' unless package_mgr.has_disk_space?
+
       success = package_mgr.update_archive(true)
       raise ProjectModuleException, 'Failed to archive module.' unless success
     end

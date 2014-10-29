@@ -29,7 +29,7 @@ class ServerUpdater
         # create update file
         FileUtils.touch faims_update_file
       else
-        puts 'Everything is update to date.'
+        puts 'Everything is up to date.'
       end
 
       has_updates
@@ -43,25 +43,30 @@ class ServerUpdater
     def update_server
       return if File.exists? faims_update_lock or !check_server_updates
 
-      # create lock file
-      FileUtils.touch faims_update_lock
+      begin
+        # create lock file
+        FileUtils.touch faims_update_lock
 
-      puts 'Updating server... Please wait this could take a while.'
-      status = run_update_script
+        puts 'Updating server... Please wait this could take a while.'
+        status = run_update_script
 
-      if status == 0 or status == 2
-        puts 'Finished updating server.'
+        if status == 0 or status == 2
+          puts 'Finished updating server.'
 
-        # cleanup update file
-        FileUtils.rm faims_update_file if File.exists? faims_update_file
-      else
-        puts 'The server failed to update properly. Please contact a system administrator to resolve this problem.'
+          # cleanup update file
+          FileUtils.rm faims_update_file if File.exists? faims_update_file
+        else
+          puts 'The server failed to update properly. Please contact a system administrator to resolve this problem.'
+        end
+
+        # cleanup lock file
+        FileUtils.rm faims_update_lock if File.exists? faims_update_lock
+
+        status
+      rescue Exception => e
+        Rails.logger.error e
+        raise Exception, 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.'
       end
-
-      # cleanup lock file
-      FileUtils.rm faims_update_lock if File.exists? faims_update_lock
-
-      status
     end
 
     def restart_server

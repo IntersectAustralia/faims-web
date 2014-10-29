@@ -68,6 +68,16 @@ describe ProjectModule do
     expect(output).to include "Module does not exist"
   end
 
+  it "cannot archive module is not enough space" do
+    project_module = make_project_module('Module 1')
+    ENV['key'] = project_module.key
+    ArchiveManager.any_instance.stub(:has_disk_space?) { false }
+    output = capture(:stdout) do
+      archive
+    end
+    expect(output).to include "Not enough space to archive module."
+  end
+
   it "deletes a project module" do
     project_module = make_project_module('Module 1')
     ENV['key'] = project_module.key

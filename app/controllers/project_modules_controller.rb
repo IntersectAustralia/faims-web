@@ -181,11 +181,17 @@ class ProjectModulesController < ProjectModuleBaseController
     @project_module = ProjectModule.find(params[:id])
 
     job = Delayed::Job.find_by_id(params[:jobid])
-    if !job.nil? and job.last_error?
-      logger.error job.last_error
-      job.destroy
+    if job
+      if job.last_error?
+        logger.error job.last_error if job.last_error?
+        render json: { result: 'failure', message: job.last_error.split("\n").first }
+        job.destroy
+      else
+        render json: { result: 'waiting' }
+      end
+    else
+      render json: { result: 'success', url: download_project_module_path(@project_module) }
     end
-    render json: { result: job.nil? ? 'success' : (job.last_error? ? 'failure' : 'waiting'), url: download_project_module_path(@project_module) }
   end
 
   def download_project_module

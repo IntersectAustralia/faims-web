@@ -89,12 +89,16 @@ check_archive = (jobid) ->
     dataType: 'json'
     data: {jobid: jobid}
     success: (data, textStatus, jqXHR) ->
-      if data.result != "waiting"
+      if data.result == 'success'
         $('#loading').addClass('hidden')
         $('#loading').dialog('destroy')
         window.location = data.url
-      else
+      else if data.result == 'waiting'
         setTimeout (-> check_archive(jobid)), 5000
+      else
+        $('#loading').addClass('hidden')
+        $('#loading').dialog('destroy')
+        alert(data.message)
       return
   return
 
@@ -246,6 +250,7 @@ bulk_delete_restore_entities = ->
           $('#selected-ents-delete').val(values.toString())
           $form.attr('action', href)
           $form.submit()
+          show_loading_dialog()
           false
       return false
   )
@@ -266,6 +271,7 @@ bulk_delete_restore_entities = ->
           $('#selected-ents-restore').val(values.toString())
           $form.attr('action', href)
           $form.submit()
+          show_loading_dialog()
           false
       return false
   )
@@ -656,6 +662,7 @@ remove_attribute = (button) ->
   else if count == 1
     clear_attribute_value(value)
   should_save = true
+  autosave_indicator()
 
 clear_attribute_value = (value) ->
   attribute_name = value.find('.attribute-name').text()
@@ -750,9 +757,21 @@ setup_attribute_groups = ->
             should_save = false
             show_loading_dialog()
             autosave(false)
+          $('.autosave-footer').removeClass("autosave-indicator")
       , idle: 5000
-      events: 'keypress mousedown'
+      events: 'keyup mousedown'
     })
+
+    $(document).click(
+      ->
+        autosave_indicator()
+    )
+
+    $(document).keyup(
+      ->
+        should_save = true
+        autosave_indicator()
+    )
 
     $(window).unload(
       ->
@@ -763,7 +782,7 @@ setup_attribute_groups = ->
         return false
     )
 
-    $('.logo').parent().prepend('<p><b>This page will automatically update any changes to this entity and will update again upon navigating away from this page</b></p>')
+    $('.logo').parent().prepend('<p class="autosave-footer"><b>This page will automatically update any changes to this entity and will update again upon navigating away from this page</b></p>')
     return false
 
 initial_setup_attribute = (form, data, updated) ->
@@ -798,12 +817,14 @@ autosave_entity_attributes = ->
   $('input[name^="attr"]').on('blur',
     ->
       should_save = true
+      autosave_indicator()
       return false
   )
 
   $('select[name*="[vocab_id]"]').change(
     ->
       should_save = true
+      autosave_indicator()
       return false
   )
 
@@ -814,7 +835,14 @@ autosave_entity_attributes = ->
         $(this).val(1)
       else
         $(this).val("")
+      autosave_indicator()
   )
+
+autosave_indicator = ->
+  $('.autosave-footer').removeClass("autosave-indicator")
+  current_form_data = $('.attr').serialize()
+  if current_form_data != form_data
+    $('.autosave-footer').addClass("autosave-indicator")
 
 autosave = (on_unload) ->
   $.ajax $('#update-all').attr('href'),
@@ -930,6 +958,23 @@ show_loading_dialog = ->
   });
   $('#setting_up').removeClass('hidden')
   $('#setting_up').dialog('open')
+
+setup_search_spinner = ->
+  $('.search-pagination').change(
+    ->
+      show_loading_dialog()
+  )
+
+  $('.search_form').submit(
+    ->
+      show_loading_dialog()
+  )
+
+  $('.btn-search-refresh').click(
+    ->
+      show_loading_dialog()
+  )
+  return
 
 datatables_setup = ->
   $('.search-table').dataTable(
@@ -1055,6 +1100,7 @@ $(document).ready(
     update_arch_ent_or_rel()
     autosave_entity_attributes()
     setup_attribute_groups()
+    setup_search_spinner()
     datatables_setup()
     setup_server_updates()
     return

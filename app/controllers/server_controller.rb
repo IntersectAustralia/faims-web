@@ -6,7 +6,7 @@ class ServerController < ApplicationController
   def check_for_updates
     page_crumbs :pages_home, :server_update
     @project_modules = ProjectModule.all
-    flash.now[:notice] = 'Everything is update to date.' unless ServerUpdater.check_server_updates
+    flash.now[:notice] = 'Everything is up to date.' unless ServerUpdater.check_server_updates
   rescue Exception => e
     logger.error e
     flash.now[:error] = e.message
@@ -22,7 +22,8 @@ class ServerController < ApplicationController
     if job
       if job.last_error?
         logger.error job.last_error if job.last_error?
-        render json: { result: 'failure', message: 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.' }
+        render json: { result: 'failure', message: job.last_error.split("\n").first }
+        job.destroy
       else
         render json: { result: 'waiting' }
       end
