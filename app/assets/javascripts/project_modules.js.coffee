@@ -89,12 +89,16 @@ check_archive = (jobid) ->
     dataType: 'json'
     data: {jobid: jobid}
     success: (data, textStatus, jqXHR) ->
-      if data.result != "waiting"
+      if data.result == 'success'
         $('#loading').addClass('hidden')
         $('#loading').dialog('destroy')
         window.location = data.url
-      else
+      else if data.result == 'waiting'
         setTimeout (-> check_archive(jobid)), 5000
+      else
+        $('#loading').addClass('hidden')
+        $('#loading').dialog('destroy')
+        alert(data.message)
       return
   return
 

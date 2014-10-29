@@ -22,7 +22,8 @@ class ServerController < ApplicationController
     if job
       if job.last_error?
         logger.error job.last_error if job.last_error?
-        render json: { result: 'failure', message: 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.' }
+        render json: { result: 'failure', message: job.last_error.split("\n").first }
+        job.destroy
       else
         render json: { result: 'waiting' }
       end

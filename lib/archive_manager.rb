@@ -12,6 +12,38 @@ class ArchiveManager < FileManager
     not File.exists? @archive or not file_list.select { |f| File.mtime("#{@base_dir}/#{f}") > File.mtime(@timestamp_file.path) }.empty?
   end
 
+  def self.tmp_space
+    stat = Sys::Filesystem.stat(Sys::Filesystem.mount_point("/tmp"))
+    stat.block_size * stat.blocks_available
+  end
+
+  def self.module_space
+    stat = Sys::Filesystem.stat(Sys::Filesystem.mount_point("/var/www/faims/"))
+    stat.block_size * stat.blocks_available
+  end
+
+  def archive_space
+    space = 0
+    absolute_file_list.each do |f|
+      next unless File.exists? f
+      next if File.basename(f) =~ /^\./ # ignore dot files
+
+      space += File.size f
+    end
+    space
+  end
+
+  def has_disk_space?
+    return true if Rails.env == 'test'
+
+    space = archive_space
+    if Sys::Filesystem.mount_point("/tmp") == Sys::Filesystem.mount_point("/var/www/faims/")
+      ArchiveManager.tmp_space > space * 2
+    else
+      ArchiveManager.tmp_space > space && ArchiveManager.module_space > space
+    end
+  end
+
   # Note: archives will not include dot files
   def update_archive(compute_checksum = false)
     return true unless has_changes?
