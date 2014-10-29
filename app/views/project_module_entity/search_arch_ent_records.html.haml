@@ -58,10 +58,10 @@
     = link_to "<i class='icon-arrow-left'></i> Back".html_safe, project_module_path(@project_module), :class => 'btn'
     = link_to "Compare", compare_arch_ents_path(@project_module, search_params), :id => 'compare-button', :class => 'btn btn-inverse'
     - if params[:show_deleted].blank?
-      = link_to "Delete Selected", batch_delete_arch_ents_path(@project_module, search_params), :id => 'delete-selected-button', :class => 'btn btn-inverse'
-      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse btn-search-refresh'
+      = link_to "Delete Selected", batch_delete_arch_ents_path(@project_module, search_params), :id => 'delete-selected-button', :class => 'btn btn-danger'
+      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-search-refresh'
     - else
-      = link_to "Restore Selected", batch_restore_arch_ents_path(@project_module, search_params), :id => 'restore-selected-button', :class => 'btn btn-inverse'
+      = link_to "Restore Selected", batch_restore_arch_ents_path(@project_module, search_params), :id => 'restore-selected-button', :class => 'btn btn-warning'
       = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-search-refresh'
     %form{:action => search_arch_ent_records_path, :method => "get", :id => 'show-hide-deleted-form'}
       %input{:type => 'hidden', :value => params[:type], :name => 'type'}

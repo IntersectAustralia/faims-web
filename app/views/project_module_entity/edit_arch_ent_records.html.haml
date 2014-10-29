@@ -12,9 +12,9 @@
   = link_to "", get_arch_ent_record_data_path(@project_module, params[:uuid]), :class => "hidden", :id => 'setup-attributes'
   = link_to "", batch_update_arch_ent_records_path(@project_module, params[:uuid]), :class => "hidden", :id => 'update-all', :method => "post"
   - if @deleted[1]
-    = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module, params[:uuid], search_params), :class => 'btn btn-warning', :id => 'restore-record'
+    = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module, params[:uuid], search_params), :class => 'btn btn-warning pull-right', :id => 'restore-record'
   - else
-    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project_module, params[:uuid], search_params), :class => 'btn btn-warning', :id => 'delete-record', confirm: "Are you sure you want to delete this record?"
+    = link_to "<i class='icon-remove icon-white'></i> Delete".html_safe, delete_arch_ent_records_path(@project_module, params[:uuid], search_params), :class => 'btn btn-danger pull-right', :id => 'delete-record', confirm: "Are you sure you want to delete this record?"
   = link_to "Show History", show_arch_ent_history_path(@project_module, params[:uuid], search_params), :class => 'btn'
   - if !@related_arch_ents.empty?
     = link_to "Show Related Entities", '#related-arch-ents', :class => 'btn', :id => 'show-related'
@@ -135,11 +135,11 @@
     No related entities to display
   .form-actions
     - if params[:show_deleted_related].blank?
-      = link_to "Delete Selected", batch_delete_related_ents_path(@project_module, search_params), :id => 'delete-selected-related-ents-button', :class => 'btn btn-inverse' unless @related_arch_ents.empty?
-      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
+      = link_to "Delete Selected", batch_delete_related_ents_path(@project_module, search_params), :id => 'delete-selected-related-ents-button', :class => 'btn btn-danger' unless @related_arch_ents.empty?
+      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
     - else
-      = link_to "Restore Selected", batch_restore_related_ents_path(@project_module, search_params), :id => 'restore-selected-related-ents-button', :class => 'btn btn-inverse' unless @related_arch_ents.empty?
-      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn btn-inverse'
+      = link_to "Restore Selected", batch_restore_related_ents_path(@project_module, search_params), :id => 'restore-selected-related-ents-button', :class => 'btn btn-warning' unless @related_arch_ents.empty?
+      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
 
 %form{:action => edit_arch_ent_records_path(@project_module, params[:uuid]), :method => "get", :id => 'show-hide-deleted-form'}
   %input{:type => 'hidden', :value => params[:type], :name => 'type'}
