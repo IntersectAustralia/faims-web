@@ -36,9 +36,9 @@ class ArchiveManager < FileManager
   def has_disk_space?
     space = archive_space
     if Sys::Filesystem.mount_point("/tmp") == Sys::Filesystem.mount_point("/var/www/faims/")
-      tmp_space > space * 2
+      ArchiveManager.tmp_space > space * 2
     else
-      tmp_space > space && module_space > space
+      ArchiveManager.tmp_space > space && ArchiveManager.module_space > space
     end
   end
 
