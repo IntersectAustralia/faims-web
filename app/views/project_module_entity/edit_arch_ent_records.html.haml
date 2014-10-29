@@ -23,23 +23,24 @@
 /     This page will automatically update any changes to this entity and will update again upon navigating away from this page
 .container
   .row-fluid.labels
-    .span2
-      %label 
-    .span2
-      %label Constrained Data:
-      .muted
-        (Vocabulary)
-    .span2
-      %label Unconstrained Data:
-      .muted
-        (Measure)
-    .span1
-      %label Annotation:
-      .muted
-        (Freetext)
-    .span1
-      %label Certainty:
-    .span3
+    .span12
+      .span2
+        %label
+      .span2
+        %label Constrained Data:
+        .muted
+          (Vocabulary)
+      .span2
+        %label Unconstrained Data:
+        .muted
+          (Measure)
+      .span3
+        %label Annotation:
+        .muted
+          (Freetext)
+      .span1
+        %label Certainty:
+      .span2
   - attributeGroup = @attributes.group_by{|a|a[3]}
   - attributeGroup.each do |key,val|
     .update-arch-ent-form
@@ -49,38 +50,39 @@
           = f.hidden_field :attribute_id, :value => val[0][1], name: 'attr['+key+'][attribute_id]'
           - val.each_with_index do |attribute, index|
             .row-fluid.attribute-value
-              %label.span2
-                %h4.attribute-name=key
-                - if attribute[10] == 1
-                  .form-attribute-error
-                    - attribute[11].each_line(';') do |l|
-                      - next if l.gsub(';', '').blank?
-                      %span=l.gsub(';', '')
-              - if !@vocab_name[attribute[1]].empty?
+              .span12
+                %label.span2
+                  %h4.attribute-name=key
+                  - if attribute[10] == 1
+                    .form-attribute-error
+                      - attribute[11].each_line(';') do |l|
+                        - next if l.gsub(';', '').blank?
+                        %span=l.gsub(';', '')
+                - if !@vocab_name[attribute[1]].empty?
+                  .span2
+                    - vocabs = @vocab_name[attribute[1]]
+                    - vocabs = vocab_name_to_breadcrumb(vocabs)
+                    = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, input_html: {name: 'attr['+key+'][vocab_id][]'}
+                - else
+                  .span2
                 .span2
-                  - vocabs = @vocab_name[attribute[1]]
-                  - vocabs = vocab_name_to_breadcrumb(vocabs)
-                  = f.input :vocab_id, collection: vocabs, include_blank: true, label: false, input_html: {name: 'attr['+key+'][vocab_id][]'}
-              - else
+                  = f.text_area :measure, :value => "", name: 'attr['+key+'][measure][]', :class => "span12 resize-text #{attribute[12] == 1 ? "file-measure" : nil}", rows: 1
+                .span3
+                  = f.text_area :freetext, :value => "", name: 'attr['+key+'][freetext][]', :class => 'span12 resize-text', rows: 1
+                .span1
+                  = f.text_field :certainty, :value => "", name: 'attr['+key+'][certainty][]'
                 .span2
-              .span2
-                = f.text_field :measure, :value => "", name: 'attr['+key+'][measure][]', :class => attribute[12] == 1 ? "file-measure" : nil
-              .span1
-                = f.text_field :freetext, :value => "", name: 'attr['+key+'][freetext][]'
-              .span1
-                = f.text_field :certainty, :value => "", name: 'attr['+key+'][certainty][]'
-              .span3
-                = link_to '#', :class => 'btn add-attribute' do
-                  %i.icon-plus
-                = link_to '#', :class => 'btn remove-attribute' do
-                  %i.icon-minus
-                - if attribute[12] == 1
-                  = link_to '#', :class => 'btn attribute-upload-file' do
-                    %span='Upload'
-                - if index == 0
-                  .ignore-errors-chk
-                    = f.check_box 'ignore_errors', name: 'attr['+key+'][ignore_errors]'
-                    Ignore Errors
+                  = link_to '#', :class => 'btn add-attribute' do
+                    %i.icon-plus
+                  = link_to '#', :class => 'btn remove-attribute' do
+                    %i.icon-minus
+                  - if attribute[12] == 1
+                    = link_to '#', :class => 'btn attribute-upload-file' do
+                      %span='Upload'
+                  - if index == 0
+                    .ignore-errors-chk
+                      = f.check_box 'ignore_errors', name: 'attr['+key+'][ignore_errors]'
+                      Ignore Errors
 
 - if !@files.empty?
   .attached-files

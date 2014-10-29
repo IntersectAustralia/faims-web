@@ -644,6 +644,9 @@ show_hide_deleted = ->
 add_attribute = (button) ->
   value = $(button).parents('.attribute-value')
   clone_value = value.clone()
+  clone_value.find('.resize-text').trigger('autosize.destroy')
+  clone_value.find('.resize-text').height(20)
+  clone_value.find('.resize-text').autosize()
   setup_attribute_value(clone_value)
   if (value.next().hasClass('form-attribute-error'))
     value = value.next()
@@ -672,6 +675,8 @@ clear_attribute_value = (value) ->
   value.find('[name="attr['+attribute_name+'][freetext][]"]').val('')
   value.find('[name="attr['+attribute_name+'][certainty][]"]').val('')
   value.find('.form-attribute-error').remove()
+  value.find('.resize-text').autosize()
+  value.find('.resize-text').trigger('autosize.resize')
 
 setup_attribute_value = (value) ->
   clear_attribute_value(value)
@@ -693,7 +698,6 @@ setup_attribute_value = (value) ->
 create_attribute_value = (value, data) ->
   v = value.clone()
 
-  clear_attribute_value(v)
   setup_attribute_value(v)
 
   vocab = v.find('[name="attr['+data.name+'][vocab_id][]"]')
@@ -702,6 +706,7 @@ create_attribute_value = (value, data) ->
   v.find('[name="attr['+data.name+'][measure][]"]').val(data.measure)
   v.find('[name="attr['+data.name+'][freetext][]"]').val(data.freetext)
   v.find('[name="attr['+data.name+'][certainty][]"]').val(data.certainty)
+  v.find('.resize-text').trigger('autosize.resize')
 
   if data.errors
     errors = data.errors.split(';')
@@ -801,6 +806,12 @@ initial_setup_attribute = (form, data, updated) ->
         form.find('.ignore-errors-chk').addClass('hidden')
 
 autosave_entity_attributes = ->
+  $('textarea[name^="attr"]').on('blur',
+  ->
+    should_save = true
+    return false
+  )
+
   $('input[name^="attr"]').on('blur',
     ->
       should_save = true
