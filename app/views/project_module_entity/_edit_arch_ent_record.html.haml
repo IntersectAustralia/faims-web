@@ -12,10 +12,6 @@
         %td
           %a{:href => edit_arch_ent_records_path(@project_module, uuids[0], search_params)}
             = uuids[1].to_s
-          - if @entity_dirty_map[uuids[0]]
-            .label.label-important='review'
-          - if @entity_forked_map[uuids[0]]
-            .label.label-warning='conflict'
         %td
           = uuids[4].to_s
         %td
@@ -24,6 +20,15 @@
           = uuids[5].to_s
         %td
           = uuids[7].to_s
-        %td
-          - if uuids[2]
-            = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module, uuids[0], search_params), :class => 'btn btn-warning btn-mini', :id => 'restore-record'
+        - if @show_review_column
+          %td
+            - if @entity_dirty_map[uuids[0]]
+              .label.label-important='review'
+        - if @show_conflict_column
+          %td
+            - if @entity_forked_map[uuids[0]]
+              .label.label-warning='conflict'
+        - if @show_actions_column
+          %td
+            - if uuids[2]
+              = link_to "<i class='icon-edit icon-white'></i> Restore".html_safe, restore_arch_ent_records_path(@project_module, uuids[0], search_params), :class => 'btn btn-warning btn-mini', :id => 'restore-record'

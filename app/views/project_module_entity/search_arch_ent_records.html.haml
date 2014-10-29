@@ -45,7 +45,12 @@
         %th Created by
         %th Last modified at
         %th Last modified by
-        %th Actions
+        - if @show_review_column
+          %th Review
+        - if @show_conflict_column
+          %th Conflict
+        - if @show_actions_column
+          %th Actions
     = render :partial => 'edit_arch_ent_record'
   = render :partial => 'shared/pagination'
 
