@@ -6,7 +6,7 @@ class ServerController < ApplicationController
   def check_for_updates
     page_crumbs :pages_home, :server_update
     @project_modules = ProjectModule.all
-    flash.now[:notice] = 'Everything is update to date.' unless ServerUpdater.check_server_updates
+    flash.now[:notice] = 'Everything is up to date.' unless ServerUpdater.check_server_updates
   rescue Exception => e
     logger.error e
     flash.now[:error] = e.message

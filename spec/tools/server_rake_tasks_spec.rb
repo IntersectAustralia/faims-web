@@ -14,7 +14,7 @@ describe 'Server rake tasks' do
     output = capture(:stdout) do
       check_for_server_updates
     end
-    expect(output).to include 'Everything is update to date'
+    expect(output).to include 'Everything is up to date'
   end
 
   it 'checks for server updates returns server has updates' do
@@ -33,7 +33,7 @@ describe 'Server rake tasks' do
     output = capture(:stdout) do
       update_server.should == nil
     end
-    expect(output).to include 'Everything is update to date'
+    expect(output).to include 'Everything is up to date'
   end
 
   it 'update server upgrades server' do

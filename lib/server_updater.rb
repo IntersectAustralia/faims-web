@@ -29,7 +29,7 @@ class ServerUpdater
         # create update file
         FileUtils.touch faims_update_file
       else
-        puts 'Everything is update to date.'
+        puts 'Everything is up to date.'
       end
 
       has_updates

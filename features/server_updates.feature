@@ -22,7 +22,7 @@ Feature: Server updates
     And I add local deployment file with version "2.0" and tag "blah"
     And I am on the project modules page
     And I follow "Check for Updates"
-    Then I should see "Everything is update to date"
+    Then I should see "Everything is up to date"
     And I should not see button "Update Server"
 
   Scenario: I can check for server updates returns new updates available
