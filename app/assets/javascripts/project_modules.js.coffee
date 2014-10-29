@@ -658,6 +658,7 @@ remove_attribute = (button) ->
   else if count == 1
     clear_attribute_value(value)
   should_save = true
+  autosave_indicator()
 
 clear_attribute_value = (value) ->
   attribute_name = value.find('.attribute-name').text()
@@ -752,9 +753,21 @@ setup_attribute_groups = ->
             should_save = false
             show_loading_dialog()
             autosave(false)
+          $('.autosave-footer').removeClass("autosave-indicator")
       , idle: 5000
-      events: 'keypress mousedown'
+      events: 'keyup mousedown'
     })
+
+    $(document).click(
+      ->
+        autosave_indicator()
+    )
+
+    $(document).keyup(
+      ->
+        should_save = true
+        autosave_indicator()
+    )
 
     $(window).unload(
       ->
@@ -765,7 +778,7 @@ setup_attribute_groups = ->
         return false
     )
 
-    $('.logo').parent().prepend('<p><b>This page will automatically update any changes to this entity and will update again upon navigating away from this page</b></p>')
+    $('.logo').parent().prepend('<p class="autosave-footer"><b>This page will automatically update any changes to this entity and will update again upon navigating away from this page</b></p>')
     return false
 
 initial_setup_attribute = (form, data, updated) ->
@@ -800,12 +813,14 @@ autosave_entity_attributes = ->
   $('input[name^="attr"]').on('blur',
     ->
       should_save = true
+      autosave_indicator()
       return false
   )
 
   $('select[name*="[vocab_id]"]').change(
     ->
       should_save = true
+      autosave_indicator()
       return false
   )
 
@@ -816,7 +831,14 @@ autosave_entity_attributes = ->
         $(this).val(1)
       else
         $(this).val("")
+      autosave_indicator()
   )
+
+autosave_indicator = ->
+  $('.autosave-footer').removeClass("autosave-indicator")
+  current_form_data = $('.attr').serialize()
+  if current_form_data != form_data
+    $('.autosave-footer').addClass("autosave-indicator")
 
 autosave = (on_unload) ->
   $.ajax $('#update-all').attr('href'),
