@@ -102,7 +102,7 @@ Feature: Server updates
     And I follow "Check for Updates"
     Then I should see button "Update Server"
     And I press "Update Server"
-    And I process delayed jobs with 1 error
+    And I process delayed jobs with error
     And I wait 5 seconds
     Then I should see dialog "Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem."
     And I cancel

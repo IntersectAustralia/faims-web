@@ -231,11 +231,9 @@ And /^I process delayed jobs$/ do
   Delayed::Job.all.size.should == 0
 end
 
-And /^I process delayed jobs with (.?) errors?$/ do |errors|
+And /^I process delayed jobs with errors?$/ do
   sleep(4)
   Delayed::Job.all.each { |job| Delayed::Worker.new.run(job) }
-  sleep(2)
-  Delayed::Job.all.size.should == errors.to_i
 end
 
 And /^I make changes to "([^"]*)"$/ do |name|
@@ -1290,7 +1288,7 @@ And /^I fake server update success$/ do
   end
 end
 
-And /^I fake server update failure/ do
+And /^I fake server update failure$/ do
   class ServerUpdater
 
     class << self
@@ -1306,18 +1304,28 @@ And /^I fake server update failure/ do
   end
 end
 
-And /^I fake server update exception/ do
+And /^I fake server update exception$/ do
   class ServerUpdater
 
     class << self
 
       def update_server
-        raise Exception
+        raise Exception, 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.'
       end
 
       def restart_server
       end
 
+    end
+
+  end
+end
+
+And /^I fake archive size too big$/ do
+  class ArchiveManager
+
+    def has_disk_space?
+      false
     end
 
   end

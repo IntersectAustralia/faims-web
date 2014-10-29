@@ -286,6 +286,19 @@ Feature: Manage project modules
     And I automatically download project module package "Module 1"
     Then I should download project module package file for "Module 1"
 
+  @javascript
+  Scenario: Cannot archive package if not enough space
+    Given I have project module "Module 1"
+    And I am on the home page
+    Then I should be on the project modules page
+    And I follow "Module 1"
+    And I make changes to "Module 1"
+    And I fake archive size too big
+    And I follow "Download Module"
+    And I process delayed jobs
+    Then I should see dialog "Not enough space to archive module."
+    And I cancel
+
 #  @javascript
 #  Scenario: Cannot download package if project module is locked
 #    Given I have project module "Module 1"

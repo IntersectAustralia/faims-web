@@ -12,6 +12,26 @@ class ArchiveManager < FileManager
     not File.exists? @archive or not file_list.select { |f| File.mtime("#{@base_dir}/#{f}") > File.mtime(@timestamp_file.path) }.empty?
   end
 
+  def disk_space
+    stat = Sys::Filesystem.stat("/")
+    stat.block_size * stat.blocks_available
+  end
+
+  def archive_space
+    space = 0
+    absolute_file_list.each do |f|
+      next unless File.exists? f
+      next if File.basename(f) =~ /^\./ # ignore dot files
+
+      space += File.size f
+    end
+    space
+  end
+
+  def has_disk_space?
+    disk_space > archive_space * 2
+  end
+
   # Note: archives will not include dot files
   def update_archive(compute_checksum = false)
     return true unless has_changes?
