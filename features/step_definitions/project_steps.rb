@@ -604,8 +604,8 @@ And /^I have database "([^"]*)" for "([^"]*)"$/ do |db, project_module|
   FileUtils.cp Rails.root.join("features/assets/#{db}"), p.get_path(:db)
 end
 
-Then /^I should see "([^"]*)" with "([^"]*)"$/ do |link, error|
-  page.should have_xpath("//a[contains(text(),\"#{link}\")]/following-sibling::div[contains(text(), \"#{error}\")]")
+Then /^I should see "([^"]*)" with "([^"]*)"$/ do |link, status|
+  page.should have_xpath("//a[contains(text(),\"#{link}\")]/../../td/div[contains(text(), \"#{status}\")]")
 end
 
 Then /^I history should have conflicts$/ do

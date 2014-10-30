@@ -75,3 +75,11 @@ Feature: Search entities
       | Identifier | Created at          | Created by  | Last modified at    | Last modified by |
       | Small 1    | 2014-10-22 04:41:00 | Faims Admin | 2014-10-22 04:41:00 | Faims Admin      |
 
+  Scenario: See reviews and conflicts on search page
+    Given I have project module "Resolve Conflicts"
+    And I am on the project modules page
+    And I follow "Resolve Conflicts"
+    And I follow "Search Entity Records"
+    And I press "Search"
+    Then I should see "Small 1" with "conflict"
+    Then I should see "Small 1" with "review"
