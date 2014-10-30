@@ -24,7 +24,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
         @entity_forked_map[row[0]] = @project_module.db.is_arch_entity_forked(row[0]) unless @entity_forked_map[row[0]]
       end
       @show_review_column = @entity_dirty_map.select{|k,v| v==1}.count > 0
-      @show_conflict_column = @entity_forked_map.select{|k,v| v==1}.count > 0
+      @show_conflict_column = @entity_forked_map.select{|k,v| v}.count > 0
       @show_actions_column = @uuid.select{|i| i[2]}.count > 0
     else
       redirect_to search_arch_ent_records_path(@project_module, type: 'all', user: 'all', query: '')
