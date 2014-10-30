@@ -844,51 +844,53 @@ And /^I update field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do |fie
     value = value.strip
     type = get_field_type(field_type)
     WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+      break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
       sleep(1)
     end
-    node = all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
+    node = all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
     if type == 'vocab'
       node.find(:xpath, ".//select[contains(@name, '#{type}')]/option[contains(text(), '#{value}')]").select_option
-    else
+    elsif type == 'certainty'
       node.find(:xpath, ".//input[contains(@name,'#{type}')]").set value
+    else
+      node.find(:xpath, ".//textarea[contains(@name,'#{type}')]").set value
     end
   end
 end
 
 And /^I click on update for attribute with field "([^"]*)"$/ do |field|
   WAIT_RANGE.each do
-    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
     sleep(1)
   end
-  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field = find(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
   field.find(:xpath, ".//input[@value='Update']").click
 end
 
 And /^I remove attribute values for field "([^"]*)"$/ do |field|
   WAIT_RANGE.each do
-    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
     sleep(1)
   end
-  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field = find(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
   field.find(:css, '.remove-attribute').click
 end
 
 And /^I click upload for field "([^"]*)"$/ do |field|
   WAIT_RANGE.each do
-    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
     sleep(1)
   end
-  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field = find(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
   field.find(:css, '.attribute-upload-file').click
 end
 
 Then(/^I ignore errors for "(.*?)"$/) do |field|
   WAIT_RANGE.each do
-    break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+    break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
     sleep(1)
   end
-  field = find(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
+  field = find(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")
   field.find(:xpath, ".//*[@id='attr_ignore_errors']").click
   #wait for autosaving
   sleep(7)
@@ -901,14 +903,16 @@ And /^I should see field "([^"]*)" of type "([^"]*)" with values "([^"]*)"$/ do 
     value.strip!
     type = get_field_type(field_type)
     WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
+      break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").size == 0
       sleep(1)
     end
-    node = all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
+    node = all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..")[index]
     if type == 'vocab'
       node.find(:xpath, ".//select[contains(@name, '#{type}')]/option[contains(text(), '#{value}')]").text.should == value
-    else
+    elsif type == 'certainty'
       node.find(:xpath, ".//input[contains(@name,'#{type}')]").value.should == value
+    else
+      node.find(:xpath, ".//textarea[contains(@name,'#{type}')]").value.should == value
     end
   end
 end
@@ -921,9 +925,9 @@ end
 
 And /^I should (not see|see) field "([^"]*)" with error "([^"]*)"$/ do |not_see, field, error|
   if not_see == 'not see'
-    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").all(:xpath, ".//*[contains(text(), '#{error}')]").size.should == 0
+    first(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").all(:xpath, ".//*[contains(text(), '#{error}')]").size.should == 0
   else
-    first(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").first(:xpath, ".//*[contains(text(), '#{error}')]").text.should == error
+    first(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{field}')]/../..").first(:xpath, ".//*[contains(text(), '#{error}')]").text.should == error
   end
 end
 
@@ -1062,10 +1066,10 @@ end
 And /^I should (not have|have) values for field$/ do |not_have, table|
   table.hashes.each do |hash|
     WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
+      break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
       sleep(1)
     end
-    nodes = all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")
+    nodes = all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")
     matched_field = false
     nodes.each do |node|
       if match_field(node, hash['Constrained Data'], hash['Unconstrained Data'], hash['Annotation'], hash['Certainty'], hash[:error])
@@ -1079,13 +1083,13 @@ end
 
 def match_field(node, vocab, measure, freetext, certainty, error)
   # p node.first(:xpath, ".//select[contains(@name, 'vocab')]/option[contains(text(), '#{vocab}')]").text unless vocab.blank?
-  # p node.first(:xpath, ".//input[contains(@name, 'measure')]").value
-  # p node.first(:xpath, ".//input[contains(@name, 'freetext')]").value
+  # p node.first(:xpath, ".//textarea[contains(@name, 'measure')]").value
+  # p node.first(:xpath, ".//textarea[contains(@name, 'freetext')]").value
   # p node.first(:xpath, ".//input[contains(@name, 'certainty')]").value
 
   (vocab.blank? or node.first(:xpath, ".//select[contains(@name, 'vocab')]/option[contains(text(), '#{vocab}')]").text == vocab) and
-    node.first(:xpath, ".//input[contains(@name, 'measure')]").value == measure and
-    node.first(:xpath, ".//input[contains(@name, 'freetext')]").value == freetext and
+    node.first(:xpath, ".//textarea[contains(@name, 'measure')]").value == measure and
+    node.first(:xpath, ".//textarea[contains(@name, 'freetext')]").value == freetext and
     node.first(:xpath, ".//input[contains(@name, 'certainty')]").value == certainty and
       (error.blank? or node.first(:xpath, ".//*[contains(text(), '#{error}')]").text == error)
 end
@@ -1093,19 +1097,19 @@ end
 And /^I add values to field$/ do |table|
   table.hashes.each do |hash|
     WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
+      break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
       sleep(1)
     end
     sleep(1)
     # click add button
-    node = all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")[hash[:index].to_i]
+    node = all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")[hash[:index].to_i]
     node.find(:css, '.add-attribute').click
     # find in value
-    value = all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")[hash[:index].to_i + 1]
+    value = all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")[hash[:index].to_i + 1]
     value.find(:xpath, ".//select[contains(@name, 'vocab')]/option[contains(text(), '#{hash['Constrained Data']}')]").select_option unless hash['Constrained Data'].blank?
-    value.find(:xpath, ".//input[contains(@name,'measure')]").set hash['Unconstrained Data'] unless hash['Unconstrained Data'].blank?
-    value.find(:xpath, ".//input[contains(@name,'freetext')]").set hash['Annotation'] unless hash['Annotation'].blank?
-    value.find(:xpath, ".//input[contains(@name,'certainty')]").set hash['Certainty'] unless hash['Certainty'].blank?
+    value.find(:xpath, ".//textarea[contains(@name, 'measure')]").set hash['Unconstrained Data'] unless hash['Unconstrained Data'].blank?
+    value.find(:xpath, ".//textarea[contains(@name, 'freetext')]").set hash['Annotation'] unless hash['Annotation'].blank?
+    value.find(:xpath, ".//input[contains(@name, 'certainty')]").set hash['Certainty'] unless hash['Certainty'].blank?
   end
   # wait for autosaving
   sleep(7)
@@ -1114,11 +1118,11 @@ end
 And /^I remove values from field$/ do |table|
   table.hashes.each do |hash|
     WAIT_RANGE.each do
-      break unless all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
+      break unless all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..").size == 0
       sleep(1)
     end
     sleep(1)
-    nodes = all(:xpath, "//div[@class = 'row-fluid attribute-value']/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")
+    nodes = all(:xpath, "//div[contains(@class, 'attribute-value')]/div/label/h4[starts-with(normalize-space(text()),'#{hash[:field]}')]/../..")
     nodes.each do |node|
       if match_field(node, hash['Constrained Data'], hash['Unconstrained Data'], hash['Annotation'], hash['Certainty'], nil)
         # click remove button
