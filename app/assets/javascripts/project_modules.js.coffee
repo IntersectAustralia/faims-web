@@ -1091,6 +1091,15 @@ check_server_updated = (url) ->
         $('#loading').addClass('hidden')
         $('#loading').dialog('destroy')
 
+tooltip_setup = ->
+  $('a.tip').each(
+    ->
+      $(this).qtip(
+        content:
+          text: $(this).next('.tooltiptext')
+      )
+  )
+
 $(document).ready(
   =>
     show_submit_modal_dialog()
@@ -1113,6 +1122,7 @@ $(document).ready(
     setup_attribute_groups()
     setup_search_spinner()
     datatables_setup()
+    tooltip_setup()
     setup_server_updates()
     return
 )
