@@ -29,7 +29,7 @@
       %input{:type => 'hidden', :name => 'show_deleted', :value => params[:show_deleted]}
       %input{:type => 'hidden', :name => 'offset', :value => params[:offset]}
       %input{:type => 'hidden', :name => 'per_page', :value => @limit}
-      %input{:type => 'submit', :value => "Search", :class => 'btn'}
+      %input{:type => 'submit', :value => "Search", :class => 'btn btn-primary'}
 
   %form.pull-left{:method => 'post', :id => 'compare'}
     %input{:type => 'hidden', :value => form_authenticity_token, :name => 'authenticity_token'}
