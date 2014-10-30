@@ -91,6 +91,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
     @project_module.db_mgr.with_shared_lock do
 
       @project_module.db.with_transaction do |db|
+        timestamp = @project_module.db.current_timestamp
         @project_module.db.get_arch_entity_attributes(uuid).collect {|a| a[3]}.uniq.each do |att|
           attribute_id = !params[:attr][att][:attribute_id].blank? ? params[:attr][att][:attribute_id] : nil
 
@@ -100,7 +101,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
           certainty = !params[:attr][att][:certainty].blank? ? params[:attr][att][:certainty] : nil
           ignore_errors = !params[:attr][att][:ignore_errors].blank? && params[:attr][att][:ignore_errors] == "1" ? params[:attr][att][:ignore_errors] : nil
 
-          @project_module.db.update_arch_entity_attribute(db, uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
+          @project_module.db.update_arch_entity_attribute(db, timestamp, uuid, @project_module.db.get_project_module_user_id(current_user.email), vocab_id, attribute_id, measure, freetext, certainty, ignore_errors)
         end
       end
 

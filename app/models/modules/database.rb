@@ -157,8 +157,7 @@ class Database
     attributes
   end
 
-  def update_arch_entity_attribute(db, uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
-    timestamp = current_timestamp
+  def update_arch_entity_attribute(db, timestamp, uuid, userid, vocab_id, attribute_id, measure, freetext, certainty, ignore_errors = nil)
     db.execute(WebQuery.insert_version, timestamp, userid)
 
     cache_timestamps = {}
