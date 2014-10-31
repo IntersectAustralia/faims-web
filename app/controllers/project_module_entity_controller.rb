@@ -93,6 +93,7 @@ class ProjectModuleEntityController < ProjectModuleBaseController
       @project_module.db.with_transaction do |db|
         timestamp = @project_module.db.current_timestamp
         @project_module.db.get_arch_entity_attributes(uuid).collect {|a| a[3]}.uniq.each do |att|
+          next if params[:attr][att].nil?
           attribute_id = !params[:attr][att][:attribute_id].blank? ? params[:attr][att][:attribute_id] : nil
 
           vocab_id = !params[:attr][att][:vocab_id].blank? ? params[:attr][att][:vocab_id] : nil

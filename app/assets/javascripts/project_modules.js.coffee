@@ -856,11 +856,18 @@ autosave_indicator = ->
     $('.autosave-footer').addClass("autosave-indicator")
 
 autosave = (on_unload) ->
+  data_to_send = ""
+  for form in $('.attr')
+    if form_data.indexOf($(form).serialize()) == -1
+      data_to_send += "&" + $(form).serialize()
+  if data_to_send.length > 0 && data_to_send[0] = "&"
+    data_to_send = data_to_send.slice(1, data_to_send.length)
+
   $.ajax $('#update-all').attr('href'),
     type: 'POST'
     async: false
     dataType: 'json'
-    data: $('.attr').serialize()
+    data: data_to_send
     success: (data, textStatus, jqXHR) ->
       if data.result != 'failure'
         $.toast('Successfully updated entity', 2500, 'success');
