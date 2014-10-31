@@ -24,6 +24,19 @@ Feature: Manage exporters
       | Exporter 2 |
       | Exporter 3 |
 
+  Scenario: List exporters with update
+    Given I am on the the upload project exporters page
+    And I upload exporter "exporter_with_interface.tar.gz"
+    And I am on the the upload project exporters page
+    And I upload exporter "exporter_with_repo.tar.gz"
+    And I am on the project exporters page
+    Then I should see project exporters
+      | name           |
+      | Interface Test |
+      | Update Test    |
+    And I should not see "Update" button for exporter "Interface Test"
+    And I should see "Update" button for exporter "Update Test"
+
   Scenario: Cannot list exporters if not admin
     Given I logout
     And I am logged in as "user1@intersect.org.au"
@@ -41,6 +54,19 @@ Feature: Manage exporters
     And I should see project exporters
       | name       |
       | Exporter 1 |
+
+  Scenario: Update exporter
+    Given I am on the the upload project exporters page
+    And I upload exporter "exporter_with_repo.tar.gz"
+    And I am on the project exporters page
+    And I follow "Upload Exporter"
+    And I upload exporter with
+      | name        |
+      | Update Test |
+    Then I should see "Exporter installed."
+    And I fake updating exporter
+    And I press "Update" for exporter "Update Test"
+    Then I should see "Exporter updated."
 
   Scenario: Upgrade exporter
     Given I am on the project exporters page

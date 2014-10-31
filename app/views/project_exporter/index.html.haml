@@ -6,19 +6,24 @@
 - if @project_exporters
   %table.table#project-exporters
     %tr
-      %th No.
-      %th Name
-      %th Version
-      %th
+      %th.span1 No.
+      %th.span2 Name
+      %th.span1 Version
+      - if @project_exporters.select { |e| e.can_update? }.size > 0
+        %th.span1 Update
+      %th.span1 Uninstall
     - index = 0
     - for project_exporter in @project_exporters
       - index = index + 1
       %tr
-        %td
+        %td.span1
           = index.to_s + "."
-        %td.project-exporter-name
+        %td.span2.project-exporter-name
           = project_exporter.name
-        %td.project-exporter-version
+        %td.span1.project-exporter-version
           = project_exporter.version
-        %td
-          = button_to "Uninstall", delete_project_exporter_path(project_exporter.key), method: :post, confirm: "Are you sure you want to uninstall exporter?", class: 'btn'
+        - if project_exporter.can_update?
+          %td.span1
+            = button_to "Update", update_project_exporter_path(project_exporter.key), method: :post, class: 'btn'
+        %td.span1
+          = button_to "Uninstall", delete_project_exporter_path(project_exporter.key), method: :post, confirm: "Are you sure you want to uninstall exporter?", class: 'btn btn-danger'

@@ -998,8 +998,10 @@ And /^I upload exporter with$/ do |table|
   find('input[type="submit"]').click
 end
 
-And /^I press "([^"]*)" for exporter "([^"]*)"$/ do |label, name|
-  find(:xpath, "//*[contains(text(), \"#{name}\")]/..").find('input[type="submit"]').click
+And /^I press "([^"]*)" for exporter "([^"]*)"$/ do |button, exporter|
+  within(find(:xpath, "//td[contains(text(), '#{exporter}')]/..")) do
+    find("input[type='submit'][value='#{button}']").click
+  end
 end
 
 def get_field_type(type)
@@ -1335,3 +1337,18 @@ And /^I fake archive size too big$/ do
   end
 end
 
+And /^I should (not see|see) "([^"]*)" button for exporter "([^"]*)"$/ do |not_see, button, exporter|
+  within(find(:xpath, "//td[contains(text(), '#{exporter}')]/..")) do
+    all("input[type='submit'][value='#{button}']").size.should == (not_see == 'not see' ? 0 : 1)
+  end
+end
+
+And /^I fake updating exporter$/ do
+  class ProjectExporter
+
+    def update
+      true
+    end
+
+  end
+end

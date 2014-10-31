@@ -80,16 +80,16 @@ class ServerUpdater
       request_json = get_deployment_version
 
       # update repo
-      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/repo.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} 2>&1")
       return $?.exitstatus if $?.exitstatus == 4 or $?.exitstatus == 6
 
       # update server
-      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/update.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')}")
+      system("sudo FACTER_app_tag=#{request_json['tag']} puppet apply --pluginsync #{Rails.root.join('puppet/update.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} 2>&1")
       $?.exitstatus
     end
 
     def run_restart_script
-      system("sudo puppet apply --pluginsync #{Rails.root.join('puppet/restart.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} &")
+      system("sudo puppet apply --pluginsync #{Rails.root.join('puppet/restart.pp').to_s} --modulepath=#{Rails.root.join('puppet/modules').to_s}:$HOME/.puppet/modules --detailed-exitcodes >> #{Rails.root.join('log/puppet.log')} 2>&1 &")
     end
 
     def get_deployment_version

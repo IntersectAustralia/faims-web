@@ -63,4 +63,25 @@ class ProjectExporterController < ApplicationController
     redirect_to project_exporters_path
   end
 
+  def update
+    @project_exporter = ProjectExporter.find_by_key(params[:key])
+    unless @project_exporter
+      flash[:error] = 'Exporter does not exist.'
+      return redirect_to project_exporters_path
+    end
+
+    begin
+      result = @project_exporter.update
+      if result
+        flash[:notice] = 'Exporter updated.'
+      else
+        flash[:error] = 'Exporter failed to update.'
+      end
+    rescue ProjectExporter::ProjectExporterException => e
+      logger.error e
+      flash[:error] = e.message
+    end
+    redirect_to project_exporters_path
+  end
+
 end

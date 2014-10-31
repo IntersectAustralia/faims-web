@@ -62,6 +62,10 @@ class ProjectExporter
     return config_json['version'] if config_json
   end
 
+  def can_update?
+    Dir.exists? File.join(dir, '.git')
+  end
+
   def get_config_json
     JSON.parse(get_raw_config)
   rescue JSON::ParserError
@@ -113,6 +117,16 @@ class ProjectExporter
     FileUtils.rm_rf dir if result and Dir.exists? dir
 
     result
+  end
+
+  def update
+    return unless can_update?
+
+    # update exporter
+    execute_command("cd #{dir} && git pull")
+
+    # re-run installer
+    execute_script(File.basename(get_path(:install_script)))
   end
 
   def export(module_dir, input_json, download_dir, markup_file)
@@ -182,7 +196,8 @@ class ProjectExporter
       raise ProjectExporterException, 'Cannot find directory in archive' unless base_dir and Dir.exists? base_dir
 
       # move contents to export directory
-      FileUtils.cp_r Dir["#{base_dir}/*"], export_dir
+      entries = Dir.entries(base_dir).select { |d| d != '.' and d != '..' }.map { |d| File.join(base_dir, d) }
+      FileUtils.cp_r entries, export_dir
 
       export_dir
     ensure
@@ -202,7 +217,11 @@ class ProjectExporter
   private
 
   def execute_script(script, params = nil)
-    system("cd #{dir} && bash #{script} #{params.to_s} >> #{ProjectExporter.exporter_log} 2>&1")
+    system("cd #{dir} && sudo bash #{script} #{params.to_s} >> #{ProjectExporter.exporter_log} 2>&1")
+  end
+
+  def execute_command(command)
+    system("#{command} >> #{ProjectExporter.exporter_log} 2>&1")
   end
 
 end
