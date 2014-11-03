@@ -945,6 +945,10 @@ And /^I wait for autosaving$/ do
   sleep(7)
 end
 
+And /^I wait for a DNG to upload$/ do
+  sleep(30)
+end
+
 And /^I refresh page$/ do
   visit(current_path)
 end

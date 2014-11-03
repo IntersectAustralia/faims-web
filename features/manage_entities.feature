@@ -160,6 +160,27 @@ Feature: Manage entities
       | empty.tar.gz |
     And I should see "tree.original.jpg"
 
+  @javascript
+  Scenario: Update entity with uploaded DNG file
+    Given I have project module "Thumbnail"
+    And I am on the project modules page
+    And I click on "Thumbnail"
+    And I follow "Search Entity Records"
+    And I enter "" and submit the form
+    And I select the first record
+    And I click upload for field "picture"
+    And I pick file "sample.dng" for "attr_file_attribute_file"
+    And I press "Upload"
+    And I wait for a DNG to upload
+    And I update fields with values
+      | field    | type      | values |
+      | entity   | Certainty | 1.0    |
+    And I wait for autosaving
+    And I refresh page
+    Then I should see carousel files
+      | name                |
+      | sample.original.dng |
+
   Scenario: View entity with attachments
     Given I have project module "Attachments"
     And I am on the project modules page
