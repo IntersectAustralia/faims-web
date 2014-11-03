@@ -1203,41 +1203,11 @@ And /^I reset faims updater$/ do
 end
 
 And /^I add remote deployment file with version "([^"]*)" and tag "([^"]*)"$/ do |version, tag|
-  # File.open(ServerUpdater.faims_remote_deployment_file, 'w+') do |f|
-  #   f.write({version:version,tag:tag}.to_json)
-  # end
-  $remote_version = version
-  $remote_tag = tag
-  class ServerUpdater
-
-    class << self
-
-      def get_deployment_version
-        {'version' => $remote_version, 'tag' => $remote_tag}
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:get_deployment_version) { {'version' => version, 'tag' => tag} }
 end
 
 And /^I add local deployment file with version "([^"]*)" and tag "([^"]*)"$/ do |version, tag|
-  # File.open(ServerUpdater.faims_deployment_file, 'w+') do |f|
-  #   f.write({version:version,tag:tag}.to_json)
-  # end
-  $local_version = version
-  $local_tag = tag
-  class ServerUpdater
-
-    class << self
-
-      def get_local_version
-        {'version' => $local_version, 'tag' => $local_tag}
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:get_local_version) { {'version' => version, 'tag' => tag} }
 end
 
 And /^I should see button "([^"]*)" for "([^"]*)" module$/ do |button, name|
@@ -1249,92 +1219,30 @@ And /^I add has server updates file$/ do
 end
 
 And /^I add script file with "([^"]*)"$/ do |data|
-  $script_data = data
-  class ServerUpdater
-
-    class << self
-
-      def run_update_script
-        $script_data
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:run_update_script) { data }
 end
 
 Given /^I fake no internet connection$/ do
-  class ServerUpdater
-
-    class << self
-
-      def get_deployment_version
-        raise Exception
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:get_deployment_version) { raise Exception }
 end
 
 And /^I fake server update success$/ do
-  class ServerUpdater
-
-    class << self
-
-      def update_server
-        FileUtils.rm ServerUpdater.faims_update_file if File.exists? ServerUpdater.faims_update_file
-      end
-
-      def restart_server
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:update_server) { FileUtils.rm ServerUpdater.faims_update_file if File.exists? ServerUpdater.faims_update_file }
+  ServerUpdater.stub(:restart_server) { }
 end
 
 And /^I fake server update failure$/ do
-  class ServerUpdater
-
-    class << self
-
-      def update_server
-      end
-
-      def restart_server
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:update_server) { }
+  ServerUpdater.stub(:restart_server) { }
 end
 
 And /^I fake server update exception$/ do
-  class ServerUpdater
-
-    class << self
-
-      def update_server
-        raise Exception, 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.'
-      end
-
-      def restart_server
-      end
-
-    end
-
-  end
+  ServerUpdater.stub(:update_server) { raise Exception, 'Encountered an unexpected error trying to check for updates. Please contact a system administrator to resolve this problem.' }
+  ServerUpdater.stub(:restart_server) { }
 end
 
 And /^I fake archive size too big$/ do
-  class ArchiveManager
-
-    def has_disk_space?
-      false
-    end
-
-  end
+  ArchiveManager.any_instance.stub(:has_disk_space?) { false }
 end
 
 And /^I should (not see|see) "([^"]*)" button for exporter "([^"]*)"$/ do |not_see, button, exporter|
@@ -1344,11 +1252,5 @@ And /^I should (not see|see) "([^"]*)" button for exporter "([^"]*)"$/ do |not_s
 end
 
 And /^I fake updating exporter$/ do
-  class ProjectExporter
-
-    def update
-      true
-    end
-
-  end
+  ProjectExporter.any_instance.stub(:update) { true }
 end

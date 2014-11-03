@@ -746,7 +746,8 @@ setup_attribute_groups = ->
       cache: false
       success: (data, textStatus, jqXHR) ->
         for index in [0...data.result.length]
-          form = $('form')[index]
+          name = data.result[index]['values'][0].name
+          form = find_form_for_attribute(name)
           initial_setup_attribute($(form), data.result[index], true)
         autosave_entity_attributes()
         $('.file-measure').prop('readonly', true);
@@ -873,7 +874,8 @@ autosave = (on_unload) ->
         $.toast('Successfully updated entity', 2500, 'success');
         if !on_unload
           for index in [0...data.result.length]
-            form = $('form')[index]
+            name = data.result[index]['values'][0].name
+            form = find_form_for_attribute(name)
             initial_setup_attribute($(form), data.result[index], true)
           autosave_entity_attributes()
           $('.file-measure').prop('readonly', true);
@@ -884,6 +886,9 @@ autosave = (on_unload) ->
         $('#setting_up').dialog('destroy')
         $('#setting_up').addClass('hidden')
   return false
+
+find_form_for_attribute = (name) ->
+  $($('.attribute-name').filter( -> $(this).text() == name )[0]).parents('form')
 
 upload_file = (button) ->
   form = $(button).parents('.update-arch-ent-form')
@@ -931,14 +936,14 @@ upload_file = (button) ->
                 if index != data.uploaded_files.length-1
                   add_attribute(free.find('.add-attribute'))
                   free = form.find('.attribute-value').last()
+              form.find('.resize-text').trigger('autosize.resize')
               $.toast('Successfully uploaded file/s', 2500, 'success');
             else
               alert(data.message)
             $('#uploading_files').dialog('destroy')
             $('#uploading_files').addClass('hidden')
             should_save = true
-            form_data = null
-
+            autosave_indicator()
         
         $('.attr_file').trigger("reset")
         $('#attribute-file-upload').find('#attr_file_attribute_id').val("")

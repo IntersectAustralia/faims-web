@@ -28,6 +28,7 @@ Feature: Edit Multivalued Attribute
       | location | Location B       |                    | test2      | 0.23      | 1     |
       | name     |                  | something          | test3      | 0.34      | 0     |
     And I refresh page
+    And I wait for page to load up data
     And I should have values for field
       | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
       | location | Location D       |                    |            | 1.0       |
@@ -61,6 +62,7 @@ Feature: Edit Multivalued Attribute
       | location | Location A       |                    | test1      | 0.12      |
       | name     |                  |                    | test2      | 1.0       |
     And I refresh page
+    And I wait for page to load up data
     Then I should have values for field
       | field    | Constrained Data | Unconstrained Data | Annotation | Certainty |
       | location | Location B       |                    |            | 1.0       |
@@ -116,6 +118,7 @@ Feature: Edit Multivalued Attribute
       | location |                  |                    |            | 0.23      | 0     |
       | name     |                  |                    |            | 0.34      | 0     |
       | name     |                  |                    |            | 0.43      | 0     |
+    And I wait for page to load up data
     Then I should have values for field
       | field    | Constrained Data | Unconstrained Data | Annotation | Certainty | error                |
       | location |                  |                    |            | 0.12      | Field value is blank |
