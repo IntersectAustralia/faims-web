@@ -17,7 +17,7 @@ class tmpreaper {
   file_line { "configure tmpreaper delay":
     path      => "/etc/tmpreaper.conf",
     line      => "TMPREAPER_DELAY='0'",
-    match     => "TMPREAPER_DELAY=*",
+    match     => "^TMPREAPER_DELAY=*",
     ensure    => "present",
     require   => Package[$tmpreaper_packges]
   }
