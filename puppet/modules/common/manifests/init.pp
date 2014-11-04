@@ -1,12 +1,18 @@
 class common {
 
   class { 'apt':
-    always_apt_update => true,
+  }
+
+  exec { "update sources":
+    path    => "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",
+    command => '/bin/true',
+    unless  => 'apt-get update'
   }
 
   $common_packages = ["git","build-essential"]
   package { $common_packages:
-    ensure  => "present"
+    ensure  => "present",
+    require => Exec["update sources"]
   }
 
 }
