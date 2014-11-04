@@ -217,7 +217,11 @@ class ProjectExporter
   private
 
   def execute_script(script, params = nil)
-    system("cd #{dir} && sudo bash #{script} #{params.to_s} >> #{ProjectExporter.exporter_log} 2>&1")
+    unless Rails.env.test?
+      system("cd #{dir} && sudo bash #{script} #{params.to_s} >> #{ProjectExporter.exporter_log} 2>&1")
+    else
+      system("cd #{dir} && bash #{script} #{params.to_s} >> #{ProjectExporter.exporter_log} 2>&1")
+    end
   end
 
   def execute_command(command)
