@@ -41,7 +41,9 @@ class ServerUpdater
     end
 
     def update_server
-      return if File.exists? faims_update_lock or !check_server_updates
+      return if File.exists? faims_update_lock
+      check_server_updates
+      return unless File.exists? faims_update_file
 
       begin
         # create lock file
