@@ -20,11 +20,11 @@ Feature: Project module file manager
       | data | file1.tar.gz  |
       | data | file2.sqlite3 |
       | data | file3.txt     |
-    Then I should see project module files
-      | dir  | file          |
-      | data | file1.tar.gz  |
-      | data | file2.sqlite3 |
-      | data | file3.txt     |
+    Then I should see project module files for "Module 1"
+      | dir  | file          | full_dir   |
+      | data | file1.tar.gz  | files/data |
+      | data | file2.sqlite3 | files/data |
+      | data | file3.txt     | files/data |
 
   @javascript
   Scenario: Add project module directories
@@ -60,11 +60,11 @@ Feature: Project module file manager
       | data  | file1.tar.gz  |
       | test1 | file2.sqlite3 |
       | test2 | file3.txt     |
-    Then I should see project module files
-      | dir   | file          |
-      | data  | file1.tar.gz  |
-      | test1 | file2.sqlite3 |
-      | test2 | file3.txt     |
+    Then I should see project module files for "Module 1"
+      | dir   | file          | full_dir               |
+      | data  | file1.tar.gz  | files/data             |
+      | test1 | file2.sqlite3 | files/data/test1       |
+      | test2 | file3.txt     | files/data/test1/test2 |
 
   @javascript
   Scenario: Delete project module files
@@ -81,13 +81,14 @@ Feature: Project module file manager
       | dir  | file          |
       | data | file1.tar.gz  |
       | data | file2.sqlite3 |
-    Then I should see project module files
-      | dir  | file      |
-      | data | file3.txt |
-    And I should not see project module files
-      | dir  | file          |
-      | data | file1.tar.gz  |
-      | data | file2.sqlite3 |
+    And I wait 2 seconds
+    Then I should see project module files for "Module 1"
+      | dir  | file      | full_dir   |
+      | data | file3.txt | files/data |
+    And I should not see project module files for "Module 1"
+      | dir  | file          | full_dir   |
+      | data | file1.tar.gz  | files/data |
+      | data | file2.sqlite3 | files/data |
     And I should see "Deleted file"
     And I should not have package archive for "Module 1"
 
@@ -111,8 +112,8 @@ Feature: Project module file manager
       | data  | test4     |
       | test5 | test6     |
     Then I should see project module directories
-      | dir   | child_dir |
-      | data  | test5     |
+      | dir  | child_dir |
+      | data | test5     |
     Then I should not see project module directories
       | dir   | child_dir |
       | data  | test1     |
@@ -137,10 +138,10 @@ Feature: Project module file manager
     And I should have package archive for "Module 1"
     And I delete root directory
     Then I should not see project module directories
-      | dir   | child_dir |
-      | data  | test1     |
-      | data  | test4     |
-      | data  | test5     |
+      | dir  | child_dir |
+      | data | test1     |
+      | data | test4     |
+      | data | test5     |
     And I should see "Deleted directory"
     And I should not have package archive for "Module 1"
 
@@ -159,12 +160,12 @@ Feature: Project module file manager
     And I delete project module directories
       | dir  | child_dir |
       | data | test1     |
-    Then I should not see project module files
-      | dir   | file          |
-      | test1 | file2.sqlite3 |
+    Then I should not see project module files for "Module 1"
+      | dir   | file          | full_dir         |
+      | test1 | file2.sqlite3 | files/data/test1 |
     Then I should not see project module directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     And I should see "Deleted directory"
     And I should not have package archive for "Module 1"
 
@@ -176,9 +177,9 @@ Feature: Project module file manager
       | dir  | file         |
       | data | file1.tar.gz |
       | data | file1.tar.gz |
-    Then I should see project module files
-      | dir  | file         |
-      | data | file1.tar.gz |
+    Then I should see project module files for "Module 1"
+      | dir  | file         | full_dir   |
+      | data | file1.tar.gz | files/data |
     And I should see "File already exists"
 
   @javascript
@@ -189,9 +190,9 @@ Feature: Project module file manager
     And I upload project module files
       | dir  | file         |
       | data | file1.tar.gz |
-    Then I should not see project module files
-      | dir  | file         |
-      | data | file1.tar.gz |
+    Then I should not see project module files for "Module 1"
+      | dir  | file         | full_dir   |
+      | data | file1.tar.gz | files/data |
     And I should see "Could not process request as project is currently locked"
 
   @javascript
@@ -225,15 +226,15 @@ Feature: Project module file manager
     Given I have project module "Module 1"
     And I am on upload data files page for Module 1
     And I upload project module files
-      | dir  | file          |
-      | data | file1.tar.gz  |
+      | dir  | file         |
+      | data | file1.tar.gz |
     And data files are locked for "Module 1"
     And I delete project module files
-      | dir  | file          |
-      | data | file1.tar.gz  |
-    Then I should see project module files
-      | dir  | file          |
-      | data | file1.tar.gz  |
+      | dir  | file         |
+      | data | file1.tar.gz |
+    Then I should see project module files for "Module 1"
+      | dir  | file         | full_dir   |
+      | data | file1.tar.gz | files/data |
     And I should see "Could not process request as project is currently locked"
 
   @javascript
@@ -241,15 +242,15 @@ Feature: Project module file manager
     Given I have project module "Module 1"
     And I am on upload data files page for Module 1
     And I create project module directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     And data files are locked for "Module 1"
     And I delete project module directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     Then I should see project module directories
-      | dir   | child_dir |
-      | data  | test1     |
+      | dir  | child_dir |
+      | data | test1     |
     And I should see "Could not process request as project is currently locked"
 
   Scenario: I upload batch file
@@ -257,10 +258,10 @@ Feature: Project module file manager
     And I am on upload data files page for Module 1
     And I pick file "batch.tar.gz" for "project_module_file"
     And I press "Upload"
-    And I should see project module files
-      | dir   | file  |
-      | test1 | test3 |
-      | data  | test2 |
+    And I should see project module files for "Module 1"
+      | dir   | file  | full_dir         |
+      | test1 | test3 | files/data/test1 |
+      | data  | test2 | files/data       |
 
   Scenario: Cannot upload batch file if archive is invalid
     Given I have project module "Module 1"
@@ -268,10 +269,10 @@ Feature: Project module file manager
     And I pick file "file3.txt" for "project_module_file"
     And I press "Upload"
     And I should see "Could not upload file. Please ensure file is a valid archive."
-    Then I should not see project module files
-      | dir   | file  |
-      | test1 | test3 |
-      | data  | test2 |
+    Then I should not see project module files for "Module 1"
+      | dir   | file  | full_dir         |
+      | test1 | test3 | files/data/test1 |
+      | data  | test2 | files/data       |
 
   Scenario: Cannot upload batch file if files are locked
     Given I have project module "Module 1"
@@ -280,10 +281,10 @@ Feature: Project module file manager
     And I pick file "batch.tar.gz" for "project_module_file"
     And I press "Upload"
     And I should see "Could not process request as project is currently locked"
-    Then I should not see project module files
-      | dir   | file  |
-      | test1 | test3 |
-      | data  | test2 |
+    Then I should not see project module files for "Module 1"
+      | dir   | file  | full_dir         |
+      | test1 | test3 | files/data/test1 |
+      | data  | test2 | files/data       |
 
 
 

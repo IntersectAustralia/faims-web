@@ -642,16 +642,30 @@ Then /^I upload project module files$/ do |table|
   end
 end
 
-Then /^I should see project module files$/ do |table|
+Then /^I should see project module files for "([^"]*)"$/ do |name, table|
+  project_module = ProjectModule.find_by_name(name)
+  data_files = project_module.db.get_files(ProjectModule::DATA).map { |f| f[:filename] }
+
+  table_files = []
   table.hashes.each do |hash|
     page.should have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/li/a[contains(text(), '#{hash[:file]}')]")
+    table_files << File.join(hash[:full_dir], hash[:file])
   end
+
+  (data_files & table_files).should == table_files
 end
 
-Then /^I should not see project module files$/ do |table|
+Then /^I should not see project module files for "([^"]*)"$/ do |name, table|
+  project_module = ProjectModule.find_by_name(name)
+  data_files = project_module.db.get_files(ProjectModule::DATA).map { |f| f[:filename] }
+
+  table_files = []
   table.hashes.each do |hash|
     page.should_not have_xpath("//div[@class='dir clearfix'][./div[@class='dir-header']/h3/span/a[text()='#{hash[:dir]}']]/ul/li/a[contains(text(), '#{hash[:file]}')]")
+    table_files << File.join('files/data', hash[:file])
   end
+
+  (data_files & table_files).should_not == table_files
 end
 
 And /^I enter directory "([^"]*)" for "([^"]*)"$/ do |child_dir, dir|

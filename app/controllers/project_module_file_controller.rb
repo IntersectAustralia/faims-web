@@ -10,7 +10,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     if params[:path].blank?
       flash.now[:error] = 'Please select file to download.'
     else
-      file = File.join(@project_module.get_path(:data_files_dir), params[:path])
+      file = sanitize_file_path(File.join(@project_module.get_path(:data_files_dir), params[:path]))
       if not File.exists? file
         flash.now[:error] = 'File does not exist.'
       elsif File.directory? file and FileHelper.get_file_list(file).size == 0
@@ -46,7 +46,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     else
       @project_module.data_mgr.with_exclusive_lock do
         file = params[:file_manager][:file]
-        @project_module.add_data_file(File.join(params[:path], file.original_filename), file.tempfile)
+        @project_module.add_data_file(sanitize_file_path(File.join(params[:path], file.original_filename)), file.tempfile)
         flash.now[:notice] = 'File uploaded.'
       end
     end
@@ -68,7 +68,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     else
       @project_module.data_mgr.with_exclusive_lock do
         dir = params[:file_manager][:dir].strip
-        @project_module.add_data_dir(File.join(File.join(params[:path], dir)))
+        @project_module.add_data_dir(sanitize_file_path(File.join(params[:path], dir)))
         flash.now[:notice] = 'Created directory.'
       end
     end
@@ -88,7 +88,7 @@ class ProjectModuleFileController < ProjectModuleBaseController
     if params[:path].blank?
       flash.now[:error] = 'Please select file to delete.'
     else
-      file = File.join(@project_module.get_path(:data_files_dir), params[:path])
+      file = sanitize_file_path(File.join(@project_module.get_path(:data_files_dir), params[:path]))
       if not File.exists? file and not File.directory? file
         flash.now[:error] = 'File does not exist.'
       else
@@ -145,6 +145,12 @@ class ProjectModuleFileController < ProjectModuleBaseController
     @project_module = ProjectModule.find(params[:id])
     @dir = FileHelper.get_file_list_by_dir(@project_module.get_path(:data_files_dir), '.')
     render 'file_list'
+  end
+
+  def sanitize_file_path(path)
+    path.gsub!(/\/\.\//, '/')
+    path.gsub!(/^\.\//, '')
+    path
   end
 
 end
