@@ -1090,7 +1090,7 @@ check_server_updated = (url) ->
     dataType: 'json'
     success: (data, textStatus, jqXHR) ->
       if data.result == "success"
-        alert(data.message)
+        $('.server_title').text(data.message)
         setTimeout (-> window.location = data.url), 60000
 
         # send restart request
