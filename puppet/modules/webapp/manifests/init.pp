@@ -39,7 +39,7 @@ class webapp {
     command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:create db:migrate db:seed app:generate_secret modules:setup modules:clear\"",
     unless      => "su - ${webapp_user} -c \"cd ${app_root} && test -d modules\"",
     logoutput   => "on_failure",
-    timeout     => 300,
+    timeout     => 600,
     require     => Exec["install webapp gems"]
   }
 
@@ -48,7 +48,7 @@ class webapp {
     environment => $rbenv_env,
     command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:migrate assets:precompile\"",
     logoutput   => "on_failure",
-    timeout     => 300,
+    timeout     => 600,
     require     => Exec["initialise app"]
   }
 
@@ -58,7 +58,7 @@ class webapp {
     command     => "su - ${webapp_user} -c \"gem install passenger\"",
     unless      => "su - ${webapp_user} -c \"gem list passenger -i\"",
     logoutput   => "on_failure",
-    timeout     => 300
+    timeout     => 600
   }
 
   exec { "link passenger gem":
