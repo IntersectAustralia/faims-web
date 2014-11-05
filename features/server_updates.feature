@@ -76,8 +76,7 @@ Feature: Server updates
     And I press "Update Server"
     And I process delayed jobs
     And I wait 5 seconds
-    Then I should see dialog "The server has been successfully updated. The server will now reboot in 60 seconds please press ok to continue."
-    And I cancel
+    Then I should see "The server has been successfully updated. The server will now reboot in 60 seconds."
 
   @javascript
   Scenario: I can update server returns server update failure

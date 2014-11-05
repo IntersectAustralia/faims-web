@@ -59,11 +59,6 @@ Feature: Manage exporters
     Given I am on the the upload project exporters page
     And I upload exporter "exporter_with_repo.tar.gz"
     And I am on the project exporters page
-    And I follow "Upload Exporter"
-    And I upload exporter with
-      | name        |
-      | Update Test |
-    Then I should see "Exporter installed."
     And I fake updating exporter
     And I press "Update" for exporter "Update Test"
     Then I should see "Exporter updated."

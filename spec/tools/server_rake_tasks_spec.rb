@@ -30,8 +30,9 @@ describe 'Server rake tasks' do
     ServerUpdater.stub(:get_deployment_version) { {'version' => '2.0', 'tag' => 'blah'} }
     ServerUpdater.stub(:get_local_version) { {'version' => '2.0', 'tag' => 'blah'} }
     ServerUpdater.stub(:run_update_script) { 0 }
+    ServerUpdater.stub(:run_restart_script) { 0 }
     output = capture(:stdout) do
-      update_server.should == nil
+      update_server.should == 0
     end
     expect(output).to include 'Everything is up to date'
   end
@@ -40,6 +41,7 @@ describe 'Server rake tasks' do
     ServerUpdater.stub(:get_deployment_version) { {'version' => '2.1', 'tag' => 'blah'} }
     ServerUpdater.stub(:get_local_version) { {'version' => '2.0', 'tag' => 'blah'} }
     ServerUpdater.stub(:run_update_script) { 2 }
+    ServerUpdater.stub(:run_restart_script) { 0 }
     output = capture(:stdout) do
       update_server.should == 2
     end
@@ -50,6 +52,7 @@ describe 'Server rake tasks' do
     ServerUpdater.stub(:get_deployment_version) { {'version' => '2.1', 'tag' => 'blah'} }
     ServerUpdater.stub(:get_local_version) { {'version' => '2.0', 'tag' => 'blah'} }
     ServerUpdater.stub(:run_update_script) { 4 }
+    ServerUpdater.stub(:run_restart_script) { 0 }
     output = capture(:stdout) do
       update_server.should == 4
     end
