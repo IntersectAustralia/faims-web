@@ -167,11 +167,11 @@
     No related entities to display
   .form-actions
     - if params[:show_deleted_related].blank?
-      = link_to "Delete Selected", batch_delete_related_ents_path(@project_module, search_params), :id => 'delete-selected-related-ents-button', :class => 'btn btn-danger' unless @related_arch_ents.empty?
-      = link_to "Show Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+      = link_to "Delete Selected Relationships", batch_delete_related_ents_path(@project_module, search_params), :id => 'delete-selected-related-ents-button', :class => 'btn btn-danger' unless @related_arch_ents.empty?
+      = link_to "Show Deleted Relationships", '#', :id => 'show-hide-deleted', :class => 'btn'
     - else
-      = link_to "Restore Selected", batch_restore_related_ents_path(@project_module, search_params), :id => 'restore-selected-related-ents-button', :class => 'btn btn-warning' unless @related_arch_ents.empty?
-      = link_to "Hide Deleted", '#', :id => 'show-hide-deleted', :class => 'btn'
+      = link_to "Restore Selected Relationships", batch_restore_related_ents_path(@project_module, search_params), :id => 'restore-selected-related-ents-button', :class => 'btn btn-warning' unless @related_arch_ents.empty?
+      = link_to "Hide Deleted Relationships", '#', :id => 'show-hide-deleted', :class => 'btn'
 
 %form{:action => edit_arch_ent_records_path(@project_module, params[:uuid]), :method => "get", :id => 'show-hide-deleted-form'}
   %input{:type => 'hidden', :value => params[:type], :name => 'type'}
