@@ -31,7 +31,7 @@ class ServerController < ApplicationController
       if ServerUpdater.has_server_updates
         render json: { result: 'failure', message: 'The server failed to update properly. Please contact a system administrator to resolve this problem.' }
       else
-        render json: { result: 'success', message: 'The server has been successfully updated. The server will now reboot in 60 seconds please press ok to continue.', url: project_modules_path, restart_url: restart_server_path }
+        render json: { result: 'success', message: 'The server has been successfully updated. The server will now reboot in 60 seconds.', url: project_modules_path, restart_url: restart_server_path }
       end
     end
   end
