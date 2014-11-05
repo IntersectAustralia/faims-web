@@ -1005,6 +1005,8 @@ datatables_setup = ->
     "sPaginationType": "bootstrap",
     "bPaginate": false,
     "bFilter": false,
+    "order": [[2, "asc"]],
+    "columnDefs": [ { "targets": 0, "orderable": false } ]
   );
   return
 
