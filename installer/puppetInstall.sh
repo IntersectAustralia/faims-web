@@ -28,7 +28,7 @@ fi
 if [ ! -d "$APP_ROOT" ]; then
     sudo git clone https://github.com/IntersectAustralia/faims-web.git $APP_ROOT
     sudo chown -R $USER:$USER $APP_ROOT
-    cd $APP_ROOT && git checkout master
+    cd $APP_ROOT && git checkout qa
 fi
 
 if [ ! -h "/etc/puppet/hiera.yaml" ]; then
