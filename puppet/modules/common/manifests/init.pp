@@ -6,7 +6,8 @@ class common {
   exec { "update sources":
     path    => "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",
     command => '/bin/true',
-    unless  => 'apt-get update'
+    unless  => 'apt-get update',
+    timeout => 600
   }
 
   $common_packages = ["git","build-essential"]
