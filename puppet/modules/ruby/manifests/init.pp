@@ -62,7 +62,7 @@ class ruby {
     path        => "${$rbenv_path}:${$exec_path}",
     user        => $webapp_user,
     environment => $rbenv_env,
-    command     => "rbenv global ${ruby_version}",
+    command     => "jhdsgfshdrbenv global ${ruby_version}",
     logoutput   => "on_failure",
     require     => Exec["build ruby version"]
   }
