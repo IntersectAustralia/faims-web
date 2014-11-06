@@ -39,7 +39,7 @@ class webapp {
     command     => "su - ${webapp_user} -c \"cd ${app_root} && bundle exec rake db:create db:migrate db:seed app:generate_secret modules:setup modules:clear\"",
     unless      => "su - ${webapp_user} -c \"cd ${app_root} && test -d modules\"",
     logoutput   => "on_failure",
-    timeout     => 600,
+    timeout     => 1800,
     require     => Exec["install webapp gems"]
   }
 
