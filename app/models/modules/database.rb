@@ -69,13 +69,13 @@ class Database
     return false
   end
 
-  def is_relationship_forked(relationshipid)
-    result = @db.get_first_value WebQuery.is_relationship_forked, relationshipid
-    return true if result and result > 0
-    result = @db.get_first_value WebQuery.is_relnvalue_forked, relationshipid
-    return true if result and result > 0
-    return false
-  end
+  # def is_relationship_forked(relationshipid)
+  #   result = @db.get_first_value WebQuery.is_relationship_forked, relationshipid
+  #   return true if result and result > 0
+  #   result = @db.get_first_value WebQuery.is_relnvalue_forked, relationshipid
+  #   return true if result and result > 0
+  #   return false
+  # end
 
   def is_arch_ent_same_type(entity1, entity2)
      return @db.get_first_value(WebQuery.get_arch_entity_type, entity1) ==
@@ -91,9 +91,9 @@ class Database
     @db.get_first_value(WebQuery.is_arch_entity_dirty, uuid, uuid)
   end
 
-  def is_relationship_dirty(relationshipid)
-    @db.get_first_value(WebQuery.is_relationship_dirty, relationshipid)
-  end
+  # def is_relationship_dirty(relationshipid)
+  #   @db.get_first_value(WebQuery.is_relationship_dirty, relationshipid)
+  # end
 
   def get_arch_entity_type(uuid)
     @db.get_first_value(WebQuery.get_arch_entity_type, uuid)
@@ -107,9 +107,9 @@ class Database
     @db.get_first_value(WebQuery.get_entity_identifier, uuid)
   end
 
-  def get_rel_identifier(relationshipid)
-    @db.get_first_value(WebQuery.get_rel_identifier, relationshipid)
-  end
+  # def get_rel_identifier(relationshipid)
+  #   @db.get_first_value(WebQuery.get_rel_identifier, relationshipid)
+  # end
 
   def search_arch_entity(limit, offset, type, user, query, show_deleted)
     params = {
@@ -680,48 +680,48 @@ class Database
     attributes
   end
 
-  def get_rel_arch_ent_members(relationshipid, limit, offset)
-    params = {
-        relationshipid:relationshipid,
-        limit:limit,
-        offset:offset
-    }
-    uuids = @db.execute(WebQuery.get_arch_entities_in_relationship, params)
-    uuids
-  end
+  # def get_rel_arch_ent_members(relationshipid, limit, offset)
+  #   params = {
+  #       relationshipid:relationshipid,
+  #       limit:limit,
+  #       offset:offset
+  #   }
+  #   uuids = @db.execute(WebQuery.get_arch_entities_in_relationship, params)
+  #   uuids
+  # end
 
-  def total_rel_arch_ent_members(relationshipid)
-    params = {
-        relationshipid:relationshipid
-    }
-    total = @db.get_first_value(WebQuery.total_arch_entities_in_relationship, params)
-    total
-  end
+  # def total_rel_arch_ent_members(relationshipid)
+  #   params = {
+  #       relationshipid:relationshipid
+  #   }
+  #   total = @db.get_first_value(WebQuery.total_arch_entities_in_relationship, params)
+  #   total
+  # end
 
-  def get_non_member_arch_ent(relationshipid, query, limit, offset)
-    params = {
-        query:query,
-        relationshipid:relationshipid,
-        limit:limit,
-        offset:offset
-    }
-    uuids = @db.execute(WebQuery.get_arch_entities_not_in_relationship, params)
-    uuids
-  end
+  # def get_non_member_arch_ent(relationshipid, query, limit, offset)
+  #   params = {
+  #       query:query,
+  #       relationshipid:relationshipid,
+  #       limit:limit,
+  #       offset:offset
+  #   }
+  #   uuids = @db.execute(WebQuery.get_arch_entities_not_in_relationship, params)
+  #   uuids
+  # end
 
-  def total_non_member_arch_ent(relationshipid, query)
-    params = {
-        query:query,
-        relationshipid:relationshipid
-    }
-    total = @db.get_first_value(WebQuery.total_arch_entities_not_in_relationship, params)
-    total
-  end
+  # def total_non_member_arch_ent(relationshipid, query)
+  #   params = {
+  #       query:query,
+  #       relationshipid:relationshipid
+  #   }
+  #   total = @db.get_first_value(WebQuery.total_arch_entities_not_in_relationship, params)
+  #   total
+  # end
 
-  def get_verbs_for_relation(relntypeid)
-    verbs = @db.execute(WebQuery.get_verbs_for_relationship, relntypeid, relntypeid)
-    verbs
-  end
+  # def get_verbs_for_relation(relntypeid)
+  #   verbs = @db.execute(WebQuery.get_verbs_for_relationship, relntypeid, relntypeid)
+  #   verbs
+  # end
 
   def get_arch_ent_rel_associations(uuid, limit, offset)
     params = {
@@ -734,70 +734,70 @@ class Database
     rels
   end
 
-  def total_arch_ent_rel_associations(uuid)
-    params = {
-        uuid:uuid
-    }
-    total = @db.get_first_value(WebQuery.total_relationships_for_arch_ent, params)
-    total
-  end
+  # def total_arch_ent_rel_associations(uuid)
+  #   params = {
+  #       uuid:uuid
+  #   }
+  #   total = @db.get_first_value(WebQuery.total_relationships_for_arch_ent, params)
+  #   total
+  # end
 
-  def get_non_arch_ent_rel_associations(uuid, query, limit, offset)
-    params = {
-        uuid:uuid,
-        limit:limit,
-        query:query,
-        offset:offset
-    }
-    rels = @db.execute(WebQuery.get_relationships_not_belong_to_arch_ent, params)
-    rels
-  end
+  # def get_non_arch_ent_rel_associations(uuid, query, limit, offset)
+  #   params = {
+  #       uuid:uuid,
+  #       limit:limit,
+  #       query:query,
+  #       offset:offset
+  #   }
+  #   rels = @db.execute(WebQuery.get_relationships_not_belong_to_arch_ent, params)
+  #   rels
+  # end
 
-  def total_non_arch_ent_rel_associations(uuid, query)
-    params = {
-        uuid:uuid,
-        query:query
-    }
-    total = @db.get_first_value(WebQuery.total_relationships_not_belong_to_arch_ent, params)
-    total
-  end
+  # def total_non_arch_ent_rel_associations(uuid, query)
+  #   params = {
+  #       uuid:uuid,
+  #       query:query
+  #   }
+  #   total = @db.get_first_value(WebQuery.total_relationships_not_belong_to_arch_ent, params)
+  #   total
+  # end
 
-  def add_member(relationshipid, userid, uuid, verb)
-    @db.transaction do |db|
+  # def add_member(relationshipid, userid, uuid, verb)
+  #   @db.transaction do |db|
 
-      timestamp = current_timestamp
-      db.execute(WebQuery.insert_version, timestamp, userid)
+  #     timestamp = current_timestamp
+  #     db.execute(WebQuery.insert_version, timestamp, userid)
 
-      params = {
-          uuid:uuid,
-          relationshipid:relationshipid,
-          userid:userid,
-          verb:clean(verb),
-          aentrelntimestamp:timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
-      }
+  #     params = {
+  #         uuid:uuid,
+  #         relationshipid:relationshipid,
+  #         userid:userid,
+  #         verb:clean(verb),
+  #         aentrelntimestamp:timestamp,
+  #         parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
+  #     }
 
-      db.execute(WebQuery.insert_arch_entity_relationship, params)
-    end
-  end
+  #     db.execute(WebQuery.insert_arch_entity_relationship, params)
+  #   end
+  # end
 
-  def delete_member(relationshipid, userid, uuid)
-    @db.transaction do |db|
+  # def delete_member(relationshipid, userid, uuid)
+  #   @db.transaction do |db|
 
-      timestamp = current_timestamp
-      db.execute(WebQuery.insert_version, timestamp, userid)
+  #     timestamp = current_timestamp
+  #     db.execute(WebQuery.insert_version, timestamp, userid)
 
-      params = {
-          uuid:uuid,
-          relationshipid:relationshipid,
-          userid:userid,
-          aentrelntimestamp:timestamp,
-          parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
-      }
+  #     params = {
+  #         uuid:uuid,
+  #         relationshipid:relationshipid,
+  #         userid:userid,
+  #         aentrelntimestamp:timestamp,
+  #         parenttimestamp: @db.get_first_value(WebQuery.get_arch_ent_rel_parenttimestamp, uuid, relationshipid)
+  #     }
 
-      db.execute(WebQuery.delete_arch_entity_relationship, params)
-    end
-  end
+  #     db.execute(WebQuery.delete_arch_entity_relationship, params)
+  #   end
+  # end
 
   def get_arch_ent_types
     types = @db.execute(WebQuery.get_arch_entity_types)

@@ -1075,169 +1075,169 @@ EOF
     )
   end
 
-  def self.get_arch_entities_in_relationship
-    cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid
-  from latestNonDeletedArchEntIdentifiers
-  where uuid in ( select uuid
-                    from latestNonDeletedAentReln
-                   where relationshipid = :relationshipid
-                 )
+#   def self.get_arch_entities_in_relationship
+#     cleanup_query(<<EOF
+# select uuid, group_concat(response, ', ') as response
+# from (
+#   select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+#                                         measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                         vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                         measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+#                                         vocabname  || ' (' || freetext || ')',
+#                                         measure    || ' (' || freetext || ')',
+#                                         measure    || ' (' || (certainty * 100.0) || '% certain)',
+#                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+#                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
+#                                         measure,
+#                                         vocabname,
+#                                         freetext), ' | ') as response, attributeid
+#   from latestNonDeletedArchEntIdentifiers
+#   where uuid in ( select uuid
+#                     from latestNonDeletedAentReln
+#                    where relationshipid = :relationshipid
+#                  )
 
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
+#   group by uuid, attributeid
+#   order by epoch)
+# group by uuid
+# limit :limit
+# offset :offset;
+# EOF
+#     )
+#   end
 
-  def self.total_arch_entities_in_relationship
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (
-    select uuid, attributeid
-    from latestNonDeletedArchEntIdentifiers
-    where uuid in ( select uuid
-                      from latestNonDeletedAentReln
-                     where relationshipid = :relationshipid
-                   )
+#   def self.total_arch_entities_in_relationship
+#     cleanup_query(<<EOF
+# select count(*)
+# from (
+#   select uuid
+#   from (
+#     select uuid, attributeid
+#     from latestNonDeletedArchEntIdentifiers
+#     where uuid in ( select uuid
+#                       from latestNonDeletedAentReln
+#                      where relationshipid = :relationshipid
+#                    )
 
-    group by uuid, attributeid
-    order by epoch)
-  group by uuid
-);
-EOF
-    )
-  end
+#     group by uuid, attributeid
+#     order by epoch)
+#   group by uuid
+# );
+# EOF
+#     )
+#   end
 
-  def self.get_arch_entities_not_in_relationship
-    cleanup_query(<<EOF
-select uuid, group_concat(response, ', ') as response
-from (
-  select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
-                                        measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                        measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
-                                        vocabname  || ' (' || freetext || ')',
-                                        measure    || ' (' || freetext || ')',
-                                        measure    || ' (' || (certainty * 100.0) || '% certain)',
-                                        vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                        freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                        measure,
-                                        vocabname,
-                                        freetext), ' | ') as response, attributeid
-  from latestNonDeletedArchEntIdentifiers
-  where uuid not in ( select uuid
-                    from latestNonDeletedAentReln
-                   where relationshipid = :relationshipid
-                 )
-  and uuid in (select uuid
-                      FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
-                                            from aentvalue
-                                        group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
-                      LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                     WHERE (freetext LIKE '%'||:query||'%'
-                        OR measure LIKE '%'||:query||'%'
-                        OR vocabname LIKE '%'||:query||'%')
-                     order by uuid)
+#   def self.get_arch_entities_not_in_relationship
+#     cleanup_query(<<EOF
+# select uuid, group_concat(response, ', ') as response
+# from (
+#   select uuid, aenttypename, attributename, group_concat(coalesce(measure    || ' '  || vocabname  || '(' ||freetext||'; '|| (certainty * 100.0) || '% certain)',
+#                                         measure    || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                         vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                         measure    || ' ' || vocabname   ||' ('|| (certainty * 100.0)  || '% certain)',
+#                                         vocabname  || ' (' || freetext || ')',
+#                                         measure    || ' (' || freetext || ')',
+#                                         measure    || ' (' || (certainty * 100.0) || '% certain)',
+#                                         vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+#                                         freetext   || ' (' || (certainty * 100.0) || '% certain)',
+#                                         measure,
+#                                         vocabname,
+#                                         freetext), ' | ') as response, attributeid
+#   from latestNonDeletedArchEntIdentifiers
+#   where uuid not in ( select uuid
+#                     from latestNonDeletedAentReln
+#                    where relationshipid = :relationshipid
+#                  )
+#   and uuid in (select uuid
+#                       FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+#                                             from aentvalue
+#                                         group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+#                       LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+#                      WHERE (freetext LIKE '%'||:query||'%'
+#                         OR measure LIKE '%'||:query||'%'
+#                         OR vocabname LIKE '%'||:query||'%')
+#                      order by uuid)
 
-  group by uuid, attributeid
-  order by epoch)
-group by uuid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
+#   group by uuid, attributeid
+#   order by epoch)
+# group by uuid
+# limit :limit
+# offset :offset;
+# EOF
+#     )
+#   end
 
-  def self.total_arch_entities_not_in_relationship
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select uuid
-  from (
-    select uuid, attributeid
-    from latestNonDeletedArchEntIdentifiers
-    where uuid not in ( select uuid
-                      from latestNonDeletedAentReln
-                     where relationshipid = :relationshipid
-                   )
-    and uuid in (select uuid
-                        FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
-                                              from aentvalue
-                                          group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
-                        LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                       WHERE (freetext LIKE '%'||:query||'%'
-                          OR measure LIKE '%'||:query||'%'
-                          OR vocabname LIKE '%'||:query||'%')
-                       order by uuid)
+#   def self.total_arch_entities_not_in_relationship
+#     cleanup_query(<<EOF
+# select count(*)
+# from (
+#   select uuid
+#   from (
+#     select uuid, attributeid
+#     from latestNonDeletedArchEntIdentifiers
+#     where uuid not in ( select uuid
+#                       from latestNonDeletedAentReln
+#                      where relationshipid = :relationshipid
+#                    )
+#     and uuid in (select uuid
+#                         FROM aentvalue join (select uuid, attributeid, max(valuetimestamp) as ValueTimestamp
+#                                               from aentvalue
+#                                           group by uuid, attributeid) USING (uuid, attributeid, valuetimestamp)
+#                         LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+#                        WHERE (freetext LIKE '%'||:query||'%'
+#                           OR measure LIKE '%'||:query||'%'
+#                           OR vocabname LIKE '%'||:query||'%')
+#                        order by uuid)
 
-    group by uuid, attributeid
-    order by epoch)
-  group by uuid
-);
-EOF
-    )
-  end
+#     group by uuid, attributeid
+#     order by epoch)
+#   group by uuid
+# );
+# EOF
+#     )
+#   end
 
-  def self.get_verbs_for_relationship
-    cleanup_query(<<EOF
-select parent from relntype where relntypeid = ? union select child from relntype where relntypeid = ?;
-EOF
-    )
-  end
+#   def self.get_verbs_for_relationship
+#     cleanup_query(<<EOF
+# select parent from relntype where relntypeid = ? union select child from relntype where relntypeid = ?;
+# EOF
+#     )
+  # end
 
-  def self.get_arch_ent_rel_parenttimestamp
-    cleanup_query(<<EOF
-SELECT max(AEntRelnTimestamp) FROM aentreln WHERE uuid = ? and relationshipid = ? group by uuid, relationshipid;
-EOF
-    )
-  end
+#   def self.get_arch_ent_rel_parenttimestamp
+#     cleanup_query(<<EOF
+# SELECT max(AEntRelnTimestamp) FROM aentreln WHERE uuid = ? and relationshipid = ? group by uuid, relationshipid;
+# EOF
+#     )
+#   end
 
-  def self.insert_arch_entity_relationship
-    cleanup_query(<<EOF
-INSERT INTO aentreln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, versionnum, parenttimestamp)
-SELECT :uuid, :relationshipid, :userid, :verb, :aentrelntimestamp, v.versionnum,
-                                                                   :parenttimestamp
-FROM
-  (SELECT versionnum
-   FROM VERSION
-   WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v ;
-EOF
-    )
-  end
+#   def self.insert_arch_entity_relationship
+#     cleanup_query(<<EOF
+# INSERT INTO aentreln (UUID, RelationshipID, UserId, ParticipatesVerb, AEntRelnTimestamp, versionnum, parenttimestamp)
+# SELECT :uuid, :relationshipid, :userid, :verb, :aentrelntimestamp, v.versionnum,
+#                                                                    :parenttimestamp
+# FROM
+#   (SELECT versionnum
+#    FROM VERSION
+#    WHERE ismerged = 1
+#    ORDER BY versionnum DESC LIMIT 1) v ;
+# EOF
+#     )
+#   end
 
-  def self.delete_arch_entity_relationship
-    cleanup_query(<<EOF
-INSERT INTO aentreln (UUID, RelationshipID, UserId, Deleted, AEntRelnTimestamp, versionnum, parenttimestamp)
-SELECT :uuid, :relationshipid, :userid, 'true', :aentrelntimestamp, v.versionnum,
-                                                                    :parenttimestamp
-FROM
-  (SELECT versionnum
-   FROM VERSION
-   WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v ;
-EOF
-    )
-  end
+#   def self.delete_arch_entity_relationship
+#     cleanup_query(<<EOF
+# INSERT INTO aentreln (UUID, RelationshipID, UserId, Deleted, AEntRelnTimestamp, versionnum, parenttimestamp)
+# SELECT :uuid, :relationshipid, :userid, 'true', :aentrelntimestamp, v.versionnum,
+#                                                                     :parenttimestamp
+# FROM
+#   (SELECT versionnum
+#    FROM VERSION
+#    WHERE ismerged = 1
+#    ORDER BY versionnum DESC LIMIT 1) v ;
+# EOF
+#     )
+#   end
 
   def self.get_relationships_for_arch_ent
     cleanup_query(<<EOF
@@ -1599,25 +1599,25 @@ EOF
     )
   end
 
-    def self.is_relationship_dirty
-    cleanup_query(<<EOF
-select sum(isdirty)
-from (
-  select isdirty, deleted
-  from relnvalue join (
-    select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
-    from relnvalue
-    where relationshipid = ? group by relationshipid, attributeid) using (relationshipid, attributeid, relnvaluetimestamp)
-  union
-  select isdirty, deleted
-  from relationship
-  where relationshipid =  ?
-  group by relationshipid
-  having max(relntimestamp))
-where deleted is null;
-EOF
-    )
-  end
+#     def self.is_relationship_dirty
+#     cleanup_query(<<EOF
+# select sum(isdirty)
+# from (
+#   select isdirty, deleted
+#   from relnvalue join (
+#     select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+#     from relnvalue
+#     where relationshipid = ? group by relationshipid, attributeid) using (relationshipid, attributeid, relnvaluetimestamp)
+#   union
+#   select isdirty, deleted
+#   from relationship
+#   where relationshipid =  ?
+#   group by relationshipid
+#   having max(relntimestamp))
+# where deleted is null;
+# EOF
+#     )
+#   end
 
   def self.get_list_of_users
     cleanup_query(<<EOF
@@ -1661,19 +1661,19 @@ EOF
     )
   end
 
-  def self.is_relationship_forked
-    cleanup_query(<<EOF
-    select count(isforked) from relationship where relationshipid = ?;
-EOF
-    )
-  end
+#   def self.is_relationship_forked
+#     cleanup_query(<<EOF
+#     select count(isforked) from relationship where relationshipid = ?;
+# EOF
+#     )
+#   end
 
-  def self.is_relnvalue_forked
-    cleanup_query(<<EOF
-    select count(isforked) from relnvalue where relationshipid = ?;
-EOF
-    )
-  end
+#   def self.is_relnvalue_forked
+#     cleanup_query(<<EOF
+#     select count(isforked) from relnvalue where relationshipid = ?;
+# EOF
+#     )
+#   end
 
   def self.clear_arch_ent_fork
     cleanup_query(<<EOF
@@ -1689,19 +1689,19 @@ EOF
     )
   end
 
-  def self.clear_rel_fork
-    cleanup_query(<<EOF
-    update relationship set isforked = NULL where relationshipid = ?;
-EOF
-    )
-  end
+#   def self.clear_rel_fork
+#     cleanup_query(<<EOF
+#     update relationship set isforked = NULL where relationshipid = ?;
+# EOF
+#     )
+#   end
 
-  def self.clear_relnvalue_fork
-    cleanup_query(<<EOF
-    update relnvalue set isforked = NULL where relationshipid = ?;
-EOF
-    )
-  end
+#   def self.clear_relnvalue_fork
+#     cleanup_query(<<EOF
+#     update relnvalue set isforked = NULL where relationshipid = ?;
+# EOF
+#     )
+#   end
 
   def self.get_project_module_user_id
     cleanup_query(<<EOF
@@ -1728,23 +1728,23 @@ EOF
     )
   end
 
-  def self.get_rel_identifier
-    cleanup_query(<<EOF
-select group_concat(response, ', ') as response
-from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                             vocabname  || ' (' || freetext || ')',
-                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                             vocabname,
-                                             freetext), ' | ') as response, deleted, relntimestamp
-      from latestAllRelationshipIdentifiers
-      where relationshipid = ?
-      group by relationshipid, attributeid
-)
-group by relationshipid
-EOF
-    )
-  end
+#   def self.get_rel_identifier
+#     cleanup_query(<<EOF
+# select group_concat(response, ', ') as response
+# from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                              vocabname  || ' (' || freetext || ')',
+#                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+#                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+#                                              vocabname,
+#                                              freetext), ' | ') as response, deleted, relntimestamp
+#       from latestAllRelationshipIdentifiers
+#       where relationshipid = ?
+#       group by relationshipid, attributeid
+# )
+# group by relationshipid
+# EOF
+#     )
+#   end
 
   def self.get_files_for_type
     cleanup_query(<<EOF
