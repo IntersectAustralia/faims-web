@@ -597,151 +597,151 @@ EOF
     )
   end
 
-  def self.load_all_relationships_include_deleted
-    cleanup_query(<<EOF
-select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
-from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                             vocabname  || ' (' || freetext || ')',
-                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                             vocabname,
-                                             freetext), ' | ') as response, deleted, relntimestamp
-        from latestAllRelationshipIdentifiers
-    group by relationshipid, attributeid
-)
-group by relationshipid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
+#   def self.load_all_relationships_include_deleted
+#     cleanup_query(<<EOF
+# select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
+# from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                              vocabname  || ' (' || freetext || ')',
+#                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+#                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+#                                              vocabname,
+#                                              freetext), ' | ') as response, deleted, relntimestamp
+#         from latestAllRelationshipIdentifiers
+#     group by relationshipid, attributeid
+# )
+# group by relationshipid
+# limit :limit
+# offset :offset;
+# EOF
+#     )
+#   end
 
-  def self.total_all_relationships_include_deleted
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select relationshipid
-  from (select relationshipid, attributeid
-          from latestAllRelationshipIdentifiers
-      group by relationshipid, attributeid
-  )
-  group by relationshipid
-);
-EOF
-    )
-  end
+#   def self.total_all_relationships_include_deleted
+#     cleanup_query(<<EOF
+# select count(*)
+# from (
+#   select relationshipid
+#   from (select relationshipid, attributeid
+#           from latestAllRelationshipIdentifiers
+#       group by relationshipid, attributeid
+#   )
+#   group by relationshipid
+# );
+# EOF
+#     )
+#   end
 
-  def self.search_relationship
-    cleanup_query(<<EOF
-select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
-from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                             vocabname  || ' (' || freetext || ')',
-                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                             vocabname,
-                                             freetext), ' | ') as response, deleted, relntimestamp
-      from latestNonDeletedRelnIdentifiers
-      where relationshipid in (select distinct relationshipid
-                               from latestNonDeletedRelnvalue
-                               LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                               where (freetext LIKE '%'||:query||'%'
-                                            OR vocabname LIKE '%'||:query||'%')
-                               order by relationshipid
-                                 )
-      group by relationshipid, attributeid
+#   def self.search_relationship
+#     cleanup_query(<<EOF
+# select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
+# from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                              vocabname  || ' (' || freetext || ')',
+#                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+#                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+#                                              vocabname,
+#                                              freetext), ' | ') as response, deleted, relntimestamp
+#       from latestNonDeletedRelnIdentifiers
+#       where relationshipid in (select distinct relationshipid
+#                                from latestNonDeletedRelnvalue
+#                                LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+#                                where (freetext LIKE '%'||:query||'%'
+#                                             OR vocabname LIKE '%'||:query||'%')
+#                                order by relationshipid
+#                                  )
+#       group by relationshipid, attributeid
 
-)
-group by relationshipid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
+# )
+# group by relationshipid
+# limit :limit
+# offset :offset;
+# EOF
+#     )
+#   end
 
-  def self.total_search_relationship
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select relationshipid
-  from (select relationshipid, attributeid
-        from latestNonDeletedRelnIdentifiers
-        where relationshipid in (select distinct relationshipid
-                                 from latestNonDeletedRelnvalue
-                                 LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                                 where (freetext LIKE '%'||:query||'%'
-                                              OR vocabname LIKE '%'||:query||'%')
-                                 order by relationshipid
-                                   )
-        group by relationshipid, attributeid
+#   def self.total_search_relationship
+#     cleanup_query(<<EOF
+# select count(*)
+# from (
+#   select relationshipid
+#   from (select relationshipid, attributeid
+#         from latestNonDeletedRelnIdentifiers
+#         where relationshipid in (select distinct relationshipid
+#                                  from latestNonDeletedRelnvalue
+#                                  LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+#                                  where (freetext LIKE '%'||:query||'%'
+#                                               OR vocabname LIKE '%'||:query||'%')
+#                                  order by relationshipid
+#                                    )
+#         group by relationshipid, attributeid
 
-  )
-  group by relationshipid
-);
-EOF
-    )
-  end
+#   )
+#   group by relationshipid
+# );
+# EOF
+#     )
+#   end
 
-  def self.search_relationship_include_deleted
-    cleanup_query(<<EOF
-select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
-from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
-                                             vocabname  || ' (' || freetext || ')',
-                                             vocabname  || ' (' || (certainty * 100.0) || '% certain)',
-                                             freetext   || ' (' || (certainty * 100.0) || '% certain)',
-                                             vocabname,
-                                             freetext), ' | ') as response, deleted, relntimestamp
-        from latestAllRelationshipIdentifiers
-          where relationshipid in (select distinct relationshipid
-                               from relnvalue join (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
-                                                      from relnvalue
-                                                      group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
-                               LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                               where (freetext LIKE '%'||:query||'%'
-                                            OR vocabname LIKE '%'||:query||'%')
-                               order by relationshipid
-                                 )
-    group by relationshipid, attributeid
+#   def self.search_relationship_include_deleted
+#     cleanup_query(<<EOF
+# select relationshipid, group_concat(response, ', ') as response, deleted, relntimestamp
+# from (select relationshipid, group_concat(coalesce(vocabname  || ' (' || freetext   ||'; '|| (certainty * 100.0)  || '% certain)',
+#                                              vocabname  || ' (' || freetext || ')',
+#                                              vocabname  || ' (' || (certainty * 100.0) || '% certain)',
+#                                              freetext   || ' (' || (certainty * 100.0) || '% certain)',
+#                                              vocabname,
+#                                              freetext), ' | ') as response, deleted, relntimestamp
+#         from latestAllRelationshipIdentifiers
+#           where relationshipid in (select distinct relationshipid
+#                                from relnvalue join (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+#                                                       from relnvalue
+#                                                       group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
+#                                LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+#                                where (freetext LIKE '%'||:query||'%'
+#                                             OR vocabname LIKE '%'||:query||'%')
+#                                order by relationshipid
+#                                  )
+#     group by relationshipid, attributeid
 
-)
-group by relationshipid
-limit :limit
-offset :offset;
-EOF
-    )
-  end
+# )
+# group by relationshipid
+# limit :limit
+# offset :offset;
+# EOF
+#     )
+#   end
 
-  def self.total_search_relationship_include_deleted
-    cleanup_query(<<EOF
-select count(*)
-from (
-  select relationshipid
-  from (select relationshipid, attributeid
-          from latestAllRelationshipIdentifiers
-            where relationshipid in (select distinct relationshipid
-                                 from relnvalue join (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
-                                                        from relnvalue
-                                                        group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
-                                 LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
-                                 where (freetext LIKE '%'||:query||'%'
-                                              OR vocabname LIKE '%'||:query||'%')
-                                 order by relationshipid
-                                   )
-      group by relationshipid, attributeid
+#   def self.total_search_relationship_include_deleted
+#     cleanup_query(<<EOF
+# select count(*)
+# from (
+#   select relationshipid
+#   from (select relationshipid, attributeid
+#           from latestAllRelationshipIdentifiers
+#             where relationshipid in (select distinct relationshipid
+#                                  from relnvalue join (select relationshipid, attributeid, max(relnvaluetimestamp) as relnvaluetimestamp
+#                                                         from relnvalue
+#                                                         group by relationshipid, attributeid) USING (relationshipid, attributeid, relnvaluetimestamp)
+#                                  LEFT OUTER JOIN vocabulary using (attributeid, vocabid)
+#                                  where (freetext LIKE '%'||:query||'%'
+#                                               OR vocabname LIKE '%'||:query||'%')
+#                                  order by relationshipid
+#                                    )
+#       group by relationshipid, attributeid
 
-  )
-  group by relationshipid
-);
-EOF
-    )
-  end
+#   )
+#   group by relationshipid
+# );
+# EOF
+#     )
+#   end
 
-  def self.get_rel_deleted_status
-    cleanup_query(<<EOF
-    SELECT relationshipid, deleted from relationship where relationshipid || relntimestamp IN
-			( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);
-EOF
-    )
-  end
+#   def self.get_rel_deleted_status
+#     cleanup_query(<<EOF
+#     SELECT relationshipid, deleted from relationship where relationshipid || relntimestamp IN
+# 			( SELECT relationshipid || max(relntimestamp) FROM relationship WHERE relationshipid = ?);
+# EOF
+#     )
+#   end
 
   def self.get_relationship_attributes
     cleanup_query(<<EOF
@@ -763,54 +763,54 @@ EOF
     )
   end
 
-  def self.insert_relationship
-    cleanup_query(<<EOF
-INSERT INTO relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, relntimestamp, versionnum, parenttimestamp)
-SELECT RelationshipID, :userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, :relntimestamp, v.versionnum,
-                                                                                                          :parenttimestamp
-FROM
-  (SELECT relationshipid,
-          max(relntimestamp) AS RelnTimestamp
-   FROM relationship
-   WHERE relationshipID = :relationshipid
+#   def self.insert_relationship
+#     cleanup_query(<<EOF
+# INSERT INTO relationship (RelationshipID, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, relntimestamp, versionnum, parenttimestamp)
+# SELECT RelationshipID, :userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, NULL, :relntimestamp, v.versionnum,
+#                                                                                                           :parenttimestamp
+# FROM
+#   (SELECT relationshipid,
+#           max(relntimestamp) AS RelnTimestamp
+#    FROM relationship
+#    WHERE relationshipID = :relationshipid
 
-   GROUP BY relationshipid)
-JOIN relationship USING (relationshipid,
-                         relntimestamp),
-  (SELECT versionnum
-   FROM VERSION
-   WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v ;
-EOF
-    )
-  end
+#    GROUP BY relationshipid)
+# JOIN relationship USING (relationshipid,
+#                          relntimestamp),
+#   (SELECT versionnum
+#    FROM VERSION
+#    WHERE ismerged = 1
+#    ORDER BY versionnum DESC LIMIT 1) v ;
+# EOF
+#     )
+#   end
 
-  def self.insert_relationship_attribute
-    cleanup_query(<<EOF
-INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, versionnum, parenttimestamp, relnvaluetimestamp)
-SELECT :relationshipid, :userid, :attributeid, :vocabid, :freetext, :certainty, v.versionnum, :parenttimestamp, :relnvaluetimestamp
-FROM
-  (SELECT versionnum
-   FROM VERSION
-   WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v;
-EOF
-    )
-  end
+#   def self.insert_relationship_attribute
+#     cleanup_query(<<EOF
+# INSERT INTO relnvalue (relationshipid, userid, attributeid, vocabid, freetext, certainty, versionnum, parenttimestamp, relnvaluetimestamp)
+# SELECT :relationshipid, :userid, :attributeid, :vocabid, :freetext, :certainty, v.versionnum, :parenttimestamp, :relnvaluetimestamp
+# FROM
+#   (SELECT versionnum
+#    FROM VERSION
+#    WHERE ismerged = 1
+#    ORDER BY versionnum DESC LIMIT 1) v;
+# EOF
+#     )
+#   end
 
-  def self.get_rel_parenttimestamp
-    cleanup_query(<<EOF
-SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;
-EOF
-    )
-  end
+#   def self.get_rel_parenttimestamp
+#     cleanup_query(<<EOF
+# SELECT max(relntimestamp) FROM relationship WHERE relationshipid = ? group by relationshipid;
+# EOF
+#     )
+#   end
 
-  def self.get_relnvalue_parenttimestamp
-    cleanup_query(<<EOF
-SELECT max(relnvaluetimestamp) FROM relnvalue WHERE relationshipid = ? and attributeid = ? group by relationshipid, attributeid;
-EOF
-    )
-  end
+#   def self.get_relnvalue_parenttimestamp
+#     cleanup_query(<<EOF
+# SELECT max(relnvaluetimestamp) FROM relnvalue WHERE relationshipid = ? and attributeid = ? group by relationshipid, attributeid;
+# EOF
+#     )
+#   end
 
   def self.update_reln_value_as_dirty
     cleanup_query(<<EOF
@@ -820,31 +820,31 @@ EOF
     )
   end
 
-  def self.delete_or_restore_relationship
-    cleanup_query(<<EOF
-INSERT INTO relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
-SELECT relationshipid, :userid, RelnTypeID,
-                      GeoSpatialColumnType,
-                      GeoSpatialColumn,
-                      :deleted,
-                      v.versionnum,
-                      :parenttimestamp
-FROM
-  (SELECT relationshipid,
-          max(relntimestamp) AS relntimestamp
-   FROM relationship
-   WHERE relationshipid = :relationshipid
+#   def self.delete_or_restore_relationship
+#     cleanup_query(<<EOF
+# INSERT INTO relationship (relationshipid, userid, RelnTypeID, GeoSpatialColumnType, GeoSpatialColumn, deleted, versionnum, parentTimestamp)
+# SELECT relationshipid, :userid, RelnTypeID,
+#                       GeoSpatialColumnType,
+#                       GeoSpatialColumn,
+#                       :deleted,
+#                       v.versionnum,
+#                       :parenttimestamp
+# FROM
+#   (SELECT relationshipid,
+#           max(relntimestamp) AS relntimestamp
+#    FROM relationship
+#    WHERE relationshipid = :relationshipid
 
-   GROUP BY relationshipid)
-JOIN relationship USING (relationshipid,
-                       relntimestamp),
-  (SELECT versionnum
-   FROM VERSION
-   WHERE ismerged = 1
-   ORDER BY versionnum DESC LIMIT 1) v ;
-EOF
-    )
-  end
+#    GROUP BY relationshipid)
+# JOIN relationship USING (relationshipid,
+#                        relntimestamp),
+#   (SELECT versionnum
+#    FROM VERSION
+#    WHERE ismerged = 1
+#    ORDER BY versionnum DESC LIMIT 1) v ;
+# EOF
+#     )
+#   end
 
   def self.get_rel_info
     cleanup_query(<<EOF
@@ -898,20 +898,20 @@ EOF
     )
   end
 
-  def self.get_rel_history
-    cleanup_query(<<EOF
-    select relationshipid, relntimestamp as tstamp
-      FROM relationship
-      where relationshipid = ?
-    union
-      select relationshipid, relnvaluetimestamp as tstamp
-        FROM relnvalue
-        where relationshipid = ?
-        group by tstamp
-        order by tstamp desc;
-EOF
-    )
-  end
+#   def self.get_rel_history
+#     cleanup_query(<<EOF
+#     select relationshipid, relntimestamp as tstamp
+#       FROM relationship
+#       where relationshipid = ?
+#     union
+#       select relationshipid, relnvaluetimestamp as tstamp
+#         FROM relnvalue
+#         where relationshipid = ?
+#         group by tstamp
+#         order by tstamp desc;
+# EOF
+#     )
+#   end
 
   def self.get_rel_attributes_at_timestamp
     cleanup_query(<<EOF

@@ -423,247 +423,247 @@ class Database
     related_arch_ents
   end
 
-  def load_rel(type, limit, offset, show_deleted)
-    if type.eql?('all')
-      params = {
-          limit:limit,
-          offset:offset
-      }
-      relationshipids = show_deleted ? @db.execute(WebQuery.load_all_relationships_include_deleted, params) : @db.execute(WebQuery.load_all_relationships, params)
-    else
-      params = {
-          type:type,
-          limit:limit,
-          offset:offset
-      }
-      relationshipids = show_deleted ? @db.execute(WebQuery.load_relationships_include_deleted, params) : @db.execute(WebQuery.load_relationships, params)
-    end
-    relationshipids
-  end
+  # def load_rel(type, limit, offset, show_deleted)
+  #   if type.eql?('all')
+  #     params = {
+  #         limit:limit,
+  #         offset:offset
+  #     }
+  #     relationshipids = show_deleted ? @db.execute(WebQuery.load_all_relationships_include_deleted, params) : @db.execute(WebQuery.load_all_relationships, params)
+  #   else
+  #     params = {
+  #         type:type,
+  #         limit:limit,
+  #         offset:offset
+  #     }
+  #     relationshipids = show_deleted ? @db.execute(WebQuery.load_relationships_include_deleted, params) : @db.execute(WebQuery.load_relationships, params)
+  #   end
+  #   relationshipids
+  # end
 
-  def search_rel(limit, offset, query, show_deleted)
-    params = {
-        query:query,
-        limit:limit,
-        offset:offset
-    }
-    relationshipids = show_deleted ? @db.execute(WebQuery.search_relationship_include_deleted, params): @db.execute(WebQuery.search_relationship, params)
-    relationshipids
-  end
+  # def search_rel(limit, offset, query, show_deleted)
+  #   params = {
+  #       query:query,
+  #       limit:limit,
+  #       offset:offset
+  #   }
+  #   relationshipids = show_deleted ? @db.execute(WebQuery.search_relationship_include_deleted, params): @db.execute(WebQuery.search_relationship, params)
+  #   relationshipids
+  # end
 
-  def total_rel(type, show_deleted)
-    if type.eql?('all')
-      total = show_deleted ? @db.get_first_value(WebQuery.total_all_relationships_include_deleted) : @db.get_first_value(WebQuery.total_all_relationships)
-    else
-      params = {
-          type:type
-      }
-      total = show_deleted ? @db.get_first_value(WebQuery.total_relationships_include_deleted, params) : @db.get_first_value(WebQuery.total_relationships, params)
-    end
-    total
-  end
+  # def total_rel(type, show_deleted)
+  #   if type.eql?('all')
+  #     total = show_deleted ? @db.get_first_value(WebQuery.total_all_relationships_include_deleted) : @db.get_first_value(WebQuery.total_all_relationships)
+  #   else
+  #     params = {
+  #         type:type
+  #     }
+  #     total = show_deleted ? @db.get_first_value(WebQuery.total_relationships_include_deleted, params) : @db.get_first_value(WebQuery.total_relationships, params)
+  #   end
+  #   total
+  # end
 
-  def total_search_rel(query, show_deleted)
-    params = {
-        query:query
-    }
-    total = show_deleted ? @db.get_first_value(WebQuery.total_search_relationship_include_deleted, params): @db.get_first_value(WebQuery.total_search_relationship, params)
-    total
-  end
+  # def total_search_rel(query, show_deleted)
+  #   params = {
+  #       query:query
+  #   }
+  #   total = show_deleted ? @db.get_first_value(WebQuery.total_search_relationship_include_deleted, params): @db.get_first_value(WebQuery.total_search_relationship, params)
+  #   total
+  # end
 
-  def get_rel_deleted_status(relationshipid)
-    @db.execute(WebQuery.get_rel_deleted_status, relationshipid).first
-  end
+  # def get_rel_deleted_status(relationshipid)
+  #   @db.execute(WebQuery.get_rel_deleted_status, relationshipid).first
+  # end
 
   def get_rel_attributes(relationshipid)
     attributes = @db.execute(WebQuery.get_relationship_attributes, relationshipid)
     attributes
   end
 
-  def update_rel_attribute(relationshipid, userid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
-    @db.transaction do |db|
+  # def update_rel_attribute(relationshipid, userid, vocab_id, attribute_id, freetext, certainty, ignore_errors = nil)
+  #   @db.transaction do |db|
 
-      timestamp = current_timestamp
-      db.execute(WebQuery.insert_version, timestamp, userid)
+  #     timestamp = current_timestamp
+  #     db.execute(WebQuery.insert_version, timestamp, userid)
 
-      cache_timestamps = {}
+  #     cache_timestamps = {}
 
-      (0..(freetext.length-1)).each do |i|
+  #     (0..(freetext.length-1)).each do |i|
 
-        if cache_timestamps[attribute_id]
-          parenttimestamp = cache_timestamps[attribute_id]
-        else
-          parenttimestamp = db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id)
+  #       if cache_timestamps[attribute_id]
+  #         parenttimestamp = cache_timestamps[attribute_id]
+  #       else
+  #         parenttimestamp = db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id)
 
-          cache_timestamps[attribute_id] = parenttimestamp
-        end
+  #         cache_timestamps[attribute_id] = parenttimestamp
+  #       end
 
-        params = {
-            relationshipid:relationshipid,
-            userid:userid,
-            attributeid:attribute_id,
-            vocabid:clean(vocab_id ? vocab_id[i] : nil),
-            freetext:clean(freetext[i]),
-            certainty:clean(certainty[i]),
-            relnvaluetimestamp:timestamp,
-            parenttimestamp:parenttimestamp
-        }
+  #       params = {
+  #           relationshipid:relationshipid,
+  #           userid:userid,
+  #           attributeid:attribute_id,
+  #           vocabid:clean(vocab_id ? vocab_id[i] : nil),
+  #           freetext:clean(freetext[i]),
+  #           certainty:clean(certainty[i]),
+  #           relnvaluetimestamp:timestamp,
+  #           parenttimestamp:parenttimestamp
+  #       }
 
-        db.execute(WebQuery.insert_relationship_attribute, params)
-      end
+  #       db.execute(WebQuery.insert_relationship_attribute, params)
+  #     end
 
-      validate_reln_value(db, relationshipid, timestamp, attribute_id) unless ignore_errors
-    end
-  end
+  #     validate_reln_value(db, relationshipid, timestamp, attribute_id) unless ignore_errors
+  #   end
+  # end
 
-  def update_reln_value_as_dirty(db, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum, isdirty, isdirtyreason)
-    db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
-  end
+  # def update_reln_value_as_dirty(db, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum, isdirty, isdirtyreason)
+  #   db.execute(WebQuery.update_reln_value_as_dirty, isdirty, isdirtyreason, relationshipid, relnvaluetimestamp, userid, attribute_id, vocab_id, freetext, certainty, versionnum)
+  # end
 
-  def merge_rel(deleted_relationshipid, merge_relationshipid, vocab_id, attribute_id, freetext, certainty, userid)
-    @db.transaction do |db|
-      db.execute(WebQuery.insert_version, current_timestamp, userid)
+  # def merge_rel(deleted_relationshipid, merge_relationshipid, vocab_id, attribute_id, freetext, certainty, userid)
+  #   @db.transaction do |db|
+  #     db.execute(WebQuery.insert_version, current_timestamp, userid)
 
-      delete_relationship_no_transaction(db, deleted_relationshipid, userid)
+  #     delete_relationship_no_transaction(db, deleted_relationshipid, userid)
 
-      insert_updated_rel(db, merge_relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
-    end
-  end
+  #     insert_updated_rel(db, merge_relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
+  #   end
+  # end
 
-  def insert_updated_rel(db, relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
-    timestamp = current_timestamp
+  # def insert_updated_rel(db, relationshipid, userid, vocab_id, attribute_id, freetext, certainty)
+  #   timestamp = current_timestamp
 
-    params = {
-        relationshipid:relationshipid,
-        userid:userid,
-        relntimestamp:timestamp,
-        parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
-    }
+  #   params = {
+  #       relationshipid:relationshipid,
+  #       userid:userid,
+  #       relntimestamp:timestamp,
+  #       parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+  #   }
 
-    db.execute(WebQuery.insert_relationship, params)
+  #   db.execute(WebQuery.insert_relationship, params)
 
-    cache_timestamps = {}
+  #   cache_timestamps = {}
 
-    (0..(freetext.length-1)).each do |i|
+  #   (0..(freetext.length-1)).each do |i|
 
-      if cache_timestamps[attribute_id[i]]
-        parenttimestamp = cache_timestamps[attribute_id[i]]
-      else
-        parenttimestamp = db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id[i])
+  #     if cache_timestamps[attribute_id[i]]
+  #       parenttimestamp = cache_timestamps[attribute_id[i]]
+  #     else
+  #       parenttimestamp = db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relationshipid, attribute_id[i])
 
-        cache_timestamps[attribute_id[i]] = parenttimestamp
-      end
+  #       cache_timestamps[attribute_id[i]] = parenttimestamp
+  #     end
 
-      params = {
-          relationshipid:relationshipid,
-          userid:userid,
-          attributeid:attribute_id[i],
-          vocabid:clean(vocab_id ? vocab_id[i] : nil),
-          freetext:clean(freetext[i]),
-          certainty:clean(certainty[i]),
-          relnvaluetimestamp:timestamp,
-          parenttimestamp:parenttimestamp
-      }
+  #     params = {
+  #         relationshipid:relationshipid,
+  #         userid:userid,
+  #         attributeid:attribute_id[i],
+  #         vocabid:clean(vocab_id ? vocab_id[i] : nil),
+  #         freetext:clean(freetext[i]),
+  #         certainty:clean(certainty[i]),
+  #         relnvaluetimestamp:timestamp,
+  #         parenttimestamp:parenttimestamp
+  #     }
 
-      db.execute(WebQuery.insert_relationship_attribute, params)
+  #     db.execute(WebQuery.insert_relationship_attribute, params)
 
-      validate_reln_value(db, relationshipid, timestamp, attribute_id[i])
-    end
-  end
+  #     validate_reln_value(db, relationshipid, timestamp, attribute_id[i])
+  #   end
+  # end
 
-  def get_rel_history(relid)
-    timestamps = @db.execute(WebQuery.get_rel_history, relid, relid)
-    timestamps
-  end
+  # def get_rel_history(relid)
+  #   timestamps = @db.execute(WebQuery.get_rel_history, relid, relid)
+  #   timestamps
+  # end
 
   def get_rel_attributes_at_timestamp(relid, timestamp)
     attributes =  @db.execute(WebQuery.get_rel_attributes_at_timestamp, @project_module.get_settings['srid'].to_i, relid, timestamp, relid, timestamp)
     attributes
   end
 
-  def get_rel_attributes_changes_at_timestamp(relid, timestamp)
-    srid = @project_module.get_settings['srid'].to_i
-    changes = @db.execute(WebQuery.get_rel_attributes_changes_at_timestamp, relid, timestamp, relid, timestamp, srid,
-                          relid, timestamp, srid, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp)
-    changes
-  end
+  # def get_rel_attributes_changes_at_timestamp(relid, timestamp)
+  #   srid = @project_module.get_settings['srid'].to_i
+  #   changes = @db.execute(WebQuery.get_rel_attributes_changes_at_timestamp, relid, timestamp, relid, timestamp, srid,
+  #                         relid, timestamp, srid, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp, relid, timestamp)
+  #   changes
+  # end
 
-  def revert_rel(relid, revert_timestamp, attributes, resolve, userid)
-    @db.transaction do |db|
-      timestamp = current_timestamp
+  # def revert_rel(relid, revert_timestamp, attributes, resolve, userid)
+  #   @db.transaction do |db|
+  #     timestamp = current_timestamp
 
-      db.execute(WebQuery.insert_version, timestamp, userid)
+  #     db.execute(WebQuery.insert_version, timestamp, userid)
 
-      revert_rel_to_timestamp(db, relid, userid, revert_timestamp, timestamp)
+  #     revert_rel_to_timestamp(db, relid, userid, revert_timestamp, timestamp)
 
-      attributes.each do | attribute |
-        revert_relnvalues_to_timestamp(db, attribute[:relationshipid], userid, attribute[:attributeid], attribute[:timestamp], timestamp)
-      end
+  #     attributes.each do | attribute |
+  #       revert_relnvalues_to_timestamp(db, attribute[:relationshipid], userid, attribute[:attributeid], attribute[:timestamp], timestamp)
+  #     end
 
-      # clear conflicts
-      resolve_rel_conflicts(db, relid) if resolve
-    end
-  end
+  #     # clear conflicts
+  #     resolve_rel_conflicts(db, relid) if resolve
+  #   end
+  # end
 
-  def revert_rel_to_timestamp(db, relid, userid, revert_timestamp, timestamp)
-    params = {
-        relationshipid:relid,
-        userid:userid,
-        relntimestamp:timestamp,
-        timestamp: revert_timestamp,
-        parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relid)
-    }
+  # def revert_rel_to_timestamp(db, relid, userid, revert_timestamp, timestamp)
+  #   params = {
+  #       relationshipid:relid,
+  #       userid:userid,
+  #       relntimestamp:timestamp,
+  #       timestamp: revert_timestamp,
+  #       parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relid)
+  #   }
 
-    db.execute(WebQuery.insert_rel_at_timestamp, params)
-  end
+  #   db.execute(WebQuery.insert_rel_at_timestamp, params)
+  # end
 
-  def revert_relnvalues_to_timestamp(db, relid, userid, attributeid, revert_timestamp, timestamp)
-    params = {
-        relationshipid:relid,
-        userid:userid,
-        attributeid:attributeid,
-        relnvaluetimestamp:timestamp,
-        timestamp: revert_timestamp,
-        parenttimestamp: db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relid, attributeid)
-    }
+  # def revert_relnvalues_to_timestamp(db, relid, userid, attributeid, revert_timestamp, timestamp)
+  #   params = {
+  #       relationshipid:relid,
+  #       userid:userid,
+  #       attributeid:attributeid,
+  #       relnvaluetimestamp:timestamp,
+  #       timestamp: revert_timestamp,
+  #       parenttimestamp: db.get_first_value(WebQuery.get_relnvalue_parenttimestamp, relid, attributeid)
+  #   }
 
-    db.execute(WebQuery.insert_relnvalue_at_timestamp, params)
-  end
+  #   db.execute(WebQuery.insert_relnvalue_at_timestamp, params)
+  # end
 
-  def resolve_rel_conflicts(db, relid)
-    db.execute(WebQuery.clear_rel_fork, relid)
-    db.execute(WebQuery.clear_relnvalue_fork, relid)
-  end
+  # def resolve_rel_conflicts(db, relid)
+  #   db.execute(WebQuery.clear_rel_fork, relid)
+  #   db.execute(WebQuery.clear_relnvalue_fork, relid)
+  # end
 
-  def delete_relationship(relationshipid, userid)
-    @db.transaction do |db|
-      db.execute(WebQuery.insert_version, current_timestamp, userid)
-      delete_relationship_no_transaction(db, relationshipid, userid)
-    end
-  end
+  # def delete_relationship(relationshipid, userid)
+  #   @db.transaction do |db|
+  #     db.execute(WebQuery.insert_version, current_timestamp, userid)
+  #     delete_relationship_no_transaction(db, relationshipid, userid)
+  #   end
+  # end
 
-  def delete_relationship_no_transaction(db, relationshipid, userid)
-    params = {
-        userid:userid,
-        deleted:'true',
-        relationshipid:relationshipid,
-        parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
-    }
-    db.execute(WebQuery.delete_or_restore_relationship, params)
-  end
+  # def delete_relationship_no_transaction(db, relationshipid, userid)
+  #   params = {
+  #       userid:userid,
+  #       deleted:'true',
+  #       relationshipid:relationshipid,
+  #       parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+  #   }
+  #   db.execute(WebQuery.delete_or_restore_relationship, params)
+  # end
 
-  def restore_relationship(relationshipid, userid)
-    @db.transaction do |db|
-      db.execute(WebQuery.insert_version, current_timestamp, userid)
-      params = {
-          userid:userid,
-          deleted:nil,
-          relationshipid:relationshipid,
-          parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
-      }
-      db.execute(WebQuery.delete_or_restore_relationship, params)
-    end
-  end
+  # def restore_relationship(relationshipid, userid)
+  #   @db.transaction do |db|
+  #     db.execute(WebQuery.insert_version, current_timestamp, userid)
+  #     params = {
+  #         userid:userid,
+  #         deleted:nil,
+  #         relationshipid:relationshipid,
+  #         parenttimestamp: db.get_first_value(WebQuery.get_rel_parenttimestamp, relationshipid)
+  #     }
+  #     db.execute(WebQuery.delete_or_restore_relationship, params)
+  #   end
+  # end
 
   def get_rel_info(relid,relntimestamp)
     info = @db.execute(WebQuery.get_rel_info, relid, relntimestamp)
