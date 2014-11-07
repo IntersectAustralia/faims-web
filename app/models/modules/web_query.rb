@@ -1412,68 +1412,66 @@ EOF
 attach database '#{fromDB}' as import;
 
 insert or replace into archentity (
-         uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
-  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
-  from import.archentity
+          uuid, aenttimestamp, userid, doi, aenttypeid, deleted, versionnum, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
+   select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version} , a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+   from import.archentity
+   left outer join (
+    select uuid, i.aenttimestamp, 1 as isForked
+      from main.archentity m join  import.archentity i using (uuid, parenttimestamp)
+    where m.aenttimestamp != i.aenttimestamp) a using (uuid, aenttimestamp)
+   except
+   select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version} , isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+   from main.archentity;
+ 
+ insert or replace into aentvalue (
+          uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isforked, parenttimestamp)
+   select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version} , a.isforked, parenttimestamp
+   from import.aentvalue
+   left outer join (
+    select uuid, attributeid, i.valuetimestamp, 1 as isForked
+      from main.aentvalue m join  import.aentvalue i using (uuid, attributeid, parenttimestamp)
+    where m.valuetimestamp != i.valuetimestamp) a using (uuid, attributeid, valuetimestamp)
+   except
+   select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version} , isforked, parenttimestamp
+   from main.aentvalue;
+ 
+ insert or replace into relationship (
+          relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
+   select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version} , a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+   from import.relationship
+    left outer join (
+    select relationshipid, i.relntimestamp, 1 as isForked
+      from main.relationship m join  import.relationship i using (relationshipid, parenttimestamp)
+    where m.relntimestamp != i.relntimestamp) a using (relationshipid, relntimestamp)
+   except
+   select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version} , isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
+   from main.relationship;
+ 
+ 
+ insert or replace into relnvalue (
+          relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isforked, parenttimestamp)
+   select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version} , a.isforked, parenttimestamp
+   from import.relnvalue
+   left outer join (
+    select relationshipid, attributeid, i.relnvaluetimestamp, 1 as isForked
+      from main.relnvalue m join  import.relnvalue i using (relationshipid, attributeid, parenttimestamp)
+    where m.relnvaluetimestamp != i.relnvaluetimestamp) a using (relationshipid, attributeid, relnvaluetimestamp)
+   except
+   select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version} , isforked, parenttimestamp
+   from main.relnvalue;
+ 
+ 
+ insert or replace into aentreln (
+          uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isforked, parenttimestamp)
+   select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version} , a.isforked, parenttimestamp
+   from import.aentreln
   left outer join (
-		select uuid, i.aenttimestamp, 1 as isForked
-		  from main.archentity m join  import.archentity i using (uuid, parenttimestamp)
-		where m.aenttimestamp != i.aenttimestamp) a using (uuid, aenttimestamp)
-  except
-  select uuid, aenttimestamp, userid, doi, aenttypeid, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
-  from main.archentity;
-
-
-insert or replace into aentvalue (
-         uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
-  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
-  from import.aentvalue
-  left outer join (
-		select uuid, attributeid, i.valuetimestamp, 1 as isForked
-		  from main.aentvalue m join  import.aentvalue i using (uuid, attributeid, parenttimestamp)
-		where m.valuetimestamp != i.valuetimestamp) a using (uuid, attributeid, valuetimestamp)
-  except
-  select uuid, valuetimestamp, userid, attributeid, vocabid, freetext, measure, certainty, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp
-  from main.aentvalue;
-
-
-insert or replace into relationship (
-         relationshipid, userid, relntimestamp, relntypeid, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn)
-  select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
-  from import.relationship
-	  left outer join (
-		select relationshipid, i.relntimestamp, 1 as isForked
-		  from main.relationship m join  import.relationship i using (relationshipid, parenttimestamp)
-		where m.relntimestamp != i.relntimestamp) a using (relationshipid, relntimestamp)
-  except
-  select relationshipid, userid, relntimestamp, relntypeid, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp, geospatialcolumntype, geospatialcolumn
-  from main.relationship;
-
-
-insert or replace into relnvalue (
-         relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
-  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
-  from import.relnvalue
-  left outer join (
-		select relationshipid, attributeid, i.relnvaluetimestamp, 1 as isForked
-		  from main.relnvalue m join  import.relnvalue i using (relationshipid, attributeid, parenttimestamp)
-		where m.relnvaluetimestamp != i.relnvaluetimestamp) a using (relationshipid, attributeid, relnvaluetimestamp)
-  except
-  select relationshipid, relnvaluetimestamp, userid, attributeid, vocabid, freetext, certainty, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp
-  from main.relnvalue;
-
-
-insert or replace into aentreln (
-         uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, versionnum, isdirty, isdirtyreason, isforked, parenttimestamp)
-  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version}, isdirty, isdirtyreason, a.isforked, parenttimestamp
-  from import.aentreln
-	left outer join (
-		select relationshipid, uuid, i.aentrelntimestamp, 1 as isForked
-		  from main.aentreln m join  import.aentreln i using (relationshipid, uuid, parenttimestamp)
-		where m.aentrelntimestamp != i.aentrelntimestamp) a using (relationshipid, uuid, aentrelntimestamp)
-  except
-  select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version}, isdirty, isdirtyreason, isforked, parenttimestamp
-  from main.aentreln;
+    select relationshipid, uuid, i.aentrelntimestamp, 1 as isForked
+      from main.aentreln m join  import.aentreln i using (relationshipid, uuid, parenttimestamp)
+    where m.aentrelntimestamp != i.aentrelntimestamp) a using (relationshipid, uuid, aentrelntimestamp)
+   except
+   select uuid, relationshipid, userid, aentrelntimestamp, participatesverb, deleted, #{version} , isforked, parenttimestamp
+   from main.aentreln;
 
 
 update version set ismerged = 1 where versionnum = #{version};

@@ -26,6 +26,7 @@ Feature: Merge entities
       | field | column |
       | name  | right  |
     And I click on "Merge"
+    And I wait for page to load up data
     Then I should see "Merged Entities"
     And I should see records
       | name    |
