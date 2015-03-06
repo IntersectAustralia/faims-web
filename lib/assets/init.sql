@@ -418,7 +418,7 @@ create view allCreatedModifiedAtBy as select uuid, createdAt, createdBy, modifie
 
 drop view if exists latestNonDeletedArchEntFormattedIdentifiers;
 create view if not exists latestNonDeletedArchEntFormattedIdentifiers as
-  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, null as deleted
+  select uuid, aenttypeid, aenttypename, group_concat(response, '') as response, null as deleted
   from (
     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, null as deleted, aentcountorder
     from (
@@ -439,7 +439,7 @@ create view if not exists latestNonDeletedArchEntFormattedIdentifiers as
 
 drop view if exists latestAllArchEntFormattedIdentifiers;
 create view if not exists latestAllArchEntFormattedIdentifiers as
-  select uuid, aenttypeid, aenttypename, group_concat(response, ' ') as response, deleted
+  select uuid, aenttypeid, aenttypename, group_concat(response, '') as response, deleted
   from (
     select uuid, aenttypeid, aenttypename, group_concat(format(formatstring, vocabname, measure, freetext, certainty), appendcharacterstring) as response, deleted,aentcountorder
     from ( select  uuid, aenttypeid, aenttypename, formatstring, vocabname, measure, freetext, certainty, appendcharacterstring, archentity.deleted as deleted, aentcountorder, vocabcountorder, attributeid
