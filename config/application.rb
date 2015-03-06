@@ -86,7 +86,7 @@ module FaimsWeb
 
     config.thumbnail_size = 10
 
-    config.faims_version = '2.0'
+    config.faims_version = '2.1'
 
     config.server_has_update_url = 'https://raw.githubusercontent.com/IntersectAustralia/faims-web/qa/.deployment_version'
 
