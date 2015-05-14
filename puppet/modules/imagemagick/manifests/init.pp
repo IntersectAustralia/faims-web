@@ -7,7 +7,7 @@ class imagemagick {
   $imagemagick_packages = ["imagemagick","libmagickwand-dev","ffmpeg","libmagickcore5-extra","ghostscript","netpbm","autotrace","html2ps","ufraw-batch","dcraw","transfig","libbz2-1.0"]
   package { $imagemagick_packages:
     ensure  => "present",
-    require => Apt::Ppa['ppa:jon-severinsson/ffmpeg']
+    require => Apt::Ppa['ppa:mc3man/trusty-media']
   }
 
 }
