@@ -8,7 +8,7 @@ class imagemagick {
     path    => "/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin",
     command => '/bin/true',
     unless  => 'apt-get update',
-    timeout => 600
+    timeout => 600,
     require => Apt::Ppa['ppa:mc3man/trusty-media'
   }
 
