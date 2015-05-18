@@ -97,6 +97,8 @@ describe XSDValidator do
     it { validate_ui_schema('ui_schema_28.xml').should be_empty }
     # error
     it { validate_ui_schema('ui_schema_error1.xml').should_not be_empty }
+    # ui schema with html description
+    it { validate_ui_schema('ui_schema_with_html_description.xml').should be_empty }
   end
 
 end

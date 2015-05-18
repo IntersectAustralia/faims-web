@@ -34,7 +34,7 @@ class ArchiveManager < FileManager
   end
 
   def has_disk_space?
-    return true if Rails.env == 'test'
+    return true if Rails.env == 'test' || Rails.env == 'development'
 
     space = archive_space
     if Sys::Filesystem.mount_point("/tmp") == Sys::Filesystem.mount_point("/var/www/faims/")
