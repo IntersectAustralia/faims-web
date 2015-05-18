@@ -9,7 +9,7 @@ class imagemagick {
     command => '/bin/true',
     unless  => 'apt-get update',
     timeout => 600,
-    require => Apt::Ppa['ppa:mc3man/trusty-media'
+    require => Apt::Ppa['ppa:mc3man/trusty-media']
   }
 
   $imagemagick_packages = ["imagemagick","libmagickwand-dev","ffmpeg","libmagickcore5-extra","ghostscript","netpbm","autotrace","html2ps","ufraw-batch","dcraw","transfig","libbz2-1.0"]
