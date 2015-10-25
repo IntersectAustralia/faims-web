@@ -20,6 +20,7 @@ gem 'bootstrap-sass', '~> 2.3.2.2'
 gem 'simple_form'
 
 group :development, :test do
+  gem 'byebug'
   gem 'rspec-rails'
   gem 'factory_girl_rails'
 
