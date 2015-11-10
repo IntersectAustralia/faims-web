@@ -1,7 +1,7 @@
 ---
 webapp_user: faims
 webapp_version: production # development, qa, staging or production
-ruby_version: 2.1.1
+ruby_version: 2.1.2
 app_root: /var/www/faims
 app_source: https://github.com/IntersectAustralia/faims-web
 app_tag: production
