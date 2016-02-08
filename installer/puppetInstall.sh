@@ -11,10 +11,7 @@ APP_ROOT=/var/www/faims
 sudo apt-get update
 
 # Install common packages
-sudo apt-get -y install git
-
-# Install puppet
-sudo apt-get -y install puppet
+sudo apt-get -y install git puppet libreadline-dev
 
 # Install puppet modules
 if [ ! -d "$HOME/.puppet/modules/stdlib" ]; then
